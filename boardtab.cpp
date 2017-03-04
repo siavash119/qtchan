@@ -37,10 +37,11 @@ void BoardTab::addThread(){
 void BoardTab::loadThreads(){
     QJsonArray threads = QJsonDocument::fromJson(reply->readAll())
             .object()["threads"].toArray();
+    qDebug() << threads;
     int length = threads.size();
     qDebug() << QString("length is ").append(QString::number(length));
-    for(int i=0;i<5;i++){
-        ThreadForm *tf = new ThreadForm();
+    for(int i=0;i<length;i++){
+        ThreadForm *tf = new ThreadForm(Thread);
         QJsonObject p = threads.at(i).toObject()["posts"].toArray()[0].toObject();
         tf->board = board;
         tf->threadNum = QString("%1").arg(p["no"].toDouble(),0,'f',0);

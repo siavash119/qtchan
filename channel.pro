@@ -31,7 +31,8 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     threadform.ui \
-    boardtab.ui
+    boardtab.ui \
+    threadtab.ui
 
 RESOURCES += \
     textfinder.qrc

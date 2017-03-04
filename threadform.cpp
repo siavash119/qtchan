@@ -9,13 +9,15 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include "mainwindow.h"
 using namespace std;
 
 
-ThreadForm::ThreadForm(QWidget *parent) :
+ThreadForm::ThreadForm(PostType type, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ThreadForm)
 {
+    this->type = type;
     ui->setupUi(this);
 }
 
@@ -49,22 +51,36 @@ void ThreadForm::load(QJsonObject &p){
     ui->sub->setPlainText(sub);
 
     //set image
-    QString img = "https://i.4cdn.org/"+this->board+"/"
-            +QString("%1").arg(p["tim"].toDouble(),0,'f',0).append("s.jpg");
-    qDebug() << QString("getting ")+img;
-    replyImage = nc.manager->get(QNetworkRequest(QUrl(img)));
-    connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::getImageFinished);
-    connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
+    if(!p["tim"].isNull()){
+        QString img;
+        QString ext = p["ext"].toString();
+        if(ext==".jpg" || ext == ".png"){
+            img = "https://i.4cdn.org/"+this->board+"/"
+                    +QString("%1").arg(p["tim"].toDouble(),0,'f',0).append(ext);
+        }
+        else {
+            img = "https://i.4cdn.org/"+this->board+"/"
+                    +QString("%1").arg(p["tim"].toDouble(),0,'f',0).append("s.jpg");
+
+        }
+        qDebug() << QString("getting ")+img;
+        replyImage = nc.manager->get(QNetworkRequest(QUrl(img)));
+        ui->tim->setFixedHeight(250);
+        this->setFixedHeight(250);
+        connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::getImageFinished);
+        (this->type == Thread) && connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
+    }
 }
 
 void ThreadForm::getImageFinished(){
     if(replyImage->error() == 0)
     {
+        int scale = 250;
         QPixmap pic;
         pic.loadFromData(replyImage->readAll());
-        ui->tim->setPixmap(pic);
-        ui->tim->setFixedHeight(250);
-        this->setFixedHeight(250);
+        //int scale = this->type == Thread ? 250 : 125;
+        if(pic.height() > pic.width()) ui->tim->setPixmap(pic.scaledToHeight(scale, Qt::SmoothTransformation));
+        else ui->tim->setPixmap(pic.scaledToWidth(scale, Qt::SmoothTransformation));
         //this->setFixedHeight(pic.height());
     }
         replyImage->deleteLater();
@@ -72,17 +88,20 @@ void ThreadForm::getImageFinished(){
 }
 
 void ThreadForm::imageClicked(){
-    QString url = "https://a.4cdn.org/"+this->board+"/thread/"
+    mw->onNewThread(this,board,threadNum);
+    //emit loadThread(this,board,threadNum);
+    /*QString url = "https://a.4cdn.org/"+this->board+"/thread/"
             +this->threadNum+".json";
     qDebug() << QString("getting ")+url;
     reply = nc.manager->get(QNetworkRequest(QUrl(url)));
-    connectionPost = connect(reply, &QNetworkReply::finished,this,&ThreadForm::getThreadFinished);
+    connectionPost = connect(reply, &QNetworkReply::finished,this,&ThreadForm::getThreadFinished);*/
 }
 
 void ThreadForm::getThreadFinished(){
     if(reply->error() == 0){
         QJsonArray posts = QJsonDocument::fromJson(reply->readAll()).object()["posts"].toArray();
         qDebug() << posts;
+        emit loadThreadTab(this,posts);
     }
     reply->deleteLater();
     disconnect(connectionPost);

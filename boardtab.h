@@ -15,6 +15,7 @@ class BoardTab : public QWidget
     Q_OBJECT
 
 public:
+    QString tabType;
     QString board;
     explicit BoardTab(QString board, QWidget *parent = 0);
     ~BoardTab();

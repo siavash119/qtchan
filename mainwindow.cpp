@@ -20,7 +20,7 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <stdio.h>
-#include "netcontroller.h"
+#include "threadtab.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("4chan Browser");
     this->setStyleSheet("background-color: grey; color:white");
+
     ui->splitter->setStretchFactor(0,0);
     ui->splitter->setStretchFactor(1,1);
 
@@ -54,7 +55,20 @@ void MainWindow::on_pushButton_clicked()
     ui->verticalLayout_3->addWidget(bt);
     QStandardItem* parent1 = new QStandardItem(searchString);
     model->appendRow(parent1);
-    bts.push_back(bt);
+    //bts.push_back(bt);
+    Tab tab = {Tab::TabType::Board,bt};
+    tabs.push_back(tab);
+    //bts.push_back(bt);
+    show_one(parent1->index());
+}
+
+void MainWindow::onNewThread(ThreadForm* tf, QString board, QString thread){
+    ThreadTab *tt = new ThreadTab(board,thread);
+    ui->verticalLayout_3->addWidget(tt);
+    QStandardItem* parent1 = new QStandardItem(thread);
+    model->appendRow(parent1);
+    Tab tab = {Tab::TabType::Thread,tt};
+    tabs.push_back(tab);
     show_one(parent1->index());
 }
 
@@ -71,11 +85,18 @@ void MainWindow::on_treeView_clicked(QModelIndex index)
 }
 
 void MainWindow::show_one(QModelIndex index){
-    int size = bts.size();
+    int size = tabs.size();
+    for(int i=0;i<size;i++){
+        ((QWidget*)tabs.at(i).TabPointer)->hide();
+        //((BoardTab*)bts.at(i))->hide();
+    }
+    ((QWidget*)tabs.at(index.row()).TabPointer)->show();
+    //((BoardTab*)bts.at(index.row()))->show();
+    /*int size = bts.size();
     for(int i=0;i<size;i++){
         ((BoardTab*)bts.at(i))->hide();
     }
-    ((BoardTab*)bts.at(index.row()))->show();
+    ((BoardTab*)bts.at(index.row()))->show();*/
 }
 
 
@@ -83,13 +104,6 @@ void MainWindow::onSelectionChanged(){
     boardsSelected = ui->treeView->selectionModel()->selectedRows();
     if(boardsSelected.size()) show_one(boardsSelected.at(0));
 }
-
-/*void MainWindow::onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected){
-    //qDebug() << selected;
-    show_one(ui->treeView->selectionModel()->selectedRows().at(0));
-    //selected.at(0);
-
-}*/
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
@@ -116,11 +130,14 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 void MainWindow::deleteSelected(){
     const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
     int row = indexList.at(0).row();
-    ((BoardTab*)bts.at(row))->close();
-    ui->verticalLayout_3->removeWidget(bts.at(row));
+    ((QWidget*)tabs.at(row).TabPointer)->close();
+    //((BoardTab*)bts.at(row))->close();
+    ui->verticalLayout_3->removeWidget((QWidget*)tabs.at(row).TabPointer);
     model->removeRow(row);
-    bts.erase(bts.begin()+row);
-    if(bts.size() > 0) show_one(ui->treeView->selectionModel()->selectedRows().at(0));
+    tabs.erase(tabs.begin()+row);
+    //bts.erase(bts.begin()+row);
+    //onSelectionChanged();
+    //if(bts.size() > 0) show_one(ui->treeView->selectionModel()->selectedRows().at(0));
 }
 
 /*void MainWindow::getThread(ThreadForm *tf, QString url){

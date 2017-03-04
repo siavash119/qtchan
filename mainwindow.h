@@ -7,6 +7,7 @@
 #include "boardtab.h"
 #include <vector>
 #include "threadform.h"
+#include "netcontroller.h"
 #include <QUrl>
 
 namespace Ui {
@@ -17,6 +18,8 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
     QNetworkReply *reply;
+    std::vector<Tab> tabs;
+    //std::vector<QWidget*> tabs;
 
 protected:
     bool eventFilter(QObject *obj, QEvent *ev);
@@ -28,7 +31,6 @@ public:
     void addTab();
     ~MainWindow();
 
-    std::vector<BoardTab*> bts;
     void show_one(QModelIndex index);
     void deleteSelected();
     //void getThread(ThreadForm *tf, QString url);
@@ -41,8 +43,8 @@ private slots:
     void onSelectionChanged();
     //void onSelectionChanged(const QItemSelection &, const QItemSelection &);
 
-//public slots:
-    //void loadThreads();
+public slots:
+    void onNewThread(ThreadForm* tf, QString board, QString thread);
 private:
     Ui::MainWindow *ui;
     QModelIndexList boardsSelected;
@@ -50,5 +52,7 @@ private:
 signals:
     void requestCatalog(QString);
 };
+
+extern MainWindow* mw;
 
 #endif // MAINWINDOW_H
