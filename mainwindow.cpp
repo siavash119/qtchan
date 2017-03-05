@@ -139,17 +139,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
 void MainWindow::deleteSelected(){
     const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
+    if(!indexList.size()) return;
     int row = indexList.at(0).row();
     ((QWidget*)tabs.at(row).TabPointer)->close();
     //((BoardTab*)bts.at(row))->close();
     ui->verticalLayout_3->removeWidget((QWidget*)tabs.at(row).TabPointer);
     model->removeRow(row);
     tabs.erase(tabs.begin()+row);
-    //bts.erase(bts.begin()+row);
-    //onSelectionChanged();
-    //if(bts.size() > 0) show_one(ui->treeView->selectionModel()->selectedRows().at(0));
 }
-
-/*void MainWindow::getThread(ThreadForm *tf, QString url){
-    qDebug() << url;
-}*/
