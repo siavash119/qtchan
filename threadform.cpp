@@ -42,8 +42,9 @@ void ThreadForm::load(QJsonObject &p){
     //set comment
     QString com = p["com"].toString();
     //TODO replace <span class="quote"> and <a href="url">
-    com = htmlParse(com);
-    ui->com->setPlainText(com);
+    //com = htmlParse(com);
+    ui->com->setHtml(com);
+    //ui->com->setPlainText(com);
 
     //set subject
     QString sub = p["sub"].toString();
@@ -61,14 +62,24 @@ void ThreadForm::load(QJsonObject &p){
         else {
             img = "https://i.4cdn.org/"+this->board+"/"
                     +QString("%1").arg(p["tim"].toDouble(),0,'f',0).append("s.jpg");
-
         }
         qDebug() << QString("getting ")+img;
         replyImage = nc.manager->get(QNetworkRequest(QUrl(img)));
-        ui->tim->setFixedHeight(250);
-        this->setFixedHeight(250);
         connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::getImageFinished);
         (this->type == Thread) && connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
+    }
+    else{
+        ui->tim->close();
+    }
+    this->show();
+    qDebug()<< ui->verticalLayout_2->BottomToTop;
+    this->setFixedHeight(ui->com->document()->size().height()+ui->sub->height()+ui->verticalLayout_2->spacing());
+}
+
+void ThreadForm::updateComHeight(){
+    int newHeight = ui->com->document()->size().height()+ui->sub->height()+ui->verticalLayout_2->BottomToTop;
+    if(newHeight > this->height()){
+        this->setFixedHeight(newHeight);
     }
 }
 
@@ -78,10 +89,13 @@ void ThreadForm::getImageFinished(){
         int scale = 250;
         QPixmap pic;
         pic.loadFromData(replyImage->readAll());
-        //int scale = this->type == Thread ? 250 : 125;
-        if(pic.height() > pic.width()) ui->tim->setPixmap(pic.scaledToHeight(scale, Qt::SmoothTransformation));
-        else ui->tim->setPixmap(pic.scaledToWidth(scale, Qt::SmoothTransformation));
-        //this->setFixedHeight(pic.height());
+        QPixmap scaled = (pic.height() > pic.width()) ?
+                 pic.scaledToHeight(scale, Qt::SmoothTransformation) :
+                 pic.scaledToWidth(scale, Qt::SmoothTransformation);
+        ui->tim->setPixmap(scaled);
+        if(scaled.height() > this->height()){
+            this->setFixedHeight(scaled.height());
+        }
     }
         replyImage->deleteLater();
         disconnect(connectionImage);
@@ -89,22 +103,6 @@ void ThreadForm::getImageFinished(){
 
 void ThreadForm::imageClicked(){
     mw->onNewThread(this,board,threadNum);
-    //emit loadThread(this,board,threadNum);
-    /*QString url = "https://a.4cdn.org/"+this->board+"/thread/"
-            +this->threadNum+".json";
-    qDebug() << QString("getting ")+url;
-    reply = nc.manager->get(QNetworkRequest(QUrl(url)));
-    connectionPost = connect(reply, &QNetworkReply::finished,this,&ThreadForm::getThreadFinished);*/
-}
-
-void ThreadForm::getThreadFinished(){
-    if(reply->error() == 0){
-        QJsonArray posts = QJsonDocument::fromJson(reply->readAll()).object()["posts"].toArray();
-        qDebug() << posts;
-        emit loadThreadTab(this,posts);
-    }
-    reply->deleteLater();
-    disconnect(connectionPost);
 }
 
 QString ThreadForm::htmlParse(QString &html){

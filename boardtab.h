@@ -23,6 +23,8 @@ public:
     void addStretch();
     void addThread();
     QNetworkReply *reply;
+    std::vector<ThreadForm*> posts;
+    void updatePosts();
 
 private:
     Ui::BoardTab *ui;

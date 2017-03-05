@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>750</width>
-    <height>250</height>
+    <height>240</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+   <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,26 +19,33 @@
   <property name="minimumSize">
    <size>
     <width>750</width>
-    <height>100</height>
+    <height>240</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>250</height>
+    <height>2500</height>
    </size>
   </property>
   <property name="font">
    <font>
+    <family>Liberation Sans</family>
     <pointsize>16</pointsize>
    </font>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #222222; color:white</string>
+  </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">
     <number>0</number>
+   </property>
+   <property name="sizeConstraint">
+    <enum>QLayout::SetDefaultConstraint</enum>
    </property>
    <property name="leftMargin">
     <number>0</number>
@@ -53,46 +60,53 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="ClickableLabel" name="tim">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>250</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>250</width>
-       <height>250</height>
-      </size>
-     </property>
-     <property name="layoutDirection">
-      <enum>Qt::LeftToRight</enum>
-     </property>
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="scaledContents">
-      <bool>false</bool>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="ClickableLabel" name="tim">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>250</width>
+         <height>200</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>250</width>
+         <height>2500</height>
+        </size>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string notr="true"/>
+       </property>
+       <property name="scaledContents">
+        <bool>false</bool>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignHCenter|Qt::AlignTop</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0">
      <property name="sizeConstraint">
-      <enum>QLayout::SetFixedSize</enum>
+      <enum>QLayout::SetDefaultConstraint</enum>
      </property>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
@@ -113,13 +127,13 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>15</height>
+           <height>30</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>40</height>
+           <height>30</height>
           </size>
          </property>
          <property name="verticalScrollBarPolicy">
@@ -139,7 +153,7 @@
        <item>
         <widget class="QPlainTextEdit" name="no">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
            <horstretch>1</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -147,13 +161,13 @@
          <property name="minimumSize">
           <size>
            <width>150</width>
-           <height>15</height>
+           <height>30</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>16777215</width>
-           <height>40</height>
+           <width>150</width>
+           <height>30</height>
           </size>
          </property>
          <property name="verticalScrollBarPolicy">
@@ -173,36 +187,30 @@
       </layout>
      </item>
      <item>
-      <widget class="QPlainTextEdit" name="com">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
+      <widget class="QTextEdit" name="com">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>1</horstretch>
+         <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>400</width>
-         <height>0</height>
+         <width>0</width>
+         <height>200</height>
         </size>
        </property>
-       <property name="focusPolicy">
-        <enum>Qt::ClickFocus</enum>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
        </property>
-       <property name="acceptDrops">
-        <bool>false</bool>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAsNeeded</enum>
        </property>
        <property name="sizeAdjustPolicy">
-        <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+        <enum>QAbstractScrollArea::AdjustToContents</enum>
        </property>
-       <property name="undoRedoEnabled">
-        <bool>false</bool>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
+       <property name="textInteractionFlags">
+        <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
        </property>
       </widget>
      </item>

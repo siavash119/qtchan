@@ -30,24 +30,26 @@ void BoardTab::addStretch(){
     ui->threads->addStretch(1);
 }
 
-void BoardTab::addThread(){
-
+void BoardTab::updatePosts(){
+    int length = posts.size();
+    for(int i=0;i<length;i++){
+        ((ThreadForm*)posts.at(i))->updateComHeight();
+    }
 }
 
 void BoardTab::loadThreads(){
-    QJsonArray threads = QJsonDocument::fromJson(reply->readAll())
-            .object()["threads"].toArray();
-    qDebug() << threads;
+    QJsonArray threads = QJsonDocument::fromJson(reply->readAll()).object()["threads"].toArray();
     int length = threads.size();
     qDebug() << QString("length is ").append(QString::number(length));
     for(int i=0;i<length;i++){
         ThreadForm *tf = new ThreadForm(Thread);
+        ui->threads->addWidget(tf);
         QJsonObject p = threads.at(i).toObject()["posts"].toArray()[0].toObject();
         tf->board = board;
         tf->threadNum = QString("%1").arg(p["no"].toDouble(),0,'f',0);
         tf->load(p);
-        this->addPost(tf);
+        posts.push_back(tf);
     }
-    this->addStretch();
+    ui->threads->addStretch(1);
     reply->deleteLater();
 }

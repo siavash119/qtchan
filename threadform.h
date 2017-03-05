@@ -32,6 +32,7 @@ public:
     QMetaObject::Connection connectionPost;
     QMetaObject::Connection connectionImage;
     QString htmlParse(QString &html);
+    void updateComHeight();
     //void setImage(QString text);
 
 signals:
@@ -43,7 +44,6 @@ private:
 public slots:
     void getImageFinished();
     void imageClicked();
-    void getThreadFinished();
 };
 
 #endif // THREADFORM_H

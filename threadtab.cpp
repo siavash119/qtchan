@@ -10,6 +10,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ThreadTab)
 {
+    this->updated = false;
     ui->setupUi(this);
     this->board = board;
     this->thread = thread;
@@ -23,12 +24,12 @@ ThreadTab::~ThreadTab()
     delete ui;
 }
 
-void ThreadTab::addStretch(){
-    ui->threads->addStretch(1);
-}
-
 void ThreadTab::addPost(ThreadForm *tf){
     ui->threads->addWidget(tf);
+}
+
+void ThreadTab::addStretch(){
+    ui->threads->addStretch(1);
 }
 
 void ThreadTab::loadPosts(){
@@ -37,13 +38,21 @@ void ThreadTab::loadPosts(){
     qDebug() << QString("length is ").append(QString::number(length));
     for(int i=0;i<length;i++){
         ThreadForm *tf = new ThreadForm();
+        ui->threads->addWidget(tf);
         QJsonObject p = posts.at(i).toObject();
         tf->board = board;
         tf->threadNum = QString("%1").arg(p["no"].toDouble(),0,'f',0);
         tf->load(p);
-        this->addPost(tf);
+        tfs.push_back(tf);
     }
-    this->addStretch();
+    ui->threads->addStretch(1);
     reply->deleteLater();
+}
 
+void ThreadTab::updatePosts(){
+    updated = true;
+    int length = tfs.size();
+    for(int i=0;i<length;i++){
+        ((ThreadForm*)tfs.at(i))->updateComHeight();
+    }
 }

@@ -24,6 +24,9 @@ public:
     void addStretch();
     void addThread();
     QNetworkReply *reply;
+    std::vector<ThreadForm*> tfs;
+    void updatePosts();
+    bool updated;
 
 private:
     Ui::ThreadTab *ui;

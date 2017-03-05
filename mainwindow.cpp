@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowTitle("4chan Browser");
-    this->setStyleSheet("background-color: grey; color:white");
+    this->setStyleSheet("background-color: #191919; color:white");
 
     ui->splitter->setStretchFactor(0,0);
     ui->splitter->setStretchFactor(1,1);
@@ -69,7 +69,9 @@ void MainWindow::onNewThread(ThreadForm* tf, QString board, QString thread){
     model->appendRow(parent1);
     Tab tab = {Tab::TabType::Thread,tt};
     tabs.push_back(tab);
-    show_one(parent1->index());
+    tt->hide();
+    //ui->treeView->selectionModel()->select();
+    //show_one(parent1->index());
 }
 
 /*void QTreeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected){
@@ -90,13 +92,14 @@ void MainWindow::show_one(QModelIndex index){
         ((QWidget*)tabs.at(i).TabPointer)->hide();
         //((BoardTab*)bts.at(i))->hide();
     }
-    ((QWidget*)tabs.at(index.row()).TabPointer)->show();
-    //((BoardTab*)bts.at(index.row()))->show();
-    /*int size = bts.size();
-    for(int i=0;i<size;i++){
-        ((BoardTab*)bts.at(i))->hide();
+    Tab tab = tabs.at(index.row());
+    if(tab.type == Tab::TabType::Thread && !((ThreadTab*)tab.TabPointer)->updated){
+        ((ThreadTab*)tab.TabPointer)->show();
+        ((ThreadTab*)tab.TabPointer)->updatePosts();
     }
-    ((BoardTab*)bts.at(index.row()))->show();*/
+    else{
+        ((BoardTab*)tab.TabPointer)->show();
+    }
 }
 
 
@@ -116,6 +119,13 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         }
         else if(key == 16777220){
             show_one(ui->treeView->selectionModel()->selectedRows().at(0));
+        }
+        else if(key == 53){
+            const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
+            int row = indexList.at(0).row();
+            qDebug() << (Tab::TabType)tabs.at(row).type;
+            ((Tab::TabType)tabs.at(row).type) == Tab::TabType::Board ? ((BoardTab*)tabs.at(row).TabPointer)->updatePosts() :
+                                                          ((ThreadTab*)tabs.at(row).TabPointer)->updatePosts();
         }
         else{
             return QObject::eventFilter(obj, event);
