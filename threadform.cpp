@@ -24,7 +24,6 @@ ThreadForm::ThreadForm(PostType type, QWidget *parent) :
 
 ThreadForm::~ThreadForm()
 {
-    delete post;
     delete ui;
 }
 
