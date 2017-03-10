@@ -10,6 +10,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include "mainwindow.h"
+#include <QStringBuilder>
 using namespace std;
 
 
@@ -23,6 +24,7 @@ ThreadForm::ThreadForm(PostType type, QWidget *parent) :
 
 ThreadForm::~ThreadForm()
 {
+    delete post;
     delete ui;
 }
 
@@ -37,33 +39,29 @@ void ThreadForm::setText(QString text){
 
 void ThreadForm::load(QJsonObject &p){
     //set post number
-    ui->no->setPlainText(QString("%1").arg(p["no"].toDouble(),0,'f',0));
+    post = new Post(p);
+    ui->no->setPlainText(post->no);
 
     //set comment
-    QString com = p["com"].toString();
     //TODO replace <span class="quote"> and <a href="url">
-    //com = htmlParse(com);
-    ui->com->setHtml(com);
-    //ui->com->setPlainText(com);
+    ui->com->setHtml(post->com);
 
     //set subject
-    QString sub = p["sub"].toString();
-    sub = htmlParse(sub);
-    ui->sub->setPlainText(sub);
+    ui->sub->setPlainText(htmlParse(post->sub));
+
+    //set name
+    ui->name->setText(post->name);
 
     //set image
-    if(!p["tim"].isNull()){
+    if(!post->tim.isNull()){
         QString img;
-        QString ext = p["ext"].toString();
-        if(ext==".jpg" || ext == ".png"){
-            img = "https://i.4cdn.org/"+this->board+"/"
-                    +QString("%1").arg(p["tim"].toDouble(),0,'f',0).append(ext);
+        if(post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png")){
+            img = "https://i.4cdn.org/" % this->board % "/" % post->tim % post->ext;
         }
         else {
-            img = "https://i.4cdn.org/"+this->board+"/"
-                    +QString("%1").arg(p["tim"].toDouble(),0,'f',0).append("s.jpg");
+            img = "https://i.4cdn.org/" % this->board % "/" % post->tim % "s.jpg";
         }
-        qDebug() << QString("getting ")+img;
+        qDebug() << QString("getting ") % img;
         replyImage = nc.manager->get(QNetworkRequest(QUrl(img)));
         connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::getImageFinished);
         (this->type == Thread) && connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
@@ -72,7 +70,6 @@ void ThreadForm::load(QJsonObject &p){
         ui->tim->close();
     }
     this->show();
-    qDebug()<< ui->verticalLayout_2->BottomToTop;
     this->setFixedHeight(ui->com->document()->size().height()+ui->sub->height()+ui->verticalLayout_2->spacing());
 }
 

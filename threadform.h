@@ -5,6 +5,7 @@
 #include <QNetworkReply>
 #include <QByteArray>
 #include <QString>
+#include "post.h"
 
 namespace Ui {
 class ThreadForm;
@@ -27,11 +28,15 @@ public:
     PostType type;
     QString threadNum;
     QString board;
+    double no;
+    QString time;
+    QString name;
     QNetworkReply *reply;
     QNetworkReply *replyImage;
     QMetaObject::Connection connectionPost;
     QMetaObject::Connection connectionImage;
     QString htmlParse(QString &html);
+    Post *post;
     void updateComHeight();
     //void setImage(QString text);
 

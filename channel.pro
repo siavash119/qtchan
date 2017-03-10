@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     boardtab.cpp \
     treekeypress.cpp \
     netcontroller.cpp \
-    threadtab.cpp
+    threadtab.cpp \
+    post.cpp
 
 HEADERS  += mainwindow.h \
     threadform.h \
@@ -27,12 +28,12 @@ HEADERS  += mainwindow.h \
     boardtab.h \
     treekeypress.h \
     netcontroller.h \
-    threadtab.h
+    threadtab.h \
+    post.h
 
 FORMS    += mainwindow.ui \
     threadform.ui \
     boardtab.ui \
     threadtab.ui
 
-RESOURCES += \
-    textfinder.qrc
+RESOURCES +=
