@@ -11,15 +11,21 @@
 #include <QJsonArray>
 #include "mainwindow.h"
 #include <QStringBuilder>
+#include <QDir>
+#include <QDesktopServices>
 using namespace std;
 
 
-ThreadForm::ThreadForm(PostType type, QWidget *parent) :
+ThreadForm::ThreadForm(QString board, QString threadNum, PostType type,QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ThreadForm)
 {
+    this->board = board;
+    this->threadNum = threadNum;
     this->type = type;
     ui->setupUi(this);
+    pathBase = "./"%board%"/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
+    qDebug() << pathBase;
 }
 
 ThreadForm::~ThreadForm()
@@ -31,10 +37,6 @@ void ThreadForm::setText(QString text){
     ui->com->setPlainText(text);
 //    ui->plainTextEdit->resize(1000,2000);
 }
-
-/*void ThreadForm::setThread(QString threadName){
-    qDebug() << this->threadNum;
-}*/
 
 void ThreadForm::load(QJsonObject &p){
     //set post number
@@ -53,26 +55,34 @@ void ThreadForm::load(QJsonObject &p){
 
     //set image
     if(!post->tim.isNull()){
-        QString img;
         if(post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png")){
-            img = "https://i.4cdn.org/" % this->board % "/" % post->tim % post->ext;
+            imgURL = this->board % "/" % post->tim % post->ext;
         }
         else {
-            img = "https://i.4cdn.org/" % this->board % "/" % post->tim % "s.jpg";
+            imgURL = this->board % "/" % post->tim % "s.jpg";
+            post->ext = "s.jpg";
         }
-        qDebug() << QString("getting ") % img;
-        replyImage = nc.manager->get(QNetworkRequest(QUrl(img)));
-        connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::getImageFinished);
-        (this->type == Thread) && connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
+        filePath = pathBase%post->filename%post->ext;
+        file = new QFile(filePath);
+        if(!file->exists()){
+            qDebug() << QString("getting https://i.4cdn.org/")  % imgURL;
+            replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % imgURL)));
+            connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::getImageFinished);
+        }
+        else{
+            loadImage(filePath);
+        }
+        connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
     }
     else{
         ui->tim->close();
     }
     this->show();
-    this->setFixedHeight(ui->com->document()->size().height()+ui->sub->height()+ui->verticalLayout_2->spacing());
+    updateComHeight();
 }
 
 void ThreadForm::updateComHeight(){
+    ui->com->setMinimumHeight(ui->com->document()->size().height());
     int newHeight = ui->com->document()->size().height()+ui->sub->height()+ui->verticalLayout_2->BottomToTop;
     if(newHeight > this->height()){
         this->setFixedHeight(newHeight);
@@ -82,23 +92,34 @@ void ThreadForm::updateComHeight(){
 void ThreadForm::getImageFinished(){
     if(replyImage->error() == 0)
     {
-        int scale = 250;
-        QPixmap pic;
-        pic.loadFromData(replyImage->readAll());
-        QPixmap scaled = (pic.height() > pic.width()) ?
-                 pic.scaledToHeight(scale, Qt::SmoothTransformation) :
-                 pic.scaledToWidth(scale, Qt::SmoothTransformation);
-        ui->tim->setPixmap(scaled);
-        if(scaled.height() > this->height()){
-            this->setFixedHeight(scaled.height());
-        }
+        file->open(QIODevice::WriteOnly);
+        file->write(replyImage->readAll());
+        file->close();
+        loadImage(filePath);
     }
         replyImage->deleteLater();
         disconnect(connectionImage);
 }
 
+void ThreadForm::loadImage(QString path){
+    int scale = 250;
+    QPixmap pic(path);
+    QPixmap scaled = (pic.height() > pic.width()) ?
+             pic.scaledToHeight(scale, Qt::SmoothTransformation) :
+             pic.scaledToWidth(scale, Qt::SmoothTransformation);
+    ui->tim->setPixmap(scaled);
+    if(scaled.height() > this->height()){
+        this->setFixedHeight(scaled.height());
+    }
+}
+
 void ThreadForm::imageClicked(){
-    mw->onNewThread(this,board,threadNum);
+    qDebug() << "clicked "+post->filename;
+    (this->type == PostType::Reply) ? openImage() : mw->onNewThread(this,board,threadNum);
+}
+
+void ThreadForm::openImage(){
+    QDesktopServices::openUrl(QUrl::fromLocalFile(QDir().absoluteFilePath(filePath)));
 }
 
 QString ThreadForm::htmlParse(QString &html){

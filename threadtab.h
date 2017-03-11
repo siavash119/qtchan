@@ -6,6 +6,7 @@
 #include "boardtab.h"
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QProcess>
 
 namespace Ui {
 class ThreadTab;
@@ -27,12 +28,14 @@ public:
     std::vector<ThreadForm*> tfs;
     void updatePosts();
     bool updated;
+    QProcess *myProcess;
 
 private:
     Ui::ThreadTab *ui;
 
 private slots:
     void loadPosts();
+    void gallery();
 
 signals:
     void newPosts();

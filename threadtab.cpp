@@ -5,6 +5,9 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QShortcut>
+#include <QKeySequence>
+#include <QDir>
 
 ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     QWidget(parent),
@@ -14,14 +17,30 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     ui->setupUi(this);
     this->board = board;
     this->thread = thread;
+    QDir().mkpath(board+"/"+thread);
     QString url = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
     reply = nc.manager->get(QNetworkRequest(QUrl(url)));
     connect(reply, &QNetworkReply::finished, this, &ThreadTab::loadPosts);
+    myProcess = new QProcess(parent);
+    QAction *foo = new QAction(this);
+    foo->setShortcut(Qt::Key_G);
+    connect(foo, &QAction::triggered, this, &ThreadTab::gallery);
+    this->addAction(foo);
 }
 
 ThreadTab::~ThreadTab()
 {
     delete ui;
+}
+
+void ThreadTab::gallery(){
+    QString command = "feh"; QStringList arguments; arguments << QDir("./"+board+"/"+thread).absolutePath()
+                                                              << "--auto-zoom"
+                                                              << "--index-info" << "\"%n\n%S\n%wx%h\""
+                                                              << "--borderless"
+                                                              << "--image-bg" << "black"
+                                                              << "--preload";
+    myProcess->startDetached(command,arguments);
 }
 
 void ThreadTab::addPost(ThreadForm *tf){
@@ -37,11 +56,9 @@ void ThreadTab::loadPosts(){
     int length = posts.size();
     qDebug() << QString("length is ").append(QString::number(length));
     for(int i=0;i<length;i++){
-        ThreadForm *tf = new ThreadForm();
-        ui->threads->addWidget(tf);
         QJsonObject p = posts.at(i).toObject();
-        tf->board = board;
-        tf->threadNum = QString("%1").arg(p["no"].toDouble(),0,'f',0);
+        ThreadForm *tf = new ThreadForm(board,thread);
+        ui->threads->addWidget(tf);
         tf->load(p);
         tfs.push_back(tf);
     }
@@ -50,7 +67,7 @@ void ThreadTab::loadPosts(){
 }
 
 void ThreadTab::updatePosts(){
-    updated = true;
+    updated = false;
     int length = tfs.size();
     for(int i=0;i<length;i++){
         ((ThreadForm*)tfs.at(i))->updateComHeight();

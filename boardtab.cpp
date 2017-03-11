@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QDir>
 
 BoardTab::BoardTab(QString board, QWidget *parent) :
     QWidget(parent),
@@ -38,15 +39,16 @@ void BoardTab::updatePosts(){
 }
 
 void BoardTab::loadThreads(){
+    QDir().mkdir(board);
+    QDir().mkdir(board+"/index");
     QJsonArray threads = QJsonDocument::fromJson(reply->readAll()).object()["threads"].toArray();
     int length = threads.size();
     qDebug() << QString("length is ").append(QString::number(length));
     for(int i=0;i<length;i++){
-        ThreadForm *tf = new ThreadForm(Thread);
-        ui->threads->addWidget(tf);
         QJsonObject p = threads.at(i).toObject()["posts"].toArray()[0].toObject();
-        tf->board = board;
-        tf->threadNum = QString("%1").arg(p["no"].toDouble(),0,'f',0);
+        QString threadNum = QString("%1").arg(p["no"].toDouble(),0,'f',0);
+        ThreadForm *tf = new ThreadForm(board,threadNum,Thread);
+        ui->threads->addWidget(tf);
         tf->load(p);
         posts.push_back(tf);
     }

@@ -6,6 +6,7 @@
 #include <QByteArray>
 #include <QString>
 #include "post.h"
+#include <QDir>
 
 namespace Ui {
 class ThreadForm;
@@ -18,12 +19,14 @@ class ThreadForm : public QWidget
     Q_OBJECT
 
 public:
-    explicit ThreadForm(PostType type = Reply, QWidget *parent = 0);
+    explicit ThreadForm(QString board, QString threadNum, PostType type = Reply, QWidget *parent = 0);
     ~ThreadForm();
     void setText(QString text);
     void setImage(QByteArray img);
     //void getImage(QNetworkAccessManager *manager, QString *img);
     void load(QJsonObject &p);
+    void loadImage(QString path);
+    void openImage();
     //void setThread(QString threadName);
     PostType type;
     QString threadNum;
@@ -38,6 +41,12 @@ public:
     QString htmlParse(QString &html);
     Post *post;
     void updateComHeight();
+    QDir *folder;
+    QString folderPath;
+    QString imgURL;
+    QString pathBase;
+    QString filePath;
+    QFile *file;
     //void setImage(QString text);
 
 signals:
