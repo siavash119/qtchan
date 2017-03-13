@@ -27,8 +27,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->setWindowTitle("4chan Browser");
-    this->setStyleSheet("background-color: #191919; color:white");
 
     ui->splitter->setStretchFactor(0,0);
     ui->splitter->setStretchFactor(1,1);
@@ -53,22 +51,25 @@ void MainWindow::on_pushButton_clicked()
     //qDebug() << QString("getting ")+url;
     BoardTab *bt = new BoardTab(searchString);
     ui->verticalLayout_3->addWidget(bt);
-    QStandardItem* parent1 = new QStandardItem(searchString);
-    model->appendRow(parent1);
-    //bts.push_back(bt);
     Tab tab = {Tab::TabType::Board,bt};
     tabs.push_back(tab);
+    QStandardItem* parent1 = new QStandardItem("/"+searchString+"/");
+    model->appendRow(parent1);
+    //ui->treeView->SelectItems(ui->treeView->size());
     //bts.push_back(bt);
-    show_one(parent1->index());
+    ui->treeView->selectionModel()->clearSelection();
+    ui->treeView->selectionModel()->select(parent1->index(),QItemSelectionModel::Select);
+    //show_one(parent1->index());
 }
 
 void MainWindow::onNewThread(ThreadForm* tf, QString board, QString thread){
+    qDebug() << "adding "+thread+" from /"+tf->board+"/"+tf->threadNum;
     ThreadTab *tt = new ThreadTab(board,thread);
     ui->verticalLayout_3->addWidget(tt);
-    QStandardItem* parent1 = new QStandardItem(thread);
-    model->appendRow(parent1);
+    QStandardItem* parent1 = new QStandardItem("/"+tf->board+"/"+thread);
     Tab tab = {Tab::TabType::Thread,tt};
     tabs.push_back(tab);
+    model->appendRow(parent1);
     tt->hide();
     //ui->treeView->selectionModel()->select();
     //show_one(parent1->index());
@@ -141,9 +142,9 @@ void MainWindow::deleteSelected(){
     const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
     if(!indexList.size()) return;
     int row = indexList.at(0).row();
-    ((QWidget*)tabs.at(row).TabPointer)->close();
-    //((BoardTab*)bts.at(row))->close();
     ui->verticalLayout_3->removeWidget((QWidget*)tabs.at(row).TabPointer);
+    ((QWidget*)tabs.at(row).TabPointer)->close();
+    ((QWidget*)tabs.at(row).TabPointer)->deleteLater();
     model->removeRow(row);
     tabs.erase(tabs.begin()+row);
 }

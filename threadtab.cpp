@@ -8,6 +8,7 @@
 #include <QShortcut>
 #include <QKeySequence>
 #include <QDir>
+#include "postform.h"
 
 ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     QWidget(parent),
@@ -18,19 +19,43 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     this->board = board;
     this->thread = thread;
     QDir().mkpath(board+"/"+thread);
-    QString url = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
-    reply = nc.manager->get(QNetworkRequest(QUrl(url)));
+    threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
+    reply = nc.manager->get(QNetworkRequest(QUrl(threadUrl)));
     connect(reply, &QNetworkReply::finished, this, &ThreadTab::loadPosts);
     myProcess = new QProcess(parent);
     QAction *foo = new QAction(this);
     foo->setShortcut(Qt::Key_G);
     connect(foo, &QAction::triggered, this, &ThreadTab::gallery);
     this->addAction(foo);
+    QAction *postForm = new QAction(this);
+    postForm->setShortcut(Qt::Key_Q);
+    connect(postForm, &QAction::triggered, this, &ThreadTab::openPostForm);
+    this->addAction(postForm);
+    QAction *refresh = new QAction(this);
+    refresh->setShortcut(Qt::Key_R);
+    connect(refresh, &QAction::triggered, this, &ThreadTab::getPosts);
+    this->addAction(refresh);
+}
+
+void ThreadTab::getPosts(){
+    qDebug() << "refreshing /" + board + "/" + thread;
+    reply = nc.manager->get(QNetworkRequest(QUrl(threadUrl)));
+    connect(reply, &QNetworkReply::finished, this, &ThreadTab::loadPosts);
 }
 
 ThreadTab::~ThreadTab()
 {
+    int i = tfs.size();
+    while(i--){
+        ((ThreadForm*)tfs.at(i))->deleteLater();
+        tfs.pop_back();
+    }
     delete ui;
+}
+
+void ThreadTab::openPostForm(){
+    PostForm *myPostForm = new PostForm(board,thread);
+    myPostForm->show();
 }
 
 void ThreadTab::gallery(){
@@ -55,7 +80,8 @@ void ThreadTab::loadPosts(){
     QJsonArray posts = QJsonDocument::fromJson(reply->readAll()).object()["posts"].toArray();
     int length = posts.size();
     qDebug() << QString("length is ").append(QString::number(length));
-    for(int i=0;i<length;i++){
+    int i=tfs.size();
+    for(;i<length;i++){
         QJsonObject p = posts.at(i).toObject();
         ThreadForm *tf = new ThreadForm(board,thread);
         ui->threads->addWidget(tf);

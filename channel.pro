@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     treekeypress.cpp \
     netcontroller.cpp \
     threadtab.cpp \
-    post.cpp
+    post.cpp \
+    postform.cpp
 
 HEADERS  += mainwindow.h \
     threadform.h \
@@ -29,11 +30,13 @@ HEADERS  += mainwindow.h \
     treekeypress.h \
     netcontroller.h \
     threadtab.h \
-    post.h
+    post.h \
+    postform.h
 
 FORMS    += mainwindow.ui \
     threadform.ui \
     boardtab.ui \
-    threadtab.ui
+    threadtab.ui \
+    postform.ui
 
 RESOURCES +=

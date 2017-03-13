@@ -25,7 +25,6 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type,QWidget *
     this->type = type;
     ui->setupUi(this);
     pathBase = "./"%board%"/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
-    qDebug() << pathBase;
 }
 
 ThreadForm::~ThreadForm()
@@ -62,7 +61,7 @@ void ThreadForm::load(QJsonObject &p){
             imgURL = this->board % "/" % post->tim % "s.jpg";
             post->ext = "s.jpg";
         }
-        filePath = pathBase%post->filename%post->ext;
+        filePath = pathBase%post->no%"-"%post->filename%post->ext;
         file = new QFile(filePath);
         if(!file->exists()){
             qDebug() << QString("getting https://i.4cdn.org/")  % imgURL;
@@ -75,17 +74,27 @@ void ThreadForm::load(QJsonObject &p){
         connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
     }
     else{
-        ui->tim->close();
+        ui->verticalLayout->deleteLater();
     }
     this->show();
     updateComHeight();
 }
 
 void ThreadForm::updateComHeight(){
-    ui->com->setMinimumHeight(ui->com->document()->size().height());
-    int newHeight = ui->com->document()->size().height()+ui->sub->height()+ui->verticalLayout_2->BottomToTop;
+    //ui->com->setMinimumHeight(ui->com->document()->size().height());
+    int docHeight = ui->com->document()->size().height();
+    int newHeight = docHeight+ui->sub->height()+ui->verticalLayout_2->BottomToTop;
     if(newHeight > this->height()){
-        this->setFixedHeight(newHeight);
+        if(type == PostType::Reply){
+            this->setFixedHeight(newHeight);
+        }
+        else if(newHeight < 500){
+            ui->com->setMinimumHeight(docHeight);
+            this->setFixedHeight(newHeight);
+        }
+        else{
+            this->setFixedHeight(500);
+        }
     }
 }
 
@@ -95,6 +104,7 @@ void ThreadForm::getImageFinished(){
         file->open(QIODevice::WriteOnly);
         file->write(replyImage->readAll());
         file->close();
+        qDebug() << "saved file "+filePath;
         loadImage(filePath);
     }
         replyImage->deleteLater();
@@ -108,6 +118,7 @@ void ThreadForm::loadImage(QString path){
              pic.scaledToHeight(scale, Qt::SmoothTransformation) :
              pic.scaledToWidth(scale, Qt::SmoothTransformation);
     ui->tim->setPixmap(scaled);
+    ui->tim->setMaximumSize(scaled.size());
     if(scaled.height() > this->height()){
         this->setFixedHeight(scaled.height());
     }
@@ -115,6 +126,7 @@ void ThreadForm::loadImage(QString path){
 
 void ThreadForm::imageClicked(){
     qDebug() << "clicked "+post->filename;
+    qDebug() << ui->tim->width();
     (this->type == PostType::Reply) ? openImage() : mw->onNewThread(this,board,threadNum);
 }
 

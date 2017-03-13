@@ -13,9 +13,15 @@ BoardTab::BoardTab(QString board, QWidget *parent) :
 {
     ui->setupUi(this);
     this->board = board;
-    QString url = "https://a.4cdn.org/"+board+"/1.json";
-    reply = nc.manager->get(QNetworkRequest(QUrl(url)));
+    boardUrl = "https://a.4cdn.org/"+board+"/1.json";
+    QDir().mkdir(board);
+    QDir().mkdir(board+"/index");
+    reply = nc.manager->get(QNetworkRequest(QUrl(boardUrl)));
     connect(reply, &QNetworkReply::finished, this, &BoardTab::loadThreads);
+    QAction *refresh = new QAction(this);
+    refresh->setShortcut(Qt::Key_R);
+    connect(refresh, &QAction::triggered, this, &BoardTab::getPosts);
+    this->addAction(refresh);
 }
 
 BoardTab::~BoardTab()
@@ -23,13 +29,12 @@ BoardTab::~BoardTab()
     delete ui;
 }
 
-void BoardTab::addPost(ThreadForm *tf){
-    ui->threads->addWidget(tf);
+void BoardTab::getPosts(){
+    qDebug() << "refreshing /" + board + "/";
+    reply = nc.manager->get(QNetworkRequest(QUrl(boardUrl)));
+    connect(reply, &QNetworkReply::finished, this, &BoardTab::loadThreads);
 }
 
-void BoardTab::addStretch(){
-    ui->threads->addStretch(1);
-}
 
 void BoardTab::updatePosts(){
     int length = posts.size();
@@ -39,12 +44,17 @@ void BoardTab::updatePosts(){
 }
 
 void BoardTab::loadThreads(){
-    QDir().mkdir(board);
-    QDir().mkdir(board+"/index");
+    int i = posts.size();
+    while(i--){
+        //((ThreadForm*)posts.at(i))->deleteLater();
+        ((ThreadForm*)posts.at(i))->close();
+        delete ((ThreadForm*)posts.at(i));
+        posts.pop_back();
+    }
     QJsonArray threads = QJsonDocument::fromJson(reply->readAll()).object()["threads"].toArray();
     int length = threads.size();
     qDebug() << QString("length is ").append(QString::number(length));
-    for(int i=0;i<length;i++){
+    for(i=0;i<length;i++){
         QJsonObject p = threads.at(i).toObject()["posts"].toArray()[0].toObject();
         QString threadNum = QString("%1").arg(p["no"].toDouble(),0,'f',0);
         ThreadForm *tf = new ThreadForm(board,threadNum,Thread);

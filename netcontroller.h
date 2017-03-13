@@ -2,12 +2,14 @@
 #define NETCONTROLLER_H
 
 #include <QNetworkAccessManager>
+#include <QNetworkCookieJar>
 #include "boardtab.h"
 
 class netController: public QObject  {
     Q_OBJECT
 public:
     QNetworkAccessManager *manager;
+    QNetworkCookieJar *cookies;
     explicit netController(QObject * parent = nullptr);
 };
 

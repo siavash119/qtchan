@@ -24,7 +24,10 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>qtchan</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #191919; color:white</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">
@@ -73,6 +76,11 @@
          <height>0</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>16</pointsize>
+        </font>
+       </property>
        <attribute name="headerVisible">
         <bool>false</bool>
        </attribute>
@@ -92,6 +100,11 @@
           </property>
           <item>
            <widget class="QLabel" name="label">
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Board</string>
             </property>
@@ -105,10 +118,20 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="pushButton">
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Find</string>
             </property>
@@ -138,8 +161,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>689</width>
-             <height>780</height>
+             <width>710</width>
+             <height>774</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -147,6 +170,11 @@
              <horstretch>1</horstretch>
              <verstretch>1</verstretch>
             </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>16</pointsize>
+            </font>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <property name="sizeConstraint">

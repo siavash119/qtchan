@@ -19,6 +19,7 @@ public:
     BoardTab *boardtab;
     QString board;
     QString thread;
+    QString threadUrl;
     explicit ThreadTab(QString board, QString thread, QWidget *parent = 0);
     ~ThreadTab();
     void addPost(ThreadForm *tf);
@@ -36,6 +37,8 @@ private:
 private slots:
     void loadPosts();
     void gallery();
+    void openPostForm();
+    void getPosts();
 
 signals:
     void newPosts();

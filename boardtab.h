@@ -17,10 +17,9 @@ class BoardTab : public QWidget
 public:
     QString tabType;
     QString board;
+    QString boardUrl;
     explicit BoardTab(QString board, QWidget *parent = 0);
     ~BoardTab();
-    void addPost(ThreadForm *tf);
-    void addStretch();
     void addThread();
     QNetworkReply *reply;
     std::vector<ThreadForm*> posts;
@@ -31,6 +30,7 @@ private:
 
 private slots:
     void loadThreads();
+    void getPosts();
 };
 
 #endif // BOARDTAB_H
