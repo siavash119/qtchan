@@ -7,6 +7,7 @@
 #include <QString>
 #include "post.h"
 #include <QDir>
+#include <QSignalMapper>
 
 namespace Ui {
 class ThreadForm;
@@ -35,8 +36,10 @@ public:
     QString time;
     QString name;
     QNetworkReply *reply;
+    QNetworkReply *replyThumb;
     QNetworkReply *replyImage;
     QMetaObject::Connection connectionPost;
+    QMetaObject::Connection connectionThumb;
     QMetaObject::Connection connectionImage;
     QString htmlParse(QString &html);
     Post *post;
@@ -44,10 +47,15 @@ public:
     QDir *folder;
     QString folderPath;
     QString imgURL;
+    QString thumbURL;
     QString pathBase;
     QString filePath;
     QFile *file;
+    QString thumbPath;
+    QFile *thumb;
     //void setImage(QString text);
+    QSignalMapper *signalMapper;
+    bool loadIt;
 
 signals:
     void loadThreadTab(ThreadForm*, QJsonArray&);
@@ -56,7 +64,8 @@ private:
     Ui::ThreadForm *ui;
 
 public slots:
-    void getImageFinished();
+    void getOrigFinished();
+    void getThumbFinished();
     void imageClicked();
 };
 

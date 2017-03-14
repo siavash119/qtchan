@@ -13,6 +13,7 @@
 #include <QStringBuilder>
 #include <QDir>
 #include <QDesktopServices>
+#include <QSignalMapper>
 using namespace std;
 
 
@@ -53,23 +54,40 @@ void ThreadForm::load(QJsonObject &p){
     ui->name->setText(post->name);
 
     //set image
+    //TODO clean if-else's
     if(!post->tim.isNull()){
-        if(post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png")){
-            imgURL = this->board % "/" % post->tim % post->ext;
-        }
-        else {
-            imgURL = this->board % "/" % post->tim % "s.jpg";
-            post->ext = "s.jpg";
-        }
+        imgURL = this->board % "/" % post->tim % post->ext;
         filePath = pathBase%post->no%"-"%post->filename%post->ext;
         file = new QFile(filePath);
-        if(!file->exists()){
-            qDebug() << QString("getting https://i.4cdn.org/")  % imgURL;
-            replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % imgURL)));
-            connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::getImageFinished);
+        if(post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png")){
+            loadIt = true;
+            if(!file->exists()){
+                qDebug() << QString("getting https://i.4cdn.org/")  % imgURL;
+                replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % imgURL)));
+                connectionImage = connect(replyImage, &QNetworkReply::finished,this, &ThreadForm::getOrigFinished);
+            }
+            else{
+                loadImage(filePath);
+            }
         }
-        else{
-            loadImage(filePath);
+        else {
+            loadIt = false;
+            if(!file->exists()){
+                qDebug() << QString("getting https://i.4cdn.org/")  % imgURL;
+                replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % imgURL)));
+                connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::getOrigFinished);
+            }
+            imgURL = this->board % "/" % post->tim % "s.jpg";
+            thumbPath = pathBase%"thumbs/"%post->no%"-"%post->filename%"s.jpg";
+            thumb = new QFile(thumbPath);
+            if(!thumb->exists()){
+                qDebug() << QString("getting https://i.4cdn.org/")  % imgURL;
+                replyThumb = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % imgURL)));
+                connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished);
+            }
+            else{
+                loadImage(thumbPath);
+            }
         }
         connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
     }
@@ -98,17 +116,31 @@ void ThreadForm::updateComHeight(){
     }
 }
 
-void ThreadForm::getImageFinished(){
+void ThreadForm::getOrigFinished(){
     if(replyImage->error() == 0)
     {
         file->open(QIODevice::WriteOnly);
         file->write(replyImage->readAll());
         file->close();
         qDebug() << "saved file "+filePath;
-        loadImage(filePath);
+        if(loadIt) loadImage(filePath);
     }
         replyImage->deleteLater();
         disconnect(connectionImage);
+}
+
+void ThreadForm::getThumbFinished(){
+    if(replyThumb->error() == 0)
+    {
+        thumb->open(QIODevice::WriteOnly);
+        thumb->write(replyThumb->readAll());
+        thumb->close();
+        qDebug() << "saved file "+thumbPath;
+        loadImage(thumbPath);
+    }
+    replyThumb->deleteLater();
+    disconnect(connectionThumb);
+
 }
 
 void ThreadForm::loadImage(QString path){

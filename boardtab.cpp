@@ -14,8 +14,9 @@ BoardTab::BoardTab(QString board, QWidget *parent) :
     ui->setupUi(this);
     this->board = board;
     boardUrl = "https://a.4cdn.org/"+board+"/1.json";
-    QDir().mkdir(board);
-    QDir().mkdir(board+"/index");
+    //QDir().mkdir(board);
+    QDir().mkpath(board+"/index/thumbs");
+    //QDir().mkdir(board+"/thumbs");
     reply = nc.manager->get(QNetworkRequest(QUrl(boardUrl)));
     connect(reply, &QNetworkReply::finished, this, &BoardTab::loadThreads);
     QAction *refresh = new QAction(this);

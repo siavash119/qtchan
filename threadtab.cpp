@@ -18,7 +18,8 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     ui->setupUi(this);
     this->board = board;
     this->thread = thread;
-    QDir().mkpath(board+"/"+thread);
+    //QDir().mkpath(board+"/"+thread);
+    QDir().mkpath(board+"/"+thread+"/thumbs");
     threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
     reply = nc.manager->get(QNetworkRequest(QUrl(threadUrl)));
     connect(reply, &QNetworkReply::finished, this, &ThreadTab::loadPosts);
