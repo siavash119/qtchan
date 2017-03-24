@@ -10,6 +10,7 @@
 #include <QDir>
 #include "postform.h"
 #include <QKeyEvent>
+#include "mainwindow.h"
 
 ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     QWidget(parent),
@@ -43,6 +44,14 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     focusSearch->setShortcut(Qt::ControlModifier+Qt::Key_F);
     connect(focusSearch,&QAction::triggered,this,&ThreadTab::focusIt);
     this->addAction(focusSearch);
+    QAction *focusTree = new QAction(this);
+    focusTree->setShortcut(Qt::Key_F3);
+    connect(focusTree,&QAction::triggered,mw,&MainWindow::focusTree);
+    this->addAction(focusTree);
+    QAction *focusBar = new QAction(this);
+    focusBar->setShortcut(Qt::Key_F6);
+    connect(focusBar,&QAction::triggered,mw,&MainWindow::focusBar);
+    this->addAction(focusBar);
     //this->installEventFilter(this);
 }
 

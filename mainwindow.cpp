@@ -141,6 +141,13 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         else if(key == 16777269){
             ui->lineEdit->setFocus();
         }
+        else if(key == 16777266){
+            qDebug("setting focus");
+            ui->treeView->setFocus();
+        }
+        else if(key == 16777267){
+            ui->scrollAreaWidgetContents->setFocus();
+        }
         else{
             return QObject::eventFilter(obj, event);
         }
@@ -166,4 +173,12 @@ void MainWindow::on_lineEdit_returnPressed()
 {
     on_pushButton_clicked();
     ui->treeView->setFocus();
+}
+
+void MainWindow::focusTree(){
+    ui->treeView->setFocus();
+}
+
+void MainWindow::focusBar(){
+    ui->lineEdit->setFocus();
 }

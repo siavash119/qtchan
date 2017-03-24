@@ -47,6 +47,8 @@ private slots:
 
 public slots:
     void onNewThread(QWidget* parent, QString board, QString thread);
+    void focusTree();
+    void focusBar();
 private:
     Ui::MainWindow *ui;
     QModelIndexList boardsSelected;

@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QDir>
 #include <QSettings>
+#include "mainwindow.h"
 
 BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *parent) :
     QWidget(parent),
@@ -27,6 +28,14 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
     refresh->setShortcut(Qt::Key_R);
     connect(refresh, &QAction::triggered, this, &BoardTab::getPosts);
     this->addAction(refresh);
+    QAction *focuser = new QAction(this);
+    focuser->setShortcut(Qt::Key_F3);
+    connect(focuser,&QAction::triggered,mw,&MainWindow::focusTree);
+    this->addAction(focuser);
+    QAction *focusBar = new QAction(this);
+    focusBar->setShortcut(Qt::Key_F6);
+    connect(focusBar,&QAction::triggered,mw,&MainWindow::focusBar);
+    this->addAction(focusBar);
 }
 
 BoardTab::~BoardTab()
