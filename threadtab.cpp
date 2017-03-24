@@ -21,7 +21,9 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     //QDir().mkpath(board+"/"+thread);
     QDir().mkpath(board+"/"+thread+"/thumbs");
     threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
-    reply = nc.manager->get(QNetworkRequest(QUrl(threadUrl)));
+    request = QNetworkRequest(QUrl(threadUrl));
+    request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
+    reply = nc.manager->get(request);
     connect(reply, &QNetworkReply::finished, this, &ThreadTab::loadPosts);
     myProcess = new QProcess(parent);
     QAction *foo = new QAction(this);
@@ -40,7 +42,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 
 void ThreadTab::getPosts(){
     qDebug() << "refreshing /" + board + "/" + thread;
-    reply = nc.manager->get(QNetworkRequest(QUrl(threadUrl)));
+    reply = nc.manager->get(request);
     connect(reply, &QNetworkReply::finished, this, &ThreadTab::loadPosts);
 }
 
@@ -86,6 +88,7 @@ void ThreadTab::loadPosts(){
         QJsonObject p = posts.at(i).toObject();
         ThreadForm *tf = new ThreadForm(board,thread);
         ui->threads->addWidget(tf);
+        connect(tf,&ThreadForm::searchPost,this,&ThreadTab::findPost);
         tf->load(p);
         tfs.push_back(tf);
     }
@@ -98,5 +101,16 @@ void ThreadTab::updatePosts(){
     int length = tfs.size();
     for(int i=0;i<length;i++){
         ((ThreadForm*)tfs.at(i))->updateComHeight();
+    }
+}
+
+void ThreadTab::findPost(QString postNum, ThreadForm* thetf){
+    int size = tfs.size();
+    for(int i=0;i<size;i++){
+        ThreadForm* tf = (ThreadForm*)(tfs.at(i));
+        if(tf->post->no == postNum)
+            //qobject_cast<ThreadForm*>(sender())->insert(position,tf);
+            //qobject_cast<ThreadForm*>(sender())->insert(tf);
+            thetf->insert(tf);
     }
 }

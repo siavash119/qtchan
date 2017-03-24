@@ -3,6 +3,7 @@
 
 #include <QNetworkAccessManager>
 #include <QNetworkCookieJar>
+#include <QJsonObject>
 #include "boardtab.h"
 
 class netController: public QObject  {
@@ -10,6 +11,7 @@ class netController: public QObject  {
 public:
     QNetworkAccessManager *manager;
     QNetworkCookieJar *cookies;
+    QJsonObject settingsFile;
     explicit netController(QObject * parent = nullptr);
 };
 
@@ -19,6 +21,10 @@ extern netController nc;
 struct Tab{
     enum TabType {Board,Thread} type;
     void* TabPointer;
+};
+
+struct Settings{
+    QObject hidden;
 };
 
 //extern std::vector<Tab> tabs;

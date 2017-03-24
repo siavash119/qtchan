@@ -47,26 +47,32 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
     QString searchString = ui->lineEdit->text();
-    //QString url = "https://a.4cdn.org/"+searchString+"/1.json";
-    //qDebug() << QString("getting ")+url;
-    BoardTab *bt = new BoardTab(searchString);
-    ui->verticalLayout_3->addWidget(bt);
-    Tab tab = {Tab::TabType::Board,bt};
-    tabs.push_back(tab);
-    QStandardItem* parent1 = new QStandardItem("/"+searchString+"/");
-    model->appendRow(parent1);
-    //ui->treeView->SelectItems(ui->treeView->size());
-    //bts.push_back(bt);
-    ui->treeView->selectionModel()->clearSelection();
-    ui->treeView->selectionModel()->select(parent1->index(),QItemSelectionModel::Select);
+    QRegularExpression re("(?:https?:\\/\\/)?boards.4chan.org\\/(\\w+)\\/thread\\/(\\d+)");
+    QRegularExpressionMatch match = re.match(searchString);
+    if (match.hasMatch()) {
+        onNewThread(this,match.captured(1),match.captured(2));
+    }
+    else{
+        //QString url = "https://a.4cdn.org/"+searchString+"/1.json";
+        //qDebug() << QString("getting ")+url;
+        BoardTab *bt = new BoardTab(searchString);
+        ui->verticalLayout_3->addWidget(bt);
+        Tab tab = {Tab::TabType::Board,bt};
+        tabs.push_back(tab);
+        QStandardItem* parent1 = new QStandardItem("/"+searchString+"/");
+        model->appendRow(parent1);
+        ui->treeView->selectionModel()->clearSelection();
+        ui->treeView->selectionModel()->select(parent1->index(),QItemSelectionModel::Select);
+    }
     //show_one(parent1->index());
 }
 
-void MainWindow::onNewThread(ThreadForm* tf, QString board, QString thread){
-    qDebug() << "adding "+thread+" from /"+tf->board+"/"+tf->threadNum;
+void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
+    //qDebug() << "adding "+thread+" from /"+tf->board+"/"+tf->threadNum;
+
     ThreadTab *tt = new ThreadTab(board,thread);
     ui->verticalLayout_3->addWidget(tt);
-    QStandardItem* parent1 = new QStandardItem("/"+tf->board+"/"+thread);
+    QStandardItem* parent1 = new QStandardItem("/"+board+"/"+thread);
     Tab tab = {Tab::TabType::Thread,tt};
     tabs.push_back(tab);
     model->appendRow(parent1);
@@ -74,10 +80,6 @@ void MainWindow::onNewThread(ThreadForm* tf, QString board, QString thread){
     //ui->treeView->selectionModel()->select();
     //show_one(parent1->index());
 }
-
-/*void QTreeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected){
-    qDebug() << &selected;
-}*/
 
 void MainWindow::addTab(){
 }
@@ -128,6 +130,9 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             ((Tab::TabType)tabs.at(row).type) == Tab::TabType::Board ? ((BoardTab*)tabs.at(row).TabPointer)->updatePosts() :
                                                           ((ThreadTab*)tabs.at(row).TabPointer)->updatePosts();
         }
+        else if(key == 16777269){
+            ui->lineEdit->setFocus();
+        }
         else{
             return QObject::eventFilter(obj, event);
         }
@@ -147,4 +152,10 @@ void MainWindow::deleteSelected(){
     ((QWidget*)tabs.at(row).TabPointer)->deleteLater();
     model->removeRow(row);
     tabs.erase(tabs.begin()+row);
+}
+
+void MainWindow::on_lineEdit_returnPressed()
+{
+    on_pushButton_clicked();
+    ui->treeView->setFocus();
 }

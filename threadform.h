@@ -56,10 +56,15 @@ public:
     //void setImage(QString text);
     QSignalMapper *signalMapper;
     bool loadIt;
+    //void insert(int position, ThreadForm* tf);
+    void insert(ThreadForm* tf);
+    ThreadForm* clone();
 
 signals:
     void loadThreadTab(ThreadForm*, QJsonArray&);
     void loadThread(ThreadForm*,QString&,QString&);
+    //void searchPost(int position, QString postNum);
+    void searchPost(QString postNum, ThreadForm* thetf);
 private:
     Ui::ThreadForm *ui;
 
@@ -67,6 +72,11 @@ public slots:
     void getOrigFinished();
     void getThumbFinished();
     void imageClicked();
+    void hideClicked();
+private slots:
+    void quoteClicked(const QString &link);
+    void onSearchPost(const QString &link, ThreadForm* thetf);
+
 };
 
 #endif // THREADFORM_H

@@ -25,12 +25,16 @@ public:
     void addPost(ThreadForm *tf);
     void addStretch();
     void addThread();
+    QNetworkRequest request;
     QNetworkReply *reply;
     std::vector<ThreadForm*> tfs;
     void updatePosts();
     bool updated;
     QProcess *myProcess;
 
+public slots:
+    //void findPost(int position, QString postNum);
+    void findPost(QString postNum, ThreadForm* thetf);
 private:
     Ui::ThreadTab *ui;
 

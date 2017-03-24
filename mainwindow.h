@@ -43,8 +43,10 @@ private slots:
     void onSelectionChanged();
     //void onSelectionChanged(const QItemSelection &, const QItemSelection &);
 
+    void on_lineEdit_returnPressed();
+
 public slots:
-    void onNewThread(ThreadForm* tf, QString board, QString thread);
+    void onNewThread(QWidget* parent, QString board, QString thread);
 private:
     Ui::MainWindow *ui;
     QModelIndexList boardsSelected;
@@ -55,4 +57,6 @@ signals:
 
 extern MainWindow* mw;
 
+enum FilterType{id,comment,trip};
+enum BoardName{b,g,diy,h,pol,d};
 #endif // MAINWINDOW_H

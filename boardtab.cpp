@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDir>
+#include <QSettings>
 
 BoardTab::BoardTab(QString board, QWidget *parent) :
     QWidget(parent),
@@ -55,13 +56,20 @@ void BoardTab::loadThreads(){
     QJsonArray threads = QJsonDocument::fromJson(reply->readAll()).object()["threads"].toArray();
     int length = threads.size();
     qDebug() << QString("length is ").append(QString::number(length));
+    QSettings settings;
+    QStringList idFilters = settings.value("filters/"+board+"/id").toStringList();
     for(i=0;i<length;i++){
         QJsonObject p = threads.at(i).toObject()["posts"].toArray()[0].toObject();
         QString threadNum = QString("%1").arg(p["no"].toDouble(),0,'f',0);
-        ThreadForm *tf = new ThreadForm(board,threadNum,Thread);
-        ui->threads->addWidget(tf);
-        tf->load(p);
-        posts.push_back(tf);
+        if (!idFilters.contains(threadNum)){
+            ThreadForm *tf = new ThreadForm(board,threadNum,Thread,this);
+            ui->threads->addWidget(tf);
+            tf->load(p);
+            posts.push_back(tf);
+        }
+        else{
+            qDebug() << "threadNum "+threadNum+" filtered!";
+        }
     }
     ui->threads->addStretch(1);
     reply->deleteLater();

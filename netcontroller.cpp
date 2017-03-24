@@ -12,13 +12,14 @@ netController::netController(QObject *parent) : QObject(parent)
 
     QString val;
     QFile file;
+    QDir().mkpath(QDir::homePath()+"/.config/qtchan");
     file.setFileName(QDir::homePath() + "/.config/qtchan/settings");
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     val = file.readAll();
     file.close();
     QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
     QJsonObject cookiesFile = d.object().value("cookies").toObject();
-    qDebug() << cookiesFile;
+    //qDebug() << cookiesFile;
     for (QJsonObject::Iterator it=cookiesFile.begin(); it!=cookiesFile.end();it++){
         QNetworkCookie temp(it.key().toStdString().c_str(),it.value().toString().toStdString().c_str());
         temp.setDomain(".4chan.org");
@@ -26,6 +27,7 @@ netController::netController(QObject *parent) : QObject(parent)
         temp.setPath("/");
         manager->cookieJar()->insertCookie(temp);
     }
+    //settingsFile = d.object().value("settings").toObject();
 }
 
 netController nc;

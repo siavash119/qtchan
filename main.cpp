@@ -1,11 +1,14 @@
 #include "mainwindow.h"
 #include <QApplication>
+//#include <QSettings>
 MainWindow *mw;
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setOrganizationName("anon");
+    QCoreApplication::setOrganizationName("qtchan");
     QCoreApplication::setApplicationName("qtchan");
+    //QSettings settings;
+    //settings.clear();
     QApplication a(argc, argv);
     MainWindow w;
     mw = &w;
