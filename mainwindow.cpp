@@ -47,23 +47,31 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
     QString searchString = ui->lineEdit->text();
-    QRegularExpression re("(?:https?:\\/\\/)?boards.4chan.org\\/(\\w+)\\/thread\\/(\\d+)");
+    QRegularExpression re("(?:(?:https?:\\/\\/)?boards.4chan.org\\/)?(\\w+)(?:\\/thread)?\\/(\\d+)");
     QRegularExpressionMatch match = re.match(searchString);
-    if (match.hasMatch()) {
-        onNewThread(this,match.captured(1),match.captured(2));
+    QRegularExpressionMatch match2;
+    BoardTab *bt;
+    if (!match.hasMatch()) {
+        QRegularExpression res("(?:(?:https?:\\/\\/)?boards.4chan.org)?\\/?(\\w+)\\/(\\w+)?");
+        match2 = res.match(searchString);
     }
     else{
-        //QString url = "https://a.4cdn.org/"+searchString+"/1.json";
-        //qDebug() << QString("getting ")+url;
-        BoardTab *bt = new BoardTab(searchString);
-        ui->verticalLayout_3->addWidget(bt);
-        Tab tab = {Tab::TabType::Board,bt};
-        tabs.push_back(tab);
-        QStandardItem* parent1 = new QStandardItem("/"+searchString+"/");
-        model->appendRow(parent1);
-        ui->treeView->selectionModel()->clearSelection();
-        ui->treeView->selectionModel()->select(parent1->index(),QItemSelectionModel::Select);
+        onNewThread(this,match.captured(1),match.captured(2));
+        return;
     }
+    if(match2.hasMatch()){
+        bt = new BoardTab(match2.captured(1),BoardType::Catalog,match2.captured(2));
+    }
+    else{
+        bt = new BoardTab(searchString,BoardType::Index);
+    }
+    ui->verticalLayout_3->addWidget(bt);
+    Tab tab = {Tab::TabType::Board,bt};
+    tabs.push_back(tab);
+    QStandardItem* parent1 = new QStandardItem("/"+searchString+"/");
+    model->appendRow(parent1);
+    ui->treeView->selectionModel()->clearSelection();
+    ui->treeView->selectionModel()->select(parent1->index(),QItemSelectionModel::Select);
     //show_one(parent1->index());
 }
 

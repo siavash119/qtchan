@@ -10,6 +10,7 @@ namespace Ui {
 class BoardTab;
 }
 
+enum BoardType{Index,Catalog};
 class BoardTab : public QWidget
 {
     Q_OBJECT
@@ -18,7 +19,9 @@ public:
     QString tabType;
     QString board;
     QString boardUrl;
-    explicit BoardTab(QString board, QWidget *parent = 0);
+    BoardType type;
+    QString search;
+    explicit BoardTab(QString board, BoardType type = BoardType::Index, QString search = "", QWidget *parent = 0);
     ~BoardTab();
     void addThread();
     QNetworkReply *reply;

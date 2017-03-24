@@ -8,13 +8,16 @@
 #include <QDir>
 #include <QSettings>
 
-BoardTab::BoardTab(QString board, QWidget *parent) :
+BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::BoardTab)
 {
     ui->setupUi(this);
     this->board = board;
-    boardUrl = "https://a.4cdn.org/"+board+"/1.json";
+    this->type = type;
+    this->search = search;
+    if(type == BoardType::Index) boardUrl = "https://a.4cdn.org/"+board+"/1.json";
+    else boardUrl = "https://a.4cdn.org/"+board+"/catalog.json";
     //QDir().mkdir(board);
     QDir().mkpath(board+"/index/thumbs");
     //QDir().mkdir(board+"/thumbs");
@@ -53,13 +56,30 @@ void BoardTab::loadThreads(){
         ((ThreadForm*)posts.at(i))->deleteLater();
         posts.pop_back();
     }
-    QJsonArray threads = QJsonDocument::fromJson(reply->readAll()).object()["threads"].toArray();
+    QJsonArray threads;
+    if(type==BoardType::Index) threads = QJsonDocument::fromJson(reply->readAll()).object()["threads"].toArray();
+    else{
+        qDebug() << "searching " + search;
+        QRegularExpression re(search,QRegularExpression::CaseInsensitiveOption);
+        QRegularExpressionMatch match;
+        QJsonArray allThreads = QJsonDocument::fromJson(reply->readAll()).array();
+        QJsonArray pageThreads;
+        for(int i=0;i<allThreads.size();i++){
+            pageThreads = allThreads.at(i).toObject().value("threads").toArray();
+            for(int j=0;j<pageThreads.size();j++){
+                match = re.match(pageThreads.at(j).toObject().value("com").toString());
+                if(match.hasMatch())threads.append(pageThreads.at(j));
+            }
+        }
+    }
     int length = threads.size();
     qDebug() << QString("length is ").append(QString::number(length));
     QSettings settings;
     QStringList idFilters = settings.value("filters/"+board+"/id").toStringList();
     for(i=0;i<length;i++){
-        QJsonObject p = threads.at(i).toObject()["posts"].toArray()[0].toObject();
+        QJsonObject p;
+        if(type==BoardType::Index) p = threads.at(i).toObject()["posts"].toArray()[0].toObject();
+        else p = threads.at(i).toObject();
         QString threadNum = QString("%1").arg(p["no"].toDouble(),0,'f',0);
         if (!idFilters.contains(threadNum)){
             ThreadForm *tf = new ThreadForm(board,threadNum,Thread,this);
