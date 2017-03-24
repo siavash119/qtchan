@@ -50,7 +50,7 @@ void BoardTab::loadThreads(){
     while(i--){
         //((ThreadForm*)posts.at(i))->deleteLater();
         ((ThreadForm*)posts.at(i))->close();
-        delete ((ThreadForm*)posts.at(i));
+        ((ThreadForm*)posts.at(i))->deleteLater();
         posts.pop_back();
     }
     QJsonArray threads = QJsonDocument::fromJson(reply->readAll()).object()["threads"].toArray();

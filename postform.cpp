@@ -157,6 +157,7 @@ void PostForm::fileChecker(const QMimeData *mimeData){
    } else {
        ui->com->setPlainText("Cannot display data");
    }
+   qDebug() << filename;
 }
 
 
@@ -181,12 +182,14 @@ void PostForm::fileSelected(const QString &file){
         ui->cancel->show();
     }
     dialog->close();
+    qDebug() << filename;
 }
 
 void PostForm::on_cancel_clicked()
 {
     filename="";
-    ui->cancel->setText("No file selected");
+    ui->filename->setText("No file selected");
+    ui->cancel->hide();
 }
 
 void PostForm::droppedItem(){

@@ -9,6 +9,7 @@
 #include <QKeySequence>
 #include <QDir>
 #include "postform.h"
+#include <QKeyEvent>
 
 ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     QWidget(parent),
@@ -38,6 +39,11 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     refresh->setShortcut(Qt::Key_R);
     connect(refresh, &QAction::triggered, this, &ThreadTab::getPosts);
     this->addAction(refresh);
+    QAction *focusSearch = new QAction(this);
+    focusSearch->setShortcut(Qt::ControlModifier+Qt::Key_F);
+    connect(focusSearch,&QAction::triggered,this,&ThreadTab::focusIt);
+    this->addAction(focusSearch);
+    //this->installEventFilter(this);
 }
 
 void ThreadTab::getPosts(){
@@ -113,4 +119,64 @@ void ThreadTab::findPost(QString postNum, ThreadForm* thetf){
             //qobject_cast<ThreadForm*>(sender())->insert(tf);
             thetf->insert(tf);
     }
+}
+
+void ThreadTab::findText(const QString text){
+    QRegularExpression re(text,QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatch match;
+    ThreadForm* tf;
+    bool pass = false;
+    if (text == "") pass = true;
+    int size = tfs.size();
+    for(int i=0;i<size;i++){
+        tf = (ThreadForm*)(tfs.at(i));
+        if(pass) { tf->show(); continue;};
+        match = re.match(tf->post->com);
+        if(!match.hasMatch()){
+            tf->hide();
+        }
+    }
+}
+
+void ThreadTab::on_pushButton_clicked()
+{
+    findText(ui->lineEdit->text());
+}
+
+bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        int mod = keyEvent->modifiers();
+        int key = keyEvent->key();
+        qDebug("Ate modifier %d",mod);
+        qDebug("Ate key press %d", key);
+        qDebug() << obj->objectName();
+        if(mod == 67108864 && key == 70){
+            //ui->lineEdit->setFocus();
+        }
+        qDebug("Ate key press %d", key);
+        if(key == 16777220){
+            on_pushButton_clicked();
+        }
+        else if(key == 16777269){
+            ui->lineEdit->setFocus();
+        }
+        else{
+            return QObject::eventFilter(obj, event);
+        }
+        return true;
+    } else {
+        // standard event processing
+        return QObject::eventFilter(obj, event);
+    }
+}
+
+void ThreadTab::focusIt(){
+    ui->lineEdit->setFocus();
+}
+
+void ThreadTab::on_lineEdit_returnPressed()
+{
+    findText(ui->lineEdit->text());
 }

@@ -15,6 +15,9 @@ class ThreadTab;
 class ThreadTab : public QWidget
 {
     Q_OBJECT
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event);
 public:
     BoardTab *boardtab;
     QString board;
@@ -31,10 +34,12 @@ public:
     void updatePosts();
     bool updated;
     QProcess *myProcess;
+    void findText(const QString text);
 
 public slots:
     //void findPost(int position, QString postNum);
     void findPost(QString postNum, ThreadForm* thetf);
+    void focusIt();
 private:
     Ui::ThreadTab *ui;
 
@@ -43,6 +48,10 @@ private slots:
     void gallery();
     void openPostForm();
     void getPosts();
+
+    void on_pushButton_clicked();
+
+    void on_lineEdit_returnPressed();
 
 signals:
     void newPosts();
