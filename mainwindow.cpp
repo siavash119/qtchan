@@ -21,6 +21,7 @@
 #include <QKeyEvent>
 #include <stdio.h>
 #include "threadtab.h"
+#include <QSettings>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -47,6 +48,11 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
     QString searchString = ui->lineEdit->text();
+    loadFromSearch(searchString,true);
+    //show_one(parent1->index());
+}
+
+void MainWindow::loadFromSearch(QString searchString, bool select){
     QRegularExpression re("(?:(?:https?:\\/\\/)?boards.4chan.org\\/)?(\\w+)(?:\\/thread)?\\/(\\d+)");
     QRegularExpressionMatch match = re.match(searchString);
     QRegularExpressionMatch match2;
@@ -66,13 +72,14 @@ void MainWindow::on_pushButton_clicked()
         bt = new BoardTab(searchString,BoardType::Index);
     }
     ui->verticalLayout_3->addWidget(bt);
-    Tab tab = {Tab::TabType::Board,bt};
+    Tab tab = {Tab::TabType::Board,bt,searchString};
     tabs.push_back(tab);
     QStandardItem* parent1 = new QStandardItem("/"+searchString+"/");
     model->appendRow(parent1);
-    ui->treeView->selectionModel()->clearSelection();
-    ui->treeView->selectionModel()->select(parent1->index(),QItemSelectionModel::Select);
-    //show_one(parent1->index());
+    if(select){
+        ui->treeView->selectionModel()->clearSelection();
+        ui->treeView->selectionModel()->select(parent1->index(),QItemSelectionModel::Select);
+    }
 }
 
 void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
@@ -81,7 +88,7 @@ void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
     ThreadTab *tt = new ThreadTab(board,thread);
     ui->verticalLayout_3->addWidget(tt);
     QStandardItem* parent1 = new QStandardItem("/"+board+"/"+thread);
-    Tab tab = {Tab::TabType::Thread,tt};
+    Tab tab = {Tab::TabType::Thread,tt,QString(board+"/"+thread)};
     tabs.push_back(tab);
     model->appendRow(parent1);
     tt->hide();
@@ -181,4 +188,22 @@ void MainWindow::focusTree(){
 
 void MainWindow::focusBar(){
     ui->lineEdit->setFocus();
+}
+
+void MainWindow::saveSession(){
+    QSettings settings;
+    QStringList session;
+    for (int i = 0; i < tabs.size(); i++) {
+        session.append(((Tab)(tabs.at(i))).searchString);
+    }
+    settings.setValue("session",session);
+}
+
+void MainWindow::loadSession(){
+    QSettings settings;
+    QStringList session = settings.value("session",QStringList()).toStringList();
+    qDebug() << "loading session";
+    for(int i=0;i<session.length();i++){
+        loadFromSearch(session.at(i),false);
+    }
 }

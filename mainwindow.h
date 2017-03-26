@@ -49,6 +49,9 @@ public slots:
     void onNewThread(QWidget* parent, QString board, QString thread);
     void focusTree();
     void focusBar();
+    void loadFromSearch(QString searchString, bool select);
+    void saveSession();
+    void loadSession();
 private:
     Ui::MainWindow *ui;
     QModelIndexList boardsSelected;

@@ -21,6 +21,7 @@ extern netController nc;
 struct Tab{
     enum TabType {Board,Thread} type;
     void* TabPointer;
+    QString searchString;
 };
 
 struct Settings{

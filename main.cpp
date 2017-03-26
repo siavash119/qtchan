@@ -13,5 +13,7 @@ int main(int argc, char *argv[])
     MainWindow w;
     mw = &w;
     w.show();
+    mw->loadSession();
+    QObject::connect(&a, &QApplication::aboutToQuit, mw, &MainWindow::saveSession);
     return a.exec();
 }
