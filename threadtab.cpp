@@ -11,6 +11,7 @@
 #include "postform.h"
 #include <QKeyEvent>
 #include "mainwindow.h"
+#include <QMutableMapIterator>
 
 ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     QWidget(parent),
@@ -28,6 +29,10 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     reply = nc.manager->get(request);
     connect(reply, &QNetworkReply::finished, this, &ThreadTab::loadPosts);
     myProcess = new QProcess(parent);
+    this->setShortcuts();
+}
+
+void ThreadTab::setShortcuts(){
     QAction *foo = new QAction(this);
     foo->setShortcut(Qt::Key_G);
     connect(foo, &QAction::triggered, this, &ThreadTab::gallery);
@@ -52,7 +57,6 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     focusBar->setShortcut(Qt::Key_F6);
     connect(focusBar,&QAction::triggered,mw,&MainWindow::focusBar);
     this->addAction(focusBar);
-    //this->installEventFilter(this);
 }
 
 void ThreadTab::getPosts(){
@@ -63,10 +67,11 @@ void ThreadTab::getPosts(){
 
 ThreadTab::~ThreadTab()
 {
-    int i = tfs.size();
-    while(i--){
-        ((ThreadForm*)tfs.at(i))->deleteLater();
-        tfs.pop_back();
+    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
+    while (mapI.hasNext()) {
+        mapI.next();
+        ((ThreadForm*)mapI.value())->deleteLater();
+        mapI.remove();
     }
     delete ui;
 }
@@ -98,14 +103,23 @@ void ThreadTab::loadPosts(){
     QJsonArray posts = QJsonDocument::fromJson(reply->readAll()).object()["posts"].toArray();
     int length = posts.size();
     qDebug() << QString("length is ").append(QString::number(length));
-    int i=tfs.size();
-    for(;i<length;i++){
+    for(int i=tfMap.size();i<length;i++){
         QJsonObject p = posts.at(i).toObject();
         ThreadForm *tf = new ThreadForm(board,thread);
         ui->threads->addWidget(tf);
         connect(tf,&ThreadForm::searchPost,this,&ThreadTab::findPost);
         tf->load(p);
-        tfs.push_back(tf);
+        tfMap.insert(tf->post->no,tf);
+        QSet<QString> quotes = tf->quotelinks;
+        ThreadForm* replyTo;
+        foreach (const QString &orig, quotes)
+        {
+            replyTo = tfMap.find(orig).value();
+            if(replyTo != nullptr){
+                replyTo->replies.insert(tf->post->no);
+                replyTo->setReplies();
+            }
+        }
     }
     ui->threads->addStretch(1);
     reply->deleteLater();
@@ -113,19 +127,22 @@ void ThreadTab::loadPosts(){
 
 void ThreadTab::updatePosts(){
     updated = false;
-    int length = tfs.size();
-    for(int i=0;i<length;i++){
-        ((ThreadForm*)tfs.at(i))->updateComHeight();
+    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
+    while (mapI.hasNext()) {
+        mapI.next();
+        //cout << i.key() << ": " << i.value() << endl;
+        ((ThreadForm*)mapI.value())->updateComHeight();
+        //mapI.remove();
     }
 }
 
 void ThreadTab::findPost(QString postNum, ThreadForm* thetf){
-    int size = tfs.size();
-    for(int i=0;i<size;i++){
-        ThreadForm* tf = (ThreadForm*)(tfs.at(i));
+    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
+    ThreadForm *tf;
+    while (mapI.hasNext()) {
+        mapI.next();
+        tf = mapI.value();
         if(tf->post->no == postNum)
-            //qobject_cast<ThreadForm*>(sender())->insert(position,tf);
-            //qobject_cast<ThreadForm*>(sender())->insert(tf);
             thetf->insert(tf);
     }
 }
@@ -136,9 +153,12 @@ void ThreadTab::findText(const QString text){
     ThreadForm* tf;
     bool pass = false;
     if (text == "") pass = true;
-    int size = tfs.size();
-    for(int i=0;i<size;i++){
-        tf = (ThreadForm*)(tfs.at(i));
+    qDebug() << "searching " + text;
+    QMapIterator<QString,ThreadForm*> mapI(tfMap);
+    while (mapI.hasNext()) {
+        mapI.next();
+        tf = mapI.value();
+        qDebug() << tf->post->com;
         if(pass) { tf->show(); continue;};
         match = re.match(tf->post->com);
         if(!match.hasMatch()){

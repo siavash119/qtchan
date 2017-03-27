@@ -7,6 +7,8 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QProcess>
+#include <QMap>
+#include <QMutableMapIterator>
 
 namespace Ui {
 class ThreadTab;
@@ -30,7 +32,8 @@ public:
     void addThread();
     QNetworkRequest request;
     QNetworkReply *reply;
-    std::vector<ThreadForm*> tfs;
+    //std::vector<ThreadForm*> tfs;
+    QMap<QString,ThreadForm*> tfMap;
     void updatePosts();
     bool updated;
     QProcess *myProcess;
@@ -42,15 +45,14 @@ public slots:
     void focusIt();
 private:
     Ui::ThreadTab *ui;
+    void setShortcuts();
 
 private slots:
     void loadPosts();
     void gallery();
     void openPostForm();
     void getPosts();
-
     void on_pushButton_clicked();
-
     void on_lineEdit_returnPressed();
 
 signals:

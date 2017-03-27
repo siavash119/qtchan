@@ -27,6 +27,7 @@ netController::netController(QObject *parent) : QObject(parent)
         temp.setPath("/");
         manager->cookieJar()->insertCookie(temp);
     }
+    filter = new Filter();
     //settingsFile = d.object().value("settings").toObject();
 }
 

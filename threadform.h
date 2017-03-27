@@ -7,6 +7,7 @@
 #include <QString>
 #include "post.h"
 #include <QDir>
+#include <QSet>
 #include <QSignalMapper>
 
 namespace Ui {
@@ -28,24 +29,25 @@ public:
     void load(QJsonObject &p);
     void loadImage(QString path);
     void openImage();
-    //void setThread(QString threadName);
     PostType type;
     QString threadNum;
     QString board;
-    double no;
-    QString time;
-    QString name;
-    QNetworkReply *reply;
-    QNetworkReply *replyThumb;
-    QNetworkReply *replyImage;
-    QMetaObject::Connection connectionPost;
-    QMetaObject::Connection connectionThumb;
-    QMetaObject::Connection connectionImage;
     QString htmlParse(QString &html);
     Post *post;
     void updateComHeight();
     QDir *folder;
     QString folderPath;
+    //void setImage(QString text);
+    QSignalMapper *signalMapper;
+    //void insert(int position, ThreadForm* tf);
+    void insert(ThreadForm* tf);
+    QSet<QString> quotelinks;
+    QSet<QString> replies;
+    void setReplies();
+private:
+    Ui::ThreadForm *ui;
+    ThreadForm* clone();
+    bool loadIt;
     QString imgURL;
     QString thumbURL;
     QString pathBase;
@@ -53,20 +55,18 @@ public:
     QFile *file;
     QString thumbPath;
     QFile *thumb;
-    //void setImage(QString text);
-    QSignalMapper *signalMapper;
-    bool loadIt;
-    //void insert(int position, ThreadForm* tf);
-    void insert(ThreadForm* tf);
-    ThreadForm* clone();
+    QMetaObject::Connection connectionPost;
+    QMetaObject::Connection connectionThumb;
+    QMetaObject::Connection connectionImage;
+    QNetworkReply *reply;
+    QNetworkReply *replyThumb;
+    QNetworkReply *replyImage;
 
 signals:
     void loadThreadTab(ThreadForm*, QJsonArray&);
     void loadThread(ThreadForm*,QString&,QString&);
     //void searchPost(int position, QString postNum);
     void searchPost(QString postNum, ThreadForm* thetf);
-private:
-    Ui::ThreadForm *ui;
 
 public slots:
     void getOrigFinished();

@@ -15,6 +15,7 @@
 #include <QDesktopServices>
 #include <QSignalMapper>
 #include <QSettings>
+#include <QStringList>
 using namespace std;
 
 
@@ -30,6 +31,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type,QWidget *
     pathBase = "./"%board%"/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
     connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
     connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
+    connect(ui->replies,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 }
 
 ThreadForm::~ThreadForm()
@@ -49,6 +51,7 @@ void ThreadForm::load(QJsonObject &p){
     //set comment
     //TODO replace <span class="quote"> and <a href="url">
     ui->com->setText(post->com);
+    quotelinks = nc.filter->findQuotes(post->com);
 
     //set subject
     ui->sub->setText(htmlParse(post->sub));
@@ -163,12 +166,17 @@ void ThreadForm::getThumbFinished(){
 }
 
 void ThreadForm::loadImage(QString path){
+    /*QPixmap scaled = QPixmap(path).scaled(post->tn_w,
+                                          post->tn_h,
+                                          Qt::KeepAspectRatio,
+                                          Qt::SmoothTransformation);*/
     int scale = 250;
     QPixmap pic(path);
     QPixmap scaled = (pic.height() > pic.width()) ?
              pic.scaledToHeight(scale, Qt::SmoothTransformation) :
              pic.scaledToWidth(scale, Qt::SmoothTransformation);
     ui->tim->setPixmap(scaled);
+    //ui->tim->setFixedSize(post->tn_w,post->tn_h);
     ui->tim->setMaximumSize(scaled.size());
     /*if(scaled.height() > this->height()){
         this->setFixedHeight(scaled.height());
@@ -177,7 +185,6 @@ void ThreadForm::loadImage(QString path){
 
 void ThreadForm::imageClicked(){
     qDebug() << "clicked "+post->filename;
-    qDebug() << ui->tim->width();
     (this->type == PostType::Reply) ? openImage() : mw->onNewThread(this,board,threadNum);
 }
 
@@ -217,13 +224,8 @@ void ThreadForm::onSearchPost(const QString &link, ThreadForm* thetf){
 }
 
 void ThreadForm::insert(ThreadForm* tf){
-    /*QTextCursor qt = ui->com->textCursor();
-    qt.setPosition(position);*/
-    //QHBoxLayout* hbox = new QHBoxLayout(ui->com);
-    //QHBoxLayout* hbox = QHBoxLayout(ui->com);
     ThreadForm *newtf = tf->clone();
-    //newtf->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
-    ui->replies->addWidget(newtf);
+    ui->quotes->addWidget(newtf);
     newtf->show();
     this->update();
 }
@@ -260,4 +262,13 @@ ThreadForm* ThreadForm::clone(){
     //qDebug() << this->height();
     //tfs->setFixedHeight(this->height());
     return tfs;
+}
+
+void ThreadForm::setReplies(){
+    QString repliesString;
+    foreach (const QString &reply, replies)
+    {
+        repliesString+="<a href=\"#p" % reply % "\">>>" % reply % "</a> ";
+    }
+    ui->replies->setText(repliesString.mid(0,repliesString.length()-1));
 }

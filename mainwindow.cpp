@@ -193,7 +193,8 @@ void MainWindow::focusBar(){
 void MainWindow::saveSession(){
     QSettings settings;
     QStringList session;
-    for (int i = 0; i < tabs.size(); i++) {
+    int numTabs = tabs.size();
+    for (int i=0; i < numTabs; i++) {
         session.append(((Tab)(tabs.at(i))).searchString);
     }
     settings.setValue("session",session);
@@ -202,7 +203,6 @@ void MainWindow::saveSession(){
 void MainWindow::loadSession(){
     QSettings settings;
     QStringList session = settings.value("session",QStringList()).toStringList();
-    qDebug() << "loading session";
     for(int i=0;i<session.length();i++){
         loadFromSearch(session.at(i),false);
     }

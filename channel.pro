@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     netcontroller.cpp \
     threadtab.cpp \
     post.cpp \
-    postform.cpp
+    postform.cpp \
+    filter.cpp
 
 HEADERS  += mainwindow.h \
     threadform.h \
@@ -31,7 +32,8 @@ HEADERS  += mainwindow.h \
     netcontroller.h \
     threadtab.h \
     post.h \
-    postform.h
+    postform.h \
+    filter.h
 
 FORMS    += mainwindow.ui \
     threadform.ui \
