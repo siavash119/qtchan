@@ -9,6 +9,7 @@
 #include <QProcess>
 #include <QMap>
 #include <QMutableMapIterator>
+#include "postform.h"
 
 namespace Ui {
 class ThreadTab;
@@ -38,6 +39,8 @@ public:
     bool updated;
     QProcess *myProcess;
     void findText(const QString text);
+    PostForm *myPostForm;
+    void loadAllImages();
 
 public slots:
     //void findPost(int position, QString postNum);

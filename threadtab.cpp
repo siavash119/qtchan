@@ -8,7 +8,6 @@
 #include <QShortcut>
 #include <QKeySequence>
 #include <QDir>
-#include "postform.h"
 #include <QKeyEvent>
 #include "mainwindow.h"
 #include <QMutableMapIterator>
@@ -29,6 +28,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     reply = nc.manager->get(request);
     connect(reply, &QNetworkReply::finished, this, &ThreadTab::loadPosts);
     myProcess = new QProcess(parent);
+    myPostForm = new PostForm(board,thread);
     this->setShortcuts();
 }
 
@@ -41,6 +41,10 @@ void ThreadTab::setShortcuts(){
     postForm->setShortcut(Qt::Key_Q);
     connect(postForm, &QAction::triggered, this, &ThreadTab::openPostForm);
     this->addAction(postForm);
+    QAction *expandAll = new QAction(this);
+    expandAll->setShortcut(Qt::Key_E);
+    connect(expandAll, &QAction::triggered, this, &ThreadTab::loadAllImages);
+    this->addAction(expandAll);
     QAction *refresh = new QAction(this);
     refresh->setShortcut(Qt::Key_R);
     connect(refresh, &QAction::triggered, this, &ThreadTab::getPosts);
@@ -77,8 +81,8 @@ ThreadTab::~ThreadTab()
 }
 
 void ThreadTab::openPostForm(){
-    PostForm *myPostForm = new PostForm(board,thread);
     myPostForm->show();
+    myPostForm->activateWindow();
 }
 
 void ThreadTab::gallery(){
@@ -132,6 +136,17 @@ void ThreadTab::updatePosts(){
         mapI.next();
         //cout << i.key() << ": " << i.value() << endl;
         ((ThreadForm*)mapI.value())->updateComHeight();
+        //mapI.remove();
+    }
+}
+
+void ThreadTab::loadAllImages(){
+    updated = false;
+    QMapIterator<QString,ThreadForm*> mapI(tfMap);
+    while (mapI.hasNext()) {
+        mapI.next();
+        //cout << i.key() << ": " << i.value() << endl;
+        ((ThreadForm*)mapI.value())->loadOrig();
         //mapI.remove();
     }
 }

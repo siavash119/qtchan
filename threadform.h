@@ -44,11 +44,12 @@ public:
     QSet<QString> quotelinks;
     QSet<QString> replies;
     void setReplies();
+    void loadOrig();
 private:
     Ui::ThreadForm *ui;
     ThreadForm* clone();
     bool loadIt;
-    QString imgURL;
+    QString fileURL;
     QString thumbURL;
     QString pathBase;
     QString filePath;
@@ -61,6 +62,9 @@ private:
     QNetworkReply *reply;
     QNetworkReply *replyThumb;
     QNetworkReply *replyImage;
+    bool gettingFile;
+    void getFile();
+    void getThumb();
 
 signals:
     void loadThreadTab(ThreadForm*, QJsonArray&);
@@ -76,7 +80,6 @@ public slots:
 private slots:
     void quoteClicked(const QString &link);
     void onSearchPost(const QString &link, ThreadForm* thetf);
-
 };
 
 #endif // THREADFORM_H

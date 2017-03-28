@@ -18,7 +18,7 @@
 #include <QStringList>
 using namespace std;
 
-
+//TODO Possibly refactor file checks and pointers to dir and file objects
 ThreadForm::ThreadForm(QString board, QString threadNum, PostType type,QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ThreadForm)
@@ -26,6 +26,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type,QWidget *
     this->board = board;
     this->threadNum = threadNum;
     this->type = type;
+    gettingFile = false;
 
     ui->setupUi(this);
     pathBase = "./"%board%"/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
@@ -61,16 +62,24 @@ void ThreadForm::load(QJsonObject &p){
 
     //set image
     //TODO clean if-else's
-    if(!post->tim.isNull()){
-        imgURL = this->board % "/" % post->tim % post->ext;
+    //TODO possibly change file pointer
+    //TODO use filedeleted image
+    if(!post->tim.isNull() && !post->filedeleted){
+        fileURL = this->board % "/" % post->tim % post->ext;
         filePath = pathBase%post->no%"-"%post->filename%post->ext;
         file = new QFile(filePath);
-        if(post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png")){
+        QSettings settings;
+        if((post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png"))){
             loadIt = true;
             if(!file->exists()){
-                qDebug() << QString("getting https://i.4cdn.org/")  % imgURL;
-                replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % imgURL)));
-                connectionImage = connect(replyImage, &QNetworkReply::finished,this, &ThreadForm::getOrigFinished);
+                if(settings.value("loadorig") == 1) getFile();
+                else{
+                    thumbURL = this->board % "/" % post->tim % "s.jpg";
+                    thumbPath = pathBase%"thumbs/"%post->no%"-"%post->filename%"s.jpg";
+                    thumb = new QFile(thumbPath);
+                    if(!thumb->exists()) getThumb();
+                    else loadImage(thumbPath);
+                }
             }
             else{
                 loadImage(filePath);
@@ -78,22 +87,16 @@ void ThreadForm::load(QJsonObject &p){
         }
         else {
             loadIt = false;
-            if(!file->exists()){
-                qDebug() << QString("getting https://i.4cdn.org/")  % imgURL;
-                replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % imgURL)));
-                connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::getOrigFinished);
+            if(settings.value("loadorig")==1){
+                if(!file->exists()){
+                    getFile();
+                }
             }
-            imgURL = this->board % "/" % post->tim % "s.jpg";
+            thumbURL = this->board % "/" % post->tim % "s.jpg";
             thumbPath = pathBase%"thumbs/"%post->no%"-"%post->filename%"s.jpg";
             thumb = new QFile(thumbPath);
-            if(!thumb->exists()){
-                qDebug() << QString("getting https://i.4cdn.org/")  % imgURL;
-                replyThumb = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % imgURL)));
-                connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished);
-            }
-            else{
-                loadImage(thumbPath);
-            }
+            if(!thumb->exists()) getThumb();
+            else loadImage(thumbPath);
         }
         connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
     }
@@ -102,6 +105,35 @@ void ThreadForm::load(QJsonObject &p){
     }
     this->show();
     //updateComHeight();
+}
+
+void ThreadForm::getFile(){
+    qDebug() << QString("getting https://i.4cdn.org/")  % fileURL;
+    replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
+    gettingFile = true;
+    connectionImage = connect(replyImage, &QNetworkReply::finished,this, &ThreadForm::getOrigFinished);
+}
+
+void ThreadForm::getThumb(){
+    qDebug() << QString("getting https://i.4cdn.org/")  % thumbURL;
+    replyThumb = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % thumbURL)));
+    connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished);
+}
+
+//TODO avoid copy pasted function
+//TODO clean if-elses
+void ThreadForm::loadOrig(){
+    if(!post->tim.isNull()){
+        if((post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png"))){
+            loadIt = true;
+            if(!file->exists()) getFile();
+            else loadImage(filePath);
+        }
+        else {
+            loadIt = false;
+            if(!file->exists()) getFile();
+        }
+    }
 }
 
 void ThreadForm::updateComHeight(){
@@ -139,6 +171,7 @@ void ThreadForm::updateComHeight(){
 }
 
 void ThreadForm::getOrigFinished(){
+    gettingFile = false;
     if(replyImage->error() == 0)
     {
         file->open(QIODevice::WriteOnly);
@@ -162,7 +195,6 @@ void ThreadForm::getThumbFinished(){
     }
     replyThumb->deleteLater();
     disconnect(connectionThumb);
-
 }
 
 void ThreadForm::loadImage(QString path){
@@ -185,7 +217,25 @@ void ThreadForm::loadImage(QString path){
 
 void ThreadForm::imageClicked(){
     qDebug() << "clicked "+post->filename;
-    (this->type == PostType::Reply) ? openImage() : mw->onNewThread(this,board,threadNum);
+    if(this->type == PostType::Reply){
+        if(gettingFile){
+            connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::openImage);
+        }
+        else if(!file->exists()){
+            qDebug() << QString("getting https://i.4cdn.org/")  % fileURL;
+            gettingFile=true;
+            replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
+            //connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::loadFromImageClicked);
+            connectionImage = connect(replyImage, &QNetworkReply::finished,[=]() {
+              this->getOrigFinished();
+              this->openImage();
+            });
+        }
+        else openImage();
+    }
+    else{
+        mw->onNewThread(this,board,threadNum);
+    }
 }
 
 void ThreadForm::hideClicked(){
@@ -236,24 +286,28 @@ ThreadForm* ThreadForm::clone(){
     tfs->ui->com->setText(post->com);
     tfs->ui->sub->setText(post->sub);
     tfs->ui->name->setText(post->name);
-    if(!post->tim.isNull()){
-        tfs->filePath = pathBase%post->no%"-"%post->filename%post->ext;
-        tfs->file = new QFile(filePath);
+    tfs->replies = replies;
+    //TODO check and account for if original is still getting file
+    if(!post->tim.isNull() && !post->filedeleted){
+        tfs->fileURL = fileURL;
+        tfs->filePath = filePath;
+        tfs->file = file;
         if(post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png")){
-            loadIt = true;
-            tfs->loadImage(filePath);
+            tfs->loadIt = true;
+            tfs->loadImage(tfs->filePath);
         }
         else {
-            loadIt = false;
-            tfs->imgURL = this->board % "/" % post->tim % "s.jpg";
-            tfs->thumbPath = pathBase%"thumbs/"%post->no%"-"%post->filename%"s.jpg";
-            tfs->thumb = new QFile(thumbPath);
-            tfs->loadImage(thumbPath);
+            tfs->loadIt = false;
+            tfs->thumbURL = thumbURL;
+            tfs->thumbPath = thumbPath;
+            tfs->thumb = thumb;
+            tfs->loadImage(tfs->thumbPath);
         }
         connect(tfs->ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
     }
     else
         tfs->ui->pictureLayout->deleteLater();
+    tfs->setReplies();
     disconnect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::hideClicked);
     connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
     connect(tfs,&ThreadForm::searchPost,this,&ThreadForm::onSearchPost);
@@ -266,7 +320,10 @@ ThreadForm* ThreadForm::clone(){
 
 void ThreadForm::setReplies(){
     QString repliesString;
-    foreach (const QString &reply, replies)
+    QList<QString> list = replies.toList();
+    qSort(list);
+    list.toSet();
+    foreach (const QString &reply, list)
     {
         repliesString+="<a href=\"#p" % reply % "\">>>" % reply % "</a> ";
     }
