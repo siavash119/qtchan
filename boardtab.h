@@ -27,6 +27,7 @@ public:
     QNetworkReply *reply;
     std::vector<ThreadForm*> posts;
     void updatePosts();
+    void setShortcuts();
 
 private:
     Ui::BoardTab *ui;

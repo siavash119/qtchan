@@ -30,6 +30,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type,QWidget *
     gettingFile = false;
 
     ui->setupUi(this);
+    ui->replies->hide();
     pathBase = "./"%board%"/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
     connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
     connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
@@ -293,15 +294,16 @@ ThreadForm* ThreadForm::clone(){
         tfs->fileURL = fileURL;
         tfs->filePath = filePath;
         tfs->file = file;
+        tfs->thumbURL = thumbURL;
+        tfs->thumbPath = thumbPath;
+        tfs->thumb = thumb;
         if(post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png")){
             tfs->loadIt = true;
-            tfs->loadImage(tfs->filePath);
+            if(file->exists())tfs->loadImage(tfs->filePath);
+            else tfs->loadImage(tfs->thumbPath);
         }
         else {
             tfs->loadIt = false;
-            tfs->thumbURL = thumbURL;
-            tfs->thumbPath = thumbPath;
-            tfs->thumb = thumb;
             tfs->loadImage(tfs->thumbPath);
         }
         connect(tfs->ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
@@ -322,11 +324,17 @@ ThreadForm* ThreadForm::clone(){
 void ThreadForm::setReplies(){
     QString repliesString;
     QList<QString> list = replies.toList();
-    qSort(list);
-    list.toSet();
-    foreach (const QString &reply, list)
-    {
-        repliesString+="<a href=\"#p" % reply % "\">>>" % reply % "</a> ";
+    if(list.length()){
+        ui->replies->show();
+        qSort(list);
+        list.toSet();
+        foreach (const QString &reply, list)
+        {
+            repliesString+="<a href=\"#p" % reply % "\">>>" % reply % "</a> ";
+        }
+        ui->replies->setText(repliesString.mid(0,repliesString.length()-1));
     }
-    ui->replies->setText(repliesString.mid(0,repliesString.length()-1));
+    else{
+        ui->replies->hide();
+    }
 }

@@ -24,6 +24,14 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
     //QDir().mkdir(board+"/thumbs");
     reply = nc.manager->get(QNetworkRequest(QUrl(boardUrl)));
     connect(reply, &QNetworkReply::finished, this, &BoardTab::loadThreads);
+}
+
+BoardTab::~BoardTab()
+{
+    delete ui;
+}
+
+void BoardTab::setShortcuts(){
     QAction *refresh = new QAction(this);
     refresh->setShortcut(Qt::Key_R);
     connect(refresh, &QAction::triggered, this, &BoardTab::getPosts);
@@ -36,11 +44,6 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
     focusBar->setShortcut(Qt::Key_F6);
     connect(focusBar,&QAction::triggered,mw,&MainWindow::focusBar);
     this->addAction(focusBar);
-}
-
-BoardTab::~BoardTab()
-{
-    delete ui;
 }
 
 void BoardTab::getPosts(){
