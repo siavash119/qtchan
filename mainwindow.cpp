@@ -39,11 +39,27 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeView->installEventFilter(this);
     connect(ui->treeView->selectionModel(),&QItemSelectionModel::selectionChanged,this,
             &MainWindow::onSelectionChanged);
-    //qt is dumb?
-    /*QShortcut *shortcut = new QShortcut(QKeySequence(Qt::Key_F),
-                             parent);
-    shortcut->setContext(Qt::ApplicationShortcut);
-    connect(shortcut,&QShortcut::activated,[=](){this->nextTab();});*/
+    setShortcuts();
+    //check binding sequence
+    //qDebug() << QKeySequence::keyBindings(QKeySequence::PreviousChild);
+}
+
+void MainWindow::setShortcuts(){
+    QAction *nTab = new QAction(this);
+    nTab->setShortcut(QKeySequence::NextChild);
+    nTab->setShortcutContext(Qt::ApplicationShortcut);
+    connect(nTab, &QAction::triggered, this, &MainWindow::nextTab);
+    this->addAction(nTab);
+    QAction *pTab = new QAction(this);
+    pTab->setShortcut(QKeySequence("Ctrl+Shift+Tab"));
+    pTab->setShortcutContext(Qt::ApplicationShortcut);
+    connect(pTab, &QAction::triggered, this, &MainWindow::prevTab);
+    this->addAction(pTab);
+    QAction *del = new QAction(this);
+    del->setShortcut(QKeySequence::Delete);
+    //del->setShortcutContext(Qt::ApplicationShortcut);
+    connect(del, &QAction::triggered, this, &MainWindow::deleteSelected);
+    this->addAction(del);
 }
 
 MainWindow::~MainWindow()
@@ -52,11 +68,9 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::nextTab(){
-    qDebug() << "hello";
     QItemSelectionModel *sModel = ui->treeView->selectionModel();
     int numRows = model->rowCount();
     boardsSelected = sModel->selectedRows();
-    qDebug() << boardsSelected;
     QModelIndex qmi;
     int selectIt;
     if(!boardsSelected.length()){
@@ -96,7 +110,7 @@ void MainWindow::on_pushButton_clicked()
 }
 
 void MainWindow::loadFromSearch(QString searchString, bool select){
-    QRegularExpression re("(?:(?:https?:\\/\\/)?boards.4chan.org\\/)?(\\w+)(?:\\/thread)?\\/(\\d+)");
+    QRegularExpression re("(?:(?:https?:\\/\\/)?boards.4chan.org\\/)?(\\w+)(?:\\/thread)?\\/(\\d+)$");
     QRegularExpressionMatch match = re.match(searchString);
     QRegularExpressionMatch match2;
     BoardTab *bt;
@@ -178,19 +192,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         int mod = keyEvent->modifiers();
         qDebug("Ate key press %d", key);
         qDebug("Modifers %d", mod);
-        if(key == 16777217 && mod == 67108864){
-            nextTab();
-        }
-        else if(key == 16777218 && mod == 100663296){
-            prevTab();
-        }
-        else if(key == 16777223){
-            deleteSelected();
-        }
-        else if(key == 16777220){
-            show_one(ui->treeView->selectionModel()->selectedRows().at(0));
-        }
-        else if(key == 53){
+        if(key == 53){
             const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
             int row = indexList.at(0).row();
             qDebug() << (Tab::TabType)tabs.at(row).type;

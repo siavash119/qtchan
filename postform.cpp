@@ -3,12 +3,13 @@
 #include <QUrl>
 #include <QUrlQuery>
 #include <QHttpMultiPart>
-#include "netcontroller.h"
 #include <iostream>
 #include <QTimer>
 #include <QFileDialog>
 #include <QRegularExpression>
 #include <QGraphicsItem>
+#include <QShortcut>
+#include "netcontroller.h"
 
 PostForm::PostForm(QString board, QString thread, QWidget *parent) :
     QWidget(parent),
@@ -27,11 +28,21 @@ PostForm::PostForm(QString board, QString thread, QWidget *parent) :
     //ui->browse->installEventFilter(this);
     submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
     //connect(this,&PostForm::dropEvent,this,&PostForm::droppedItem);
+    setShortcuts();
 }
 
 PostForm::~PostForm()
 {
     delete ui;
+}
+
+void PostForm::setShortcuts(){
+    //override application shortcuts
+    new QShortcut(QKeySequence::NextChild,this);
+    new QShortcut(QKeySequence("Ctrl+Shift+Tab"),this);
+    new QShortcut(QKeySequence::Delete,this);
+
+    //rest in the eventfilter
 }
 
 void PostForm::postIt(){
@@ -112,6 +123,8 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
         int mod = keyEvent->modifiers();
         int key = keyEvent->key();
         qDebug("Ate key press %d", key);
+        qDebug("Ate modifier press %d", mod);
+        //shift+enter to post
         if(mod == 33554432 && key == 16777220){
             postIt();
             return true;

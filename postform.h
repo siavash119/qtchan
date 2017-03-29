@@ -35,6 +35,7 @@ private slots:
     void on_browse_clicked();
     void on_cancel_clicked();
     void droppedItem();
+    void setShortcuts();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);

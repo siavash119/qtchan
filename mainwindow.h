@@ -60,7 +60,7 @@ public slots:
 private:
     Ui::MainWindow *ui;
     QModelIndexList boardsSelected;
-    void setShortcuts(QWidget* parent);
+    void setShortcuts();
 
 signals:
     void requestCatalog(QString);
