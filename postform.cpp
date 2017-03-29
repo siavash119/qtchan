@@ -3,12 +3,12 @@
 #include <QUrl>
 #include <QUrlQuery>
 #include <QHttpMultiPart>
-#include <iostream>
 #include <QTimer>
 #include <QFileDialog>
 #include <QRegularExpression>
 #include <QGraphicsItem>
 #include <QShortcut>
+#include <iostream>
 #include "netcontroller.h"
 
 PostForm::PostForm(QString board, QString thread, QWidget *parent) :
@@ -38,8 +38,8 @@ PostForm::~PostForm()
 
 void PostForm::setShortcuts(){
     //override application shortcuts
-    new QShortcut(QKeySequence::NextChild,this);
-    new QShortcut(QKeySequence("Ctrl+Shift+Tab"),this);
+    //new QShortcut(QKeySequence::NextChild,this);
+    //new QShortcut(QKeySequence("Ctrl+Shift+Tab"),this);
     new QShortcut(QKeySequence::Delete,this);
 
     //rest in the eventfilter

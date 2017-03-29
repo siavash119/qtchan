@@ -3,11 +3,8 @@
 
 #include <QMainWindow>
 #include <QStandardItemModel>
-#include <QItemSelection>
-#include <vector>
 #include <QUrl>
-#include <QShortcut>
-#include <QShortcutEvent>
+#include <QTreeView>
 #include "netcontroller.h"
 #include "boardtab.h"
 #include "threadform.h"
@@ -20,8 +17,8 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
     QNetworkReply *reply;
+    //TODO change vector to set or map
     std::vector<Tab> tabs;
-    //std::vector<QWidget*> tabs;
 
 protected:
     bool eventFilter(QObject *obj, QEvent *ev);
@@ -36,7 +33,6 @@ public:
     void show_one(QModelIndex index);
     void deleteSelected();
     //void getThread(ThreadForm *tf, QString url);
-    QShortcut *shortcut;
 
 private slots:
     void on_pushButton_clicked();

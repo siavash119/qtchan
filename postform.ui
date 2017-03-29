@@ -172,6 +172,9 @@
            <pointsize>16</pointsize>
           </font>
          </property>
+         <property name="focusPolicy">
+          <enum>Qt::TabFocus</enum>
+         </property>
          <property name="styleSheet">
           <string notr="true"/>
          </property>
