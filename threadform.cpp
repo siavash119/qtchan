@@ -5,22 +5,23 @@
 #include <QImageReader>
 #include <QFile>
 #include <iostream>
-#include "netcontroller.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-#include "mainwindow.h"
 #include <QStringBuilder>
 #include <QDir>
 #include <QDesktopServices>
 #include <QSignalMapper>
 #include <QSettings>
 #include <QStringList>
+#include "netcontroller.h"
+#include "mainwindow.h"
+#include "threadtab.h"
 using namespace std;
 
 //TODO Possibly refactor file checks and pointers to dir and file objects
 //TODO Possibly decouple the file and thumb getters to the post class
-ThreadForm::ThreadForm(QString board, QString threadNum, PostType type,QWidget *parent) :
+ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ThreadForm)
 {
@@ -28,13 +29,15 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type,QWidget *
     this->threadNum = threadNum;
     this->type = type;
     gettingFile = false;
-
     ui->setupUi(this);
+    ui->tim->hide();
+    ui->horizontalSpacer->changeSize(0,0);
     ui->replies->hide();
     pathBase = "./"%board%"/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
     connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
     connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
     connect(ui->replies,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
+    this->tab = parent;
 }
 
 ThreadForm::~ThreadForm()
@@ -67,11 +70,15 @@ void ThreadForm::load(QJsonObject &p){
     //TODO possibly change file pointer
     //TODO use filedeleted image
     if(!post->tim.isNull() && !post->filedeleted){
+        ui->tim->show();
+        ui->horizontalSpacer->changeSize(250,0);
+        ui->horizontalSpacer->invalidate();
         fileURL = this->board % "/" % post->tim % post->ext;
         filePath = pathBase%post->no%"-"%post->filename%post->ext;
         file = new QFile(filePath);
         QSettings settings;
         if((post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png"))){
+            //ui->horizontalSpacer->1
             loadIt = true;
             if(!file->exists()){
                 if(settings.value("loadorig") == 1) getFile();
@@ -210,11 +217,7 @@ void ThreadForm::loadImage(QString path){
              pic.scaledToHeight(scale, Qt::SmoothTransformation) :
              pic.scaledToWidth(scale, Qt::SmoothTransformation);
     ui->tim->setPixmap(scaled);
-    //ui->tim->setFixedSize(post->tn_w,post->tn_h);
     ui->tim->setMaximumSize(scaled.size());
-    /*if(scaled.height() > this->height()){
-        this->setFixedHeight(scaled.height());
-    }*/
 }
 
 void ThreadForm::imageClicked(){
@@ -241,6 +244,7 @@ void ThreadForm::imageClicked(){
 }
 
 void ThreadForm::hideClicked(){
+    this->hide();
     QSettings settings;
     QStringList idFilters = settings.value("filters/"+board+"/id").toStringList();
     idFilters.append(threadNum);
@@ -263,16 +267,28 @@ QString ThreadForm::htmlParse(QString &html){
 void ThreadForm::quoteClicked(const QString &link)
 {
     qDebug() << link;
-    QRegularExpression postLink("#p(\\d+)");
-    QRegularExpressionMatch match = postLink.match(link);
-    if (match.hasMatch()) {
-        //emit searchPost(ui->com->textCursor().position(),match.captured(1));
-        emit searchPost(match.captured(1),this);
+    if(this->type == PostType::Reply){
+        QRegularExpression postLink("#p(\\d+)");
+        QRegularExpressionMatch match = postLink.match(link);
+        if (match.hasMatch()) {
+            ThreadForm* tf = ((ThreadTab*)tab)->findPost(match.captured(1));
+            this->insert(tf);
+        }
     }
 }
 
-void ThreadForm::onSearchPost(const QString &link, ThreadForm* thetf){
-    emit searchPost(link,thetf);
+void ThreadForm::on_replies_linkHovered(const QString &link)
+{
+    qDebug() << link;
+    if(this->type == PostType::Reply){
+        QRegularExpression postLink("#p(\\d+)");
+        QRegularExpressionMatch match = postLink.match(link);
+        //TODO hover new threadform
+        if (match.hasMatch()) {
+            //emit searchPost(ui->com->textCursor().position(),match.captured(1));
+            //emit searchPost(match.captured(1),this);
+        }
+    }
 }
 
 void ThreadForm::insert(ThreadForm* tf){
@@ -284,6 +300,7 @@ void ThreadForm::insert(ThreadForm* tf){
 
 ThreadForm* ThreadForm::clone(){
     ThreadForm* tfs = new ThreadForm(this->board,this->threadNum,this->type);
+    tfs->tab = tab;
     tfs->ui->no->setText(post->no);
     tfs->ui->com->setText(post->com);
     tfs->ui->sub->setText(post->sub);
@@ -313,21 +330,14 @@ ThreadForm* ThreadForm::clone(){
     tfs->setReplies();
     disconnect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::hideClicked);
     connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
-    connect(tfs,&ThreadForm::searchPost,this,&ThreadForm::onSearchPost);
-     //       connect(tf,&ThreadForm::searchPost,this,&ThreadTab::findPost);
-    //tfs->ui->com->setFixedHeight(this->ui->com->height());
-    //qDebug() << this->height();
-    //tfs->setFixedHeight(this->height());
     return tfs;
 }
 
 void ThreadForm::setReplies(){
     QString repliesString;
-    QList<QString> list = replies.toList();
+    QList<QString> list = replies.values();
     if(list.length()){
         ui->replies->show();
-        qSort(list);
-        list.toSet();
         foreach (const QString &reply, list)
         {
             repliesString+="<a href=\"#p" % reply % "\">>>" % reply % "</a> ";

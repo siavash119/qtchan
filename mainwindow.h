@@ -4,13 +4,13 @@
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QItemSelection>
-#include "boardtab.h"
 #include <vector>
-#include "threadform.h"
-#include "netcontroller.h"
 #include <QUrl>
 #include <QShortcut>
 #include <QShortcutEvent>
+#include "netcontroller.h"
+#include "boardtab.h"
+#include "threadform.h"
 
 namespace Ui {
 class MainWindow;

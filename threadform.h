@@ -5,10 +5,10 @@
 #include <QNetworkReply>
 #include <QByteArray>
 #include <QString>
-#include "post.h"
 #include <QDir>
 #include <QSet>
 #include <QSignalMapper>
+#include "post.h"
 
 namespace Ui {
 class ThreadForm;
@@ -42,12 +42,12 @@ public:
     //void insert(int position, ThreadForm* tf);
     void insert(ThreadForm* tf);
     QSet<QString> quotelinks;
-    QSet<QString> replies;
+    QMap<double,QString> replies;
     void setReplies();
     void loadOrig();
+    ThreadForm* clone();
 private:
     Ui::ThreadForm *ui;
-    ThreadForm* clone();
     bool loadIt;
     QString fileURL;
     QString thumbURL;
@@ -65,12 +65,12 @@ private:
     bool gettingFile;
     void getFile();
     void getThumb();
+    QWidget* tab;
 
 signals:
     void loadThreadTab(ThreadForm*, QJsonArray&);
     void loadThread(ThreadForm*,QString&,QString&);
     //void searchPost(int position, QString postNum);
-    void searchPost(QString postNum, ThreadForm* thetf);
 
 public slots:
     void getOrigFinished();
@@ -79,7 +79,7 @@ public slots:
     void hideClicked();
 private slots:
     void quoteClicked(const QString &link);
-    void onSearchPost(const QString &link, ThreadForm* thetf);
+    void on_replies_linkHovered(const QString &link);
 };
 
 #endif // THREADFORM_H

@@ -1,13 +1,13 @@
 #include "boardtab.h"
 #include "ui_boardtab.h"
-#include "netcontroller.h"
-#include "threadform.h"
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDir>
 #include <QSettings>
+#include "netcontroller.h"
 #include "mainwindow.h"
+#include "threadform.h"
 
 BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *parent) :
     QWidget(parent),

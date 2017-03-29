@@ -1,7 +1,5 @@
-#include "netcontroller.h"
 #include "threadtab.h"
 #include "ui_threadtab.h"
-#include "threadform.h"
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -9,8 +7,10 @@
 #include <QKeySequence>
 #include <QDir>
 #include <QKeyEvent>
-#include "mainwindow.h"
 #include <QMutableMapIterator>
+#include "netcontroller.h"
+#include "mainwindow.h"
+#include "threadform.h"
 
 ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     QWidget(parent),
@@ -109,9 +109,8 @@ void ThreadTab::loadPosts(){
     qDebug() << QString("length is ").append(QString::number(length));
     for(int i=tfMap.size();i<length;i++){
         QJsonObject p = posts.at(i).toObject();
-        ThreadForm *tf = new ThreadForm(board,thread);
+        ThreadForm *tf = new ThreadForm(board,thread,PostType::Reply,this);
         ui->threads->addWidget(tf);
-        connect(tf,&ThreadForm::searchPost,this,&ThreadTab::findPost);
         tf->load(p);
         tfMap.insert(tf->post->no,tf);
         QSet<QString> quotes = tf->quotelinks;
@@ -120,7 +119,8 @@ void ThreadTab::loadPosts(){
         {
             replyTo = tfMap.find(orig).value();
             if(replyTo != nullptr){
-                replyTo->replies.insert(tf->post->no);
+                //replyTo->replies.insert(tf->post->no);
+                replyTo->replies.insert(tf->post->no.toDouble(),tf->post->no);
                 replyTo->setReplies();
             }
         }
@@ -130,14 +130,14 @@ void ThreadTab::loadPosts(){
 }
 
 void ThreadTab::updatePosts(){
-    updated = false;
+    /*updated = false;
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
         //cout << i.key() << ": " << i.value() << endl;
         ((ThreadForm*)mapI.value())->updateComHeight();
         //mapI.remove();
-    }
+    }*/
 }
 
 void ThreadTab::loadAllImages(){
@@ -151,15 +151,8 @@ void ThreadTab::loadAllImages(){
     }
 }
 
-void ThreadTab::findPost(QString postNum, ThreadForm* thetf){
-    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
-    ThreadForm *tf;
-    while (mapI.hasNext()) {
-        mapI.next();
-        tf = mapI.value();
-        if(tf->post->no == postNum)
-            thetf->insert(tf);
-    }
+ThreadForm* ThreadTab::findPost(QString postNum){
+    return tfMap.value(postNum);
 }
 
 void ThreadTab::findText(const QString text){

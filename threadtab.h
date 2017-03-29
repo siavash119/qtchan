@@ -2,13 +2,13 @@
 #define THREADTAB_H
 
 #include <QWidget>
-#include "threadform.h"
-#include "boardtab.h"
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QProcess>
 #include <QMap>
 #include <QMutableMapIterator>
+#include "boardtab.h"
+#include "threadform.h"
 #include "postform.h"
 
 namespace Ui {
@@ -41,10 +41,10 @@ public:
     void findText(const QString text);
     PostForm *myPostForm;
     void loadAllImages();
+    ThreadForm* findPost(QString postNum);
 
 public slots:
     //void findPost(int position, QString postNum);
-    void findPost(QString postNum, ThreadForm* thetf);
     void focusIt();
 private:
     Ui::ThreadTab *ui;

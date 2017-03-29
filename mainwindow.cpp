@@ -16,13 +16,13 @@
 #include <QGridLayout>
 #include <QTextEdit>
 #include <QStandardItem>
-#include "threadform.h"
 #include <QEvent>
 #include <QKeyEvent>
 #include <stdio.h>
-#include "threadtab.h"
 #include <QSettings>
 #include <QShortcut>
+#include "threadtab.h"
+#include "threadform.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
