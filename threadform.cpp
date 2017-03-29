@@ -66,9 +66,6 @@ void ThreadForm::load(QJsonObject &p){
     //TODO possibly change file pointer
     //TODO use filedeleted image
     if(!post->tim.isNull() && !post->filedeleted){
-        ui->tim->show();
-        ui->horizontalSpacer->changeSize(250,0);
-        ui->horizontalSpacer->invalidate();
         fileURL = this->board % "/" % post->tim % post->ext;
         filePath = pathBase%post->no%"-"%post->filename%post->ext;
         file = new QFile(filePath);
@@ -212,6 +209,9 @@ void ThreadForm::loadImage(QString path){
     QPixmap scaled = (pic.height() > pic.width()) ?
              pic.scaledToHeight(scale, Qt::SmoothTransformation) :
              pic.scaledToWidth(scale, Qt::SmoothTransformation);
+    ui->tim->show();
+    ui->horizontalSpacer->changeSize(250,0);
+    ui->horizontalSpacer->invalidate();
     ui->tim->setPixmap(scaled);
     ui->tim->setMaximumSize(scaled.size());
 }
@@ -312,7 +312,7 @@ ThreadForm* ThreadForm::clone(){
         tfs->thumb = thumb;
         if(post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png")){
             tfs->loadIt = true;
-            if(file->exists())tfs->loadImage(tfs->filePath);
+            if(file->exists() && tfs->loadIt)tfs->loadImage(tfs->filePath);
             else tfs->loadImage(tfs->thumbPath);
         }
         else {
