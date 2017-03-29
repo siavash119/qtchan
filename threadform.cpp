@@ -14,7 +14,6 @@
 #include "netcontroller.h"
 #include "mainwindow.h"
 #include "threadtab.h"
-using namespace std;
 
 //TODO Possibly refactor file checks and pointers to dir and file objects
 //TODO Possibly decouple the file and thumb getters to the post class
