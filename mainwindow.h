@@ -9,6 +9,8 @@
 #include "threadform.h"
 #include "netcontroller.h"
 #include <QUrl>
+#include <QShortcut>
+#include <QShortcutEvent>
 
 namespace Ui {
 class MainWindow;
@@ -34,6 +36,7 @@ public:
     void show_one(QModelIndex index);
     void deleteSelected();
     //void getThread(ThreadForm *tf, QString url);
+    QShortcut *shortcut;
 
 private slots:
     void on_pushButton_clicked();
@@ -52,9 +55,12 @@ public slots:
     void loadFromSearch(QString searchString, bool select);
     void saveSession();
     void loadSession();
+    void nextTab();
+    void prevTab();
 private:
     Ui::MainWindow *ui;
     QModelIndexList boardsSelected;
+    void setShortcuts(QWidget* parent);
 
 signals:
     void requestCatalog(QString);

@@ -22,6 +22,7 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
     //QDir().mkdir(board);
     QDir().mkpath(board+"/index/thumbs");
     //QDir().mkdir(board+"/thumbs");
+    setShortcuts();
     reply = nc.manager->get(QNetworkRequest(QUrl(boardUrl)));
     connect(reply, &QNetworkReply::finished, this, &BoardTab::loadThreads);
 }

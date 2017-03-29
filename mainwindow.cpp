@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include "threadtab.h"
 #include <QSettings>
+#include <QShortcut>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -38,11 +39,53 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeView->installEventFilter(this);
     connect(ui->treeView->selectionModel(),&QItemSelectionModel::selectionChanged,this,
             &MainWindow::onSelectionChanged);
+    //qt is dumb?
+    /*QShortcut *shortcut = new QShortcut(QKeySequence(Qt::Key_F),
+                             parent);
+    shortcut->setContext(Qt::ApplicationShortcut);
+    connect(shortcut,&QShortcut::activated,[=](){this->nextTab();});*/
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::nextTab(){
+    qDebug() << "hello";
+    QItemSelectionModel *sModel = ui->treeView->selectionModel();
+    int numRows = model->rowCount();
+    boardsSelected = sModel->selectedRows();
+    qDebug() << boardsSelected;
+    QModelIndex qmi;
+    int selectIt;
+    if(!boardsSelected.length()){
+        selectIt=0;
+    }
+    else{
+        qmi = boardsSelected.at(0);
+        selectIt = (qmi.row()+1<numRows) ? qmi.row()+1 : 0;
+    }
+    sModel->clear();
+    sModel->select(model->index(selectIt,0),QItemSelectionModel::ClearAndSelect);
+}
+
+void MainWindow::prevTab(){
+    QItemSelectionModel *sModel = ui->treeView->selectionModel();
+    int numRows = model->rowCount();
+    boardsSelected = sModel->selectedRows();
+    qDebug() << boardsSelected;
+    QModelIndex qmi;
+    int selectIt;
+    if(!boardsSelected.length()){
+        selectIt=numRows-1;
+    }
+    else{
+        qmi = boardsSelected.at(0);
+        selectIt = (qmi.row()-1>=0) ? qmi.row()-1 : numRows-1;
+    }
+    sModel->clear();
+    sModel->select(model->index(selectIt,0),QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -107,6 +150,7 @@ void MainWindow::on_treeView_clicked(QModelIndex index)
 void MainWindow::show_one(QModelIndex index){
     int size = tabs.size();
     for(int i=0;i<size;i++){
+        if(i == index.row()) continue;
         ((QWidget*)tabs.at(i).TabPointer)->hide();
         //((BoardTab*)bts.at(i))->hide();
     }
@@ -131,8 +175,16 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
         int key = keyEvent->key();
+        int mod = keyEvent->modifiers();
         qDebug("Ate key press %d", key);
-        if(key == 16777223){
+        qDebug("Modifers %d", mod);
+        if(key == 16777217 && mod == 67108864){
+            nextTab();
+        }
+        else if(key == 16777218 && mod == 100663296){
+            prevTab();
+        }
+        else if(key == 16777223){
             deleteSelected();
         }
         else if(key == 16777220){

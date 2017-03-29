@@ -19,7 +19,7 @@
 using namespace std;
 
 //TODO Possibly refactor file checks and pointers to dir and file objects
-//TODO Possibly decouple the file and thumb getters to another class
+//TODO Possibly decouple the file and thumb getters to the post class
 ThreadForm::ThreadForm(QString board, QString threadNum, PostType type,QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ThreadForm)
