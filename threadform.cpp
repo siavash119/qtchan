@@ -11,6 +11,7 @@
 #include <QSettings>
 #include <QStringList>
 #include <iostream>
+#include <QListIterator>
 #include "netcontroller.h"
 #include "mainwindow.h"
 #include "threadtab.h"
@@ -24,7 +25,6 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, QWidget 
     this->board = board;
     this->threadNum = threadNum;
     this->type = type;
-    gettingFile = false;
     ui->setupUi(this);
     ui->tim->hide();
     ui->horizontalSpacer->changeSize(0,0);
@@ -47,7 +47,7 @@ void ThreadForm::setText(QString text){
 
 void ThreadForm::load(QJsonObject &p){
     //set post number
-    post = new Post(p);
+    post = new Post(p,board);
     ui->no->setText(post->no);
 
     //set comment
@@ -180,7 +180,14 @@ void ThreadForm::getOrigFinished(){
         file->write(replyImage->readAll());
         file->close();
         qDebug() << "saved file "+filePath;
-        if(loadIt) loadImage(filePath);
+        if(loadIt){
+            loadImage(filePath);
+            QListIterator<ThreadForm*> i(clones);
+            while(i.hasNext()){
+                ThreadForm* cloned = i.next();
+                cloned->loadImage(cloned->filePath);
+            }
+        }
     }
         replyImage->deleteLater();
         disconnect(connectionImage);
@@ -211,7 +218,7 @@ void ThreadForm::loadImage(QString path){
              pic.scaledToWidth(scale, Qt::SmoothTransformation);
     ui->tim->show();
     ui->horizontalSpacer->changeSize(250,0);
-    ui->horizontalSpacer->invalidate();
+    //ui->horizontalSpacer->invalidate();
     ui->tim->setPixmap(scaled);
     ui->tim->setMaximumSize(scaled.size());
 }
@@ -246,6 +253,22 @@ void ThreadForm::hideClicked(){
     idFilters.append(threadNum);
     settings.setValue("filters/"+board+"/id",idFilters);
     qDebug() << "hide Clicked so "+threadNum+" filtered!";
+    QListIterator<ThreadForm*> i(clones);
+    while(i.hasNext()){
+        i.next()->deleteLater();
+    }
+    QSet<QString> quotes = quotelinks;
+    ThreadForm* replyTo;
+    foreach (const QString &orig, quotes)
+    {
+        replyTo = ((ThreadTab*)tab)->tfMap.find(orig).value();
+        if(replyTo != nullptr){
+            //replyTo->replies.insert(tf->post->no);
+            replyTo->replies.remove(post->no.toDouble());
+            replyTo->setReplies();
+        }
+    }
+    this->hidden = true;
     this->close();
 }
 
@@ -268,14 +291,14 @@ void ThreadForm::quoteClicked(const QString &link)
         QRegularExpressionMatch match = postLink.match(link);
         if (match.hasMatch()) {
             ThreadForm* tf = ((ThreadTab*)tab)->findPost(match.captured(1));
-            this->insert(tf);
+            if(!tf->hidden) this->insert(tf);
         }
     }
 }
 
 void ThreadForm::on_replies_linkHovered(const QString &link)
 {
-    qDebug() << link;
+    //qDebug() << link;
     if(this->type == PostType::Reply){
         QRegularExpression postLink("#p(\\d+)");
         QRegularExpressionMatch match = postLink.match(link);
@@ -295,7 +318,7 @@ void ThreadForm::insert(ThreadForm* tf){
 }
 
 ThreadForm* ThreadForm::clone(){
-    ThreadForm* tfs = new ThreadForm(this->board,this->threadNum,this->type);
+    ThreadForm* tfs = new ThreadForm(this->board,this->threadNum,this->type,tab);
     tfs->tab = tab;
     tfs->ui->no->setText(post->no);
     tfs->ui->com->setText(post->com);
@@ -324,8 +347,10 @@ ThreadForm* ThreadForm::clone(){
     else
         tfs->ui->pictureLayout->deleteLater();
     tfs->setReplies();
+    this->clones.append(tfs);
     disconnect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::hideClicked);
     connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
+    connect(tfs,&QObject::destroyed,[=](){this->clones.removeOne(tfs);});
     return tfs;
 }
 
@@ -336,9 +361,14 @@ void ThreadForm::setReplies(){
         ui->replies->show();
         foreach (const QString &reply, list)
         {
-            repliesString+="<a href=\"#p" % reply % "\">>>" % reply % "</a> ";
+            repliesString+=" <a href=\"#p" % reply % "\">>>" % reply % "</a>";
         }
-        ui->replies->setText(repliesString.mid(0,repliesString.length()-1));
+        repliesString = repliesString.mid(1);
+        ui->replies->setText(repliesString);
+        QListIterator<ThreadForm*> i(clones);
+        while(i.hasNext()){
+            i.next()->ui->replies->setText(repliesString);
+        }
     }
     else{
         ui->replies->hide();

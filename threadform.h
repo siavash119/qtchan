@@ -7,6 +7,7 @@
 #include <QString>
 #include <QDir>
 #include <QSet>
+#include <QList>
 #include <QSignalMapper>
 #include "post.h"
 
@@ -19,6 +20,7 @@ enum PostType { Thread, Reply };
 class ThreadForm : public QWidget
 {
     Q_OBJECT
+    bool gettingFile = false;
 
 public:
     explicit ThreadForm(QString board, QString threadNum, PostType type = Reply, QWidget *parent = 0);
@@ -46,6 +48,10 @@ public:
     void setReplies();
     void loadOrig();
     ThreadForm* clone();
+    QList<ThreadForm*> clones;
+    //TODO check settings -> filter
+    bool hidden = false;
+
 private:
     Ui::ThreadForm *ui;
     bool loadIt;
@@ -62,10 +68,9 @@ private:
     QNetworkReply *reply;
     QNetworkReply *replyThumb;
     QNetworkReply *replyImage;
-    bool gettingFile;
     void getFile();
     void getThumb();
-    QWidget* tab;
+    QWidget* tab; //pointer to tab
 
 signals:
     void loadThreadTab(ThreadForm*, QJsonArray&);

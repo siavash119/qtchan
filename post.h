@@ -9,7 +9,7 @@
 class Post
 {
 public:
-    Post(QJsonObject &p);
+    Post(QJsonObject &p,QString &board);
     ~Post();
     QString no;
     int resto;
@@ -58,6 +58,15 @@ public:
     QString semantic_url; //Thread URL slug
 
     int since4pass; //Year 4chan Pass bought (YYYY)
+
+    //custom strings
+
+    QString board;
+    /*QString fileURL;
+    QString filePath;
+    QString thumbURL;
+    QString thumbPath;
+    */
 };
 
 #endif // POST_H

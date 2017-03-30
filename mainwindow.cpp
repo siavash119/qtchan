@@ -203,8 +203,8 @@ void MainWindow::deleteSelected(){
     const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
     if(!indexList.size()) return;
     int row = indexList.at(0).row();
-    ui->verticalLayout_3->removeWidget((QWidget*)tabs.at(row).TabPointer);
-    ((QWidget*)tabs.at(row).TabPointer)->close();
+    //ui->verticalLayout_3->removeWidget((QWidget*)tabs.at(row).TabPointer);
+    //((QWidget*)tabs.at(row).TabPointer)->close();
     ((QWidget*)tabs.at(row).TabPointer)->deleteLater();
     model->removeRow(row);
     tabs.erase(tabs.begin()+row);

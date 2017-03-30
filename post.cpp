@@ -1,8 +1,9 @@
 #include "post.h"
 #include <QDebug>
 
-Post::Post(QJsonObject &p)
+Post::Post(QJsonObject &p, QString &board)
 {
+    this->board = board;
     no = QString::number(p.value("no").toInt());
     resto = p.value("resto").toInt();
     if(!resto){

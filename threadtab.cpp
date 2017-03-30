@@ -112,7 +112,10 @@ void ThreadTab::loadPosts(){
         ThreadForm *tf = new ThreadForm(board,thread,PostType::Reply,this);
         ui->threads->addWidget(tf);
         tf->load(p);
+        //todo on hide clicked remove from map and update replies
         tfMap.insert(tf->post->no,tf);
+        //seg faults
+        //connect(tf,&ThreadForm::destroyed,[=](){tfMap.remove(tf->post->no);});
         QSet<QString> quotes = tf->quotelinks;
         ThreadForm* replyTo;
         foreach (const QString &orig, quotes)
