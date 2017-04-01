@@ -98,12 +98,13 @@ void MainWindow::on_pushButton_clicked()
 }
 
 void MainWindow::loadFromSearch(QString searchString, bool select){
-    QRegularExpression re("(?:(?:https?:\\/\\/)?boards.4chan.org\\/)?(\\w+)(?:\\/thread)?\\/(\\d+)(?:#p\\d+)$");
+    QRegularExpression re("^(?:(?:https?:\\/\\/)?boards.4chan.org)?\\/?(\\w+)(?:\\/thread)?\\/(\\d+)(?:#p\\d+)?$",QRegularExpression::CaseInsensitiveOption);
     QRegularExpressionMatch match = re.match(searchString);
     QRegularExpressionMatch match2;
+    QString displayString;
     BoardTab *bt;
     if (!match.hasMatch()) {
-        QRegularExpression res("(?:(?:https?:\\/\\/)?boards.4chan.org)?\\/?(\\w+)\\/(?:catalog#s=)?(\\w+)?");
+        QRegularExpression res("^(?:(?:https?:\\/\\/)?boards.4chan.org)?\\/?(\\w+)\\/(?:catalog#s=)?(.+)?$",QRegularExpression::CaseInsensitiveOption);
         match2 = res.match(searchString);
     }
     else{
@@ -112,16 +113,19 @@ void MainWindow::loadFromSearch(QString searchString, bool select){
     }
     if(match2.hasMatch()){
         bt = new BoardTab(match2.captured(1),BoardType::Catalog,match2.captured(2));
+        displayString = "/"+match2.captured(1)+"/"+match2.captured(2);
     }
     else{
+        //return;
         bt = new BoardTab(searchString,BoardType::Index);
+        displayString = "/"+searchString+"/";
     }
     //ui->verticalLayout_3->addWidget(bt);
     ui->stackedWidget->addWidget(bt);
     //ui->stackedWidget
     Tab tab = {Tab::TabType::Board,bt,searchString};
     tabs.push_back(tab);
-    QStandardItem* parent1 = new QStandardItem("/"+searchString+"/");
+    QStandardItem* parent1 = new QStandardItem(displayString);
     model->appendRow(parent1);
     if(select){
         ui->treeView->setCurrentIndex(parent1->index());
@@ -135,7 +139,7 @@ void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
     //ui->verticalLayout_3->addWidget(tt);
     ui->stackedWidget->addWidget(tt);
     QStandardItem* parent1 = new QStandardItem("/"+board+"/"+thread);
-    Tab tab = {Tab::TabType::Thread,tt,QString(board+"/"+thread)};
+    Tab tab = {Tab::TabType::Thread,tt,QString("/"+board+"/"+thread)};
     tabs.push_back(tab);
     model->appendRow(parent1);
     //tt->hide();

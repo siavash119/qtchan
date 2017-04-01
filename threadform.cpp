@@ -62,6 +62,13 @@ void ThreadForm::load(QJsonObject &p){
 
     //set name
     ui->name->setText(post->name);
+    qDebug() << this->board;
+    if(QString::compare(this->board,"pol")!=0){
+        ui->country_name->hide();
+    }
+    else{
+        ui->country_name->setText(post->country_name);
+    }
 
     //set image
     //TODO clean if-else's
