@@ -231,7 +231,7 @@
       <number>0</number>
      </property>
      <item>
-      <layout class="QHBoxLayout" name="postInfoLayout" stretch="0,0,0">
+      <layout class="QHBoxLayout" name="postInfoLayout" stretch="0,0,0,0">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -268,6 +268,13 @@
          </property>
          <property name="textInteractionFlags">
           <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="country_name">
+         <property name="text">
+          <string/>
          </property>
         </widget>
        </item>

@@ -98,12 +98,12 @@ void MainWindow::on_pushButton_clicked()
 }
 
 void MainWindow::loadFromSearch(QString searchString, bool select){
-    QRegularExpression re("(?:(?:https?:\\/\\/)?boards.4chan.org\\/)?(\\w+)(?:\\/thread)?\\/(\\d+)$");
+    QRegularExpression re("(?:(?:https?:\\/\\/)?boards.4chan.org\\/)?(\\w+)(?:\\/thread)?\\/(\\d+)(?:#p\\d+)$");
     QRegularExpressionMatch match = re.match(searchString);
     QRegularExpressionMatch match2;
     BoardTab *bt;
     if (!match.hasMatch()) {
-        QRegularExpression res("(?:(?:https?:\\/\\/)?boards.4chan.org)?\\/?(\\w+)\\/(\\w+)?");
+        QRegularExpression res("(?:(?:https?:\\/\\/)?boards.4chan.org)?\\/?(\\w+)\\/(?:catalog#s=)?(\\w+)?");
         match2 = res.match(searchString);
     }
     else{

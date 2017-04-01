@@ -16,7 +16,7 @@ public:
     Filter();
     void regexp(QString search);
     void htmlParse(QString search);
-    QSet<QString> findQuotes(QString post);
+    static QSet<QString> findQuotes(QString post);
 
 private:
     QRegularExpression quotelink;

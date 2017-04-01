@@ -119,7 +119,7 @@ void ThreadTab::loadPosts(){
     qDebug() << QString("length is ").append(QString::number(length));
     for(int i=tfMap.size();i<length;i++){
         QJsonObject p = posts.at(i).toObject();
-        ThreadForm *tf = new ThreadForm(board,thread,PostType::Reply,this);
+        ThreadForm *tf = new ThreadForm(board,thread,PostType::Reply,true,this);
         ui->threads->addWidget(tf);
         tf->load(p);
         //todo on hide clicked remove from map and update replies

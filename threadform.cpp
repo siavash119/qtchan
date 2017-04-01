@@ -18,13 +18,14 @@
 
 //TODO Possibly refactor file checks and pointers to dir and file objects
 //TODO Possibly decouple the file and thumb getters to the post class
-ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, QWidget *parent) :
+ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool root, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ThreadForm)
 {
     this->board = board;
     this->threadNum = threadNum;
     this->type = type;
+    this->root = root;
     ui->setupUi(this);
     ui->tim->hide();
     ui->horizontalSpacer->changeSize(0,0);
@@ -54,7 +55,7 @@ void ThreadForm::load(QJsonObject &p){
     //set comment
     //TODO replace <span class="quote"> and <a href="url">
     ui->com->setText(post->com);
-    quotelinks = nc.filter->findQuotes(post->com);
+    quotelinks = Filter::findQuotes(post->com);
 
     //set subject
     ui->sub->setText(htmlParse(post->sub));
@@ -288,13 +289,12 @@ QString ThreadForm::htmlParse(QString &html){
 void ThreadForm::quoteClicked(const QString &link)
 {
     qDebug() << link;
-    if(this->type == PostType::Reply){
-        QRegularExpression postLink("#p(\\d+)");
-        QRegularExpressionMatch match = postLink.match(link);
-        if (match.hasMatch()) {
-            ThreadForm* tf = ((ThreadTab*)tab)->findPost(match.captured(1));
-            if(tf != nullptr && !tf->hidden) this->insert(tf);
-        }
+    if(link.at(0)=='#' && this->type == PostType::Reply){
+        ThreadForm* tf = ((ThreadTab*)tab)->findPost(link.mid(2));
+        if(tf != nullptr && !tf->hidden) this->insert(tf);
+    }
+    else if(link.at(0)=='/'){
+        mw->loadFromSearch(link,false);
     }
 }
 
@@ -324,12 +324,19 @@ void ThreadForm::insert(ThreadForm* tf){
 }
 
 ThreadForm* ThreadForm::clone(){
-    ThreadForm* tfs = new ThreadForm(this->board,this->threadNum,this->type,tab);
+    ThreadForm* tfs = new ThreadForm(this->board,this->threadNum,this->type,false);
     tfs->tab = tab;
+    tfs->post = this->post;
     tfs->ui->no->setText(post->no);
     tfs->ui->com->setText(post->com);
     tfs->ui->sub->setText(post->sub);
     tfs->ui->name->setText(post->name);
+    if(this->board != "pol"){
+        tfs->ui->country_name->hide();
+    }
+    else{
+        tfs->ui->country_name->setText(post->country_name);
+    }
     tfs->replies = replies;
     //TODO check and account for if original is still getting file
     if(!post->tim.isNull() && !post->filedeleted){

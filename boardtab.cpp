@@ -95,7 +95,7 @@ void BoardTab::loadThreads(){
         else p = threads.at(i).toObject();
         QString threadNum = QString("%1").arg(p["no"].toDouble(),0,'f',0);
         if (!idFilters.contains(threadNum)){
-            ThreadForm *tf = new ThreadForm(board,threadNum,Thread,this);
+            ThreadForm *tf = new ThreadForm(board,threadNum,Thread,true,this);
             ui->threads->addWidget(tf);
             tf->load(p);
             posts.push_back(tf);
