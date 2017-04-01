@@ -8,6 +8,7 @@
 #include <QDir>
 #include <QKeyEvent>
 #include <QMutableMapIterator>
+#include <QProcess>
 #include "netcontroller.h"
 #include "mainwindow.h"
 #include "threadform.h"
@@ -25,9 +26,9 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
     request = QNetworkRequest(QUrl(threadUrl));
     request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
-    reply = nc.manager->get(request);
+    reply = nc.jsonManager->get(request);
     connect(reply, &QNetworkReply::finished, this, &ThreadTab::loadPosts);
-    myProcess = new QProcess(parent);
+    //myProcess = new QProcess(parent);
     myPostForm = new PostForm(board,thread);
     this->setShortcuts();
 }
@@ -86,13 +87,14 @@ void ThreadTab::openPostForm(){
 }
 
 void ThreadTab::gallery(){
-    QString command = "feh"; QStringList arguments; arguments << QDir("./"+board+"/"+thread).absolutePath()
+    /*QString command = "feh"; QStringList arguments; arguments << QDir("./"+board+"/"+thread).absolutePath()
                                                               << "--auto-zoom"
                                                               << "--index-info" << "\"%n\n%S\n%wx%h\""
                                                               << "--borderless"
                                                               << "--image-bg" << "black"
-                                                              << "--preload";
-    myProcess->startDetached(command,arguments);
+                                                              << "--preload";*/
+    QString command = "mpv"; QStringList arguments; arguments << QDir("./"+board+"/"+thread).absolutePath();
+    QProcess().startDetached(command,arguments);
 }
 
 void ThreadTab::addPost(ThreadForm *tf){
@@ -101,6 +103,14 @@ void ThreadTab::addPost(ThreadForm *tf){
 
 void ThreadTab::addStretch(){
     ui->threads->addStretch(1);
+}
+
+int ThreadTab::getMinWidth(){
+    return ui->scrollArea->minimumWidth();
+}
+
+void ThreadTab::updateWidth(){
+    ui->scrollArea->setMinimumWidth(this->sizeHint().width());
 }
 
 void ThreadTab::loadPosts(){
@@ -121,7 +131,7 @@ void ThreadTab::loadPosts(){
         foreach (const QString &orig, quotes)
         {
             replyTo = tfMap.find(orig).value();
-            if(replyTo != nullptr){
+            if(replyTo != tfMap.end().value()){
                 //replyTo->replies.insert(tf->post->no);
                 replyTo->replies.insert(tf->post->no.toDouble(),tf->post->no);
                 replyTo->setReplies();

@@ -4,7 +4,6 @@
 #include <QWidget>
 #include <QNetworkReply>
 #include <QNetworkRequest>
-#include <QProcess>
 #include <QMap>
 #include <QMutableMapIterator>
 #include "boardtab.h"
@@ -37,15 +36,19 @@ public:
     QMap<QString,ThreadForm*> tfMap;
     void updatePosts();
     bool updated;
-    QProcess *myProcess;
+    //QProcess *myProcess;
     void findText(const QString text);
     PostForm *myPostForm;
     void loadAllImages();
     ThreadForm* findPost(QString postNum);
+    int getMinWidth();
+    void setMinWidth(int minw);
 
 public slots:
     //void findPost(int position, QString postNum);
     void focusIt();
+    void updateWidth();
+
 private:
     Ui::ThreadTab *ui;
     void setShortcuts();

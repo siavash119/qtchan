@@ -29,6 +29,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, QWidget 
     ui->tim->hide();
     ui->horizontalSpacer->changeSize(0,0);
     ui->replies->hide();
+    this->setMinimumWidth(488);
     pathBase = "./"%board%"/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
     connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
     connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
@@ -218,7 +219,8 @@ void ThreadForm::loadImage(QString path){
              pic.scaledToWidth(scale, Qt::SmoothTransformation);
     ui->tim->show();
     ui->horizontalSpacer->changeSize(250,0);
-    //ui->horizontalSpacer->invalidate();
+    ui->horizontalSpacer->invalidate();
+    this->setMinimumWidth(738);
     ui->tim->setPixmap(scaled);
     ui->tim->setMaximumSize(scaled.size());
 }
@@ -291,7 +293,7 @@ void ThreadForm::quoteClicked(const QString &link)
         QRegularExpressionMatch match = postLink.match(link);
         if (match.hasMatch()) {
             ThreadForm* tf = ((ThreadTab*)tab)->findPost(match.captured(1));
-            if(!tf->hidden) this->insert(tf);
+            if(tf != nullptr && !tf->hidden) this->insert(tf);
         }
     }
 }
@@ -314,7 +316,11 @@ void ThreadForm::insert(ThreadForm* tf){
     ThreadForm *newtf = tf->clone();
     ui->quotes->addWidget(newtf);
     newtf->show();
-    this->update();
+    //newtf->setMinimumWidth(newtf->sizeHint().width());
+    //this->setMinimumWidth(this->sizeHint().width());
+    //((ThreadTab*)tab)->updateWidth();
+    //this->update();
+    //((ThreadTab*)tab)->updateWidth();
 }
 
 ThreadForm* ThreadForm::clone(){
@@ -349,7 +355,11 @@ ThreadForm* ThreadForm::clone(){
     tfs->setReplies();
     this->clones.append(tfs);
     disconnect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::hideClicked);
-    connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
+    //connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
+    connect(tfs->ui->hide,&ClickableLabel::clicked,[=](){
+        tfs->hide();
+        tfs->deleteLater();
+    });
     connect(tfs,&QObject::destroyed,[=](){this->clones.removeOne(tfs);});
     return tfs;
 }

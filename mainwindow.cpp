@@ -55,6 +55,11 @@ void MainWindow::setShortcuts(){
     closeTab->setShortcutContext(Qt::ApplicationShortcut);
     connect(closeTab, &QAction::triggered, this, &MainWindow::deleteSelected);
     this->addAction(closeTab);
+    QAction *navBar = new QAction(this);
+    navBar->setShortcut(QKeySequence("Ctrl+l"));
+    navBar->setShortcutContext(Qt::ApplicationShortcut);
+    connect(navBar, &QAction::triggered, this, &MainWindow::focusBar);
+    this->addAction(navBar);
 }
 
 MainWindow::~MainWindow()
@@ -111,25 +116,29 @@ void MainWindow::loadFromSearch(QString searchString, bool select){
     else{
         bt = new BoardTab(searchString,BoardType::Index);
     }
-    ui->verticalLayout_3->addWidget(bt);
+    //ui->verticalLayout_3->addWidget(bt);
+    ui->stackedWidget->addWidget(bt);
+    //ui->stackedWidget
     Tab tab = {Tab::TabType::Board,bt,searchString};
     tabs.push_back(tab);
     QStandardItem* parent1 = new QStandardItem("/"+searchString+"/");
     model->appendRow(parent1);
     if(select){
         ui->treeView->setCurrentIndex(parent1->index());
+        ui->stackedWidget->setCurrentIndex(parent1->index().row());
     }
 }
 
 void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
     qDebug() << "loading /"+board+"/"+thread;
     ThreadTab *tt = new ThreadTab(board,thread);
-    ui->verticalLayout_3->addWidget(tt);
+    //ui->verticalLayout_3->addWidget(tt);
+    ui->stackedWidget->addWidget(tt);
     QStandardItem* parent1 = new QStandardItem("/"+board+"/"+thread);
     Tab tab = {Tab::TabType::Thread,tt,QString(board+"/"+thread)};
     tabs.push_back(tab);
     model->appendRow(parent1);
-    tt->hide();
+    //tt->hide();
 }
 
 void MainWindow::addTab(){
@@ -137,30 +146,31 @@ void MainWindow::addTab(){
 
 void MainWindow::on_treeView_clicked(QModelIndex index)
 {
-    show_one(index);
+    ui->stackedWidget->setCurrentIndex(index.row());
+    //show_one(index);
 }
 
 void MainWindow::show_one(QModelIndex index){
-    int size = tabs.size();
+    //((QWidget*)tabs.at(index.row()).TabPointer)->raise();
+    ui->stackedWidget->setCurrentIndex(index.row());
+    /*int size = tabs.size();
     for(int i=0;i<size;i++){
         if(i == index.row()) continue;
         ((QWidget*)tabs.at(i).TabPointer)->hide();
         //((BoardTab*)bts.at(i))->hide();
     }
     Tab tab = tabs.at(index.row());
-    if(tab.type == Tab::TabType::Thread && !((ThreadTab*)tab.TabPointer)->updated){
-        ((ThreadTab*)tab.TabPointer)->show();
+    ((QWidget*)tab.TabPointer)->show();*/
+    /*if(tab.type == Tab::TabType::Thread && !((ThreadTab*)tab.TabPointer)->updated){
         ((ThreadTab*)tab.TabPointer)->updatePosts();
-    }
-    else{
-        ((BoardTab*)tab.TabPointer)->show();
-    }
+    }*/
 }
 
 
 void MainWindow::onSelectionChanged(){
     boardsSelected = ui->treeView->selectionModel()->selectedRows();
-    if(boardsSelected.size()) show_one(boardsSelected.at(0));
+    if(boardsSelected.size()) ui->stackedWidget->setCurrentIndex(boardsSelected.at(0).row());
+    //if(boardsSelected.size()) show_one(boardsSelected.at(0));
 }
 
 //TODO replace with regular QAction shortcuts

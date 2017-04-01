@@ -7,6 +7,7 @@
 netController::netController(QObject *parent) : QObject(parent)
 {
     manager = new QNetworkAccessManager(this);
+    jsonManager = new QNetworkAccessManager(this);
     cookies = new QNetworkCookieJar(this);
     manager->setCookieJar(cookies);
 
@@ -26,6 +27,7 @@ netController::netController(QObject *parent) : QObject(parent)
         temp.setSecure(1);
         temp.setPath("/");
         manager->cookieJar()->insertCookie(temp);
+        jsonManager->cookieJar()->insertCookie(temp);
     }
     filter = new Filter();
     //settingsFile = d.object().value("settings").toObject();

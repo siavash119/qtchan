@@ -75,6 +75,7 @@ private:
 signals:
     void loadThreadTab(ThreadForm*, QJsonArray&);
     void loadThread(ThreadForm*,QString&,QString&);
+    void updateWidth();
     //void searchPost(int position, QString postNum);
 
 public slots:

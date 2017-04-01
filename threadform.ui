@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>750</width>
+    <width>738</width>
     <height>132</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>750</width>
+    <width>0</width>
     <height>0</height>
    </size>
   </property>
@@ -129,9 +129,6 @@
      <property name="spacing">
       <number>0</number>
      </property>
-     <property name="sizeConstraint">
-      <enum>QLayout::SetFixedSize</enum>
-     </property>
      <item>
       <layout class="QGridLayout" name="gridLayout">
        <property name="leftMargin">
@@ -230,9 +227,6 @@
      <property name="spacing">
       <number>0</number>
      </property>
-     <property name="sizeConstraint">
-      <enum>QLayout::SetDefaultConstraint</enum>
-     </property>
      <property name="bottomMargin">
       <number>0</number>
      </property>
@@ -240,9 +234,6 @@
       <layout class="QHBoxLayout" name="postInfoLayout" stretch="0,0,0">
        <property name="spacing">
         <number>0</number>
-       </property>
-       <property name="sizeConstraint">
-        <enum>QLayout::SetFixedSize</enum>
        </property>
        <item>
         <widget class="QLabel" name="name">
@@ -323,7 +314,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>200</width>
+           <width>150</width>
            <height>36</height>
           </size>
          </property>
@@ -358,6 +349,12 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>450</width>
+         <height>0</height>
+        </size>
        </property>
        <property name="palette">
         <palette>
@@ -563,6 +560,12 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>450</width>
+         <height>0</height>
+        </size>
        </property>
        <property name="palette">
         <palette>

@@ -11,6 +11,7 @@ class netController: public QObject  {
     Q_OBJECT
 public:
     QNetworkAccessManager *manager;
+    QNetworkAccessManager *jsonManager;
     QNetworkCookieJar *cookies;
     QJsonObject settingsFile;
     explicit netController(QObject * parent = nullptr);
