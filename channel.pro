@@ -17,7 +17,6 @@ SOURCES += main.cpp\
     threadform.cpp \
     clickablelabel.cpp \
     boardtab.cpp \
-    treekeypress.cpp \
     netcontroller.cpp \
     threadtab.cpp \
     post.cpp \

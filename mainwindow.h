@@ -33,7 +33,7 @@ public:
 
     void addTab();
     ~MainWindow();
-    bool removePage(int searchPage, QAbstractItemModel* model, QModelIndex parent = QModelIndex());
+    void removePage(int searchPage, QAbstractItemModel* model, QModelIndex parent = QModelIndex());
     void selectPage(int searchPage, QAbstractItemModel* model, QModelIndex parent = QModelIndex());
 
     void show_one(QModelIndex index);
@@ -63,6 +63,7 @@ private:
     Ui::MainWindow *ui;
     QModelIndexList boardsSelected;
     void setShortcuts();
+
 
 signals:
     void requestCatalog(QString);
