@@ -20,10 +20,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
     ui->splitter->setStretchFactor(0,0);
     ui->splitter->setStretchFactor(1,1);
-
+    /*QStringList headers;
+    headers << "hi";
+    QString data = "yo";
+    model = new TreeModel(headers,data);*/
     model = new QStandardItemModel;
     model->setColumnCount(1);
     ui->treeView->setModel(model);
@@ -77,6 +79,7 @@ void MainWindow::nextTab(){
         if(qmi.row()+1<numRows) key = qmi.row()+1;
     }
     ui->treeView->setCurrentIndex(model->index(key,0));
+    ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0),QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::prevTab(){
@@ -89,6 +92,7 @@ void MainWindow::prevTab(){
         if(qmi.row()-1>=0) key = qmi.row()-1;
     }
     ui->treeView->setCurrentIndex(model->index(key,0));
+    ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0),QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -125,12 +129,25 @@ void MainWindow::loadFromSearch(QString searchString, bool select){
     //ui->stackedWidget
     Tab tab = {Tab::TabType::Board,bt,searchString};
     tabs.push_back(tab);
+    /*QList<QVariant> rootData;
+    rootData << displayString;
+    //TreeItem* parent1 = new TreeItem();
+    QModelIndex index = ui->treeView->selectionModel()->currentIndex();
+    model->insertRow(index.row()+1,index.parent());
+    QModelIndex child = model->index(index.row()+1, 0, index.parent());
+    model->setData(child,displayString);*/
     QStandardItem* parent1 = new QStandardItem(displayString);
     model->appendRow(parent1);
-    if(select){
+    pages++;
+    parent1->setData(pages,Qt::UserRole);
+    tabsNew.insert(pages,tab);
+    //ui->stackedWidget->setCurrentWidget(bt);
+    selectPage(pages,model);
+
+    /*if(select){
         ui->treeView->setCurrentIndex(parent1->index());
         ui->stackedWidget->setCurrentIndex(parent1->index().row());
-    }
+    }*/
 }
 
 void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
@@ -138,10 +155,22 @@ void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
     ThreadTab *tt = new ThreadTab(board,thread);
     //ui->verticalLayout_3->addWidget(tt);
     ui->stackedWidget->addWidget(tt);
-    QStandardItem* parent1 = new QStandardItem("/"+board+"/"+thread);
     Tab tab = {Tab::TabType::Thread,tt,QString("/"+board+"/"+thread)};
     tabs.push_back(tab);
+    QStandardItem* parent1 = new QStandardItem("/"+board+"/"+thread);
     model->appendRow(parent1);
+    pages++;
+    parent1->setData(pages,Qt::UserRole);
+    tabsNew.insert(pages,tab);
+    //ui->stackedWidget->setCurrentWidget(tt);
+    selectPage(pages,model);
+    //ui->treeView->selectionModel()->sel
+    //tabsNew.insert((void*)tt,tab);
+    //TreeItem* parent1 = new TreeItem();
+    /*QModelIndex index = ui->treeView->selectionModel()->currentIndex();
+    model->insertRow(index.row()+1,index.parent());
+    QModelIndex child = model->index(index.row()+1, 0, index.parent());
+    model->setData(child,"/"+board+"/"+thread);*/
     //tt->hide();
 }
 
@@ -150,13 +179,17 @@ void MainWindow::addTab(){
 
 void MainWindow::on_treeView_clicked(QModelIndex index)
 {
-    ui->stackedWidget->setCurrentIndex(index.row());
+    int pageId = index.data(Qt::UserRole).toInt();
+    ui->stackedWidget->setCurrentWidget((QWidget*)(tabsNew.find(pageId)->TabPointer));
+    //ui->stackedWidget->setCurrentIndex(index.row());
     //show_one(index);
 }
 
 void MainWindow::show_one(QModelIndex index){
+    int pageId = index.data(Qt::UserRole).toInt();
+    ui->stackedWidget->setCurrentWidget((QWidget*)(tabsNew.find(pageId)->TabPointer));
     //((QWidget*)tabs.at(index.row()).TabPointer)->raise();
-    ui->stackedWidget->setCurrentIndex(index.row());
+    //ui->stackedWidget->setCurrentIndex(index.row());
     /*int size = tabs.size();
     for(int i=0;i<size;i++){
         if(i == index.row()) continue;
@@ -172,8 +205,20 @@ void MainWindow::show_one(QModelIndex index){
 
 
 void MainWindow::onSelectionChanged(){
-    boardsSelected = ui->treeView->selectionModel()->selectedRows();
-    if(boardsSelected.size()) ui->stackedWidget->setCurrentIndex(boardsSelected.at(0).row());
+    QModelIndexList list = ui->treeView->selectionModel()->selectedRows();
+    if(list.size()) {
+        int pageId = list.at(0).data(Qt::UserRole).toInt();
+        ui->stackedWidget->setCurrentWidget((QWidget*)(tabsNew.find(pageId)->TabPointer));
+    }
+    /*else{
+        QModelIndex index = ui->treeView->currentIndex();
+        ui->stackedWidget->setCurrentIndex(index.row());
+        int pageId = index.data(Qt::UserRole).toInt();
+        ui->stackedWidget->setCurrentWidget((QWidget*)(tabsNew.find(pageId)->TabPointer));
+    }*/
+
+    //boardsSelected = ui->treeView->selectionModel()->selectedRows();
+    //if(boardsSelected.size()) ui->stackedWidget->setCurrentIndex(boardsSelected.at(0).row());
     //if(boardsSelected.size()) show_one(boardsSelected.at(0));
 }
 
@@ -187,11 +232,12 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         qDebug("Ate key press %d", key);
         qDebug("Modifers %d", mod);
         if(key == 53){
-            const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
+            /*const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
             int row = indexList.at(0).row();
             qDebug() << (Tab::TabType)tabs.at(row).type;
             ((Tab::TabType)tabs.at(row).type) == Tab::TabType::Board ? ((BoardTab*)tabs.at(row).TabPointer)->updatePosts() :
-                                                          ((ThreadTab*)tabs.at(row).TabPointer)->updatePosts();
+                                                          ((ThreadTab*)tabs.at(row).TabPointer)->updatePosts();*/
+            qDebug() << ui->treeView->indentation();
         }
         else if(key == 16777269){
             ui->lineEdit->setFocus();
@@ -216,12 +262,39 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 void MainWindow::deleteSelected(){
     const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
     if(!indexList.size()) return;
-    int row = indexList.at(0).row();
+    int pageId = indexList.at(0).data(Qt::UserRole).toInt();
+    removePage(pageId,model);
+    tabsNew.remove(pageId);
+    //QModelIndex item = indexList.at(0);
+    /*model->removeRow(item.row());
+    tabsNew.remove(item.data(Qt::UserRole).toInt());*/
     //ui->verticalLayout_3->removeWidget((QWidget*)tabs.at(row).TabPointer);
     //((QWidget*)tabs.at(row).TabPointer)->close();
-    ((QWidget*)tabs.at(row).TabPointer)->deleteLater();
-    model->removeRow(row);
-    tabs.erase(tabs.begin()+row);
+    //((QWidget*)tabs.at(row).TabPointer)->deleteLater();
+    //tabs.erase(tabs.begin()+row);
+    //model->removeRow(ui->treeView->selectionModel()->sele)
+}
+
+bool MainWindow::removePage(int searchPage, QAbstractItemModel* model, QModelIndex parent) {
+    for(int r = 0; r < model->rowCount(parent); ++r) {
+        QModelIndex index = model->index(r, 0, parent);
+        int pageId = index.data(Qt::UserRole).toInt();
+        if(pageId == searchPage) return model->removeRow(r,parent);
+        if( model->hasChildren(index) ) {
+            removePage(searchPage, model, index);
+        }
+    }
+}
+
+void MainWindow::selectPage(int searchPage, QAbstractItemModel* model, QModelIndex parent) {
+    for(int r = 0; r < model->rowCount(parent); ++r) {
+        QModelIndex index = model->index(r, 0, parent);
+        int pageId = index.data(Qt::UserRole).toInt();
+        if(pageId == searchPage) return ui->treeView->selectionModel()->setCurrentIndex(model->index(r,0),QItemSelectionModel::ClearAndSelect);
+        if( model->hasChildren(index) ) {
+            removePage(searchPage, model, index);
+        }
+    }
 }
 
 void MainWindow::on_lineEdit_returnPressed()
@@ -236,16 +309,25 @@ void MainWindow::focusTree(){
 
 void MainWindow::focusBar(){
     ui->lineEdit->setFocus();
+    ui->lineEdit->selectAll();
 }
 
 void MainWindow::saveSession(){
     QSettings settings;
     QStringList session;
-    int numTabs = tabs.size();
-    for (int i=0; i < numTabs; i++) {
-        session.append(((Tab)(tabs.at(i))).searchString);
+    QMapIterator<int,Tab> i(tabsNew);
+    while(i.hasNext()){
+        session.append(i.next().value().searchString);
     }
+    //int numTabs = tabs.size();
+    /*for (int i=0; i < numTabs; i++) {
+        session.append(((Tab)(tabs.at(i))).searchString);
+    }*/
     settings.setValue("session",session);
+    //QStringList List;
+    //qDebug() << List;
+    // save list
+    //settings.setValue("session_new", QVariant::fromValue(List));
 }
 
 void MainWindow::loadSession(){

@@ -1,5 +1,6 @@
 #include "post.h"
 #include <QDebug>
+#include <QSettings>
 
 Post::Post(QJsonObject &p, QString &board)
 {
@@ -23,7 +24,7 @@ Post::Post(QJsonObject &p, QString &board)
     country = p.value("country").toString();
     country_name = p.value("country_name").toString();
     sub = p.value("sub").toString();
-    com = p.value("com").toString();
+    com = htmlParse(p.value("com").toString());
     double temp = p.value("tim").toDouble();
     if(temp){
         tim = QString::number(temp,'d',0);
@@ -43,4 +44,16 @@ Post::Post(QJsonObject &p, QString &board)
 
 Post::~Post(){
     delete this;
+}
+
+QString Post::htmlParse(QString string){
+    //QSettings settings;
+    //QColor color = settings.value("quote_color",);
+    QString colorString = "class=\"quote\" style=\"color:#8ba446\"";
+    QString quoteString = "class=\"quote\" style=\"color:#897399\"";
+    QRegExp quotes("class=\"quote\"");
+    QRegExp quotelinks("class=\"quotelink\"");
+    string.replace(quotes,colorString);
+    string.replace(quotelinks,quoteString);
+    return string;
 }

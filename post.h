@@ -67,6 +67,8 @@ public:
     QString thumbURL;
     QString thumbPath;
     */
+private:
+    QString htmlParse(QString string);
 };
 
 #endif // POST_H

@@ -5,6 +5,7 @@
 #include <QStandardItemModel>
 #include <QUrl>
 #include <QTreeView>
+#include <QMap>
 #include "netcontroller.h"
 #include "boardtab.h"
 #include "threadform.h"
@@ -17,21 +18,27 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
     QNetworkReply *reply;
-    //TODO change vector to set or map
+    //TODO possibly change vector to set or map
     std::vector<Tab> tabs;
+    QMap<int,Tab> tabsNew;
 
 protected:
     bool eventFilter(QObject *obj, QEvent *ev);
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-    QStandardItemModel* model;
+    QStandardItemModel *model;
+    //TreeModel* model;
+    int pages = 0;
 
     void addTab();
     ~MainWindow();
+    bool removePage(int searchPage, QAbstractItemModel* model, QModelIndex parent = QModelIndex());
+    void selectPage(int searchPage, QAbstractItemModel* model, QModelIndex parent = QModelIndex());
 
     void show_one(QModelIndex index);
     void deleteSelected();
+    void loadSession();
     //void getThread(ThreadForm *tf, QString url);
 
 private slots:
@@ -50,7 +57,6 @@ public slots:
     void focusBar();
     void loadFromSearch(QString searchString, bool select);
     void saveSession();
-    void loadSession();
     void nextTab();
     void prevTab();
 private:

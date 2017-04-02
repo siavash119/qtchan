@@ -62,7 +62,6 @@ void ThreadForm::load(QJsonObject &p){
 
     //set name
     ui->name->setText(post->name);
-    qDebug() << this->board;
     if(QString::compare(this->board,"pol")!=0){
         ui->country_name->hide();
     }
@@ -385,7 +384,7 @@ void ThreadForm::setReplies(){
         ui->replies->show();
         foreach (const QString &reply, list)
         {
-            repliesString+=" <a href=\"#p" % reply % "\">>>" % reply % "</a>";
+            repliesString+=" <a href=\"#p" % reply % "\" style=\"color:#897399\">>>" % reply % "</a>";
         }
         repliesString = repliesString.mid(1);
         ui->replies->setText(repliesString);
