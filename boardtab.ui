@@ -91,6 +91,12 @@
      <property name="autoFillBackground">
       <bool>false</bool>
      </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
      <property name="sizeAdjustPolicy">
       <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
      </property>
@@ -105,8 +111,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>398</width>
-        <height>598</height>
+        <width>400</width>
+        <height>600</height>
        </rect>
       </property>
       <property name="sizePolicy">

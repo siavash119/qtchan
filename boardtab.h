@@ -25,6 +25,7 @@ public:
     ~BoardTab();
     void addThread();
     QNetworkReply *reply;
+    //TODO change to map
     std::vector<ThreadForm*> posts;
     void updatePosts();
     void setShortcuts();
