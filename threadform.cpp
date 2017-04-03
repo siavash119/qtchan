@@ -26,16 +26,21 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
     this->threadNum = threadNum;
     this->type = type;
     this->root = root;
+    this->tab = parent;
     ui->setupUi(this);
     ui->tim->hide();
     ui->horizontalSpacer->changeSize(0,0);
     ui->replies->hide();
+    if(board != "pol") ui->country_name->hide();
     this->setMinimumWidth(488);
     pathBase = "./"%board%"/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
     connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
     connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
     connect(ui->replies,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
-    this->tab = parent;
+    //TODO quote for boardtab too
+    if(type==Reply)connect(ui->no,&ClickableLabel::clicked,[=](){
+        ((ThreadTab*)tab)->quoteIt(">>"+ui->no->text());
+    });
 }
 
 ThreadForm::~ThreadForm()
@@ -58,16 +63,12 @@ void ThreadForm::load(QJsonObject &p){
     quotelinks = Filter::findQuotes(post->com);
 
     //set subject
-    ui->sub->setText(htmlParse(post->sub));
+    if(post->sub==QString()) ui->sub->hide();
+    else ui->sub->setText(htmlParse(post->sub));
 
     //set name
     ui->name->setText(post->name);
-    if(QString::compare(this->board,"pol")!=0){
-        ui->country_name->hide();
-    }
-    else{
-        ui->country_name->setText(post->country_name);
-    }
+    ui->country_name->setText(post->country_name);
 
     //set image
     //TODO clean if-else's
@@ -330,12 +331,14 @@ void ThreadForm::insert(ThreadForm* tf){
 }
 
 ThreadForm* ThreadForm::clone(){
-    ThreadForm* tfs = new ThreadForm(this->board,this->threadNum,this->type,false);
+    //TODO just tfs->load(post);
+    ThreadForm* tfs = new ThreadForm(this->board,this->threadNum,this->type,false,tab);
     tfs->tab = tab;
     tfs->post = this->post;
     tfs->ui->no->setText(post->no);
     tfs->ui->com->setText(post->com);
-    tfs->ui->sub->setText(post->sub);
+    if(post->sub==QString()) tfs->ui->sub->hide();
+    else ui->sub->setText(htmlParse(post->sub));
     tfs->ui->name->setText(post->name);
     if(this->board != "pol"){
         tfs->ui->country_name->hide();

@@ -235,14 +235,14 @@
       <number>0</number>
      </property>
      <item>
-      <layout class="QHBoxLayout" name="postInfoLayout" stretch="0,0,0,0">
+      <layout class="QHBoxLayout" name="postInfoLayout" stretch="0,0,0,0,0">
        <property name="spacing">
         <number>0</number>
        </property>
        <item>
         <widget class="QLabel" name="name">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -277,6 +277,12 @@
        </item>
        <item>
         <widget class="QLabel" name="country_name">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="font">
           <font>
            <pointsize>14</pointsize>
@@ -296,7 +302,7 @@
        <item>
         <widget class="QLabel" name="sub">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -327,7 +333,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="no">
+        <widget class="ClickableLabel" name="no">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -359,6 +365,22 @@
          </property>
          <property name="textInteractionFlags">
           <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string/>
          </property>
         </widget>
        </item>
