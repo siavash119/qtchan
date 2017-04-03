@@ -25,6 +25,10 @@ public:
     QFileDialog *dialog;
     QMetaObject::Connection submitConnection;
     void fileChecker(const QMimeData *mimedata);
+    //TODO links in com?
+
+public slots:
+    void appendText(QString text);
 
 private:
     Ui::PostForm *ui;

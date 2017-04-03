@@ -45,6 +45,10 @@ void PostForm::setShortcuts(){
     //rest in the eventfilter
 }
 
+void PostForm::appendText(QString text){
+    ui->com->appendPlainText(text);
+}
+
 void PostForm::postIt(){
     disconnect(submitConnection);
     this->removeEventFilter(this);
