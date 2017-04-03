@@ -48,6 +48,7 @@ public slots:
     //void findPost(int position, QString postNum);
     void focusIt();
     void updateWidth();
+    void quoteIt(QString text);
 
 private:
     Ui::ThreadTab *ui;

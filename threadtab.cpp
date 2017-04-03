@@ -84,6 +84,7 @@ ThreadTab::~ThreadTab()
 void ThreadTab::openPostForm(){
     myPostForm->show();
     myPostForm->activateWindow();
+    myPostForm->raise();
 }
 
 void ThreadTab::gallery(){
@@ -192,6 +193,12 @@ void ThreadTab::on_pushButton_clicked()
 {
     findText(ui->lineEdit->text());
 }
+
+void ThreadTab::quoteIt(QString text){
+    myPostForm->appendText(text);
+    openPostForm();
+}
+
 
 bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 {
