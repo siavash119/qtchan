@@ -18,8 +18,6 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
     QNetworkReply *reply;
-    //TODO possibly change vector to set or map
-    std::vector<Tab> tabs;
     QMap<int,Tab> tabsNew;
 
 protected:
@@ -28,7 +26,6 @@ protected:
 public:
     explicit MainWindow(QWidget *parent = 0);
     QStandardItemModel *model;
-    //TreeModel* model;
     int pages = 0;
 
     void addTab();
@@ -39,11 +36,9 @@ public:
     void show_one(QModelIndex index);
     void deleteSelected();
     void loadSession();
-    //void getThread(ThreadForm *tf, QString url);
 
 private slots:
     void on_pushButton_clicked();
-    //void replyFinished();
 
     void on_treeView_clicked(QModelIndex index);
     void onSelectionChanged();

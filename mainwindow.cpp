@@ -70,18 +70,26 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-//TODO fix next/prev for tree
+//TODO fix next/prev for tree (recursive check)
 void MainWindow::nextTab(){
     int numRows = model->rowCount();
     if(!numRows) return;
     boardsSelected = ui->treeView->selectionModel()->selectedRows();
     int key = 0;
+    QModelIndex qmi;
     if(boardsSelected.length()){
-        QModelIndex qmi = boardsSelected.at(0);
-        if(qmi.row()+1<numRows) key = qmi.row()+1;
+        qmi = boardsSelected.at(0);
+        if(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)){
+            ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0,qmi),QItemSelectionModel::ClearAndSelect);
+            return;
+        }
+        if(qmi.row()+1<model->rowCount(qmi.parent())) key = qmi.row()+1;
+        else{
+            qmi = qmi.parent();
+            if(qmi.row()+1<model->rowCount(qmi.parent())) key = qmi.row()+1;
+        }
     }
-    ui->treeView->setCurrentIndex(model->index(key,0));
-    ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0),QItemSelectionModel::ClearAndSelect);
+    ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0,qmi.parent()),QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::prevTab(){
@@ -89,12 +97,33 @@ void MainWindow::prevTab(){
     if(!numRows) return;
     boardsSelected = ui->treeView->selectionModel()->selectedRows();
     int key = numRows-1;
+    QModelIndex qmi;
     if(boardsSelected.length()){
-        QModelIndex qmi = boardsSelected.at(0);
-        if(qmi.row()-1>=0) key = qmi.row()-1;
+        qmi = boardsSelected.at(0);
+        if(qmi.row()-1>=0){
+            key = qmi.row()-1;
+            qmi = qmi.sibling(key,0);
+            if(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)){
+                key = model->rowCount(qmi) - 1;
+                ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0,qmi),QItemSelectionModel::ClearAndSelect);
+                return;
+            }
+        }
+        else{
+            qmi = qmi.parent();
+            key = qmi.row();
+            if(key == -1){
+                key = model->rowCount() - 1;
+                qmi = model->index(key,0);
+                if(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)){
+                    key = model->rowCount(qmi) - 1;
+                    ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0,qmi),QItemSelectionModel::ClearAndSelect);
+                    return;
+                }
+            }
+        }
     }
-    ui->treeView->setCurrentIndex(model->index(key,0));
-    ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0),QItemSelectionModel::ClearAndSelect);
+    ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0,qmi.parent()),QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -130,7 +159,6 @@ void MainWindow::loadFromSearch(QString searchString, bool select){
     ui->stackedWidget->addWidget(bt);
     //ui->stackedWidget
     Tab tab = {Tab::TabType::Board,bt,searchString};
-    tabs.push_back(tab);
     QStandardItem* parent1 = new QStandardItem(displayString);
     model->appendRow(parent1);
     pages++;
@@ -146,7 +174,6 @@ void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
     //ui->verticalLayout_3->addWidget(tt);
     ui->stackedWidget->addWidget(tt);
     Tab tab = {Tab::TabType::Thread,tt,QString("/"+board+"/"+thread)};
-    tabs.push_back(tab);
     QStandardItem* parent1 = new QStandardItem("/"+board+"/"+thread);
     model->appendRow(parent1);
     pages++;
