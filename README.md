@@ -8,4 +8,7 @@ There's still a lot to do.
 * captcha
 * settings
 
+### MINOR
+* themes
+
 ![qtchan ss](https://i.abcdn.co/qtchan.png)
