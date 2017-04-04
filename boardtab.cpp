@@ -14,6 +14,7 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
     ui(new Ui::BoardTab)
 {
     ui->setupUi(this);
+    //TODO check if actual board
     this->board = board;
     this->type = type;
     this->search = search;
