@@ -111,13 +111,12 @@ void PostForm::postFinished(){
     reply->show();
     if(reply->toPlainText().contains(QRegularExpression("uploaded.$|Post successful!$")))
     {
+        this->ui->com->clear();
         QTimer::singleShot(1000, this, &PostForm::close);
         QTimer::singleShot(1000, reply, &QTextEdit::close);
     }
-    else{
-        this->installEventFilter(this);
-        submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
-    }
+    this->installEventFilter(this);
+    submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
 }
 
 bool PostForm::eventFilter(QObject *obj, QEvent *event)
