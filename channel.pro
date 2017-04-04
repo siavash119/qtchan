@@ -27,7 +27,6 @@ HEADERS  += mainwindow.h \
     threadform.h \
     clickablelabel.h \
     boardtab.h \
-    treekeypress.h \
     netcontroller.h \
     threadtab.h \
     post.h \
