@@ -45,6 +45,8 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
 
 ThreadForm::~ThreadForm()
 {
+    disconnect(connectionImage);
+    disconnect(connectionThumb);
     delete ui;
 }
 
