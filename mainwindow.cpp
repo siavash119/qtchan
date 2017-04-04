@@ -63,6 +63,11 @@ void MainWindow::setShortcuts(){
     navBar->setShortcutContext(Qt::ApplicationShortcut);
     connect(navBar, &QAction::triggered, this, &MainWindow::focusBar);
     this->addAction(navBar);
+    QAction *saveState = new QAction(this);
+    saveState->setShortcut(QKeySequence(Qt::Key_F10));
+    saveState->setShortcutContext(Qt::ApplicationShortcut);
+    connect(saveState, &QAction::triggered, this, &MainWindow::saveSession);
+    this->addAction(saveState);
 }
 
 MainWindow::~MainWindow()
