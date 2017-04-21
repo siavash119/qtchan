@@ -5,6 +5,7 @@
 #include <QNetworkReply>
 #include <QFileDialog>
 #include <QMimeData>
+#include "overlay.h"
 
 namespace Ui {
 class PostForm;
@@ -25,6 +26,8 @@ public:
     QFileDialog *dialog;
     QMetaObject::Connection submitConnection;
     void fileChecker(const QMimeData *mimedata);
+    void addOverlay();
+    void removeOverlay();
     //TODO links in com?
 
 public slots:
@@ -32,6 +35,8 @@ public slots:
 
 private:
     Ui::PostForm *ui;
+    Overlay *overlay;
+    QWidget *focused;
 
 private slots:
     void postFinished();

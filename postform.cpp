@@ -9,6 +9,7 @@
 #include <QGraphicsItem>
 #include <QShortcut>
 #include <iostream>
+#include <QGraphicsEffect>
 #include "netcontroller.h"
 
 PostForm::PostForm(QString board, QString thread, QWidget *parent) :
@@ -50,6 +51,7 @@ void PostForm::appendText(QString text){
 }
 
 void PostForm::postIt(){
+    addOverlay();
     disconnect(submitConnection);
     this->removeEventFilter(this);
     qDebug() << "posting";
@@ -115,9 +117,30 @@ void PostForm::postFinished(){
         QTimer::singleShot(1000, this, &PostForm::close);
         QTimer::singleShot(1000, reply, &QTextEdit::close);
     }
+    removeOverlay();
     this->installEventFilter(this);
     submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
 }
+
+void PostForm::addOverlay(){
+    qDebug() << "adding overlay";
+    overlay = new Overlay(this);
+    overlay->setObjectName("overlay");
+    overlay->setParent(this);
+    overlay->show();
+    focused = this->focusWidget();
+    ui->com->setFocusPolicy(Qt::NoFocus);
+    ui->filename->setFocus();
+}
+
+void PostForm::removeOverlay(){
+    qDebug() << "removing overlay";
+    overlay->deleteLater();
+    ui->com->setFocusPolicy(Qt::StrongFocus);
+    focused->setFocus();
+}
+
+
 
 bool PostForm::eventFilter(QObject *obj, QEvent *event)
 {
@@ -133,7 +156,9 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
             return true;
         }
         if(key==53){
-            qDebug() << filename;
+            addOverlay();
+            QTimer::singleShot(1000, this, &PostForm::removeOverlay);
+            //qDebug() << filename;
         }
         return QObject::eventFilter(obj, event);
     }
@@ -156,24 +181,24 @@ void PostForm::fileChecker(const QMimeData *mimeData){
    if (mimeData->hasImage()) {
        //ui->label->setPixmap(qvariant_cast<QPixmap>(mimeData->imageData()));
    } else if (mimeData->hasHtml()) {
-       ui->com->setPlainText(mimeData->text());
+       ui->filename->setText(mimeData->text());
        //setTextFormat(Qt::RichText);
    } else if (mimeData->hasText()) {
        qDebug() << mimeData->text();
-       filename = mimeData->text().mid(7);
+       filename = mimeData->text().mid(7); //remove file://
        filename.remove(QRegExp("[\\n\\t\\r]"));
        ui->filename->setText(filename);
-       ui->cancel->show();
    } else if (mimeData->hasUrls()) {
        QList<QUrl> urlList = mimeData->urls();
        QString text;
        for (int i = 0; i < urlList.size() && i < 32; ++i)
            text += urlList.at(i).path() + QLatin1Char('\n');
-       ui->com->setPlainText(text);
+       ui->filename->setText(text);
    } else {
-       ui->com->setPlainText("Cannot display data");
+       ui->filename->setText("Cannot display data");
    }
    qDebug() << filename;
+   ui->cancel->show();
 }
 
 
