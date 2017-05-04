@@ -15,7 +15,8 @@ There's still a lot to do.
 
 # Using 4chan pass to post
 Create a file ~/.config/qtchan/settings like below. Look at your browser cookies for values.
-```{
+```
+{
 	"cookies":{
 		"4chan_pass":"your 4chanpass",
 		"pass_id":"your pass id",
