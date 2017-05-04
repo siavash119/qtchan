@@ -23,10 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->splitter->setStretchFactor(0,0);
     ui->splitter->setStretchFactor(1,1);
-    /*QStringList headers;
-    headers << "hi";
-    QString data = "yo";
-    model = new TreeModel(headers,data);*/
     model = new QStandardItemModel;
     model->setColumnCount(1);
     ui->treeView->setModel(model);
@@ -68,6 +64,9 @@ void MainWindow::setShortcuts(){
     saveState->setShortcutContext(Qt::ApplicationShortcut);
     connect(saveState, &QAction::triggered, this, &MainWindow::saveSession);
     this->addAction(saveState);
+    ui->actionSave->setShortcut(QKeySequence("Ctrl+S"));
+    ui->actionSave->setShortcutContext(Qt::ApplicationShortcut);
+    connect(ui->actionSave,&QAction::triggered,this,&MainWindow::saveSession);
 }
 
 MainWindow::~MainWindow()
@@ -160,6 +159,7 @@ void MainWindow::loadFromSearch(QString searchString, bool select){
         bt = new BoardTab(searchString,BoardType::Index);
         displayString = "/"+searchString+"/";
     }
+    qDebug() << "loading " + displayString;
     //ui->verticalLayout_3->addWidget(bt);
     ui->stackedWidget->addWidget(bt);
     //ui->stackedWidget
@@ -228,7 +228,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             qDebug() << (Tab::TabType)tabs.at(row).type;
             ((Tab::TabType)tabs.at(row).type) == Tab::TabType::Board ? ((BoardTab*)tabs.at(row).TabPointer)->updatePosts() :
                                                           ((ThreadTab*)tabs.at(row).TabPointer)->updatePosts();*/
-            qDebug() << ui->treeView->indentation();
         }
         else if(key == 16777269){
             ui->lineEdit->setFocus();
@@ -301,6 +300,7 @@ void MainWindow::focusBar(){
 }
 
 void MainWindow::saveSession(){
+    qDebug() << "Saving session.";
     QSettings settings;
     QStringList session;
     //TODO keep item order
@@ -308,15 +308,7 @@ void MainWindow::saveSession(){
     while(i.hasNext()){
         session.append(i.next().value().searchString);
     }
-    //int numTabs = tabs.size();
-    /*for (int i=0; i < numTabs; i++) {
-        session.append(((Tab)(tabs.at(i))).searchString);
-    }*/
     settings.setValue("session",session);
-    //QStringList List;
-    //qDebug() << List;
-    // save list
-    //settings.setValue("session_new", QVariant::fromValue(List));
 }
 
 void MainWindow::loadSession(){

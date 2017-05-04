@@ -34,6 +34,9 @@
     <pointsize>16</pointsize>
    </font>
   </property>
+  <property name="mouseTracking">
+   <bool>false</bool>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -287,6 +290,9 @@
           <font>
            <pointsize>14</pointsize>
           </font>
+         </property>
+         <property name="mouseTracking">
+          <bool>false</bool>
          </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -577,6 +583,9 @@
          <pointsize>14</pointsize>
         </font>
        </property>
+       <property name="mouseTracking">
+        <bool>false</bool>
+       </property>
        <property name="styleSheet">
         <string notr="true"/>
        </property>
@@ -586,11 +595,11 @@
        <property name="textFormat">
         <enum>Qt::RichText</enum>
        </property>
-       <property name="scaledContents">
-        <bool>true</bool>
-       </property>
        <property name="wordWrap">
         <bool>true</bool>
+       </property>
+       <property name="margin">
+        <number>5</number>
        </property>
        <property name="textInteractionFlags">
         <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
@@ -790,6 +799,9 @@
        </property>
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="mouseTracking">
+        <bool>false</bool>
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>

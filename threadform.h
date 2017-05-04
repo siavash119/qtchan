@@ -9,6 +9,8 @@
 #include <QSet>
 #include <QList>
 #include <QSignalMapper>
+#include <QMouseEvent>
+#include <QPointer>
 #include "post.h"
 
 namespace Ui {
@@ -43,6 +45,7 @@ public:
     QSignalMapper *signalMapper;
     //void insert(int position, ThreadForm* tf);
     void insert(ThreadForm* tf);
+    void deleteHideLayout();
     QSet<QString> quotelinks;
     QMap<double,QString> replies;
     void setReplies();
@@ -72,11 +75,14 @@ private:
     void getFile();
     void getThumb();
     QWidget* tab; //pointer to tab
+    QPointer<ThreadForm> floating;
 
 signals:
     void loadThreadTab(ThreadForm*, QJsonArray&);
     void loadThread(ThreadForm*,QString&,QString&);
     void updateWidth();
+    void floatLink(const QString &link);
+    void updateFloat();
     //void searchPost(int position, QString postNum);
 
 public slots:
@@ -87,6 +93,12 @@ public slots:
 private slots:
     void quoteClicked(const QString &link);
     void on_replies_linkHovered(const QString &link);
+
+    void on_com_linkHovered(const QString &link);
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event);
+    //void mouseMoveEvent(QMouseEvent *event);
 };
 
 #endif // THREADFORM_H

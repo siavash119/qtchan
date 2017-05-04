@@ -6,7 +6,9 @@
 #include <QNetworkRequest>
 #include <QMap>
 #include <QMutableMapIterator>
+#include <QPointer>
 #include "boardtab.h"
+#include "clickablelabel.h"
 #include "threadform.h"
 #include "postform.h"
 
@@ -43,12 +45,17 @@ public:
     ThreadForm* findPost(QString postNum);
     int getMinWidth();
     void setMinWidth(int minw);
+    QPointer<ThreadForm> floating;
+    bool floatIt;
 
 public slots:
     //void findPost(int position, QString postNum);
     void focusIt();
     void updateWidth();
     void quoteIt(QString text);
+    void floatReply(const QString &link);
+    void deleteFloat();
+    void updateFloat();
 
 private:
     Ui::ThreadTab *ui;

@@ -31,6 +31,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     //myProcess = new QProcess(parent);
     myPostForm = new PostForm(board,thread);
     this->setShortcuts();
+    this->installEventFilter(this);
 }
 
 void ThreadTab::setShortcuts(){
@@ -123,6 +124,7 @@ void ThreadTab::loadPosts(){
         ThreadForm *tf = new ThreadForm(board,thread,PostType::Reply,true,this);
         ui->threads->addWidget(tf);
         tf->load(p);
+        connect(tf,&ThreadForm::floatLink,this,&ThreadTab::floatReply);
         //todo on hide clicked remove from map and update replies
         tfMap.insert(tf->post->no,tf);
         //seg faults
@@ -166,6 +168,8 @@ void ThreadTab::loadAllImages(){
 }
 
 ThreadForm* ThreadTab::findPost(QString postNum){
+    //TODO return 0 if not there
+    //already does it?
     return tfMap.value(postNum);
 }
 
@@ -199,16 +203,16 @@ void ThreadTab::quoteIt(QString text){
     openPostForm();
 }
 
-
 bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 {
-    if (event->type() == QEvent::KeyPress) {
+    switch(event->type())
+    {
+    case QEvent::KeyPress:{
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
         int mod = keyEvent->modifiers();
         int key = keyEvent->key();
         qDebug("Ate modifier %d",mod);
         qDebug("Ate key press %d", key);
-        qDebug() << obj->objectName();
         if(mod == 67108864 && key == 70){
             //ui->lineEdit->setFocus();
         }
@@ -223,8 +227,13 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
             return QObject::eventFilter(obj, event);
         }
         return true;
-    } else {
-        // standard event processing
+        break;
+    }
+    //check cursor change instead?
+    case QEvent::Leave:
+    case QEvent::Wheel:
+        deleteFloat();
+    default:
         return QObject::eventFilter(obj, event);
     }
 }
@@ -236,4 +245,40 @@ void ThreadTab::focusIt(){
 void ThreadTab::on_lineEdit_returnPressed()
 {
     findText(ui->lineEdit->text());
+}
+
+void ThreadTab::floatReply(const QString &link){
+    deleteFloat();
+    ThreadForm *tf = findPost(link);
+    floating = tf->clone();
+    floating->deleteHideLayout();
+    floating->setParent(this);
+    floating->setObjectName("reply");
+    floating->setWindowFlags(Qt::ToolTip);
+    floating->setWindowTitle("reply");
+    QPoint globalCursorPos = QCursor::pos();
+    QSize sizeHint = floating->sizeHint();
+    floating->setGeometry(globalCursorPos.x()+10,globalCursorPos.y()+10,sizeHint.width(),sizeHint.height());
+    //floating->move(globalCursorPos.x()+10,globalCursorPos.y()+10);
+    floating->updateGeometry();
+    floating->update();
+    floating->show();
+}
+
+void ThreadTab::deleteFloat(){
+    if(floating && floating->post){
+        floating->hide();
+        floating->deleteLater();
+    }
+}
+
+void ThreadTab::updateFloat(){
+    if(floating && floating->post){
+        QPoint globalCursorPos = QCursor::pos();
+        QSize sizeHint = floating->sizeHint();
+        floating->setGeometry(globalCursorPos.x()+10,globalCursorPos.y()+10,sizeHint.width(),sizeHint.height());
+        //floating->move(globalCursorPos.x()+10,globalCursorPos.y()+10);
+        floating->updateGeometry();
+        floating->update();
+    }
 }

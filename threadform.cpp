@@ -27,6 +27,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
     this->type = type;
     this->root = root;
     this->tab = parent;
+    if(this->type == PostType::Reply) this->floating = ((ThreadTab*)tab)->floating;
     ui->setupUi(this);
     ui->tim->hide();
     ui->horizontalSpacer->changeSize(0,0);
@@ -41,6 +42,13 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
     if(type==Reply)connect(ui->no,&ClickableLabel::clicked,[=](){
         ((ThreadTab*)tab)->quoteIt(">>"+ui->no->text());
     });
+    ui->replies->installEventFilter(this);
+    ui->com->installEventFilter(this);
+    this->installEventFilter(this);
+    ui->tim->installEventFilter(this);
+    ui->name->installEventFilter(this);
+    ////ui->postLayout->installEventFilter(this);
+    ////ui->postLayout->installEventFilter(this);
 }
 
 ThreadForm::~ThreadForm()
@@ -309,7 +317,18 @@ void ThreadForm::quoteClicked(const QString &link)
 
 void ThreadForm::on_replies_linkHovered(const QString &link)
 {
-    //qDebug() << link;
+    qDebug() << link;
+    if(this->type == PostType::Reply){
+        if(link.at(0)=='#'){
+            qDebug() << link;
+            emit floatLink(link.mid(2));
+        }
+        else{
+           //TODO check mouse cursor?
+           ((ThreadTab*)tab)->deleteFloat();
+        }
+    }
+    /*
     if(this->type == PostType::Reply){
         QRegularExpression postLink("#p(\\d+)");
         QRegularExpressionMatch match = postLink.match(link);
@@ -318,7 +337,7 @@ void ThreadForm::on_replies_linkHovered(const QString &link)
             //emit searchPost(ui->com->textCursor().position(),match.captured(1));
             //emit searchPost(match.captured(1),this);
         }
-    }
+    }*/
 }
 
 void ThreadForm::insert(ThreadForm* tf){
@@ -378,6 +397,8 @@ ThreadForm* ThreadForm::clone(){
         tfs->hide();
         tfs->deleteLater();
     });
+    //TODO load and connect cross thread replies
+    if(this->type == PostType::Reply) connect(tfs,&ThreadForm::floatLink,((ThreadTab*)tab),&ThreadTab::floatReply);
     connect(tfs,&QObject::destroyed,[=](){this->clones.removeOne(tfs);});
     return tfs;
 }
@@ -401,4 +422,36 @@ void ThreadForm::setReplies(){
     else{
         ui->replies->hide();
     }
+}
+
+bool ThreadForm::eventFilter(QObject *obj, QEvent *event)
+{
+    //check cursor type instead?
+    if(event->type() == QEvent::MouseMove){
+        if(this->type == PostType::Reply) ((ThreadTab*)tab)->updateFloat();
+    }
+    //qDebug() << cursor.shape();
+    /*if (event->type() == QEvent::CursorChange) {
+        QMouseEvent *mE = static_cast<QMouseEvent *>(event);
+        if(cursor.shape()==Qt::PointingHandCursor){
+            qDebug() << "do it";
+        }
+        return QObject::eventFilter(obj, event);
+    }*/
+    else if(event->type() == QEvent::Leave){
+        if(this->type == PostType::Reply) ((ThreadTab*)tab)->deleteFloat();
+    }
+    else if(event->type() == QEvent::DragEnter){
+        return true;
+    }
+    return QObject::eventFilter(obj, event);
+}
+
+void ThreadForm::on_com_linkHovered(const QString &link)
+{
+    on_replies_linkHovered(link);
+}
+
+void ThreadForm::deleteHideLayout(){
+    delete this->ui->hideLayout;
 }
