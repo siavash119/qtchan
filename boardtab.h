@@ -26,16 +26,22 @@ public:
     void addThread();
     QNetworkReply *reply;
     //TODO change to map
-    std::vector<ThreadForm*> posts;
+    QMap<QString,ThreadForm*> tfMap;
     void updatePosts();
     void setShortcuts();
+    void getPosts();
+    void focusIt();
+
+public slots:
+    void findText(const QString text);
 
 private:
     Ui::BoardTab *ui;
 
 private slots:
     void loadThreads();
-    void getPosts();
+    void on_pushButton_clicked();
+    void on_lineEdit_returnPressed();
 };
 
 #endif // BOARDTAB_H

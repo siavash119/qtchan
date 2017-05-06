@@ -30,6 +30,12 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 
 BoardTab::~BoardTab()
 {
+    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
+    while (mapI.hasNext()) {
+        mapI.next();
+        ((ThreadForm*)mapI.value())->deleteLater();
+        mapI.remove();
+    }
     delete ui;
 }
 
@@ -46,34 +52,64 @@ void BoardTab::setShortcuts(){
     focusBar->setShortcut(Qt::Key_F6);
     connect(focusBar,&QAction::triggered,mw,&MainWindow::focusBar);
     this->addAction(focusBar);
+    QAction *focusSearch = new QAction(this);
+    focusSearch->setShortcut(QKeySequence("Ctrl+f"));
+    connect(focusSearch,&QAction::triggered,this,&BoardTab::focusIt);
+    this->addAction(focusSearch);
+}
+
+void BoardTab::findText(const QString text){
+    QRegularExpression re(text,QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatch match;
+    ThreadForm* tf;
+    bool pass = false;
+    if (text == "") pass = true;
+    qDebug().noquote() << "searching " + text;
+    QMapIterator<QString,ThreadForm*> mapI(tfMap);
+    while (mapI.hasNext()) {
+        mapI.next();
+        tf = mapI.value();
+        if(pass) { tf->show(); continue;};
+        match = re.match(tf->post->com);
+        if(!match.hasMatch()){
+            tf->hide();
+        }
+        else qDebug().noquote().nospace() << "found " << text << " in thread #" << tf->post->no;
+    }
 }
 
 void BoardTab::getPosts(){
-    qDebug() << "refreshing /" + board + "/";
+    qDebug("refreshing /%s/",board.toLatin1().constData());
     reply = nc.manager->get(QNetworkRequest(QUrl(boardUrl)));
     connect(reply, &QNetworkReply::finished, this, &BoardTab::loadThreads);
 }
 
 
 void BoardTab::updatePosts(){
-    int length = posts.size();
+    /*int length = posts.size();
     for(int i=0;i<length;i++){
         ((ThreadForm*)posts.at(i))->updateComHeight();
-    }
+    }*/
 }
 
 void BoardTab::loadThreads(){
-    int i = posts.size();
+    /*int i = posts.size();
     while(i--){
         //((ThreadForm*)posts.at(i))->deleteLater();
         ((ThreadForm*)posts.at(i))->close();
         ((ThreadForm*)posts.at(i))->deleteLater();
         posts.pop_back();
+    }*/
+    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
+    while (mapI.hasNext()) {
+        mapI.next();
+        ((ThreadForm*)mapI.value())->deleteLater();
+        mapI.remove();
     }
     QJsonArray threads;
     if(type==BoardType::Index) threads = QJsonDocument::fromJson(reply->readAll()).object()["threads"].toArray();
     else{
-        qDebug() << "searching " + search;
+        qDebug("searching %s",search.toLatin1().constData());
         QRegularExpression re(search,QRegularExpression::CaseInsensitiveOption);
         QRegularExpressionMatch match;
         QJsonArray allThreads = QJsonDocument::fromJson(reply->readAll()).array();
@@ -87,10 +123,10 @@ void BoardTab::loadThreads(){
         }
     }
     int length = threads.size();
-    qDebug() << QString("length is ").append(QString::number(length));
+    qDebug(QString("length is ").append(QString::number(length)).toLatin1().constData());
     QSettings settings;
     QStringList idFilters = settings.value("filters/"+board+"/id").toStringList();
-    for(i=0;i<length;i++){
+    for(int i=0;i<length;i++){
         QJsonObject p;
         if(type==BoardType::Index) p = threads.at(i).toObject()["posts"].toArray()[0].toObject();
         else p = threads.at(i).toObject();
@@ -99,12 +135,27 @@ void BoardTab::loadThreads(){
             ThreadForm *tf = new ThreadForm(board,threadNum,Thread,true,this);
             ui->threads->addWidget(tf);
             tf->load(p);
-            posts.push_back(tf);
+            tfMap.insert(tf->post->no,tf);
+            //posts.push_back(tf);
         }
         else{
-            qDebug() << "threadNum "+threadNum+" filtered!";
+            qDebug("threadNum %s filtered!",threadNum.toLatin1().constData());
         }
     }
     ui->threads->addStretch(1);
     reply->deleteLater();
+}
+
+void BoardTab::on_pushButton_clicked()
+{
+    findText(ui->lineEdit->text());
+}
+
+void BoardTab::on_lineEdit_returnPressed()
+{
+    findText(ui->lineEdit->text());
+}
+
+void BoardTab::focusIt(){
+    ui->lineEdit->setFocus();
 }
