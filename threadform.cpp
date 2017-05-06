@@ -296,6 +296,7 @@ void ThreadForm::hideClicked(){
 void ThreadForm::openImage(){
     if(replyImage->error()){
         qDebug().noquote() << "loading post error:" << replyImage->errorString();
+        replyImage->deleteLater();
         return;
     }
     QDesktopServices::openUrl(QUrl::fromLocalFile(QDir().absoluteFilePath(filePath)));

@@ -119,6 +119,7 @@ void ThreadTab::updateWidth(){
 void ThreadTab::loadPosts(){
     if(reply->error()){
         qDebug().noquote() << "loading post error:" << reply->errorString();
+        reply->deleteLater();
         return;
     }
     QJsonArray posts = QJsonDocument::fromJson(reply->readAll()).object().value("posts").toArray();

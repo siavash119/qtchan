@@ -109,6 +109,7 @@ void BoardTab::loadThreads(){
     QJsonArray threads;
     if(reply->error()){
         qDebug().noquote() << "loading post error:" << reply->errorString();
+        reply->deleteLater();
         return;
     }
     if(type==BoardType::Index) threads = QJsonDocument::fromJson(reply->readAll()).object().value("threads").toArray();
