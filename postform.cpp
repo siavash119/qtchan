@@ -42,6 +42,7 @@ void PostForm::setShortcuts(){
     //new QShortcut(QKeySequence::NextChild,this);
     //new QShortcut(QKeySequence("Ctrl+Shift+Tab"),this);
     new QShortcut(QKeySequence::Delete,this);
+    new QShortcut(Qt::Key_R,this);
 
     //rest in the eventfilter
 }
@@ -54,7 +55,7 @@ void PostForm::postIt(){
     addOverlay();
     disconnect(submitConnection);
     this->removeEventFilter(this);
-    qDebug() << "posting";
+    qDebug().noquote() << "posting";
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
     QHttpPart mode;
     mode.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"mode\""));
@@ -70,7 +71,7 @@ void PostForm::postIt(){
     email.setBody(ui->email->toPlainText().toStdString().c_str());
     QHttpPart com;
     com.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"com\""));
-    qDebug() << ui->com->toPlainText().toStdString().c_str();
+    qDebug().noquote() << ui->com->toPlainText().toStdString().c_str();
     com.setBody(ui->com->toPlainText().toStdString().c_str());
     /*QHttpPart recaptcha;
     com.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"g-recaptcha-response\""));
@@ -109,7 +110,7 @@ void PostForm::postFinished(){
     reply->setMinimumSize(640,480);
     QByteArray temp = postReply->readAll();
     reply->setHtml(temp);
-    qDebug() << temp;
+    qDebug().noquote() << temp;
     reply->show();
     if(reply->toPlainText().contains(QRegularExpression("uploaded.$|Post successful!$")))
     {
@@ -123,7 +124,7 @@ void PostForm::postFinished(){
 }
 
 void PostForm::addOverlay(){
-    qDebug() << "adding overlay";
+    qDebug().noquote() << "adding overlay";
     overlay = new Overlay(this);
     overlay->setObjectName("overlay");
     overlay->setParent(this);
@@ -134,7 +135,7 @@ void PostForm::addOverlay(){
 }
 
 void PostForm::removeOverlay(){
-    qDebug() << "removing overlay";
+    qDebug().noquote() << "removing overlay";
     overlay->deleteLater();
     ui->com->setFocusPolicy(Qt::StrongFocus);
     focused->setFocus();
@@ -148,8 +149,8 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
         int mod = keyEvent->modifiers();
         int key = keyEvent->key();
-        qDebug("Ate key press %d", key);
-        qDebug("Ate modifier press %d", mod);
+        //qDebug("Ate key press %d", key);
+        //qDebug("Ate modifier press %d", mod);
         //shift+enter to post
         if(mod == 33554432 && key == 16777220){
             postIt();
@@ -170,21 +171,21 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
     if(event->type() == QEvent::Drop){
             const QMimeData *mimeData = ((QDropEvent*)event)->mimeData();
             fileChecker(mimeData);
-            qDebug() << "DROPPED";
+            qDebug().noquote() << "DROPPED";
             return true;
     }
     return QObject::eventFilter(obj, event);
 }
 
 void PostForm::fileChecker(const QMimeData *mimeData){
-    qDebug()<< "checking file";
+    qDebug().noquote() << "checking file";
    if (mimeData->hasImage()) {
        //ui->label->setPixmap(qvariant_cast<QPixmap>(mimeData->imageData()));
    } else if (mimeData->hasHtml()) {
        ui->filename->setText(mimeData->text());
        //setTextFormat(Qt::RichText);
    } else if (mimeData->hasText()) {
-       qDebug() << mimeData->text();
+       qDebug().noquote() << mimeData->text();
        filename = mimeData->text().mid(7); //remove file://
        filename.remove(QRegExp("[\\n\\t\\r]"));
        ui->filename->setText(filename);
@@ -197,7 +198,7 @@ void PostForm::fileChecker(const QMimeData *mimeData){
    } else {
        ui->filename->setText("Cannot display data");
    }
-   qDebug() << filename;
+   qDebug().noquote() << filename;
    ui->cancel->show();
 }
 
@@ -223,7 +224,7 @@ void PostForm::fileSelected(const QString &file){
         ui->cancel->show();
     }
     dialog->close();
-    qDebug() << filename;
+    qDebug().noquote() << filename;
 }
 
 void PostForm::on_cancel_clicked()
@@ -234,5 +235,5 @@ void PostForm::on_cancel_clicked()
 }
 
 void PostForm::droppedItem(){
-    qDebug() << "dropped!";
+    qDebug().noquote() << "dropped!";
 }
