@@ -117,7 +117,11 @@ void ThreadTab::updateWidth(){
 }
 
 void ThreadTab::loadPosts(){
-    QJsonArray posts = QJsonDocument::fromJson(reply->readAll()).object()["posts"].toArray();
+    if(reply->error()){
+        qDebug().noquote() << "loading post error:" << reply->errorString();
+        return;
+    }
+    QJsonArray posts = QJsonDocument::fromJson(reply->readAll()).object().value("posts").toArray();
     int length = posts.size();
     qDebug().noquote() << QString("length is ").append(QString::number(length));
     for(int i=tfMap.size();i<length;i++){

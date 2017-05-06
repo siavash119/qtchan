@@ -107,7 +107,11 @@ void BoardTab::loadThreads(){
         mapI.remove();
     }
     QJsonArray threads;
-    if(type==BoardType::Index) threads = QJsonDocument::fromJson(reply->readAll()).object()["threads"].toArray();
+    if(reply->error()){
+        qDebug().noquote() << "loading post error:" << reply->errorString();
+        return;
+    }
+    if(type==BoardType::Index) threads = QJsonDocument::fromJson(reply->readAll()).object().value("threads").toArray();
     else{
         qDebug("searching %s",search.toLatin1().constData());
         QRegularExpression re(search,QRegularExpression::CaseInsensitiveOption);
@@ -128,9 +132,9 @@ void BoardTab::loadThreads(){
     QStringList idFilters = settings.value("filters/"+board+"/id").toStringList();
     for(int i=0;i<length;i++){
         QJsonObject p;
-        if(type==BoardType::Index) p = threads.at(i).toObject()["posts"].toArray()[0].toObject();
+        if(type==BoardType::Index) p = threads.at(i).toObject().value("posts").toArray().at(0).toObject();
         else p = threads.at(i).toObject();
-        QString threadNum = QString("%1").arg(p["no"].toDouble(),0,'f',0);
+        QString threadNum = QString("%1").arg(p.value("no").toDouble(),0,'f',0);
         if (!idFilters.contains(threadNum)){
             ThreadForm *tf = new ThreadForm(board,threadNum,Thread,true,this);
             ui->threads->addWidget(tf);

@@ -69,7 +69,7 @@ private:
     QMetaObject::Connection connectionPost;
     QMetaObject::Connection connectionThumb;
     QMetaObject::Connection connectionImage;
-    QNetworkReply *reply;
+    //QNetworkReply *reply; //Use for cross-thread gets later?
     QNetworkReply *replyThumb;
     QNetworkReply *replyImage;
     void getFile();
