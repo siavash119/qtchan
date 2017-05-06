@@ -67,6 +67,15 @@ void MainWindow::setShortcuts(){
     ui->actionSave->setShortcut(QKeySequence("Ctrl+S"));
     ui->actionSave->setShortcutContext(Qt::ApplicationShortcut);
     connect(ui->actionSave,&QAction::triggered,this,&MainWindow::saveSession);
+    ui->actionReload->setShortcut(QKeySequence("Ctrl+R"));
+    connect(ui->actionReload,&QAction::triggered,[=]{
+        QMapIterator<int,Tab> i(tabsNew);
+        while(i.hasNext()){
+            Tab tab = i.next().value();
+            if(tab.type == Tab::TabType::Board) ((BoardTab*)tab.TabPointer)->getPosts();
+            else ((ThreadTab*)tab.TabPointer)->getPosts();
+        }
+    });
 }
 
 MainWindow::~MainWindow()
@@ -159,7 +168,7 @@ void MainWindow::loadFromSearch(QString searchString, bool select){
         bt = new BoardTab(searchString,BoardType::Index);
         displayString = "/"+searchString+"/";
     }
-    qDebug() << "loading " + displayString;
+    qDebug().noquote() << "loading " + displayString;
     //ui->verticalLayout_3->addWidget(bt);
     ui->stackedWidget->addWidget(bt);
     //ui->stackedWidget
@@ -174,7 +183,7 @@ void MainWindow::loadFromSearch(QString searchString, bool select){
 }
 
 void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
-    qDebug() << "loading /"+board+"/"+thread;
+    qDebug().noquote()  << "loading /"+board+"/"+thread;
     ThreadTab *tt = new ThreadTab(board,thread);
     //ui->verticalLayout_3->addWidget(tt);
     ui->stackedWidget->addWidget(tt);
@@ -220,8 +229,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
         int key = keyEvent->key();
         int mod = keyEvent->modifiers();
-        qDebug("Ate key press %d", key);
-        qDebug("Modifers %d", mod);
+        //qDebug("Ate key press %d", key);
+        //qDebug("Modifers %d", mod);
         if(key == 53){
             /*const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
             int row = indexList.at(0).row();
@@ -250,6 +259,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 }
 
 void MainWindow::deleteSelected(){
+    //TODO delete all selected; right now only deletes first one
     const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
     if(!indexList.size()) return;
     int pageId = indexList.at(0).data(Qt::UserRole).toInt();
@@ -300,7 +310,7 @@ void MainWindow::focusBar(){
 }
 
 void MainWindow::saveSession(){
-    qDebug() << "Saving session.";
+    qDebug().noquote() << "Saving session.";
     QSettings settings;
     QStringList session;
     //TODO keep item order

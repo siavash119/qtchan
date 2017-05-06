@@ -481,7 +481,10 @@
   </widget>
   <action name="actionReload">
    <property name="text">
-    <string>Reload</string>
+    <string>Refresh All</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh all tabs</string>
    </property>
   </action>
   <action name="actionSave">
