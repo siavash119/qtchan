@@ -47,6 +47,7 @@ public:
     void setMinWidth(int minw);
     QPointer<ThreadForm> floating;
     bool floatIt;
+    void getPosts();
 
 public slots:
     //void findPost(int position, QString postNum);
@@ -65,7 +66,6 @@ private slots:
     void loadPosts();
     void gallery();
     void openPostForm();
-    void getPosts();
     void on_pushButton_clicked();
     void on_lineEdit_returnPressed();
 

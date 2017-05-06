@@ -49,10 +49,11 @@ void ThreadTab::setShortcuts(){
     this->addAction(expandAll);
     QAction *refresh = new QAction(this);
     refresh->setShortcut(Qt::Key_R);
+    refresh->setShortcutContext(Qt::ApplicationShortcut);
     connect(refresh, &QAction::triggered, this, &ThreadTab::getPosts);
     this->addAction(refresh);
     QAction *focusSearch = new QAction(this);
-    focusSearch->setShortcut(Qt::ControlModifier+Qt::Key_F);
+    focusSearch->setShortcut(QKeySequence("Ctrl+f"));
     connect(focusSearch,&QAction::triggered,this,&ThreadTab::focusIt);
     this->addAction(focusSearch);
     QAction *focusTree = new QAction(this);
@@ -66,7 +67,7 @@ void ThreadTab::setShortcuts(){
 }
 
 void ThreadTab::getPosts(){
-    qDebug() << "refreshing /" + board + "/" + thread;
+    qDebug().noquote() << "refreshing /" + board + "/" + thread;
     reply = nc.manager->get(request);
     connect(reply, &QNetworkReply::finished, this, &ThreadTab::loadPosts);
 }
@@ -118,7 +119,7 @@ void ThreadTab::updateWidth(){
 void ThreadTab::loadPosts(){
     QJsonArray posts = QJsonDocument::fromJson(reply->readAll()).object()["posts"].toArray();
     int length = posts.size();
-    qDebug() << QString("length is ").append(QString::number(length));
+    qDebug().noquote() << QString("length is ").append(QString::number(length));
     for(int i=tfMap.size();i<length;i++){
         QJsonObject p = posts.at(i).toObject();
         ThreadForm *tf = new ThreadForm(board,thread,PostType::Reply,true,this);
@@ -179,17 +180,17 @@ void ThreadTab::findText(const QString text){
     ThreadForm* tf;
     bool pass = false;
     if (text == "") pass = true;
-    qDebug() << "searching " + text;
+    qDebug().noquote() << "searching " + text;
     QMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
         tf = mapI.value();
-        qDebug() << tf->post->com;
         if(pass) { tf->show(); continue;};
         match = re.match(tf->post->com);
         if(!match.hasMatch()){
             tf->hide();
         }
+        else qDebug().noquote().nospace() << "found " << text << " in thread #" << tf->post->no;
     }
 }
 
@@ -209,14 +210,10 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
     {
     case QEvent::KeyPress:{
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        int mod = keyEvent->modifiers();
+        //int mod = keyEvent->modifiers();
         int key = keyEvent->key();
-        qDebug("Ate modifier %d",mod);
-        qDebug("Ate key press %d", key);
-        if(mod == 67108864 && key == 70){
-            //ui->lineEdit->setFocus();
-        }
-        qDebug("Ate key press %d", key);
+        //qDebug("Ate modifier %d",mod);
+        //qDebug("Ate key press %d", key);
         if(key == 16777220){
             on_pushButton_clicked();
         }
@@ -249,7 +246,8 @@ void ThreadTab::on_lineEdit_returnPressed()
 
 void ThreadTab::floatReply(const QString &link){
     deleteFloat();
-    ThreadForm *tf = findPost(link);
+    QPointer<ThreadForm> tf = findPost(link);
+    if(!tf) return;
     floating = tf->clone();
     floating->deleteHideLayout();
     floating->setParent(this);

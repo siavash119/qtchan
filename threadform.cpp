@@ -129,14 +129,14 @@ void ThreadForm::load(QJsonObject &p){
 }
 
 void ThreadForm::getFile(){
-    qDebug() << QString("getting https://i.4cdn.org/")  % fileURL;
+    qDebug().noquote() << QString("getting https://i.4cdn.org/")  % fileURL;
     replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
     gettingFile = true;
     connectionImage = connect(replyImage, &QNetworkReply::finished,this, &ThreadForm::getOrigFinished);
 }
 
 void ThreadForm::getThumb(){
-    qDebug() << QString("getting https://i.4cdn.org/")  % thumbURL;
+    qDebug().noquote() << QString("getting https://i.4cdn.org/")  % thumbURL;
     replyThumb = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % thumbURL)));
     connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished);
 }
@@ -198,7 +198,7 @@ void ThreadForm::getOrigFinished(){
         file->open(QIODevice::WriteOnly);
         file->write(replyImage->readAll());
         file->close();
-        qDebug() << "saved file "+filePath;
+        qDebug().noquote() << "saved file "+filePath;
         if(loadIt){
             loadImage(filePath);
             QListIterator<ThreadForm*> i(clones);
@@ -218,7 +218,7 @@ void ThreadForm::getThumbFinished(){
         thumb->open(QIODevice::WriteOnly);
         thumb->write(replyThumb->readAll());
         thumb->close();
-        qDebug() << "saved file "+thumbPath;
+        qDebug().noquote() << "saved file "+thumbPath;
         loadImage(thumbPath);
     }
     replyThumb->deleteLater();
@@ -244,13 +244,13 @@ void ThreadForm::loadImage(QString path){
 }
 
 void ThreadForm::imageClicked(){
-    qDebug() << "clicked "+post->filename;
+    qDebug().noquote() << "clicked "+post->filename;
     if(this->type == PostType::Reply){
         if(gettingFile){
             connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::openImage);
         }
         else if(!file->exists()){
-            qDebug() << QString("getting https://i.4cdn.org/")  % fileURL;
+            qDebug().noquote() << QString("getting https://i.4cdn.org/")  % fileURL;
             gettingFile=true;
             replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
             //connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::loadFromImageClicked);
@@ -272,7 +272,7 @@ void ThreadForm::hideClicked(){
     QStringList idFilters = settings.value("filters/"+board+"/id").toStringList();
     idFilters.append(threadNum);
     settings.setValue("filters/"+board+"/id",idFilters);
-    qDebug() << "hide Clicked so "+threadNum+" filtered!";
+    qDebug().noquote() << "hide Clicked so "+threadNum+" filtered!";
     QListIterator<ThreadForm*> i(clones);
     while(i.hasNext()){
         i.next()->deleteLater();
@@ -305,22 +305,23 @@ QString ThreadForm::htmlParse(QString &html){
 
 void ThreadForm::quoteClicked(const QString &link)
 {
-    qDebug() << link;
-    if(link.at(0)=='#' && this->type == PostType::Reply){
+    qDebug().noquote() << link;
+    //check size > 2 instead of isempty?
+    if(!link.isEmpty() && link.at(0)=='#' && this->type == PostType::Reply){
         ThreadForm* tf = ((ThreadTab*)tab)->findPost(link.mid(2));
         if(tf != nullptr && !tf->hidden) this->insert(tf);
     }
-    else if(link.at(0)=='/'){
+    else if(!link.isEmpty() && link.at(0)=='/'){
         mw->loadFromSearch(link,false);
     }
 }
 
 void ThreadForm::on_replies_linkHovered(const QString &link)
 {
-    qDebug() << link;
     if(this->type == PostType::Reply){
-        if(link.at(0)=='#'){
-            qDebug() << link;
+        //check size > 2 instead is isempty?
+        if(!link.isEmpty() && link.at(0)=='#'){
+            //qDebug().noquote() << "hovering" << link;
             emit floatLink(link.mid(2));
         }
         else{
@@ -328,16 +329,6 @@ void ThreadForm::on_replies_linkHovered(const QString &link)
            ((ThreadTab*)tab)->deleteFloat();
         }
     }
-    /*
-    if(this->type == PostType::Reply){
-        QRegularExpression postLink("#p(\\d+)");
-        QRegularExpressionMatch match = postLink.match(link);
-        //TODO hover new threadform
-        if (match.hasMatch()) {
-            //emit searchPost(ui->com->textCursor().position(),match.captured(1));
-            //emit searchPost(match.captured(1),this);
-        }
-    }*/
 }
 
 void ThreadForm::insert(ThreadForm* tf){
@@ -348,7 +339,6 @@ void ThreadForm::insert(ThreadForm* tf){
     //this->setMinimumWidth(this->sizeHint().width());
     //((ThreadTab*)tab)->updateWidth();
     //this->update();
-    //((ThreadTab*)tab)->updateWidth();
 }
 
 ThreadForm* ThreadForm::clone(){
