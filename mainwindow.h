@@ -52,8 +52,8 @@ public slots:
     void focusBar();
     void loadFromSearch(QString searchString, bool select);
     void saveSession();
-    void nextTab();
-    void prevTab();
+    void nextTab(QModelIndex qmi);
+    void prevTab(QModelIndex qmi);
 private:
     Ui::MainWindow *ui;
     QModelIndexList boardsSelected;

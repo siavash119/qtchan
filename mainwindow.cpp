@@ -34,16 +34,23 @@ MainWindow::MainWindow(QWidget *parent) :
     //qDebug() << QKeySequence::keyBindings(QKeySequence::PreviousChild);
 }
 
+//TODO next/prev tab on cur stackedWidget index
 void MainWindow::setShortcuts(){
     QAction *nTab = new QAction(this);
     nTab->setShortcut(QKeySequence::NextChild);
     nTab->setShortcutContext(Qt::ApplicationShortcut);
-    connect(nTab, &QAction::triggered, this, &MainWindow::nextTab);
+    connect(nTab, &QAction::triggered, [=]{
+        if(ui->treeView->selectionModel()->hasSelection())
+            nextTab(ui->treeView->selectionModel()->selectedIndexes().last());
+    });
     this->addAction(nTab);
     QAction *pTab = new QAction(this);
     pTab->setShortcut(QKeySequence("Ctrl+Shift+Tab"));
     pTab->setShortcutContext(Qt::ApplicationShortcut);
-    connect(pTab, &QAction::triggered, this, &MainWindow::prevTab);
+    connect(pTab, &QAction::triggered,[=]{
+            if(ui->treeView->selectionModel()->hasSelection())
+                prevTab(ui->treeView->selectionModel()->selectedIndexes().first());
+        });
     this->addAction(pTab);
     QAction *del = new QAction(this);
     del->setShortcut(QKeySequence::Delete);
@@ -80,63 +87,41 @@ void MainWindow::setShortcuts(){
 
 MainWindow::~MainWindow()
 {
+    delete model;
     delete ui;
 }
 
-//TODO fix next/prev for tree (recursive check)
-void MainWindow::nextTab(){
-    int numRows = model->rowCount();
-    if(!numRows) return;
-    boardsSelected = ui->treeView->selectionModel()->selectedRows();
-    int key = 0;
-    QModelIndex qmi;
-    if(boardsSelected.length()){
-        qmi = boardsSelected.at(0);
-        if(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)){
-            ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0,qmi),QItemSelectionModel::ClearAndSelect);
-            return;
-        }
-        if(qmi.row()+1<model->rowCount(qmi.parent())) key = qmi.row()+1;
-        else{
-            qmi = qmi.parent();
-            if(qmi.row()+1<model->rowCount(qmi.parent())) key = qmi.row()+1;
-        }
+void MainWindow::nextTab(QModelIndex qmi){
+    if(!model->rowCount(qmi.parent())) return; //necessary?
+    if(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)){
+        ui->treeView->selectionModel()->setCurrentIndex(model->index(0,0,qmi),QItemSelectionModel::ClearAndSelect);
+        return;
     }
-    ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0,qmi.parent()),QItemSelectionModel::ClearAndSelect);
+    while(qmi.row() == model->rowCount(qmi.parent())-1){ //is last child and no children
+        qmi = qmi.parent();
+    }
+    if(qmi.row()+1<model->rowCount(qmi.parent())){
+        ui->treeView->selectionModel()->setCurrentIndex(model->index(qmi.row()+1,0,qmi.parent()),QItemSelectionModel::ClearAndSelect);
+        return;
+    }
+    ui->treeView->selectionModel()->setCurrentIndex(model->index(0,0),QItemSelectionModel::ClearAndSelect);
 }
 
-void MainWindow::prevTab(){
-    int numRows = model->rowCount();
-    if(!numRows) return;
-    boardsSelected = ui->treeView->selectionModel()->selectedRows();
-    int key = numRows-1;
-    QModelIndex qmi;
-    if(boardsSelected.length()){
-        qmi = boardsSelected.at(0);
-        if(qmi.row()-1>=0){
-            key = qmi.row()-1;
-            qmi = qmi.sibling(key,0);
-            if(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)){
-                key = model->rowCount(qmi) - 1;
-                ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0,qmi),QItemSelectionModel::ClearAndSelect);
-                return;
-            }
+void MainWindow::prevTab(QModelIndex qmi){
+    if(!model->rowCount(qmi.parent())) return; //necessary?
+    if(qmi.row()-1>=0){
+        qmi = qmi.sibling(qmi.row()-1,0);
+        while(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)){
+            qmi = qmi.child(model->rowCount(qmi)-1,0);
         }
-        else{
-            qmi = qmi.parent();
-            key = qmi.row();
-            if(key == -1){
-                key = model->rowCount() - 1;
-                qmi = model->index(key,0);
-                if(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)){
-                    key = model->rowCount(qmi) - 1;
-                    ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0,qmi),QItemSelectionModel::ClearAndSelect);
-                    return;
-                }
-            }
-        }
+        ui->treeView->selectionModel()->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
+        return;
     }
-    ui->treeView->selectionModel()->setCurrentIndex(model->index(key,0,qmi.parent()),QItemSelectionModel::ClearAndSelect);
+    qmi = qmi.parent();
+    if(qmi.row()==-1) //we're at the very first row so select last row
+        ui->treeView->selectionModel()->setCurrentIndex(model->index(model->rowCount()-1,0),QItemSelectionModel::ClearAndSelect);
+    else
+        ui->treeView->selectionModel()->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -228,7 +213,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
         int key = keyEvent->key();
-        int mod = keyEvent->modifiers();
+        //int mod = keyEvent->modifiers();
         //qDebug("Ate key press %d", key);
         //qDebug("Modifers %d", mod);
         if(key == 53){
