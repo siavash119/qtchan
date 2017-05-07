@@ -128,7 +128,7 @@ void BoardTab::loadThreads(){
         }
     }
     int length = threads.size();
-    qDebug(QString("length is ").append(QString::number(length)).toLatin1().constData());
+    qDebug("%s",QString("length is ").append(QString::number(length)).toLatin1().constData());
     QSettings settings;
     QStringList idFilters = settings.value("filters/"+board+"/id").toStringList();
     for(int i=0;i<length;i++){

@@ -15,7 +15,7 @@ class Filter
 public:
     Filter();
     void regexp(QString search);
-    void htmlParse(QString search);
+    //void htmlParse(QString search);
     static QSet<QString> findQuotes(QString post);
 
 private:

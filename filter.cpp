@@ -5,9 +5,9 @@ Filter::Filter()
     //quotelink.setPattern("href=\\\"#p(\\d+)\\\"");
 }
 
-void Filter::htmlParse(QString search){
+/*void Filter::htmlParse(QString search){
 
-}
+}*/
 
 QSet<QString> Filter::findQuotes(QString post){
     QRegularExpression quotelink;

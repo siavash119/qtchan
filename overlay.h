@@ -9,7 +9,7 @@ public:
     explicit Overlay(QWidget* parent);
 private:
     QRect rect;
-    const QColor& color;
+    const QColor color;
 protected:
     void paintEvent(QPaintEvent*);
 };
