@@ -246,10 +246,7 @@ void ThreadForm::loadImage(QString path){
 void ThreadForm::imageClicked(){
     qDebug().noquote() << "clicked "+post->filename;
     if(this->type == PostType::Reply){
-        if(gettingFile){
-            connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::openImage);
-        }
-        else if(!file->exists()){
+        if(!file->exists() && !gettingFile){
             qDebug().noquote() << QString("getting https://i.4cdn.org/")  % fileURL;
             gettingFile=true;
             replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
@@ -257,7 +254,7 @@ void ThreadForm::imageClicked(){
             connectionImage = connect(replyImage, &QNetworkReply::finished,[=]() {
                 this->getOrigFinished();
                 this->openImage();
-                replyImage->deleteLater();
+                //replyImage->deleteLater();
             });
         }
         else openImage();
@@ -294,11 +291,6 @@ void ThreadForm::hideClicked(){
 }
 
 void ThreadForm::openImage(){
-    if(replyImage->error()){
-        qDebug().noquote() << "loading post error:" << replyImage->errorString();
-        replyImage->deleteLater();
-        return;
-    }
     QDesktopServices::openUrl(QUrl::fromLocalFile(QDir().absoluteFilePath(filePath)));
 }
 

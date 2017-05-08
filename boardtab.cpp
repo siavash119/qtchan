@@ -95,7 +95,6 @@ void BoardTab::updatePosts(){
 void BoardTab::loadThreads(){
     /*int i = posts.size();
     while(i--){
-        //((ThreadForm*)posts.at(i))->deleteLater();
         ((ThreadForm*)posts.at(i))->close();
         ((ThreadForm*)posts.at(i))->deleteLater();
         posts.pop_back();

@@ -40,17 +40,15 @@ void MainWindow::setShortcuts(){
     nTab->setShortcut(QKeySequence::NextChild);
     nTab->setShortcutContext(Qt::ApplicationShortcut);
     connect(nTab, &QAction::triggered, [=]{
-        if(ui->treeView->selectionModel()->hasSelection())
-            nextTab(ui->treeView->selectionModel()->selectedIndexes().last());
+        nextTab(ui->treeView->currentIndex());
     });
     this->addAction(nTab);
     QAction *pTab = new QAction(this);
     pTab->setShortcut(QKeySequence("Ctrl+Shift+Tab"));
     pTab->setShortcutContext(Qt::ApplicationShortcut);
     connect(pTab, &QAction::triggered,[=]{
-            if(ui->treeView->selectionModel()->hasSelection())
-                prevTab(ui->treeView->selectionModel()->selectedIndexes().first());
-        });
+        prevTab(ui->treeView->currentIndex());
+    });
     this->addAction(pTab);
     QAction *del = new QAction(this);
     del->setShortcut(QKeySequence::Delete);
@@ -163,6 +161,7 @@ void MainWindow::loadFromSearch(QString searchString, bool select){
     pages++;
     parent1->setData(pages,Qt::UserRole);
     tabsNew.insert(pages,tab);
+    tabs.insert(parent1,bt);
     //ui->stackedWidget->setCurrentWidget(bt);
     selectPage(pages,model);
 }
@@ -174,9 +173,11 @@ void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
     ui->stackedWidget->addWidget(tt);
     Tab tab = {Tab::TabType::Thread,tt,QString("/"+board+"/"+thread)};
     QStandardItem* parent1 = new QStandardItem("/"+board+"/"+thread);
+    //TODO append as child
     model->appendRow(parent1);
     pages++;
     parent1->setData(pages,Qt::UserRole);
+    tabs.insert(parent1,tt);
     tabsNew.insert(pages,tab);
     //ui->stackedWidget->setCurrentWidget(tt);
     //selectPage(pages,model);
@@ -187,8 +188,11 @@ void MainWindow::addTab(){
 
 void MainWindow::on_treeView_clicked(QModelIndex index)
 {
+    //model->findItems()
     int pageId = index.data(Qt::UserRole).toInt();
     ui->stackedWidget->setCurrentWidget((QWidget*)(tabsNew.find(pageId)->TabPointer));
+    //qDebug() << index.internalPointer();
+    //ui->stackedWidget->setCurrentWidget(tabs.find(index.internalPointer()));
     //ui->stackedWidget->setCurrentIndex(index.row());
     //show_one(index);
 }

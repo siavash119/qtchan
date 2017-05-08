@@ -18,6 +18,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
     QNetworkReply *reply;
+    QMap<QStandardItem*,QWidget*> tabs;
     QMap<int,Tab> tabsNew;
 
 protected:
