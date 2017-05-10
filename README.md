@@ -26,6 +26,7 @@ Create a file ~/.config/qtchan/settings like below. Look at your browser cookies
 ## TODO
 ### MAJOR
 * captcha
+* process-threading
 * better geometry for hovered and embedded replies
 * instructions
 * settings
@@ -33,5 +34,4 @@ Create a file ~/.config/qtchan/settings like below. Look at your browser cookies
 ### MINOR
 * save tree tabs order and structure
 * show loading state
-* load pixmaps in another thread?
 * themes
