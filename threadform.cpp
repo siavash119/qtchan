@@ -154,6 +154,7 @@ void ThreadForm::loadOrig(){
             loadIt = false;
             if(!file->exists()) getFile();
         }
+        QApplication::processEvents();
     }
 }
 

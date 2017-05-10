@@ -33,8 +33,9 @@ BoardTab::~BoardTab()
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
-        ((ThreadForm*)mapI.value())->deleteLater();
+        delete ((ThreadForm*)mapI.value());
         mapI.remove();
+        QCoreApplication::processEvents();
     }
     delete ui;
 }
@@ -93,17 +94,12 @@ void BoardTab::updatePosts(){
 }
 
 void BoardTab::loadThreads(){
-    /*int i = posts.size();
-    while(i--){
-        ((ThreadForm*)posts.at(i))->close();
-        ((ThreadForm*)posts.at(i))->deleteLater();
-        posts.pop_back();
-    }*/
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
-        ((ThreadForm*)mapI.value())->deleteLater();
+        delete ((ThreadForm*)mapI.value());
         mapI.remove();
+        QCoreApplication::processEvents();
     }
     QJsonArray threads;
     if(reply->error()){
@@ -145,6 +141,7 @@ void BoardTab::loadThreads(){
         else{
             qDebug("threadNum %s filtered!",threadNum.toLatin1().constData());
         }
+        QCoreApplication::processEvents();
     }
     ui->threads->addStretch(1);
     reply->deleteLater();

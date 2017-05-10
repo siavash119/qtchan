@@ -126,6 +126,9 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
       <layout class="QVBoxLayout" name="threads">
        <property name="spacing">
         <number>6</number>

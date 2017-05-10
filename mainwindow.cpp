@@ -89,7 +89,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+//for next/prev tab just send up and down key and loop to beginning/end if no change in selection?
 void MainWindow::nextTab(QModelIndex qmi){
+    /*QKeyEvent event(QEvent::KeyPress,Qt::Key_Down,0);
+    QApplication::sendEvent(ui->treeView, &event);*/
     if(!model->rowCount(qmi.parent())) return; //necessary?
     if(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)){
         ui->treeView->selectionModel()->setCurrentIndex(model->index(0,0,qmi),QItemSelectionModel::ClearAndSelect);
@@ -248,12 +251,19 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 }
 
 void MainWindow::deleteSelected(){
-    //TODO delete all selected; right now only deletes first one
-    const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
-    if(!indexList.size()) return;
-    int pageId = indexList.at(0).data(Qt::UserRole).toInt();
-    removePage(pageId,model);
-    model->removeRow(indexList.at(0).row(),indexList.at(0).parent());
+    QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
+    int pageId;
+    QModelIndex ind;
+    //TODO delete better
+    while(indexList.size()){
+        ind = indexList.first();
+        pageId = ind.data(Qt::UserRole).toInt();
+        if(pageId){
+            removePage(pageId,model);
+            model->removeRow(ind.row(),ind.parent());
+        }
+        indexList = ui->treeView->selectionModel()->selectedRows();
+    }
 }
 
 void MainWindow::removePage(int searchPage, QAbstractItemModel* model, QModelIndex parent) {
@@ -261,7 +271,8 @@ void MainWindow::removePage(int searchPage, QAbstractItemModel* model, QModelInd
         QModelIndex index = model->index(r, 0, parent);
         int pageId = index.data(Qt::UserRole).toInt();
         if(pageId == searchPage || searchPage == 0){
-            QWidget* tab = (QWidget*)(tabsNew.find(pageId)->TabPointer);
+            QPointer<QWidget> tab = (QWidget*)(tabsNew.find(pageId)->TabPointer);
+            if(!tab) return;
             ui->stackedWidget->removeWidget(tab);
             tab->deleteLater();
             tabsNew.remove(pageId);

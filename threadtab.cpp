@@ -77,8 +77,9 @@ ThreadTab::~ThreadTab()
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
-        ((ThreadForm*)mapI.value())->deleteLater();
+        delete ((ThreadForm*)mapI.value());
         mapI.remove();
+        QCoreApplication::processEvents();
     }
     delete ui;
 }
@@ -136,6 +137,7 @@ void ThreadTab::loadPosts(){
         //seg faults
         //connect(tf,&ThreadForm::destroyed,[=](){tfMap.remove(tf->post->no);});
         QSet<QString> quotes = tf->quotelinks;
+        QCoreApplication::processEvents();
         ThreadForm* replyTo;
         foreach (const QString &orig, quotes)
         {
@@ -145,6 +147,7 @@ void ThreadTab::loadPosts(){
                 replyTo->replies.insert(tf->post->no.toDouble(),tf->post->no);
                 replyTo->setReplies();
             }
+            QCoreApplication::processEvents();
         }
     }
     ui->threads->addStretch(1);
