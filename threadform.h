@@ -36,7 +36,7 @@ public:
     PostType type;
     QString threadNum;
     QString board;
-    QString htmlParse(QString &html);
+    static QString htmlParse(QString &html);
     Post *post;
     void updateComHeight();
     QDir *folder;
@@ -93,6 +93,7 @@ public slots:
 private slots:
     void quoteClicked(const QString &link);
     void on_replies_linkHovered(const QString &link);
+    //void downloading(qint64 read, qint64 total);
 
     void on_com_linkHovered(const QString &link);
 

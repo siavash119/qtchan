@@ -382,9 +382,6 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
          <property name="text">
           <string/>
          </property>
@@ -585,9 +582,6 @@
        </property>
        <property name="mouseTracking">
         <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true"/>
        </property>
        <property name="text">
         <string/>

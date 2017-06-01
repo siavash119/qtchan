@@ -132,6 +132,7 @@ void ThreadForm::getFile(){
     qDebug().noquote() << QString("getting https://i.4cdn.org/")  % fileURL;
     replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
     gettingFile = true;
+    //connect(replyImage, &QNetworkReply::downloadProgress,this,&ThreadForm::downloading);
     connectionImage = connect(replyImage, &QNetworkReply::finished,this, &ThreadForm::getOrigFinished);
 }
 
@@ -140,6 +141,14 @@ void ThreadForm::getThumb(){
     replyThumb = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % thumbURL)));
     connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished);
 }
+
+/*void ThreadForm::downloading(qint64 read, qint64 total)
+{
+    qDebug() << "downloading"+read;
+    QByteArray b = replyImage->readAll();
+    QDataStream out(file);
+    out << b;
+}*/
 
 //TODO avoid copy pasted function
 //TODO clean if-elses
@@ -444,3 +453,11 @@ void ThreadForm::on_com_linkHovered(const QString &link)
 void ThreadForm::deleteHideLayout(){
     delete this->ui->hideLayout;
 }
+
+/*void ThreadForm::setBorder(){
+    ui->com->setStyleSheet("bottom-border:3px solid black");
+}
+
+void ThreadForm::removeBorder(){
+    ui->com->setStyleSheet("");
+}*/

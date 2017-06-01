@@ -21,9 +21,11 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     ui->setupUi(this);
     this->board = board;
     this->thread = thread;
+    this->setWindowTitle("/"+board+"/"+thread);
     //QDir().mkpath(board+"/"+thread);
     QDir().mkpath(board+"/"+thread+"/thumbs");
     threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
+    qDebug() << threadUrl;
     request = QNetworkRequest(QUrl(threadUrl));
     request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
     reply = nc.jsonManager->get(request);
@@ -74,12 +76,13 @@ void ThreadTab::getPosts(){
 
 ThreadTab::~ThreadTab()
 {
+    //QCoreApplication::processEvents();
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
         delete ((ThreadForm*)mapI.value());
         mapI.remove();
-        QCoreApplication::processEvents();
+        //QCoreApplication::processEvents();
     }
     delete ui;
 }
@@ -123,7 +126,15 @@ void ThreadTab::loadPosts(){
         reply->deleteLater();
         return;
     }
-    QJsonArray posts = QJsonDocument::fromJson(reply->readAll()).object().value("posts").toArray();
+    //write to file and make json array
+    QByteArray rep = reply->readAll();
+    QFile jsonFile(board+"/"+thread+"/"+thread+".json"); // "des" is the file path to the destination file
+    jsonFile.open(QIODevice::WriteOnly);
+    QDataStream out(&jsonFile);
+    out << rep;
+    QJsonArray posts = QJsonDocument::fromJson(rep).object().value("posts").toArray();
+
+    //make json arrays
     int length = posts.size();
     qDebug().noquote() << QString("length is ").append(QString::number(length));
     for(int i=tfMap.size();i<length;i++){
@@ -134,10 +145,14 @@ void ThreadTab::loadPosts(){
         connect(tf,&ThreadForm::floatLink,this,&ThreadTab::floatReply);
         //todo on hide clicked remove from map and update replies
         tfMap.insert(tf->post->no,tf);
+        if(i==0){
+            if(tf->post->sub.length())this->setWindowTitle("/"+board+"/"+thread + " - " + tf->post->sub);
+            else if(tf->post->com.length()) this->setWindowTitle("/"+board+"/"+thread + " - " + ThreadForm::htmlParse(tf->post->com));
+        }
         //seg faults
         //connect(tf,&ThreadForm::destroyed,[=](){tfMap.remove(tf->post->no);});
         QSet<QString> quotes = tf->quotelinks;
-        QCoreApplication::processEvents();
+        //QCoreApplication::processEvents();
         ThreadForm* replyTo;
         foreach (const QString &orig, quotes)
         {
@@ -147,7 +162,7 @@ void ThreadTab::loadPosts(){
                 replyTo->replies.insert(tf->post->no.toDouble(),tf->post->no);
                 replyTo->setReplies();
             }
-            QCoreApplication::processEvents();
+            //QCoreApplication::processEvents();
         }
     }
     ui->threads->addStretch(1);
@@ -265,6 +280,12 @@ void ThreadTab::floatReply(const QString &link){
     QPoint globalCursorPos = QCursor::pos();
     QSize sizeHint = floating->sizeHint();
     floating->setGeometry(globalCursorPos.x()+10,globalCursorPos.y()+10,sizeHint.width(),sizeHint.height());
+    //floating->setStyleSheet("border-style:solid;border-width: 4px;");
+    floating->setStyleSheet(QString::fromUtf8("QWidget#ThreadForm\n"
+    "{\n"
+    "    border: 3px solid black;\n"
+    "}\n"
+    ""));
     //floating->move(globalCursorPos.x()+10,globalCursorPos.y()+10);
     floating->updateGeometry();
     floating->update();

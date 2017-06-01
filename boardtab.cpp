@@ -18,6 +18,7 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
     this->board = board;
     this->type = type;
     this->search = search;
+    this->setWindowTitle("/"+board+"/"+search);
     if(type == BoardType::Index) boardUrl = "https://a.4cdn.org/"+board+"/1.json";
     else boardUrl = "https://a.4cdn.org/"+board+"/catalog.json";
     //QDir().mkdir(board);
@@ -35,7 +36,7 @@ BoardTab::~BoardTab()
         mapI.next();
         delete ((ThreadForm*)mapI.value());
         mapI.remove();
-        QCoreApplication::processEvents();
+        //QCoreApplication::processEvents();
     }
     delete ui;
 }
@@ -99,7 +100,7 @@ void BoardTab::loadThreads(){
         mapI.next();
         delete ((ThreadForm*)mapI.value());
         mapI.remove();
-        QCoreApplication::processEvents();
+        //QCoreApplication::processEvents();
     }
     QJsonArray threads;
     if(reply->error()){
@@ -141,7 +142,7 @@ void BoardTab::loadThreads(){
         else{
             qDebug("threadNum %s filtered!",threadNum.toLatin1().constData());
         }
-        QCoreApplication::processEvents();
+        //QCoreApplication::processEvents();
     }
     ui->threads->addStretch(1);
     reply->deleteLater();
