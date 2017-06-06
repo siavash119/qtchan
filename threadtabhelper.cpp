@@ -53,7 +53,7 @@ void ThreadTabHelper::loadPosts(){
         tfMap.insert(tf->post->no,tf);
         if(i==0){
             if(tf->post->sub.length())emit windowTitle("/"+board+"/"+thread + " - " + tf->post->sub);
-            else if(tf->post->com.length()) emit windowTitle("/"+board+"/"+thread + " - " + ThreadForm::htmlParse(tf->post->com));
+            else if(tf->post->com.length()) emit windowTitle("/"+board+"/"+thread + " - " + ThreadForm::htmlParse(tf->post->com).replace("\n"," "));
         }
         QSet<QString> quotes = tf->quotelinks;
         //QCoreApplication::processEvents();
