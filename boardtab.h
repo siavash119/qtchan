@@ -31,6 +31,7 @@ public:
     void setShortcuts();
     void getPosts();
     void focusIt();
+    void startUp();
 
 public slots:
     void findText(const QString text);
@@ -42,6 +43,9 @@ private slots:
     void loadThreads();
     void on_pushButton_clicked();
     void on_lineEdit_returnPressed();
+
+signals:
+    void finished();
 };
 
 #endif // BOARDTAB_H

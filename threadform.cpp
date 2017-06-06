@@ -12,9 +12,11 @@
 #include <QStringList>
 #include <iostream>
 #include <QListIterator>
+#include <QThreadPool>
 #include "netcontroller.h"
 #include "mainwindow.h"
 #include "threadtab.h"
+//#include "resizer.h"
 
 //TODO Possibly refactor file checks and pointers to dir and file objects
 //TODO Possibly decouple the file and thumb getters to the post class
@@ -27,7 +29,6 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
     this->type = type;
     this->root = root;
     this->tab = parent;
-    if(this->type == PostType::Reply) this->floating = ((ThreadTab*)tab)->floating;
     ui->setupUi(this);
     ui->tim->hide();
     ui->horizontalSpacer->changeSize(0,0);
@@ -55,6 +56,7 @@ ThreadForm::~ThreadForm()
 {
     disconnect(connectionImage);
     disconnect(connectionThumb);
+    watcher.waitForFinished();
     delete ui;
 }
 
@@ -100,6 +102,7 @@ void ThreadForm::load(QJsonObject &p){
                     thumb = new QFile(thumbPath);
                     if(!thumb->exists()) getThumb();
                     else loadImage(thumbPath);
+                    //else QFuture<QImage> getImage = QtConcurrent::run(scaleImage, thumbPath);
                 }
             }
             else{
@@ -163,7 +166,6 @@ void ThreadForm::loadOrig(){
             loadIt = false;
             if(!file->exists()) getFile();
         }
-        QApplication::processEvents();
     }
 }
 
@@ -235,22 +237,30 @@ void ThreadForm::getThumbFinished(){
     disconnect(connectionThumb);
 }
 
-void ThreadForm::loadImage(QString path){
-    /*QPixmap scaled = QPixmap(path).scaled(post->tn_w,
-                                          post->tn_h,
-                                          Qt::KeepAspectRatio,
-                                          Qt::SmoothTransformation);*/
+QImage ThreadForm::scaleImage(QString path){
     int scale = 250;
-    QPixmap pic(path);
-    QPixmap scaled = (pic.height() > pic.width()) ?
+    QImage pic;
+    pic.load(path);
+    QImage scaled = (pic.height() > pic.width()) ?
              pic.scaledToHeight(scale, Qt::SmoothTransformation) :
              pic.scaledToWidth(scale, Qt::SmoothTransformation);
-    ui->tim->show();
-    ui->horizontalSpacer->changeSize(250,0);
-    ui->horizontalSpacer->invalidate();
-    this->setMinimumWidth(738);
-    ui->tim->setPixmap(scaled);
-    ui->tim->setMaximumSize(scaled.size());
+    return scaled;
+}
+
+void ThreadForm::loadImage(QString path){
+    QFuture<QImage> newImage = QtConcurrent::run(scaleImage, path);
+    watcher.setFuture(newImage);
+    connect(&watcher, &QFutureWatcherBase::finished,[=](){
+        QImage scaled = newImage.result();
+        if(!scaled.isNull()){
+            ui->tim->show();
+            ui->horizontalSpacer->changeSize(250,0);
+            ui->horizontalSpacer->invalidate();
+            this->setMinimumWidth(738);
+            ui->tim->setPixmap(QPixmap::fromImage(scaled));
+            ui->tim->setMaximumSize(scaled.size());
+       }
+    });
 }
 
 void ThreadForm::imageClicked(){
@@ -307,7 +317,7 @@ void ThreadForm::openImage(){
 QString ThreadForm::htmlParse(QString &html){
     return html.replace("<br>","\n").replace("&amp;","&")
             .replace("&gt;",">").replace("&lt;","<")
-            .replace("&quot","\"").replace("&#039;","'")
+            .replace("&quot;","\"").replace("&#039;","'")
             .replace("<wb>","\n").replace("<wbr>","\n");
 }
 

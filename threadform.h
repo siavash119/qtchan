@@ -10,7 +10,7 @@
 #include <QList>
 #include <QSignalMapper>
 #include <QMouseEvent>
-#include <QPointer>
+#include <QFutureWatcher>
 #include "post.h"
 
 namespace Ui {
@@ -55,6 +55,8 @@ public:
     //TODO check settings -> filter
     bool hidden = false;
     bool root;
+    static QImage scaleImage(QString path);
+    QFutureWatcher<QImage> watcher;
 
 private:
     Ui::ThreadForm *ui;
@@ -75,7 +77,6 @@ private:
     void getFile();
     void getThumb();
     QWidget* tab; //pointer to tab
-    QPointer<ThreadForm> floating;
 
 signals:
     void loadThreadTab(ThreadForm*, QJsonArray&);

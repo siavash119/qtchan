@@ -78,7 +78,7 @@ void MainWindow::setShortcuts(){
         while(i.hasNext()){
             Tab tab = i.next().value();
             if(tab.type == Tab::TabType::Board) ((BoardTab*)tab.TabPointer)->getPosts();
-            else ((ThreadTab*)tab.TabPointer)->getPosts();
+            else ((ThreadTab*)tab.TabPointer)->helper->getPosts();
         }
     });
 }

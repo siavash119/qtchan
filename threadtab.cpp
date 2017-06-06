@@ -11,7 +11,6 @@
 #include <QProcess>
 #include "netcontroller.h"
 #include "mainwindow.h"
-#include "threadform.h"
 
 ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     QWidget(parent),
@@ -22,18 +21,18 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     this->board = board;
     this->thread = thread;
     this->setWindowTitle("/"+board+"/"+thread);
-    //QDir().mkpath(board+"/"+thread);
-    QDir().mkpath(board+"/"+thread+"/thumbs");
-    threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
-    qDebug() << threadUrl;
-    request = QNetworkRequest(QUrl(threadUrl));
-    request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
-    reply = nc.jsonManager->get(request);
-    connect(reply, &QNetworkReply::finished, this, &ThreadTab::loadPosts);
-    //myProcess = new QProcess(parent);
+    //startUp();
+    workerThread = new QThread;
+    helper = new ThreadTabHelper(board,thread, this);
+    helper->moveToThread(workerThread);
+    connect(helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF);
+    connect(helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle);
     myPostForm = new PostForm(board,thread);
     this->setShortcuts();
     this->installEventFilter(this);
+    helper->startUp();
+    connect(helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch);
+    space = new QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
 }
 
 void ThreadTab::setShortcuts(){
@@ -52,7 +51,7 @@ void ThreadTab::setShortcuts(){
     QAction *refresh = new QAction(this);
     refresh->setShortcut(Qt::Key_R);
     refresh->setShortcutContext(Qt::ApplicationShortcut);
-    connect(refresh, &QAction::triggered, this, &ThreadTab::getPosts);
+    connect(refresh, &QAction::triggered,[=](){helper->getPosts();});
     this->addAction(refresh);
     QAction *focusSearch = new QAction(this);
     focusSearch->setShortcut(QKeySequence("Ctrl+f"));
@@ -68,22 +67,18 @@ void ThreadTab::setShortcuts(){
     this->addAction(focusBar);
 }
 
-void ThreadTab::getPosts(){
-    qDebug().noquote() << "refreshing /" + board + "/" + thread;
-    reply = nc.manager->get(request);
-    connect(reply, &QNetworkReply::finished, this, &ThreadTab::loadPosts);
-}
-
 ThreadTab::~ThreadTab()
 {
-    //QCoreApplication::processEvents();
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
-        delete ((ThreadForm*)mapI.value());
+        delete qobject_cast<ThreadForm *>(mapI.value());
         mapI.remove();
-        //QCoreApplication::processEvents();
     }
+    helper->abort = 1;
+    workerThread->quit();
+    workerThread->wait();
+    //delete space;
     delete ui;
 }
 
@@ -104,12 +99,10 @@ void ThreadTab::gallery(){
     QProcess().startDetached(command,arguments);
 }
 
-void ThreadTab::addPost(ThreadForm *tf){
-    ui->threads->addWidget(tf);
-}
-
 void ThreadTab::addStretch(){
-    ui->threads->addStretch(1);
+    //ui->threads->addStretch(1);
+    ui->threads->removeItem(space);
+    ui->threads->insertItem(-1,space);
 }
 
 int ThreadTab::getMinWidth(){
@@ -120,64 +113,14 @@ void ThreadTab::updateWidth(){
     ui->scrollArea->setMinimumWidth(this->sizeHint().width());
 }
 
-void ThreadTab::loadPosts(){
-    if(reply->error()){
-        qDebug().noquote() << "loading post error:" << reply->errorString();
-        reply->deleteLater();
-        return;
-    }
-    //write to file and make json array
-    QByteArray rep = reply->readAll();
-    QFile jsonFile(board+"/"+thread+"/"+thread+".json"); // "des" is the file path to the destination file
-    jsonFile.open(QIODevice::WriteOnly);
-    QDataStream out(&jsonFile);
-    out << rep;
-    QJsonArray posts = QJsonDocument::fromJson(rep).object().value("posts").toArray();
-
-    //make json arrays
-    int length = posts.size();
-    qDebug().noquote() << QString("length is ").append(QString::number(length));
-    for(int i=tfMap.size();i<length;i++){
-        QJsonObject p = posts.at(i).toObject();
-        ThreadForm *tf = new ThreadForm(board,thread,PostType::Reply,true,this);
-        ui->threads->addWidget(tf);
-        tf->load(p);
-        connect(tf,&ThreadForm::floatLink,this,&ThreadTab::floatReply);
-        //todo on hide clicked remove from map and update replies
-        tfMap.insert(tf->post->no,tf);
-        if(i==0){
-            if(tf->post->sub.length())this->setWindowTitle("/"+board+"/"+thread + " - " + tf->post->sub);
-            else if(tf->post->com.length()) this->setWindowTitle("/"+board+"/"+thread + " - " + ThreadForm::htmlParse(tf->post->com));
-        }
-        //seg faults
-        //connect(tf,&ThreadForm::destroyed,[=](){tfMap.remove(tf->post->no);});
-        QSet<QString> quotes = tf->quotelinks;
-        //QCoreApplication::processEvents();
-        ThreadForm* replyTo;
-        foreach (const QString &orig, quotes)
-        {
-            replyTo = tfMap.find(orig).value();
-            if(replyTo != tfMap.end().value()){
-                //replyTo->replies.insert(tf->post->no);
-                replyTo->replies.insert(tf->post->no.toDouble(),tf->post->no);
-                replyTo->setReplies();
-            }
-            //QCoreApplication::processEvents();
-        }
-    }
-    ui->threads->addStretch(1);
-    reply->deleteLater();
+void ThreadTab::onNewTF(ThreadForm* tf){
+    ui->threads->addWidget(tf);
+    tfMap.insert(tf->post->no,tf);
+    connect(tf,&ThreadForm::floatLink,this,&ThreadTab::floatReply);
 }
 
-void ThreadTab::updatePosts(){
-    /*updated = false;
-    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
-    while (mapI.hasNext()) {
-        mapI.next();
-        //cout << i.key() << ": " << i.value() << endl;
-        ((ThreadForm*)mapI.value())->updateComHeight();
-        //mapI.remove();
-    }*/
+void ThreadTab::onWindowTitle(QString title){
+    this->setWindowTitle(title);
 }
 
 void ThreadTab::loadAllImages(){
@@ -186,14 +129,13 @@ void ThreadTab::loadAllImages(){
     while (mapI.hasNext()) {
         mapI.next();
         //cout << i.key() << ": " << i.value() << endl;
-        ((ThreadForm*)mapI.value())->loadOrig();
+        //((ThreadForm*)mapI.value())->loadOrig();
+        qobject_cast<ThreadForm *>(mapI.value())->loadOrig();
         //mapI.remove();
     }
 }
 
 ThreadForm* ThreadTab::findPost(QString postNum){
-    //TODO return 0 if not there
-    //already does it?
     return tfMap.value(postNum);
 }
 
@@ -293,14 +235,15 @@ void ThreadTab::floatReply(const QString &link){
 }
 
 void ThreadTab::deleteFloat(){
-    if(floating && floating->post){
-        floating->hide();
-        floating->deleteLater();
+    if(floating){
+        delete floating;
+        //floating->hide();
+        //floating->deleteLater();
     }
 }
 
 void ThreadTab::updateFloat(){
-    if(floating && floating->post){
+    if(floating){
         QPoint globalCursorPos = QCursor::pos();
         QSize sizeHint = floating->sizeHint();
         floating->setGeometry(globalCursorPos.x()+10,globalCursorPos.y()+10,sizeHint.width(),sizeHint.height());

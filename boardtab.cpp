@@ -21,7 +21,17 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
     this->setWindowTitle("/"+board+"/"+search);
     if(type == BoardType::Index) boardUrl = "https://a.4cdn.org/"+board+"/1.json";
     else boardUrl = "https://a.4cdn.org/"+board+"/catalog.json";
+    startUp();
     //QDir().mkdir(board);
+    /*QDir().mkpath(board+"/index/thumbs");
+    //QDir().mkdir(board+"/thumbs");
+    setShortcuts();
+    reply = nc.jsonManager->get(QNetworkRequest(QUrl(boardUrl)));
+    connect(reply, &QNetworkReply::finished, this, &BoardTab::loadThreads);*/
+}
+
+
+void BoardTab::startUp(){
     QDir().mkpath(board+"/index/thumbs");
     //QDir().mkdir(board+"/thumbs");
     setShortcuts();
@@ -38,6 +48,7 @@ BoardTab::~BoardTab()
         mapI.remove();
         //QCoreApplication::processEvents();
     }
+    emit finished();
     delete ui;
 }
 

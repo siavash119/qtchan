@@ -818,6 +818,9 @@
        <property name="wordWrap">
         <bool>true</bool>
        </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
        <property name="textInteractionFlags">
         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
        </property>

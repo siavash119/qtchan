@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     post.cpp \
     postform.cpp \
     filter.cpp \
-    overlay.cpp
+    overlay.cpp \
+    threadtabhelper.cpp
 
 HEADERS  += mainwindow.h \
     threadform.h \
@@ -33,7 +34,8 @@ HEADERS  += mainwindow.h \
     post.h \
     postform.h \
     filter.h \
-    overlay.h
+    overlay.h \
+    threadtabhelper.h
 
 FORMS    += mainwindow.ui \
     threadform.ui \
