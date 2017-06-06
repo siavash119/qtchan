@@ -7,6 +7,7 @@ class Overlay : public QWidget
     Q_OBJECT
 public:
     explicit Overlay(QWidget* parent);
+    QString displayText;
 private:
     QRect rect;
     const QColor color;

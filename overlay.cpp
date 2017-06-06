@@ -5,6 +5,7 @@ Overlay::Overlay(QWidget* parent):
     color(QColor(0,0,0, 120))
 {
     rect = parent->rect();
+    displayText = "Posting...";
     //rect.setWidth(rect.width() * 0.05f);
 }
 
@@ -16,6 +17,6 @@ void Overlay::paintEvent(QPaintEvent*)
     painter.fillRect(rect, color);
     painter.setPen({200, 200, 255});
     painter.setFont({"arial,helvetica", 48});
-    painter.drawText(rect, "Posting...", Qt::AlignHCenter | Qt::AlignVCenter);
+    painter.drawText(rect, displayText, Qt::AlignHCenter | Qt::AlignVCenter);
 }
 
