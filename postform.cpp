@@ -107,18 +107,22 @@ void PostForm::postIt(){
 void PostForm::postFinished(){
     QTextEdit *reply = new QTextEdit();
     reply->setWindowTitle("post to /"+board+"/"+thread+" response");
-    reply->setMinimumSize(640,480);
+    //reply->setMinimumSize(640,480);
     QByteArray temp = postReply->readAll();
     reply->setHtml(temp);
+    reply->setGeometry(0,0,this->width(),this->height());
     qDebug().noquote() << temp;
-    reply->show();
     if(reply->toPlainText().contains(QRegularExpression("uploaded.$|Post successful!$")))
     {
+        overlay->displayText = "Post successful!";
         this->ui->com->clear();
         QTimer::singleShot(1000, this, &PostForm::close);
-        QTimer::singleShot(1000, reply, &QTextEdit::close);
+        //QTimer::singleShot(1000, reply, &QTextEdit::close);
     }
-    removeOverlay();
+    else{
+        reply->show();
+    }
+    QTimer::singleShot(1000, this,&PostForm::removeOverlay);
     this->installEventFilter(this);
     submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
 }
