@@ -214,6 +214,7 @@ void MainWindow::onSelectionChanged(){
         ui->stackedWidget->setCurrentWidget(curTab);
         this->setWindowTitle(curTab->windowTitle());
     }
+    QCoreApplication::processEvents();
 }
 
 //TODO replace with regular QAction shortcuts
@@ -256,6 +257,9 @@ void MainWindow::deleteSelected(){
     QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
     int pageId;
     QModelIndex ind;
+    if(!indexList.size() && ui->treeView->currentIndex().isValid()){
+        indexList.append(ui->treeView->currentIndex());
+    }
     //TODO delete better
     while(indexList.size()){
         ind = indexList.first();
@@ -266,6 +270,7 @@ void MainWindow::deleteSelected(){
         }
         indexList = ui->treeView->selectionModel()->selectedRows();
     }
+    ui->treeView->selectionModel()->setCurrentIndex(ui->treeView->currentIndex(),QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::removePage(int searchPage, QAbstractItemModel* model, QModelIndex parent) {
@@ -286,6 +291,7 @@ void MainWindow::removePage(int searchPage, QAbstractItemModel* model, QModelInd
             removePage(searchPage, model, index);
         }
     }
+    if(!ui->stackedWidget->count()) this->setWindowTitle("qtchan");
 }
 
 void MainWindow::selectPage(int searchPage, QAbstractItemModel* model, QModelIndex parent) {
@@ -294,6 +300,10 @@ void MainWindow::selectPage(int searchPage, QAbstractItemModel* model, QModelInd
         int pageId = index.data(Qt::UserRole).toInt();
         if(pageId == searchPage) return ui->treeView->selectionModel()->setCurrentIndex(model->index(r,0),QItemSelectionModel::ClearAndSelect);
     }
+}
+
+QObject* MainWindow::currentWidget(){
+    return ui->stackedWidget->currentWidget();
 }
 
 void MainWindow::on_lineEdit_returnPressed()

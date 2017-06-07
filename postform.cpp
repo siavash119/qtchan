@@ -191,7 +191,7 @@ void PostForm::fileChecker(const QMimeData *mimeData){
    } else if (mimeData->hasText()) {
        qDebug().noquote() << mimeData->text();
        filename = mimeData->text().mid(7); //remove file://
-       filename.remove(QRegExp("[\\n\\t\\r]"));
+       filename.remove(QRegularExpression("[\\n\\t\\r]"));
        ui->filename->setText(filename);
    } else if (mimeData->hasUrls()) {
        QList<QUrl> urlList = mimeData->urls();

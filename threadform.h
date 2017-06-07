@@ -37,6 +37,7 @@ public:
     QString threadNum;
     QString board;
     static QString htmlParse(QString &html);
+    static QString titleParse(QString &title);
     Post *post;
     void updateComHeight();
     QDir *folder;

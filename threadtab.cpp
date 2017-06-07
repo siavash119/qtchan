@@ -121,6 +121,7 @@ void ThreadTab::onNewTF(ThreadForm* tf){
 
 void ThreadTab::onWindowTitle(QString title){
     this->setWindowTitle(title);
+    if(mw->currentWidget() == this) mw->setWindowTitle(title);
 }
 
 void ThreadTab::loadAllImages(){

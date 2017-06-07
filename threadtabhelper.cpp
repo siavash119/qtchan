@@ -52,8 +52,15 @@ void ThreadTabHelper::loadPosts(){
         emit newTF(tf);
         tfMap.insert(tf->post->no,tf);
         if(i==0){
+            qDebug() << tf->post->com;
             if(tf->post->sub.length())emit windowTitle("/"+board+"/"+thread + " - " + tf->post->sub);
-            else if(tf->post->com.length()) emit windowTitle("/"+board+"/"+thread + " - " + ThreadForm::htmlParse(tf->post->com).replace("\n"," "));
+            else if(tf->post->com.length()){
+                QString temp = tf->post->com;
+                emit windowTitle("/"+board+"/"+thread + " - " +
+                     ThreadForm::htmlParse(temp
+                        .replace(QRegExp("</?span( class=\"quote\" style=\"color:#[\\d|\\w]{6}\")?>"),""))
+                        .replace("\n"," "));
+            }
         }
         QSet<QString> quotes = tf->quotelinks;
         //QCoreApplication::processEvents();

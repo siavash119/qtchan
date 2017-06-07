@@ -68,7 +68,7 @@ public:
     QString thumbPath;
     */
 private:
-    QString htmlParse(QString string);
+    QString quoteColor(QString string);
 };
 
 #endif // POST_H

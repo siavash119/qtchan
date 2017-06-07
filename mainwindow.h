@@ -37,6 +37,7 @@ public:
     void show_one(QModelIndex index);
     void deleteSelected();
     void loadSession();
+    QObject* currentWidget();
 
 private slots:
     void on_pushButton_clicked();
@@ -55,6 +56,7 @@ public slots:
     void saveSession();
     void nextTab(QModelIndex qmi);
     void prevTab(QModelIndex qmi);
+
 private:
     Ui::MainWindow *ui;
     QModelIndexList boardsSelected;

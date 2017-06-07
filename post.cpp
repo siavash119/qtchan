@@ -24,7 +24,7 @@ Post::Post(QJsonObject &p, QString &board)
     country = p.value("country").toString();
     country_name = p.value("country_name").toString();
     sub = p.value("sub").toString();
-    com = htmlParse(p.value("com").toString());
+    com = quoteColor(p.value("com").toString());
     double temp = p.value("tim").toDouble();
     if(temp){
         tim = QString::number(temp,'d',0);
@@ -46,7 +46,7 @@ Post::~Post(){
     delete this;
 }
 
-QString Post::htmlParse(QString string){
+QString Post::quoteColor(QString string){
     //QSettings settings;
     //QColor color = settings.value("quote_color",);
     QString colorString = "class=\"quote\" style=\"color:#8ba446\"";

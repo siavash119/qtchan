@@ -15,19 +15,19 @@ public:
     ThreadTabHelper(QString board, QString thread, QWidget* parent);
     QString board;
     QString thread;
-    void startUp();
-    static void writeJson(QString &board, QString &thread, QByteArray &rep);
     QMap<QString,ThreadForm*> tfMap;
     QJsonArray posts;
     QJsonObject p;
     QFutureWatcher<QImage>* imageScaler;
     bool abort = false;
+    void startUp();
+    static void writeJson(QString &board, QString &thread, QByteArray &rep);
 
 private:
+    QString threadUrl;
     QNetworkReply *reply;
     QNetworkRequest request;
     QWidget* parent;
-    QString threadUrl;
     QMetaObject::Connection connectionPost;
 
 public slots:
