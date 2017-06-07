@@ -48,7 +48,7 @@ void PostForm::setShortcuts(){
 }
 
 void PostForm::appendText(QString text){
-    ui->com->appendPlainText(text);
+    ui->com->textCursor().insertText(text);
 }
 
 void PostForm::postIt(){
