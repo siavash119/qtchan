@@ -4,8 +4,9 @@ There's still a lot to do.
 
 # Features
 * browse and post (only 4chan pass right now) on 4chan
-* tree style tabs and save state
+* auto update threads and auto download original file
 * download all media as original filename
+* tree style tabs and save state
 * open files in OS's default application
 * search and filter
 
@@ -26,12 +27,12 @@ Create a file ~/.config/qtchan/settings like below. Look at your browser cookies
 ## TODO
 ### MAJOR
 * captcha
-* process-threading
+* process-threading (done for thread tabs and forms; still need to do for board tabs)
 * better geometry for hovered and embedded replies
 * instructions
 * settings
 
 ### MINOR
-* save tree tabs order and structure
+* save tree tabs order and structure (right now only saves list in opened order)
 * show loading state
 * themes
