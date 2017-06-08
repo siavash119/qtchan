@@ -31,7 +31,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     myPostForm = new PostForm(board,thread);
     this->setShortcuts();
     this->installEventFilter(this);
-    space = new QSpacerItem(0,0,QSizePolicy::Ignored,QSizePolicy::Ignored);
+    space = new QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
     helper->startUp();
     connect(mw,&MainWindow::setAutoUpdate,[=](bool update){helper->setAutoUpdate(update);});
     connect(helper,&ThreadTabHelper::addStretch,[=](){this->addStretch();});
