@@ -25,7 +25,7 @@ class ThreadForm : public QWidget
     bool gettingFile = false;
 
 public:
-    explicit ThreadForm(QString board, QString threadNum, PostType type = Reply, bool root = true, QWidget *parent = 0);
+    explicit ThreadForm(QString board, QString threadNum, PostType type = Reply, bool root = true, bool autoExpand = false, QWidget *parent = 0);
     ~ThreadForm();
     void setText(QString text);
     void setImage(QByteArray img);
@@ -56,6 +56,7 @@ public:
     //TODO check settings -> filter
     bool hidden = false;
     bool root;
+    bool autoExpand;
     static QImage scaleImage(QString path);
     QFutureWatcher<QImage> watcher;
 

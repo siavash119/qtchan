@@ -60,6 +60,9 @@ private slots:
     void openPostForm();
     void on_pushButton_clicked();
     void on_lineEdit_returnPressed();
+
+signals:
+    void autoUpdate(bool update);
 };
 
 #endif // THREADTAB_H

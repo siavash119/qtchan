@@ -9,6 +9,7 @@
 #include <QKeyEvent>
 #include <QMutableMapIterator>
 #include <QProcess>
+#include <QTimer>
 #include "netcontroller.h"
 #include "mainwindow.h"
 
@@ -30,9 +31,10 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     myPostForm = new PostForm(board,thread);
     this->setShortcuts();
     this->installEventFilter(this);
-    helper->startUp();
-    connect(helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch);
     space = new QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
+    helper->startUp();
+    connect(mw,&MainWindow::setAutoUpdate,[=](bool update){helper->setAutoUpdate(update);});
+    connect(helper,&ThreadTabHelper::addStretch,[=](){this->addStretch();});
 }
 
 void ThreadTab::setShortcuts(){
@@ -46,7 +48,7 @@ void ThreadTab::setShortcuts(){
     this->addAction(postForm);
     QAction *expandAll = new QAction(this);
     expandAll->setShortcut(Qt::Key_E);
-    connect(expandAll, &QAction::triggered, this, &ThreadTab::loadAllImages);
+    connect(expandAll, &QAction::triggered,[=](){helper->loadAllImages();});
     this->addAction(expandAll);
     QAction *refresh = new QAction(this);
     refresh->setShortcut(Qt::Key_R);
@@ -78,7 +80,9 @@ ThreadTab::~ThreadTab()
     helper->abort = 1;
     workerThread->quit();
     workerThread->wait();
-    //delete space;
+    delete helper;
+    delete myPostForm;
+    delete workerThread;
     delete ui;
 }
 

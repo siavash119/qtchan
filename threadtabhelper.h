@@ -6,6 +6,7 @@
 #include <QFutureWatcher>
 #include <QImage>
 #include <QMetaObject>
+#include <QSettings>
 #include "threadform.h"
 
 class ThreadTabHelper : public QObject
@@ -13,6 +14,7 @@ class ThreadTabHelper : public QObject
     Q_OBJECT
 public:
     ThreadTabHelper(QString board, QString thread, QWidget* parent);
+    ~ThreadTabHelper();
     QString board;
     QString thread;
     QMap<QString,ThreadForm*> tfMap;
@@ -20,8 +22,10 @@ public:
     QJsonObject p;
     QFutureWatcher<QImage>* imageScaler;
     bool abort = false;
+    bool expandAll;
     void startUp();
     static void writeJson(QString &board, QString &thread, QByteArray &rep);
+    void setAutoUpdate(bool update);
 
 private:
     QString threadUrl;
@@ -29,10 +33,14 @@ private:
     QNetworkRequest request;
     QWidget* parent;
     QMetaObject::Connection connectionPost;
+    QPointer<QTimer> updateTimer;
+    QThread* updateThread;
+    QMetaObject::Connection connectionUpdate;
 
 public slots:
     void loadPosts();
     void getPosts();
+    void loadAllImages();
 
 signals:
     void postsLoaded(QJsonArray &posts);

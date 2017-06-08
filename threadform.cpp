@@ -20,7 +20,7 @@
 
 //TODO Possibly refactor file checks and pointers to dir and file objects
 //TODO Possibly decouple the file and thumb getters to the post class
-ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool root, QWidget *parent) :
+ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool root, bool autoExpand, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ThreadForm)
 {
@@ -29,6 +29,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
     this->type = type;
     this->root = root;
     this->tab = parent;
+    this->autoExpand = autoExpand;
     ui->setupUi(this);
     ui->tim->hide();
     ui->horizontalSpacer->changeSize(0,0);
@@ -41,7 +42,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
     connect(ui->replies,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
     //TODO quote for boardtab too
     if(type==Reply)connect(ui->no,&ClickableLabel::clicked,[=](){
-        ((ThreadTab*)tab)->quoteIt(">>"+ui->no->text());
+        qobject_cast<ThreadTab*>(tab)->quoteIt(">>"+ui->no->text());
     });
     ui->replies->installEventFilter(this);
     ui->com->installEventFilter(this);
@@ -90,12 +91,11 @@ void ThreadForm::load(QJsonObject &p){
         fileURL = this->board % "/" % post->tim % post->ext;
         filePath = pathBase%post->no%"-"%post->filename%post->ext;
         file = new QFile(filePath);
-        QSettings settings;
+        //skip getting thumbnail if autoExpand is true
         if((post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png"))){
-            //ui->horizontalSpacer->1
             loadIt = true;
             if(!file->exists()){
-                if(settings.value("loadorig") == 1) getFile();
+                if(autoExpand) getFile();
                 else{
                     thumbURL = this->board % "/" % post->tim % "s.jpg";
                     thumbPath = pathBase%"thumbs/"%post->no%"-"%post->filename%"s.jpg";
@@ -111,7 +111,7 @@ void ThreadForm::load(QJsonObject &p){
         }
         else {
             loadIt = false;
-            if(settings.value("loadorig")==1){
+            if(autoExpand){
                 if(!file->exists()){
                     getFile();
                 }
@@ -370,7 +370,7 @@ void ThreadForm::insert(ThreadForm* tf){
 
 ThreadForm* ThreadForm::clone(){
     //TODO just tfs->load(post);
-    ThreadForm* tfs = new ThreadForm(this->board,this->threadNum,this->type,false,tab);
+    ThreadForm* tfs = new ThreadForm(this->board,this->threadNum,this->type,false,false,tab);
     tfs->tab = tab;
     tfs->post = this->post;
     tfs->ui->no->setText(post->no);

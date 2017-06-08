@@ -56,15 +56,18 @@ public slots:
     void saveSession();
     void nextTab(QModelIndex qmi);
     void prevTab(QModelIndex qmi);
+    void toggleAutoUpdate();
+    void toggleAutoExpand();
 
 private:
     Ui::MainWindow *ui;
     QModelIndexList boardsSelected;
     void setShortcuts();
 
-
 signals:
     void requestCatalog(QString);
+    void setAutoUpdate(bool autoUpdate);
+    void setAutoExpand(bool autoExpand);
 };
 
 extern MainWindow* mw;

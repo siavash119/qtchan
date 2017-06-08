@@ -64,6 +64,16 @@ void MainWindow::setShortcuts(){
     navBar->setShortcutContext(Qt::ApplicationShortcut);
     connect(navBar, &QAction::triggered, this, &MainWindow::focusBar);
     this->addAction(navBar);
+    QAction *setAutoUpdate = new QAction(this);
+    setAutoUpdate->setShortcut(QKeySequence("Ctrl+u"));
+    setAutoUpdate->setShortcutContext(Qt::ApplicationShortcut);
+    connect(setAutoUpdate, &QAction::triggered, this, &MainWindow::toggleAutoUpdate);
+    this->addAction(setAutoUpdate);
+    QAction *setAutoExpand = new QAction(this);
+    setAutoExpand->setShortcut(QKeySequence("Ctrl+e"));
+    setAutoExpand->setShortcutContext(Qt::ApplicationShortcut);
+    connect(setAutoExpand, &QAction::triggered, this, &MainWindow::toggleAutoExpand);
+    this->addAction(setAutoExpand);
     QAction *saveState = new QAction(this);
     saveState->setShortcut(QKeySequence(Qt::Key_F10));
     saveState->setShortcutContext(Qt::ApplicationShortcut);
@@ -87,6 +97,23 @@ MainWindow::~MainWindow()
 {
     delete model;
     delete ui;
+}
+
+//TODO put toggle functions in 1 function with argument
+void MainWindow::toggleAutoUpdate(){
+    QSettings settings;
+    bool autoUpdate = !settings.value("autoUpdate").toBool();
+    qDebug () << "setting autoUpdate to" << autoUpdate;
+    settings.setValue("autoUpdate",autoUpdate);
+    emit setAutoUpdate(autoUpdate);
+}
+
+void MainWindow::toggleAutoExpand(){
+    QSettings settings;
+    bool autoExpand = !settings.value("autoExpand").toBool();
+    qDebug () << "setting autoExpand to" << autoExpand;
+    settings.setValue("autoExpand",autoExpand);
+    emit setAutoExpand(autoExpand);
 }
 
 //for next/prev tab just send up and down key and loop to beginning/end if no change in selection?
