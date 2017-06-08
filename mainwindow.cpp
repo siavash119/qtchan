@@ -146,10 +146,13 @@ void MainWindow::prevTab(QModelIndex qmi){
         return;
     }
     qmi = qmi.parent();
-    if(qmi.row()==-1) //we're at the very first row so select last row
-        ui->treeView->selectionModel()->setCurrentIndex(model->index(model->rowCount()-1,0),QItemSelectionModel::ClearAndSelect);
-    else
-        ui->treeView->selectionModel()->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
+    if(qmi.row()==-1){ //we're at the very first row so select last row
+        qmi = model->index(model->rowCount()-1,0);
+        while(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)){
+            qmi = qmi.child(model->rowCount(qmi)-1,0);
+        }
+    }
+    ui->treeView->selectionModel()->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::on_pushButton_clicked()
