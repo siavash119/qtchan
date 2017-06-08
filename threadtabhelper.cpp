@@ -91,7 +91,6 @@ void ThreadTabHelper::loadPosts(){
             }
         }
         QSet<QString> quotes = tf->quotelinks;
-        //QCoreApplication::processEvents();
         QPointer<ThreadForm> replyTo;
         foreach (const QString &orig, quotes)
         {

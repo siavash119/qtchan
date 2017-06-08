@@ -3,6 +3,7 @@
 
 #include <QNetworkAccessManager>
 #include <QNetworkCookieJar>
+#include <QNetworkDiskCache>
 #include <QJsonObject>
 #include "boardtab.h"
 #include "filter.h"
@@ -14,6 +15,7 @@ public:
     QNetworkAccessManager *fileManager;
     QNetworkAccessManager *jsonManager;
     QNetworkCookieJar *cookies;
+    QNetworkDiskCache *diskCache;
     QJsonObject settingsFile;
     explicit netController(QObject * parent = nullptr);
     Filter *filter;

@@ -9,10 +9,17 @@ netController::netController(QObject *parent) : QObject(parent)
     thumbManager = new QNetworkAccessManager(this);
     fileManager = new QNetworkAccessManager(this);
     jsonManager = new QNetworkAccessManager(this);
+
     cookies = new QNetworkCookieJar(this);
     thumbManager->setCookieJar(cookies);
     fileManager->setCookieJar(cookies);
     jsonManager->setCookieJar(cookies);
+
+    diskCache = new QNetworkDiskCache(this);
+    QDir().mkpath("cache");
+    diskCache->setCacheDirectory("cache");
+    //diskCache->setMaximumCacheSize(1073741824); //1GB cache
+    jsonManager->setCache(diskCache);
 
     QString val;
     QFile file;
