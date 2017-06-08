@@ -85,27 +85,23 @@ void ThreadForm::load(QJsonObject &p){
 
     //set image
     //TODO clean if-else's
-    //TODO possibly change file pointer
     //TODO use filedeleted image
     if(!post->tim.isNull() && !post->filedeleted){
         fileURL = this->board % "/" % post->tim % post->ext;
         filePath = pathBase%post->no%"-"%post->filename%post->ext;
         file = new QFile(filePath);
-        //skip getting thumbnail if autoExpand is true
         if((post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png"))){
             loadIt = true;
             if(!file->exists()){
                 if(autoExpand) getFile();
-                else{
-                    thumbURL = this->board % "/" % post->tim % "s.jpg";
-                    thumbPath = pathBase%"thumbs/"%post->no%"-"%post->filename%"s.jpg";
-                    thumb = new QFile(thumbPath);
-                    if(!thumb->exists()) getThumb();
-                    else loadImage(thumbPath);
-                    //else QFuture<QImage> getImage = QtConcurrent::run(scaleImage, thumbPath);
-                }
+                thumbURL = this->board % "/" % post->tim % "s.jpg";
+                thumbPath = pathBase%"thumbs/"%post->no%"-"%post->filename%"s.jpg";
+                thumb = new QFile(thumbPath);
+                if(!thumb->exists()) getThumb();
+                else loadImage(thumbPath);
             }
             else{
+                finished = true;
                 loadImage(filePath);
             }
         }
@@ -207,6 +203,8 @@ void ThreadForm::getOrigFinished(){
     gettingFile = false;
     if(replyImage->error() == 0)
     {
+        disconnect(connectionThumb);
+        finished = true;
         file->open(QIODevice::WriteOnly);
         file->write(replyImage->readAll());
         file->close();
@@ -231,7 +229,8 @@ void ThreadForm::getThumbFinished(){
         thumb->write(replyThumb->readAll());
         thumb->close();
         qDebug().noquote() << "saved file "+thumbPath;
-        loadImage(thumbPath);
+        //check if orig file somehow dl'd faster than thumbnail
+        if(!finished) loadImage(thumbPath);
     }
     replyThumb->deleteLater();
     disconnect(connectionThumb);

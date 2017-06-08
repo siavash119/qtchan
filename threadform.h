@@ -78,6 +78,7 @@ private:
     QNetworkReply *replyImage;
     void getFile();
     void getThumb();
+    bool finished = false;
     QWidget* tab; //pointer to tab
 
 signals:
