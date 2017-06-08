@@ -98,7 +98,7 @@ void PostForm::postIt(){
     QUrl url = QUrl("https://sys.4chan.org/"+board+"/post");
     QNetworkRequest request(url);
     //request.1
-    postReply = nc.manager->post(request, multiPart);
+    postReply = nc.jsonManager->post(request, multiPart);
     connect(postReply, &QNetworkReply::finished, this, &PostForm::postFinished);
     multiPart->setParent(postReply); // delete the multiPart with the reply
     // here connect signals etc.

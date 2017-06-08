@@ -10,7 +10,8 @@
 class netController: public QObject  {
     Q_OBJECT
 public:
-    QNetworkAccessManager *manager;
+    QNetworkAccessManager *thumbManager;
+    QNetworkAccessManager *fileManager;
     QNetworkAccessManager *jsonManager;
     QNetworkCookieJar *cookies;
     QJsonObject settingsFile;

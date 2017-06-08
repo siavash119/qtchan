@@ -129,7 +129,7 @@ void ThreadForm::load(QJsonObject &p){
 
 void ThreadForm::getFile(){
     qDebug().noquote() << QString("getting https://i.4cdn.org/")  % fileURL;
-    replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
+    replyImage = nc.fileManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
     gettingFile = true;
     //connect(replyImage, &QNetworkReply::downloadProgress,this,&ThreadForm::downloading);
     connectionImage = connect(replyImage, &QNetworkReply::finished,this, &ThreadForm::getOrigFinished);
@@ -137,7 +137,7 @@ void ThreadForm::getFile(){
 
 void ThreadForm::getThumb(){
     qDebug().noquote() << QString("getting https://i.4cdn.org/")  % thumbURL;
-    replyThumb = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % thumbURL)));
+    replyThumb = nc.thumbManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % thumbURL)));
     connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished);
 }
 
@@ -200,6 +200,7 @@ void ThreadForm::updateComHeight(){
 }
 
 void ThreadForm::getOrigFinished(){
+    disconnect(connectionImage);
     gettingFile = false;
     if(replyImage->error() == 0)
     {
@@ -218,11 +219,11 @@ void ThreadForm::getOrigFinished(){
             }
         }
     }
-        replyImage->deleteLater();
-        disconnect(connectionImage);
+    replyImage->deleteLater();
 }
 
 void ThreadForm::getThumbFinished(){
+    disconnect(connectionThumb);
     if(replyThumb->error() == 0)
     {
         thumb->open(QIODevice::WriteOnly);
@@ -233,7 +234,6 @@ void ThreadForm::getThumbFinished(){
         if(!finished) loadImage(thumbPath);
     }
     replyThumb->deleteLater();
-    disconnect(connectionThumb);
 }
 
 QImage ThreadForm::scaleImage(QString path){
@@ -268,7 +268,7 @@ void ThreadForm::imageClicked(){
         if(!file->exists() && !gettingFile){
             qDebug().noquote() << QString("getting https://i.4cdn.org/")  % fileURL;
             gettingFile=true;
-            replyImage = nc.manager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
+            replyImage = nc.fileManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
             //connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::loadFromImageClicked);
             connectionImage = connect(replyImage, &QNetworkReply::finished,[=]() {
                 this->getOrigFinished();

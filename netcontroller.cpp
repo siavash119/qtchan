@@ -6,10 +6,13 @@
 
 netController::netController(QObject *parent) : QObject(parent)
 {
-    manager = new QNetworkAccessManager(this);
+    thumbManager = new QNetworkAccessManager(this);
+    fileManager = new QNetworkAccessManager(this);
     jsonManager = new QNetworkAccessManager(this);
     cookies = new QNetworkCookieJar(this);
-    manager->setCookieJar(cookies);
+    thumbManager->setCookieJar(cookies);
+    fileManager->setCookieJar(cookies);
+    jsonManager->setCookieJar(cookies);
 
     QString val;
     QFile file;
@@ -26,7 +29,8 @@ netController::netController(QObject *parent) : QObject(parent)
         temp.setDomain(".4chan.org");
         temp.setSecure(1);
         temp.setPath("/");
-        manager->cookieJar()->insertCookie(temp);
+        thumbManager->cookieJar()->insertCookie(temp);
+        fileManager->cookieJar()->insertCookie(temp);
         jsonManager->cookieJar()->insertCookie(temp);
     }
     filter = new Filter();

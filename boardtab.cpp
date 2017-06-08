@@ -93,7 +93,7 @@ void BoardTab::findText(const QString text){
 
 void BoardTab::getPosts(){
     qDebug("refreshing /%s/",board.toLatin1().constData());
-    reply = nc.manager->get(QNetworkRequest(QUrl(boardUrl)));
+    reply = nc.jsonManager->get(QNetworkRequest(QUrl(boardUrl)));
     connect(reply, &QNetworkReply::finished, this, &BoardTab::loadThreads);
 }
 
@@ -109,7 +109,7 @@ void BoardTab::loadThreads(){
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
-        delete ((ThreadForm*)mapI.value());
+        delete mapI.value();
         mapI.remove();
         //QCoreApplication::processEvents();
     }
