@@ -63,8 +63,11 @@ void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep
 void ThreadTabHelper::loadPosts(){
     if(reply->error()){
         qDebug().noquote() << "loading post error:" << reply->errorString();
-        if(reply->errorString().indexOf("not found")){
+        qDebug() << reply->error();
+        if(reply->error() == QNetworkReply::ContentNotFoundError){
+            qDebug() << "Stopping timer for" << threadUrl;
             updateTimer->stop();
+            emit thread404();
         }
         reply->deleteLater();
         return;
