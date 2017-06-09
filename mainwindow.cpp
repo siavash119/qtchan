@@ -240,9 +240,13 @@ void MainWindow::onSelectionChanged(){
     QModelIndexList list = ui->treeView->selectionModel()->selectedRows();
     if(list.size()) {
         int pageId = list.at(0).data(Qt::UserRole).toInt();
-        QWidget* curTab = static_cast<QWidget*>(tabsNew.find(pageId)->TabPointer);
-        ui->stackedWidget->setCurrentWidget(curTab);
-        this->setWindowTitle(curTab->windowTitle());
+        QPointer<QWidget> curTab = static_cast<QWidget*>(tabsNew.find(pageId)->TabPointer);
+        if(curTab){
+            ui->stackedWidget->setCurrentWidget(curTab);
+            qDebug() << curTab;
+            qDebug() << curTab->windowTitle();
+            this->setWindowTitle(curTab->windowTitle());
+        }
     }
     QCoreApplication::processEvents();
 }
