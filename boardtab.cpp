@@ -44,7 +44,7 @@ BoardTab::~BoardTab()
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
-        delete ((ThreadForm*)mapI.value());
+        delete static_cast<ThreadForm*>(mapI.value());
         mapI.remove();
         //QCoreApplication::processEvents();
     }

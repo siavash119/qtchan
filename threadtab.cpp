@@ -9,6 +9,7 @@
 #include <QKeyEvent>
 #include <QMutableMapIterator>
 #include <QProcess>
+#include <QScrollBar>
 #include <QTimer>
 #include "netcontroller.h"
 #include "mainwindow.h"
@@ -35,7 +36,21 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     helper->startUp();
     connect(mw,&MainWindow::setAutoUpdate,[=](bool update){helper->setAutoUpdate(update);});
     connect(helper,&ThreadTabHelper::addStretch,[=](){this->addStretch();});
+    /*connect(helper,&ThreadTabHelper::scrollIt,[=](){
+        this->checkScroll();
+    });*/
 }
+
+/*void ThreadTab::checkScroll(){
+    QScrollBar* vBar = ui->scrollArea->verticalScrollBar();
+    int height = ui->scrollAreaWidgetContents->size().height();
+    int scrollPos = vBar->value() + vBar->height();
+    qDebug() << height;
+    qDebug() << scrollPos;
+    qDebug() << "----------";
+    if(scrollPos >= height - 500) vBar->triggerAction(QScrollBar::SliderToMaximum);
+    //vBar->setSliderDown();
+}*/
 
 void ThreadTab::setShortcuts(){
     QAction *foo = new QAction(this);
@@ -74,15 +89,15 @@ ThreadTab::~ThreadTab()
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
-        delete qobject_cast<ThreadForm *>(mapI.value());
+        delete static_cast<ThreadForm *>(mapI.value());
         mapI.remove();
     }
     helper->abort = 1;
     workerThread->quit();
     workerThread->wait();
-    delete helper;
-    delete myPostForm;
-    delete workerThread;
+    helper->deleteLater();
+    myPostForm->deleteLater();
+    workerThread->deleteLater();
     delete ui;
 }
 
@@ -135,7 +150,7 @@ void ThreadTab::loadAllImages(){
         mapI.next();
         //cout << i.key() << ": " << i.value() << endl;
         //((ThreadForm*)mapI.value())->loadOrig();
-        qobject_cast<ThreadForm *>(mapI.value())->loadOrig();
+        static_cast<ThreadForm *>(mapI.value())->loadOrig();
         //mapI.remove();
     }
 }

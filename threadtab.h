@@ -26,8 +26,8 @@ public:
     QString threadUrl;
     explicit ThreadTab(QString board, QString thread, QWidget *parent = 0);
     ~ThreadTab();
-    void addStretch();
     QMap<QString,ThreadForm*> tfMap;
+    void addStretch();
     bool updated;
     void findText(const QString text);
     PostForm *myPostForm;
@@ -49,6 +49,7 @@ public slots:
     void updateFloat();
     void onNewTF(ThreadForm* tf);
     void onWindowTitle(QString title);
+    //void checkScroll();
 
 private:
     Ui::ThreadTab *ui;

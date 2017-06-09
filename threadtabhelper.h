@@ -48,6 +48,7 @@ signals:
     void windowTitle(QString windowTitle);
     void setReplies(ThreadForm* tf);
     void addStretch();
+    //void scrollIt();
 };
 
 #endif // THREADTABHELPER_H

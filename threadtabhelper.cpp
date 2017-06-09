@@ -28,8 +28,10 @@ void ThreadTabHelper::startUp(){
 }
 
 ThreadTabHelper::~ThreadTabHelper(){
-    disconnect(connectionUpdate);
-    delete updateTimer;
+    //disconnect(connectionUpdate);
+    //disconnect(connectionPost);
+    updateTimer->deleteLater();
+    //delete updateTimer;
 }
 
 void ThreadTabHelper::setAutoUpdate(bool update){
@@ -59,14 +61,17 @@ void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep
 }
 
 void ThreadTabHelper::loadPosts(){
-    disconnect(connectionPost);
     if(reply->error()){
         qDebug().noquote() << "loading post error:" << reply->errorString();
+        if(reply->errorString().indexOf("not found")){
+            updateTimer->stop();
+        }
         reply->deleteLater();
         return;
     }
     //write to file and make json array
     QByteArray rep = reply->readAll();
+    disconnect(connectionPost);
     QtConcurrent::run(&ThreadTabHelper::writeJson,board, thread, rep);
     posts = QJsonDocument::fromJson(rep).object().value("posts").toArray();
     int length = posts.size();
@@ -104,7 +109,8 @@ void ThreadTabHelper::loadPosts(){
         i++;
         QCoreApplication::processEvents();
     }
-    emit addStretch();
+    if(!abort) emit addStretch();
+    //emit scrollIt();
     reply->deleteLater();
 }
 

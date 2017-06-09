@@ -168,12 +168,12 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
         return QObject::eventFilter(obj, event);
     }
     if(event->type() == QEvent::DragEnter){
-        ((QDragEnterEvent*)event)->acceptProposedAction();
+        static_cast<QDragEnterEvent*>(event)->acceptProposedAction();
         return true;
     }
 
     if(event->type() == QEvent::Drop){
-            const QMimeData *mimeData = ((QDropEvent*)event)->mimeData();
+            const QMimeData *mimeData = static_cast<QDropEvent*>(event)->mimeData();
             fileChecker(mimeData);
             qDebug().noquote() << "DROPPED";
             return true;

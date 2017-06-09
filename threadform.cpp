@@ -42,7 +42,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
     connect(ui->replies,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
     //TODO quote for boardtab too
     if(type==Reply)connect(ui->no,&ClickableLabel::clicked,[=](){
-        qobject_cast<ThreadTab*>(tab)->quoteIt(">>"+ui->no->text());
+        static_cast<ThreadTab*>(tab)->quoteIt(">>"+ui->no->text());
     });
     ui->replies->installEventFilter(this);
     ui->com->installEventFilter(this);
@@ -55,8 +55,8 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
 
 ThreadForm::~ThreadForm()
 {
-    disconnect(connectionImage);
-    disconnect(connectionThumb);
+    //disconnect(connectionImage);
+    //disconnect(connectionThumb);
     watcher.waitForFinished();
     delete ui;
 }
@@ -258,6 +258,9 @@ void ThreadForm::loadImage(QString path){
             this->setMinimumWidth(738);
             ui->tim->setPixmap(QPixmap::fromImage(scaled));
             ui->tim->setMaximumSize(scaled.size());
+            /*if(this->type == PostType::Reply){
+                static_cast<ThreadTab*>(tab)->checkScroll();
+            }*/
        }
     });
 }
@@ -298,7 +301,7 @@ void ThreadForm::hideClicked(){
     ThreadForm* replyTo;
     foreach (const QString &orig, quotes)
     {
-        replyTo = ((ThreadTab*)tab)->tfMap.find(orig).value();
+        replyTo = static_cast<ThreadTab*>(tab)->tfMap.find(orig).value();
         if(replyTo != nullptr){
             //replyTo->replies.insert(tf->post->no);
             replyTo->replies.remove(post->no.toDouble());
@@ -334,7 +337,7 @@ void ThreadForm::quoteClicked(const QString &link)
     qDebug().noquote() << link;
     //check size > 2 instead of isempty?
     if(!link.isEmpty() && link.at(0)=='#' && this->type == PostType::Reply){
-        ThreadForm* tf = ((ThreadTab*)tab)->findPost(link.mid(2));
+        ThreadForm* tf = static_cast<ThreadTab*>(tab)->findPost(link.mid(2));
         if(tf != nullptr && !tf->hidden) this->insert(tf);
     }
     else if(!link.isEmpty() && link.at(0)=='/'){
@@ -352,7 +355,7 @@ void ThreadForm::on_replies_linkHovered(const QString &link)
         }
         else{
            //TODO check mouse cursor?
-           ((ThreadTab*)tab)->deleteFloat();
+           static_cast<ThreadTab*>(tab)->deleteFloat();
         }
     }
 }
@@ -414,7 +417,7 @@ ThreadForm* ThreadForm::clone(){
         tfs->deleteLater();
     });
     //TODO load and connect cross thread replies
-    if(this->type == PostType::Reply) connect(tfs,&ThreadForm::floatLink,((ThreadTab*)tab),&ThreadTab::floatReply);
+    if(this->type == PostType::Reply) connect(tfs,&ThreadForm::floatLink,static_cast<ThreadTab*>(tab),&ThreadTab::floatReply);
     connect(tfs,&QObject::destroyed,[=](){this->clones.removeOne(tfs);});
     return tfs;
 }
@@ -444,7 +447,8 @@ bool ThreadForm::eventFilter(QObject *obj, QEvent *event)
 {
     //check cursor type instead?
     if(event->type() == QEvent::MouseMove){
-        if(this->type == PostType::Reply) ((ThreadTab*)tab)->updateFloat();
+        if(this->type == PostType::Reply)
+            static_cast<ThreadTab*>(tab)->updateFloat();
     }
     //qDebug() << cursor.shape();
     /*if (event->type() == QEvent::CursorChange) {
@@ -455,7 +459,8 @@ bool ThreadForm::eventFilter(QObject *obj, QEvent *event)
         return QObject::eventFilter(obj, event);
     }*/
     else if(event->type() == QEvent::Leave){
-        if(this->type == PostType::Reply) ((ThreadTab*)tab)->deleteFloat();
+        if(this->type == PostType::Reply)
+            static_cast<ThreadTab*>(tab)->deleteFloat();
     }
     else if(event->type() == QEvent::DragEnter){
         return true;
