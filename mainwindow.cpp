@@ -162,6 +162,7 @@ void MainWindow::on_pushButton_clicked()
 }
 
 void MainWindow::loadFromSearch(QString searchString, bool select){
+    (void)select;
     QRegularExpression re("^(?:(?:https?:\\/\\/)?boards.4chan.org)?\\/?(\\w+)(?:\\/thread)?\\/(\\d+)(?:#p\\d+)?$",QRegularExpression::CaseInsensitiveOption);
     QRegularExpressionMatch match = re.match(searchString);
     QRegularExpressionMatch match2;
@@ -200,6 +201,7 @@ void MainWindow::loadFromSearch(QString searchString, bool select){
 }
 
 void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
+    (void)parent;
     qDebug().noquote()  << "loading /"+board+"/"+thread;
     ThreadTab *tt = new ThreadTab(board,thread);
     //ui->verticalLayout_3->addWidget(tt);
@@ -243,8 +245,6 @@ void MainWindow::onSelectionChanged(){
         QPointer<QWidget> curTab = static_cast<QWidget*>(tabsNew.find(pageId)->TabPointer);
         if(curTab){
             ui->stackedWidget->setCurrentWidget(curTab);
-            qDebug() << curTab;
-            qDebug() << curTab->windowTitle();
             this->setWindowTitle(curTab->windowTitle());
         }
     }
