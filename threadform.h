@@ -23,6 +23,7 @@ class ThreadForm : public QWidget
 {
     Q_OBJECT
     bool gettingFile = false;
+    bool gettingThumb = false;
 
 public:
     explicit ThreadForm(QString board, QString threadNum, PostType type = Reply, bool root = true, bool autoExpand = false, QWidget *parent = 0);
@@ -38,7 +39,8 @@ public:
     QString board;
     static QString htmlParse(QString &html);
     static QString titleParse(QString &title);
-    Post *post;
+    //Post *post;
+    Post post;
     void updateComHeight();
     QDir *folder;
     QString folderPath;

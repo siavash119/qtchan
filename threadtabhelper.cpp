@@ -17,7 +17,7 @@ void ThreadTabHelper::startUp(){
     request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
     getPosts();
     updateTimer = new QTimer();
-    updateTimer->setInterval(60000);
+    updateTimer->setInterval(30000);
     updateTimer->start();
     QSettings settings;
     if(settings.value("autoUpdate").toBool()){
@@ -30,7 +30,10 @@ void ThreadTabHelper::startUp(){
 ThreadTabHelper::~ThreadTabHelper(){
     //disconnect(connectionUpdate);
     //disconnect(connectionPost);
-    updateTimer->deleteLater();
+    qDebug () << "destroying ThreadTabHelper";
+    updateTimer->stop();
+    delete updateTimer;
+    if(gettingReply) reply->abort();
     //delete updateTimer;
 }
 
@@ -46,6 +49,7 @@ void ThreadTabHelper::setAutoUpdate(bool update){
 void ThreadTabHelper::getPosts(){
     qDebug() << "getting posts for" << threadUrl;
     reply = nc.jsonManager->get(request);
+    gettingReply = true;
     connectionPost = connect(reply, &QNetworkReply::finished,[=](){
         loadPosts();
     });
@@ -61,9 +65,9 @@ void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep
 }
 
 void ThreadTabHelper::loadPosts(){
+    gettingReply = false;
     if(reply->error()){
         qDebug().noquote() << "loading post error:" << reply->errorString();
-        qDebug() << reply->error();
         if(reply->error() == QNetworkReply::ContentNotFoundError){
             qDebug() << "Stopping timer for" << threadUrl;
             updateTimer->stop();
@@ -87,11 +91,11 @@ void ThreadTabHelper::loadPosts(){
         ThreadForm *tf = new ThreadForm(board,thread,PostType::Reply,true,loadFile,parent);
         tf->load(p);
         emit newTF(tf);
-        tfMap.insert(tf->post->no,tf);
+        tfMap.insert(tf->post.no,tf);
         if(i==0){
-            if(tf->post->sub.length())emit windowTitle("/"+board+"/"+thread + " - " + tf->post->sub);
-            else if(tf->post->com.length()){
-                QString temp = tf->post->com;
+            if(tf->post.sub.length())emit windowTitle("/"+board+"/"+thread + " - " + tf->post.sub);
+            else if(tf->post.com.length()){
+                QString temp = tf->post.com;
                 emit windowTitle("/"+board+"/"+thread + " - " +
                      ThreadForm::htmlParse(temp
                         .replace(QRegExp("</?span( class=\"quote\" style=\"color:#[\\d|\\w]{6}\")?>"),""))
@@ -104,7 +108,7 @@ void ThreadTabHelper::loadPosts(){
         {
             replyTo = tfMap.find(orig).value();
             if(replyTo != tfMap.end().value()){
-                replyTo->replies.insert(tf->post->no.toDouble(),tf->post->no);
+                replyTo->replies.insert(tf->post.no.toDouble(),tf->post.no);
                 //replyTo->setReplies();
             }
         }

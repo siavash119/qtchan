@@ -44,7 +44,7 @@ BoardTab::~BoardTab()
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
-        delete static_cast<ThreadForm*>(mapI.value());
+        delete mapI.value();
         mapI.remove();
         //QCoreApplication::processEvents();
     }
@@ -83,11 +83,11 @@ void BoardTab::findText(const QString text){
         mapI.next();
         tf = mapI.value();
         if(pass) { tf->show(); continue;};
-        match = re.match(tf->post->com);
+        match = re.match(tf->post.com);
         if(!match.hasMatch()){
             tf->hide();
         }
-        else qDebug().noquote().nospace() << "found " << text << " in thread #" << tf->post->no;
+        else qDebug().noquote().nospace() << "found " << text << " in thread #" << tf->post.no;
     }
 }
 
@@ -147,7 +147,7 @@ void BoardTab::loadThreads(){
             ThreadForm *tf = new ThreadForm(board,threadNum,Thread,true,false,this);
             ui->threads->addWidget(tf);
             tf->load(p);
-            tfMap.insert(tf->post->no,tf);
+            tfMap.insert(tf->post.no,tf);
             //posts.push_back(tf);
         }
         else{

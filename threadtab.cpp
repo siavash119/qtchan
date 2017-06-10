@@ -89,14 +89,14 @@ ThreadTab::~ThreadTab()
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
-        delete static_cast<ThreadForm *>(mapI.value());
+        delete mapI.value();
         mapI.remove();
     }
     helper->abort = 1;
     workerThread->quit();
     workerThread->wait();
-    helper->deleteLater();
-    myPostForm->deleteLater();
+    delete helper;
+    delete myPostForm;
     workerThread->deleteLater();
     delete ui;
 }
@@ -134,7 +134,7 @@ void ThreadTab::updateWidth(){
 
 void ThreadTab::onNewTF(ThreadForm* tf){
     ui->threads->addWidget(tf);
-    tfMap.insert(tf->post->no,tf);
+    tfMap.insert(tf->post.no,tf);
     connect(tf,&ThreadForm::floatLink,this,&ThreadTab::floatReply);
 }
 
@@ -171,11 +171,11 @@ void ThreadTab::findText(const QString text){
         mapI.next();
         tf = mapI.value();
         if(pass) { tf->show(); continue;};
-        match = re.match(tf->post->com);
+        match = re.match(tf->post.com);
         if(!match.hasMatch()){
             tf->hide();
         }
-        else qDebug().noquote().nospace() << "found " << text << " in thread #" << tf->post->no;
+        else qDebug().noquote().nospace() << "found " << text << " in thread #" << tf->post.no;
     }
 }
 

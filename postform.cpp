@@ -105,14 +105,14 @@ void PostForm::postIt(){
 }
 
 void PostForm::postFinished(){
-    QTextEdit *reply = new QTextEdit();
-    reply->setWindowTitle("post to /"+board+"/"+thread+" response");
-    //reply->setMinimumSize(640,480);
+    QTextEdit reply;
+    reply.setWindowTitle("post to /"+board+"/"+thread+" response");
+    //reply.setMinimumSize(640,480);
     QByteArray temp = postReply->readAll();
-    reply->setHtml(temp);
-    reply->setGeometry(0,0,this->width(),this->height());
+    reply.setHtml(temp);
+    reply.setGeometry(0,0,this->width(),this->height());
     qDebug().noquote() << temp;
-    if(reply->toPlainText().contains(QRegularExpression("uploaded.$|Post successful!$")))
+    if(reply.toPlainText().contains(QRegularExpression("uploaded.$|Post successful!$")))
     {
         overlay->displayText = "Post successful!";
         this->ui->com->clear();
@@ -120,7 +120,7 @@ void PostForm::postFinished(){
         //QTimer::singleShot(1000, reply, &QTextEdit::close);
     }
     else{
-        reply->show();
+        reply.show();
     }
     QTimer::singleShot(1000, this,&PostForm::removeOverlay);
     this->installEventFilter(this);
@@ -140,7 +140,7 @@ void PostForm::addOverlay(){
 
 void PostForm::removeOverlay(){
     qDebug().noquote() << "removing overlay";
-    overlay->deleteLater();
+    delete overlay;
     ui->com->setFocusPolicy(Qt::StrongFocus);
     focused->setFocus();
 }

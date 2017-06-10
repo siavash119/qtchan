@@ -4,12 +4,17 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QRegExp>
 #include <time.h>
 
 class Post
 {
+    QString colorString = "class=\"quote\" style=\"color:#8ba446\"";
+    QString quoteString = "class=\"quote\" style=\"color:#897399\"";
 public:
     Post(QJsonObject &p,QString &board);
+    Post();
+    void load(QJsonObject &p,QString &board);
     ~Post();
     QString no;
     int resto;
@@ -37,7 +42,7 @@ public:
     QString tim; //Renamed filename (Unix timestamp + milliseconds)
     QString filename; //Original filename
     QString ext; //File extension (.jpg|.png|.gif|.pdf|.swf|.webm)
-    int fsize; //File size
+    double fsize; //File size
     QString md5; //File MD5
     int w; //Image width
     int h; //Image Height

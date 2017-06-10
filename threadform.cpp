@@ -58,7 +58,11 @@ ThreadForm::~ThreadForm()
     //disconnect(connectionImage);
     //disconnect(connectionThumb);
     watcher.waitForFinished();
+    //delete post;
+    if(gettingFile)replyImage->abort();
+    if(gettingThumb)replyThumb->abort();
     delete ui;
+    //delete post;
 }
 
 void ThreadForm::setText(QString text){
@@ -67,36 +71,37 @@ void ThreadForm::setText(QString text){
 
 void ThreadForm::load(QJsonObject &p){
     //set post number
-    post = new Post(p,board);
-    ui->no->setText(post->no);
+    //post = new Post(p,board);
+    post.load(p,board);
+    ui->no->setText(post.no);
 
     //set comment
     //TODO replace <span class="quote"> and <a href="url">
-    ui->com->setText(post->com);
-    quotelinks = Filter::findQuotes(post->com);
+    ui->com->setText(post.com);
+    quotelinks = Filter::findQuotes(post.com);
 
     //set subject
-    if(post->sub==QString()) ui->sub->hide();
-    else ui->sub->setText(htmlParse(post->sub));
+    if(post.sub==QString()) ui->sub->hide();
+    else ui->sub->setText(htmlParse(post.sub));
 
     //set name
-    ui->name->setText(post->name);
-    ui->country_name->setText(post->country_name);
+    ui->name->setText(post.name);
+    ui->country_name->setText(post.country_name);
 
     //set image
     //TODO clean if-else's
     //TODO use filedeleted image
-    if(!post->tim.isNull() && !post->filedeleted){
-        fileURL = this->board % "/" % post->tim % post->ext;
-        filePath = pathBase%post->no%"-"%post->filename%post->ext;
-        file = new QFile(filePath);
-        if((post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png"))){
+    if(!post.tim.isNull() && !post.filedeleted){
+        fileURL = this->board % "/" % post.tim % post.ext;
+        filePath = pathBase%post.no%"-"%post.filename%post.ext;
+        file = new QFile(filePath,this);
+        if((post.ext == QLatin1String(".jpg") || post.ext == QLatin1String(".png"))){
             loadIt = true;
             if(!file->exists()){
                 if(autoExpand) getFile();
-                thumbURL = this->board % "/" % post->tim % "s.jpg";
-                thumbPath = pathBase%"thumbs/"%post->no%"-"%post->filename%"s.jpg";
-                thumb = new QFile(thumbPath);
+                thumbURL = this->board % "/" % post.tim % "s.jpg";
+                thumbPath = pathBase%"thumbs/"%post.no%"-"%post.filename%"s.jpg";
+                thumb = new QFile(thumbPath,this);
                 if(!thumb->exists()) getThumb();
                 else loadImage(thumbPath);
             }
@@ -112,16 +117,17 @@ void ThreadForm::load(QJsonObject &p){
                     getFile();
                 }
             }
-            thumbURL = this->board % "/" % post->tim % "s.jpg";
-            thumbPath = pathBase%"thumbs/"%post->no%"-"%post->filename%"s.jpg";
-            thumb = new QFile(thumbPath);
+            thumbURL = this->board % "/" % post.tim % "s.jpg";
+            thumbPath = pathBase%"thumbs/"%post.no%"-"%post.filename%"s.jpg";
+            thumb = new QFile(thumbPath,this);
             if(!thumb->exists()) getThumb();
             else loadImage(thumbPath);
         }
         connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
     }
     else{
-        ui->pictureLayout->deleteLater();
+        //ui->pictureLayout->deleteLater();
+        delete ui->pictureLayout;
     }
     this->show();
     //updateComHeight();
@@ -138,6 +144,7 @@ void ThreadForm::getFile(){
 void ThreadForm::getThumb(){
     qDebug().noquote() << QString("getting https://i.4cdn.org/")  % thumbURL;
     replyThumb = nc.thumbManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % thumbURL)));
+    gettingThumb = true;
     connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished);
 }
 
@@ -152,8 +159,8 @@ void ThreadForm::getThumb(){
 //TODO avoid copy pasted function
 //TODO clean if-elses
 void ThreadForm::loadOrig(){
-    if(!post->tim.isNull()){
-        if((post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png"))){
+    if(!post.tim.isNull()){
+        if((post.ext == QLatin1String(".jpg") || post.ext == QLatin1String(".png"))){
             loadIt = true;
             if(!file->exists()) getFile();
             else loadImage(filePath);
@@ -224,6 +231,7 @@ void ThreadForm::getOrigFinished(){
 
 void ThreadForm::getThumbFinished(){
     disconnect(connectionThumb);
+    gettingThumb = false;
     if(replyThumb->error() == 0)
     {
         thumb->open(QIODevice::WriteOnly);
@@ -266,7 +274,7 @@ void ThreadForm::loadImage(QString path){
 }
 
 void ThreadForm::imageClicked(){
-    qDebug().noquote() << "clicked "+post->filename;
+    qDebug().noquote() << "clicked "+post.filename;
     if(this->type == PostType::Reply){
         if(!file->exists() && !gettingFile){
             qDebug().noquote() << QString("getting https://i.4cdn.org/")  % fileURL;
@@ -303,8 +311,8 @@ void ThreadForm::hideClicked(){
     {
         replyTo = static_cast<ThreadTab*>(tab)->tfMap.find(orig).value();
         if(replyTo != nullptr){
-            //replyTo->replies.insert(tf->post->no);
-            replyTo->replies.remove(post->no.toDouble());
+            //replyTo->replies.insert(tf->post.no);
+            replyTo->replies.remove(post.no.toDouble());
             replyTo->setReplies();
         }
     }
@@ -375,27 +383,27 @@ ThreadForm* ThreadForm::clone(){
     ThreadForm* tfs = new ThreadForm(this->board,this->threadNum,this->type,false,false,tab);
     tfs->tab = tab;
     tfs->post = this->post;
-    tfs->ui->no->setText(post->no);
-    tfs->ui->com->setText(post->com);
-    if(post->sub==QString()) tfs->ui->sub->hide();
-    else ui->sub->setText(htmlParse(post->sub));
-    tfs->ui->name->setText(post->name);
+    tfs->ui->no->setText(post.no);
+    tfs->ui->com->setText(post.com);
+    if(post.sub==QString()) tfs->ui->sub->hide();
+    else ui->sub->setText(htmlParse(post.sub));
+    tfs->ui->name->setText(post.name);
     if(this->board != "pol"){
         tfs->ui->country_name->hide();
     }
     else{
-        tfs->ui->country_name->setText(post->country_name);
+        tfs->ui->country_name->setText(post.country_name);
     }
     tfs->replies = replies;
     //TODO check and account for if original is still getting file
-    if(!post->tim.isNull() && !post->filedeleted){
+    if(!post.tim.isNull() && !post.filedeleted){
         tfs->fileURL = fileURL;
         tfs->filePath = filePath;
         tfs->file = file;
         tfs->thumbURL = thumbURL;
         tfs->thumbPath = thumbPath;
         tfs->thumb = thumb;
-        if(post->ext == QLatin1String(".jpg") || post->ext == QLatin1String(".png")){
+        if(post.ext == QLatin1String(".jpg") || post.ext == QLatin1String(".png")){
             tfs->loadIt = true;
             if(file->exists() && tfs->loadIt)tfs->loadImage(tfs->filePath);
             else tfs->loadImage(tfs->thumbPath);
@@ -414,7 +422,7 @@ ThreadForm* ThreadForm::clone(){
     //connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
     connect(tfs->ui->hide,&ClickableLabel::clicked,[=](){
         tfs->hide();
-        tfs->deleteLater();
+        delete tfs;
     });
     //TODO load and connect cross thread replies
     if(this->type == PostType::Reply) connect(tfs,&ThreadForm::floatLink,static_cast<ThreadTab*>(tab),&ThreadTab::floatReply);

@@ -1,9 +1,9 @@
 #include "post.h"
-#include <QDebug>
-#include <QSettings>
 
-Post::Post(QJsonObject &p, QString &board)
-{
+Post::Post(){
+}
+
+void Post::load(QJsonObject &p, QString &board){
     this->board = board;
     no = QString::number(p.value("no").toInt());
     resto = p.value("resto").toInt();
@@ -26,7 +26,7 @@ Post::Post(QJsonObject &p, QString &board)
     sub = p.value("sub").toString();
     com = quoteColor(p.value("com").toString());
     double temp = p.value("tim").toDouble();
-    if(temp){
+    if(temp != 0.0){
         tim = QString::number(temp,'d',0);
         filename = p.value("filename").toString();
         ext = p.value("ext").toString();
@@ -42,15 +42,17 @@ Post::Post(QJsonObject &p, QString &board)
     }
 }
 
+Post::Post(QJsonObject &p, QString &board)
+{
+    load(p,board);
+}
+
 Post::~Post(){
-    delete this;
 }
 
 QString Post::quoteColor(QString string){
     //QSettings settings;
     //QColor color = settings.value("quote_color",);
-    QString colorString = "class=\"quote\" style=\"color:#8ba446\"";
-    QString quoteString = "class=\"quote\" style=\"color:#897399\"";
     QRegExp quotes("class=\"quote\"");
     QRegExp quotelinks("class=\"quotelink\"");
     string.replace(quotes,colorString);

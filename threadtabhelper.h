@@ -12,6 +12,7 @@
 class ThreadTabHelper : public QObject
 {
     Q_OBJECT
+    bool gettingReply = false;
 public:
     ThreadTabHelper(QString board, QString thread, QWidget* parent);
     ~ThreadTabHelper();
