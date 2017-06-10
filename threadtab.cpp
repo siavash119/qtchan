@@ -25,20 +25,17 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     this->setWindowTitle("/"+board+"/"+thread);
     //startUp();
     workerThread = new QThread;
-    helper = new ThreadTabHelper(board,thread, this);
-    helper->moveToThread(workerThread);
-    connect(helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF);
-    connect(helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle);
-    myPostForm = new PostForm(board,thread);
+    helper.startUp(board,thread, this);
+    helper.moveToThread(workerThread);
+    connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF);
+    connect(&helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle);
+    //myPostForm = new PostForm(board,thread,this);
+    myPostForm.load(board,thread);
     this->setShortcuts();
     this->installEventFilter(this);
     space = new QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
-    helper->startUp();
-    connect(mw,&MainWindow::setAutoUpdate,[=](bool update){helper->setAutoUpdate(update);});
-    connect(helper,&ThreadTabHelper::addStretch,[=](){this->addStretch();});
-    /*connect(helper,&ThreadTabHelper::scrollIt,[=](){
-        this->checkScroll();
-    });*/
+    connect(mw,&MainWindow::setAutoUpdate,[=](bool update){helper.setAutoUpdate(update);});
+    connect(&helper,&ThreadTabHelper::addStretch,[=](){this->addStretch();});
 }
 
 /*void ThreadTab::checkScroll(){
@@ -63,12 +60,12 @@ void ThreadTab::setShortcuts(){
     this->addAction(postForm);
     QAction *expandAll = new QAction(this);
     expandAll->setShortcut(Qt::Key_E);
-    connect(expandAll, &QAction::triggered,[=](){helper->loadAllImages();});
+    connect(expandAll, &QAction::triggered,[=](){helper.loadAllImages();});
     this->addAction(expandAll);
     QAction *refresh = new QAction(this);
     refresh->setShortcut(Qt::Key_R);
     refresh->setShortcutContext(Qt::ApplicationShortcut);
-    connect(refresh, &QAction::triggered,[=](){helper->getPosts();});
+    connect(refresh, &QAction::triggered,[=](){helper.getPosts();});
     this->addAction(refresh);
     QAction *focusSearch = new QAction(this);
     focusSearch->setShortcut(QKeySequence("Ctrl+f"));
@@ -92,19 +89,18 @@ ThreadTab::~ThreadTab()
         delete mapI.value();
         mapI.remove();
     }
-    helper->abort = 1;
+    helper.abort = 1;
     workerThread->quit();
     workerThread->wait();
-    delete helper;
-    delete myPostForm;
+    //delete myPostForm;
     workerThread->deleteLater();
     delete ui;
 }
 
 void ThreadTab::openPostForm(){
-    myPostForm->show();
-    myPostForm->activateWindow();
-    myPostForm->raise();
+    myPostForm.show();
+    myPostForm.activateWindow();
+    myPostForm.raise();
 }
 
 void ThreadTab::gallery(){
@@ -185,7 +181,7 @@ void ThreadTab::on_pushButton_clicked()
 }
 
 void ThreadTab::quoteIt(QString text){
-    myPostForm->appendText(text);
+    myPostForm.appendText(text);
     openPostForm();
 }
 

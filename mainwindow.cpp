@@ -88,7 +88,7 @@ void MainWindow::setShortcuts(){
         while(i.hasNext()){
             Tab tab = i.next().value();
             if(tab.type == Tab::TabType::Board) static_cast<BoardTab*>(tab.TabPointer)->getPosts();
-            else static_cast<ThreadTab*>(tab.TabPointer)->helper->getPosts();
+            else static_cast<ThreadTab*>(tab.TabPointer)->helper.getPosts();
         }
     });
 }
@@ -315,9 +315,10 @@ void MainWindow::removePage(int searchPage, QAbstractItemModel* model, QModelInd
         int pageId = index.data(Qt::UserRole).toInt();
         if(pageId == searchPage || searchPage == 0){
             QPointer<QWidget> tab = static_cast<QWidget*>(tabsNew.find(pageId)->TabPointer);
-            if(!tab) break;
-            ui->stackedWidget->removeWidget(tab);
-            delete tab;
+            if(!tab) continue;
+            tab->disconnect();
+            tab->deleteLater();
+            //delete tab;
             tabsNew.remove(pageId);
             if( model->hasChildren(index) ) {
                 removePage(0,model,index); //delete all children under match

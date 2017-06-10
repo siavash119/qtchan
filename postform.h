@@ -16,7 +16,8 @@ class PostForm : public QWidget
     Q_OBJECT
 
 public:
-    explicit PostForm(QString board, QString thead = "0", QWidget *parent = 0);
+    explicit PostForm(QWidget *parent = 0);
+    void load(QString &board, QString thread = "0");
     ~PostForm();
     void postIt();
     QString board;
@@ -31,7 +32,7 @@ public:
     //TODO links in com?
 
 public slots:
-    void appendText(QString text);
+    void appendText(QString &text);
 
 private:
     Ui::PostForm *ui;

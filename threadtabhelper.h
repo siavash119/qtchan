@@ -14,7 +14,7 @@ class ThreadTabHelper : public QObject
     Q_OBJECT
     bool gettingReply = false;
 public:
-    ThreadTabHelper(QString board, QString thread, QWidget* parent);
+    ThreadTabHelper();
     ~ThreadTabHelper();
     QString board;
     QString thread;
@@ -24,7 +24,8 @@ public:
     QFutureWatcher<QImage>* imageScaler;
     bool abort = false;
     bool expandAll;
-    void startUp();
+    //void startUp();
+    void startUp(QString &board, QString &thread, QWidget* parent);
     static void writeJson(QString &board, QString &thread, QByteArray &rep);
     void setAutoUpdate(bool update);
 

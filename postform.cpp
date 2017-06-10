@@ -12,24 +12,24 @@
 #include <QGraphicsEffect>
 #include "netcontroller.h"
 
-PostForm::PostForm(QString board, QString thread, QWidget *parent) :
+PostForm::PostForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PostForm)
 {
     ui->setupUi(this);
     ui->cancel->hide();
-    this->board = board;
-    this->thread = thread;
     this->setObjectName("PostForm");
-    this->setWindowTitle("post to /" + board + "/" + thread);
     ui->com->setFocus();
-    filename="";
     ui->com->installEventFilter(this);
     ui->browse->installEventFilter(this);
-    //ui->browse->installEventFilter(this);
     submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
-    //connect(this,&PostForm::dropEvent,this,&PostForm::droppedItem);
     setShortcuts();
+}
+
+void PostForm::load(QString &board, QString thread){
+    this->board = board;
+    this->thread = thread;
+    this->setWindowTitle("post to /" + board + "/" + thread);
 }
 
 PostForm::~PostForm()
@@ -47,7 +47,7 @@ void PostForm::setShortcuts(){
     //rest in the eventfilter
 }
 
-void PostForm::appendText(QString text){
+void PostForm::appendText(QString &text){
     ui->com->textCursor().insertText(text);
 }
 

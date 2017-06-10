@@ -30,7 +30,7 @@ public:
     void addStretch();
     bool updated;
     void findText(const QString text);
-    PostForm *myPostForm;
+    PostForm myPostForm;
     void loadAllImages();
     ThreadForm* findPost(QString postNum);
     int getMinWidth();
@@ -38,7 +38,7 @@ public:
     QPointer<ThreadForm> floating;
     bool floatIt;
     QThread*  workerThread;
-    ThreadTabHelper* helper;
+    ThreadTabHelper helper;
 
 public slots:
     void focusIt();

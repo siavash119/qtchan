@@ -1,16 +1,17 @@
 #include "threadtabhelper.h"
 #include "netcontroller.h"
 
-ThreadTabHelper::ThreadTabHelper(QString board, QString thread, QWidget* parent){
+ThreadTabHelper::ThreadTabHelper(){
+
+}
+
+void ThreadTabHelper::startUp(QString &board, QString &thread, QWidget* parent){
     this->board = board;
     this->thread = thread;
     this->parent = parent;
     this->threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
     QSettings settings;
     this->expandAll = settings.value("autoExpand",false).toBool();
-}
-
-void ThreadTabHelper::startUp(){
     QDir().mkpath(board+"/"+thread+"/thumbs");
     qDebug() << threadUrl;
     request = QNetworkRequest(QUrl(threadUrl));
@@ -19,7 +20,6 @@ void ThreadTabHelper::startUp(){
     updateTimer = new QTimer();
     updateTimer->setInterval(30000);
     updateTimer->start();
-    QSettings settings;
     if(settings.value("autoUpdate").toBool()){
         connectionUpdate = connect(updateTimer, &QTimer::timeout,[=](){
             getPosts();
@@ -30,7 +30,6 @@ void ThreadTabHelper::startUp(){
 ThreadTabHelper::~ThreadTabHelper(){
     //disconnect(connectionUpdate);
     //disconnect(connectionPost);
-    qDebug () << "destroying ThreadTabHelper";
     updateTimer->stop();
     delete updateTimer;
     if(gettingReply) reply->abort();

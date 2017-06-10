@@ -61,6 +61,7 @@ ThreadForm::~ThreadForm()
     //delete post;
     if(gettingFile)replyImage->abort();
     if(gettingThumb)replyThumb->abort();
+    this->disconnect();
     delete ui;
     //delete post;
 }
@@ -256,7 +257,6 @@ QImage ThreadForm::scaleImage(QString path){
 
 void ThreadForm::loadImage(QString path){
     QFuture<QImage> newImage = QtConcurrent::run(scaleImage, path);
-    watcher.setFuture(newImage);
     connect(&watcher, &QFutureWatcherBase::finished,[=](){
         QImage scaled = newImage.result();
         if(!scaled.isNull()){
@@ -271,6 +271,7 @@ void ThreadForm::loadImage(QString path){
             }*/
        }
     });
+    watcher.setFuture(newImage);
 }
 
 void ThreadForm::imageClicked(){
