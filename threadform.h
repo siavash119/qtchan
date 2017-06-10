@@ -52,15 +52,17 @@ public:
     QSet<QString> quotelinks;
     QMap<double,QString> replies;
     void setReplies();
+    void setRepliesString();
     void loadOrig();
     ThreadForm* clone();
-    QList<ThreadForm*> clones;
+    QList<QPointer<ThreadForm>> clones;
     //TODO check settings -> filter
     bool hidden = false;
     bool root;
     bool autoExpand;
     static QImage scaleImage(QString path);
     QFutureWatcher<QImage> watcher;
+    QString repliesString;
 
 private:
     Ui::ThreadForm *ui;
@@ -89,6 +91,7 @@ signals:
     void updateWidth();
     void floatLink(const QString &link);
     void updateFloat();
+    void removeMe();
     //void searchPost(int position, QString postNum);
 
 public slots:

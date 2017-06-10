@@ -57,6 +57,7 @@ ThreadForm::~ThreadForm()
 {
     //disconnect(connectionImage);
     //disconnect(connectionThumb);
+    emit removeMe();
     watcher.waitForFinished();
     //delete post;
     if(gettingFile)replyImage->abort();
@@ -220,7 +221,7 @@ void ThreadForm::getOrigFinished(){
         qDebug().noquote() << "saved file "+filePath;
         if(loadIt){
             loadImage(filePath);
-            QListIterator<ThreadForm*> i(clones);
+            QListIterator<QPointer<ThreadForm>> i(clones);
             while(i.hasNext()){
                 ThreadForm* cloned = i.next();
                 cloned->loadImage(cloned->filePath);
@@ -302,7 +303,7 @@ void ThreadForm::hideClicked(){
     idFilters.append(threadNum);
     settings.setValue("filters/"+board+"/id",idFilters);
     qDebug().noquote() << "hide Clicked so "+threadNum+" filtered!";
-    QListIterator<ThreadForm*> i(clones);
+    QListIterator<QPointer<ThreadForm>> i(clones);
     while(i.hasNext()){
         i.next()->deleteLater();
     }
@@ -380,7 +381,7 @@ void ThreadForm::insert(ThreadForm* tf){
 }
 
 ThreadForm* ThreadForm::clone(){
-    //TODO just tfs->load(post);
+    //TODO? just tfs->load(post);
     ThreadForm* tfs = new ThreadForm(this->board,this->threadNum,this->type,false,false,tab);
     tfs->tab = tab;
     tfs->post = this->post;
@@ -420,19 +421,19 @@ ThreadForm* ThreadForm::clone(){
     tfs->setReplies();
     this->clones.append(tfs);
     disconnect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::hideClicked);
-    //connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
     connect(tfs->ui->hide,&ClickableLabel::clicked,[=](){
         tfs->hide();
         delete tfs;
     });
+    connect(tfs,&ThreadForm::removeMe,[=](){this->clones.removeOne(tfs);});
     //TODO load and connect cross thread replies
-    if(this->type == PostType::Reply) connect(tfs,&ThreadForm::floatLink,static_cast<ThreadTab*>(tab),&ThreadTab::floatReply);
-    connect(tfs,&QObject::destroyed,[=](){this->clones.removeOne(tfs);});
+    if(this->type == PostType::Reply)
+        connect(tfs,&ThreadForm::floatLink,static_cast<ThreadTab*>(tab),&ThreadTab::floatReply);
     return tfs;
 }
 
 void ThreadForm::setReplies(){
-    QString repliesString;
+    repliesString = "";
     QList<QString> list = replies.values();
     if(list.length()){
         ui->replies->show();
@@ -442,14 +443,23 @@ void ThreadForm::setReplies(){
         }
         repliesString = repliesString.mid(1);
         ui->replies->setText(repliesString);
-        QListIterator<ThreadForm*> i(clones);
+        //also set replies for all clones
+        QListIterator<QPointer<ThreadForm>> i(clones);
+        //qDebug() << clones;
         while(i.hasNext()){
-            i.next()->ui->replies->setText(repliesString);
+            QPointer<ThreadForm> next = i.next();
+            next->repliesString = repliesString;
+            next->setRepliesString();
         }
     }
     else{
         ui->replies->hide();
     }
+}
+
+void ThreadForm::setRepliesString(){
+    ui->replies->show();
+    ui->replies->setText(repliesString);
 }
 
 bool ThreadForm::eventFilter(QObject *obj, QEvent *event)

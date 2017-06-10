@@ -37,7 +37,7 @@ public:
     void setMinWidth(int minw);
     QPointer<ThreadForm> floating;
     bool floatIt;
-    QThread*  workerThread;
+    QThread workerThread;
     ThreadTabHelper helper;
 
 public slots:

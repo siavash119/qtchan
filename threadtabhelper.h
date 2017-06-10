@@ -51,6 +51,7 @@ signals:
     void setReplies(ThreadForm* tf);
     void addStretch();
     void thread404();
+    void refresh(QPointer<ThreadForm> tf);
     //void scrollIt();
 };
 

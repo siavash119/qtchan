@@ -24,9 +24,9 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     this->thread = thread;
     this->setWindowTitle("/"+board+"/"+thread);
     //startUp();
-    workerThread = new QThread;
+    //workerThread = new QThread;
     helper.startUp(board,thread, this);
-    helper.moveToThread(workerThread);
+    helper.moveToThread(&workerThread);
     connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF);
     connect(&helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle);
     //myPostForm = new PostForm(board,thread,this);
@@ -36,6 +36,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     space = new QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
     connect(mw,&MainWindow::setAutoUpdate,[=](bool update){helper.setAutoUpdate(update);});
     connect(&helper,&ThreadTabHelper::addStretch,[=](){this->addStretch();});
+    //connect(&helper,&ThreadTabHelper::refresh,[=](ThreadForm* tf){onRefresh(tf);});
 }
 
 /*void ThreadTab::checkScroll(){
@@ -90,10 +91,12 @@ ThreadTab::~ThreadTab()
         mapI.remove();
     }
     helper.abort = 1;
-    workerThread->quit();
-    workerThread->wait();
+    workerThread.quit();
+    workerThread.wait();
+    //workerThread->quit();
+    //workerThread->wait();
     //delete myPostForm;
-    workerThread->deleteLater();
+    //workerThread->deleteLater();
     delete ui;
 }
 

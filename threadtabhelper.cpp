@@ -89,8 +89,8 @@ void ThreadTabHelper::loadPosts(){
         p = posts.at(i).toObject();
         ThreadForm *tf = new ThreadForm(board,thread,PostType::Reply,true,loadFile,parent);
         tf->load(p);
-        emit newTF(tf);
         tfMap.insert(tf->post.no,tf);
+        emit newTF(tf);
         if(i==0){
             if(tf->post.sub.length())emit windowTitle("/"+board+"/"+thread + " - " + tf->post.sub);
             else if(tf->post.com.length()){
@@ -101,19 +101,17 @@ void ThreadTabHelper::loadPosts(){
                         .replace("\n"," "));
             }
         }
-        QSet<QString> quotes = tf->quotelinks;
         QPointer<ThreadForm> replyTo;
-        foreach (const QString &orig, quotes)
+        foreach (const QString &orig, tf->quotelinks)
         {
             replyTo = tfMap.find(orig).value();
             if(replyTo != tfMap.end().value()){
                 replyTo->replies.insert(tf->post.no.toDouble(),tf->post.no);
-                //replyTo->setReplies();
+                replyTo->setReplies();
             }
         }
-        if(replyTo) replyTo->setReplies();
         i++;
-        QCoreApplication::processEvents();
+        QCoreApplication::processEvents();   
     }
     if(!abort) emit addStretch();
     //emit scrollIt();
