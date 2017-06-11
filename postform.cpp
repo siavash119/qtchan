@@ -24,6 +24,7 @@ PostForm::PostForm(QWidget *parent) :
     ui->browse->installEventFilter(this);
     submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
     setShortcuts();
+    setWindowFlags(Qt::WindowStaysOnTopHint);
 }
 
 void PostForm::load(QString &board, QString thread){
