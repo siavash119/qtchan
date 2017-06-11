@@ -434,7 +434,6 @@ ThreadForm* ThreadForm::clone(){
 
 //TODO don't run this if destroying the whole threadtab
 void ThreadForm::removeClone(QPointer<ThreadForm> tf){
-    qDebug() << "removing clone";
     if(tf) clones.removeOne(tf);
 }
 
