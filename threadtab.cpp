@@ -29,7 +29,9 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     helper.moveToThread(&workerThread);
     connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF,UniqueDirect);
     connect(&helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle,UniqueDirect);
-    //myPostForm = new PostForm(board,thread,this);
+    myPostForm.setParent(this,Qt::Tool
+                         | Qt::WindowMaximizeButtonHint
+                         | Qt::WindowCloseButtonHint);
     myPostForm.load(board,thread);
     this->setShortcuts();
     this->installEventFilter(this);

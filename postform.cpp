@@ -20,11 +20,13 @@ PostForm::PostForm(QWidget *parent) :
     ui->cancel->hide();
     this->setObjectName("PostForm");
     ui->com->setFocus();
+    ui->name->installEventFilter(this);
+    ui->email->installEventFilter(this);
+    ui->subject->installEventFilter(this);
     ui->com->installEventFilter(this);
     ui->browse->installEventFilter(this);
     submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
     setShortcuts();
-    setWindowFlags(Qt::WindowStaysOnTopHint);
 }
 
 void PostForm::load(QString &board, QString thread){
@@ -156,6 +158,10 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
         int key = keyEvent->key();
         //qDebug("Ate key press %d", key);
         //qDebug("Ate modifier press %d", mod);
+        //escape to get out
+        if(key == 16777216){
+            hide();
+        }
         //shift+enter to post
         if(mod == 33554432 && key == 16777220){
             postIt();
@@ -170,14 +176,14 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
     }
     if(event->type() == QEvent::DragEnter){
         static_cast<QDragEnterEvent*>(event)->acceptProposedAction();
-        return true;
+        return false;
     }
 
     if(event->type() == QEvent::Drop){
             const QMimeData *mimeData = static_cast<QDropEvent*>(event)->mimeData();
             fileChecker(mimeData);
             qDebug().noquote() << "DROPPED";
-            return true;
+            return false;
     }
     return QObject::eventFilter(obj, event);
 }
@@ -188,11 +194,15 @@ void PostForm::fileChecker(const QMimeData *mimeData){
        //ui->label->setPixmap(qvariant_cast<QPixmap>(mimeData->imageData()));
    } else if (mimeData->hasHtml()) {
        ui->filename->setText(mimeData->text());
-       //setTextFormat(Qt::RichText);
    } else if (mimeData->hasText()) {
        qDebug().noquote() << mimeData->text();
+       #if defined(Q_OS_WIN)
+       filename = mimeData->text().mid(8); //remove file:///
+       #else
        filename = mimeData->text().mid(7); //remove file://
+       #endif
        filename.remove(QRegularExpression("[\\n\\t\\r]"));
+       qDebug() << "added file to upload:" << filename;
        ui->filename->setText(filename);
    } else if (mimeData->hasUrls()) {
        QList<QUrl> urlList = mimeData->urls();
