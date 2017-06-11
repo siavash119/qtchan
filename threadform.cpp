@@ -41,9 +41,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
     connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
     connect(ui->replies,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
     //TODO quote for boardtab too
-    if(type==Reply)connect(ui->no,&ClickableLabel::clicked,[=](){
-        static_cast<ThreadTab*>(tab)->quoteIt(">>"+ui->no->text());
-    });
+    if(type==Reply)connect(ui->no,&ClickableLabel::clicked,this,&ThreadForm::appendQuote);
     ui->replies->installEventFilter(this);
     ui->com->installEventFilter(this);
     this->installEventFilter(this);
@@ -53,18 +51,22 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
     ////ui->postLayout->installEventFilter(this);
 }
 
+void ThreadForm::appendQuote(){
+    static_cast<ThreadTab*>(tab)->quoteIt(">>"+ui->no->text());
+}
+
 ThreadForm::~ThreadForm()
 {
-    //disconnect(connectionImage);
-    //disconnect(connectionThumb);
-    emit removeMe();
+    emit removeMe(this);
     watcher.waitForFinished();
-    //delete post;
     if(gettingFile)replyImage->abort();
     if(gettingThumb)replyThumb->abort();
-    this->disconnect();
+    disconnect(&watcher);
+    disconnect(connectionThumb);
+    disconnect(connectionImage);
+    disconnect(ui->no);
+    disconnect(this);
     delete ui;
-    //delete post;
 }
 
 void ThreadForm::setText(QString text){
@@ -140,14 +142,14 @@ void ThreadForm::getFile(){
     replyImage = nc.fileManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
     gettingFile = true;
     //connect(replyImage, &QNetworkReply::downloadProgress,this,&ThreadForm::downloading);
-    connectionImage = connect(replyImage, &QNetworkReply::finished,this, &ThreadForm::getOrigFinished);
+    connectionImage = connect(replyImage, &QNetworkReply::finished,this, &ThreadForm::getOrigFinished, Qt::UniqueConnection);
 }
 
 void ThreadForm::getThumb(){
     qDebug().noquote() << QString("getting https://i.4cdn.org/")  % thumbURL;
     replyThumb = nc.thumbManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % thumbURL)));
     gettingThumb = true;
-    connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished);
+    connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished,Qt::UniqueConnection);
 }
 
 /*void ThreadForm::downloading(qint64 read, qint64 total)
@@ -283,17 +285,18 @@ void ThreadForm::imageClicked(){
             gettingFile=true;
             replyImage = nc.fileManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
             //connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::loadFromImageClicked);
-            connectionImage = connect(replyImage, &QNetworkReply::finished,[=]() {
-                this->getOrigFinished();
-                this->openImage();
-                //replyImage->deleteLater();
-            });
+            connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::alreadyClicked,Qt::UniqueConnection);
         }
         else openImage();
     }
     else{
         mw->onNewThread(this,board,threadNum);
     }
+}
+
+void ThreadForm::alreadyClicked(){
+    getOrigFinished();
+    openImage();
 }
 
 void ThreadForm::hideClicked(){
@@ -421,15 +424,18 @@ ThreadForm* ThreadForm::clone(){
     tfs->setReplies();
     this->clones.append(tfs);
     disconnect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::hideClicked);
-    connect(tfs->ui->hide,&ClickableLabel::clicked,[=](){
-        tfs->hide();
-        delete tfs;
-    });
-    connect(tfs,&ThreadForm::removeMe,[=](){this->clones.removeOne(tfs);});
+    connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
+    connect(tfs,&ThreadForm::removeMe,this,&ThreadForm::removeClone);
     //TODO load and connect cross thread replies
     if(this->type == PostType::Reply)
         connect(tfs,&ThreadForm::floatLink,static_cast<ThreadTab*>(tab),&ThreadTab::floatReply);
     return tfs;
+}
+
+//TODO don't run this if destroying the whole threadtab
+void ThreadForm::removeClone(QPointer<ThreadForm> tf){
+    qDebug() << "removing clone";
+    if(tf) clones.removeOne(tf);
 }
 
 void ThreadForm::setReplies(){

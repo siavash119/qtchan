@@ -21,27 +21,29 @@ void ThreadTabHelper::startUp(QString &board, QString &thread, QWidget* parent){
     updateTimer->setInterval(60000);
     updateTimer->start();
     if(settings.value("autoUpdate").toBool()){
-        connectionUpdate = connect(updateTimer, &QTimer::timeout,[=](){
-            getPosts();
-        });
+        connectionUpdate = connect(updateTimer, &QTimer::timeout,
+                                   this,&ThreadTabHelper::getPosts,UniqueDirect);
     }
 }
 
 ThreadTabHelper::~ThreadTabHelper(){
-    //disconnect(connectionUpdate);
-    //disconnect(connectionPost);
     updateTimer->stop();
     delete updateTimer;
-    if(gettingReply) reply->abort();
+    disconnect(connectionUpdate);
+    disconnect(connectionPost);
+    if(gettingReply){
+        reply->abort();
+        disconnect(reply);
+        reply->deleteLater();
+    }
     //delete updateTimer;
 }
 
 void ThreadTabHelper::setAutoUpdate(bool update){
     disconnect(connectionUpdate);
     if(update){
-        connectionUpdate = connect(updateTimer, &QTimer::timeout,[=](){
-            getPosts();
-        });
+        connectionUpdate = connect(updateTimer, &QTimer::timeout,
+                                   this,&ThreadTabHelper::getPosts,UniqueDirect);
     }
 }
 
@@ -49,9 +51,8 @@ void ThreadTabHelper::getPosts(){
     qDebug() << "getting posts for" << threadUrl;
     reply = nc.jsonManager->get(request);
     gettingReply = true;
-    connectionPost = connect(reply, &QNetworkReply::finished,[=](){
-        loadPosts();
-    });
+    connectionPost = connect(reply, &QNetworkReply::finished,
+                             this,&ThreadTabHelper::loadPosts, UniqueDirect);
 }
 
 void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep){
@@ -76,7 +77,7 @@ void ThreadTabHelper::loadPosts(){
     }
     //write to file and make json array
     QByteArray rep = reply->readAll();
-    disconnect(connectionPost);
+    //disconnect(connectionPost);
     QtConcurrent::run(&ThreadTabHelper::writeJson,board, thread, rep);
     posts = QJsonDocument::fromJson(rep).object().value("posts").toArray();
     int length = posts.size();
@@ -114,8 +115,8 @@ void ThreadTabHelper::loadPosts(){
     }
     if(!abort) emit addStretch();
     //emit scrollIt();
-    //delete reply;
     reply->deleteLater();
+    //reply->deleteLater();
 }
 
 void ThreadTabHelper::loadAllImages(){

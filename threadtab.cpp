@@ -27,15 +27,15 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     //workerThread = new QThread;
     helper.startUp(board,thread, this);
     helper.moveToThread(&workerThread);
-    connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF);
-    connect(&helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle);
+    connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF,UniqueDirect);
+    connect(&helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle,UniqueDirect);
     //myPostForm = new PostForm(board,thread,this);
     myPostForm.load(board,thread);
     this->setShortcuts();
     this->installEventFilter(this);
     space = new QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
-    connect(mw,&MainWindow::setAutoUpdate,[=](bool update){helper.setAutoUpdate(update);});
-    connect(&helper,&ThreadTabHelper::addStretch,[=](){this->addStretch();});
+    connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,UniqueDirect);
+    connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
     //connect(&helper,&ThreadTabHelper::refresh,[=](ThreadForm* tf){onRefresh(tf);});
 }
 
@@ -61,12 +61,12 @@ void ThreadTab::setShortcuts(){
     this->addAction(postForm);
     QAction *expandAll = new QAction(this);
     expandAll->setShortcut(Qt::Key_E);
-    connect(expandAll, &QAction::triggered,[=](){helper.loadAllImages();});
+    connect(expandAll, &QAction::triggered,&helper,&ThreadTabHelper::loadAllImages,UniqueDirect);
     this->addAction(expandAll);
     QAction *refresh = new QAction(this);
     refresh->setShortcut(Qt::Key_R);
     refresh->setShortcutContext(Qt::ApplicationShortcut);
-    connect(refresh, &QAction::triggered,[=](){helper.getPosts();});
+    connect(refresh, &QAction::triggered,&helper,&ThreadTabHelper::getPosts,UniqueDirect);
     this->addAction(refresh);
     QAction *focusSearch = new QAction(this);
     focusSearch->setShortcut(QKeySequence("Ctrl+f"));
@@ -88,16 +88,12 @@ ThreadTab::~ThreadTab()
     while (mapI.hasNext()) {
         mapI.next();
         disconnect(mapI.value());
-        delete mapI.value();
+        mapI.value()->deleteLater();
         mapI.remove();
     }
     helper.abort = 1;
     workerThread.quit();
     workerThread.wait();
-    //workerThread->quit();
-    //workerThread->wait();
-    //delete myPostForm;
-    //workerThread->deleteLater();
     delete ui;
 }
 
@@ -119,7 +115,6 @@ void ThreadTab::gallery(){
 }
 
 void ThreadTab::addStretch(){
-    //ui->threads->addStretch(1);
     ui->threads->removeItem(space);
     ui->threads->insertItem(-1,space);
 }
@@ -148,10 +143,7 @@ void ThreadTab::loadAllImages(){
     QMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
-        //cout << i.key() << ": " << i.value() << endl;
-        //((ThreadForm*)mapI.value())->loadOrig();
         static_cast<ThreadForm *>(mapI.value())->loadOrig();
-        //mapI.remove();
     }
 }
 
@@ -256,12 +248,11 @@ void ThreadTab::floatReply(const QString &link){
 
 void ThreadTab::deleteFloat(){
     if(floating){
-        delete floating;
-        //floating->hide();
-        //floating->deleteLater();
+        floating->deleteLater();
     }
 }
 
+//TODO compensate for float on edges of screen
 void ThreadTab::updateFloat(){
     if(floating){
         QPoint globalCursorPos = QCursor::pos();

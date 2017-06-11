@@ -13,6 +13,7 @@ class ThreadTabHelper : public QObject
 {
     Q_OBJECT
     bool gettingReply = false;
+    Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
 public:
     ThreadTabHelper();
     ~ThreadTabHelper();

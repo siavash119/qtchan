@@ -24,7 +24,7 @@ class ThreadForm : public QWidget
     Q_OBJECT
     bool gettingFile = false;
     bool gettingThumb = false;
-
+    Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
 public:
     explicit ThreadForm(QString board, QString threadNum, PostType type = Reply, bool root = true, bool autoExpand = false, QWidget *parent = 0);
     ~ThreadForm();
@@ -74,7 +74,6 @@ private:
     QFile *file;
     QString thumbPath;
     QFile *thumb;
-    QMetaObject::Connection connectionPost;
     QMetaObject::Connection connectionThumb;
     QMetaObject::Connection connectionImage;
     //QNetworkReply *reply; //Use for cross-thread gets later?
@@ -91,7 +90,7 @@ signals:
     void updateWidth();
     void floatLink(const QString &link);
     void updateFloat();
-    void removeMe();
+    void removeMe(QPointer<ThreadForm> tf);
     //void searchPost(int position, QString postNum);
 
 public slots:
@@ -99,9 +98,13 @@ public slots:
     void getThumbFinished();
     void imageClicked();
     void hideClicked();
+    void removeClone(QPointer<ThreadForm> tf);
+
 private slots:
     void quoteClicked(const QString &link);
     void on_replies_linkHovered(const QString &link);
+    void appendQuote();
+    void alreadyClicked();
     //void downloading(qint64 read, qint64 total);
 
     void on_com_linkHovered(const QString &link);

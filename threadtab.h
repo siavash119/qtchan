@@ -17,7 +17,7 @@ class ThreadTab;
 class ThreadTab : public QWidget
 {
     Q_OBJECT
-
+    Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 public:
