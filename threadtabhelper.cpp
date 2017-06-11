@@ -18,7 +18,7 @@ void ThreadTabHelper::startUp(QString &board, QString &thread, QWidget* parent){
     request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
     getPosts();
     updateTimer = new QTimer();
-    updateTimer->setInterval(30000);
+    updateTimer->setInterval(60000);
     updateTimer->start();
     if(settings.value("autoUpdate").toBool()){
         connectionUpdate = connect(updateTimer, &QTimer::timeout,[=](){
@@ -54,7 +54,6 @@ void ThreadTabHelper::getPosts(){
     });
 }
 
-//todo put this in background thread
 void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep){
     QFile jsonFile(board+"/"+thread+"/"+thread+".json");
     jsonFile.open(QIODevice::WriteOnly);
@@ -115,6 +114,7 @@ void ThreadTabHelper::loadPosts(){
     }
     if(!abort) emit addStretch();
     //emit scrollIt();
+    //delete reply;
     reply->deleteLater();
 }
 
