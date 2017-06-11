@@ -87,7 +87,6 @@ ThreadTab::~ThreadTab()
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
-        disconnect(mapI.value());
         mapI.value()->deleteLater();
         mapI.remove();
     }

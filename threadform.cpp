@@ -61,6 +61,7 @@ ThreadForm::~ThreadForm()
     watcher.waitForFinished();
     if(gettingFile)replyImage->abort();
     if(gettingThumb)replyThumb->abort();
+    //necessary because of the lambda functions?
     disconnect(&watcher);
     disconnect(connectionThumb);
     disconnect(connectionImage);

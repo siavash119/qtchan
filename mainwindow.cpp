@@ -317,8 +317,8 @@ void MainWindow::removePage(int searchPage, QAbstractItemModel* model, QModelInd
             QPointer<QWidget> tab = static_cast<QWidget*>(tabsNew.find(pageId)->TabPointer);
             if(!tab) continue;
             tab->disconnect();
-            tab->deleteLater();
-            //delete tab;
+            ui->stackedWidget->removeWidget(tab);
+            delete tab;
             tabsNew.remove(pageId);
             if( model->hasChildren(index) ) {
                 removePage(0,model,index); //delete all children under match
@@ -328,6 +328,7 @@ void MainWindow::removePage(int searchPage, QAbstractItemModel* model, QModelInd
             removePage(searchPage, model, index);
         }
     }
+    qDebug() << ui->stackedWidget->count();
     if(!ui->stackedWidget->count()) this->setWindowTitle("qtchan");
 }
 
