@@ -328,7 +328,6 @@ void MainWindow::removePage(int searchPage, QAbstractItemModel* model, QModelInd
             removePage(searchPage, model, index);
         }
     }
-    qDebug() << ui->stackedWidget->count();
     if(!ui->stackedWidget->count()) this->setWindowTitle("qtchan");
 }
 
