@@ -18,6 +18,7 @@ class ThreadTab : public QWidget
 {
     Q_OBJECT
     Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
+    QSpacerItem space = QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 public:
@@ -27,7 +28,6 @@ public:
     explicit ThreadTab(QString board, QString thread, QWidget *parent = 0);
     ~ThreadTab();
     QMap<QString,ThreadForm*> tfMap;
-    void addStretch();
     bool updated;
     void findText(const QString text);
     PostForm myPostForm;
@@ -41,6 +41,7 @@ public:
     ThreadTabHelper helper;
 
 public slots:
+    void addStretch();
     void focusIt();
     void updateWidth();
     void quoteIt(QString text);
@@ -53,8 +54,8 @@ public slots:
 
 private:
     Ui::ThreadTab *ui;
+    QMetaObject::Connection connectionAutoUpdate;
     void setShortcuts();
-    QSpacerItem *space;
 
 private slots:
     void gallery();

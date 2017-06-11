@@ -33,8 +33,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     myPostForm.load(board,thread);
     this->setShortcuts();
     this->installEventFilter(this);
-    space = new QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
-    connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,UniqueDirect);
+    connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,UniqueDirect);
     connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
     //connect(&helper,&ThreadTabHelper::refresh,[=](ThreadForm* tf){onRefresh(tf);});
 }
@@ -84,6 +83,7 @@ void ThreadTab::setShortcuts(){
 
 ThreadTab::~ThreadTab()
 {
+    ui->threads->removeItem(&space);
     QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
@@ -93,6 +93,7 @@ ThreadTab::~ThreadTab()
     helper.abort = 1;
     workerThread.quit();
     workerThread.wait();
+    disconnect(connectionAutoUpdate);
     delete ui;
 }
 
@@ -114,8 +115,8 @@ void ThreadTab::gallery(){
 }
 
 void ThreadTab::addStretch(){
-    ui->threads->removeItem(space);
-    ui->threads->insertItem(-1,space);
+    ui->threads->removeItem(&space);
+    ui->threads->insertItem(-1,&space);
 }
 
 int ThreadTab::getMinWidth(){

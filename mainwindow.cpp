@@ -177,12 +177,11 @@ void MainWindow::loadFromSearch(QString searchString, bool select){
         return;
     }
     if(match2.hasMatch()){
-        bt = new BoardTab(match2.captured(1),BoardType::Catalog,match2.captured(2));
+        bt = new BoardTab(match2.captured(1),BoardType::Catalog,match2.captured(2),this);
         displayString = "/"+match2.captured(1)+"/"+match2.captured(2);
     }
     else{
-        //return;
-        bt = new BoardTab(searchString,BoardType::Index);
+        bt = new BoardTab(searchString,BoardType::Index,"",this);
         displayString = "/"+searchString+"/";
     }
     qDebug().noquote() << "loading " + displayString;
@@ -203,7 +202,7 @@ void MainWindow::loadFromSearch(QString searchString, bool select){
 void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
     (void)parent;
     qDebug().noquote()  << "loading /"+board+"/"+thread;
-    ThreadTab *tt = new ThreadTab(board,thread);
+    ThreadTab *tt = new ThreadTab(board,thread,this);
     //ui->verticalLayout_3->addWidget(tt);
     ui->stackedWidget->addWidget(tt);
     Tab tab = {Tab::TabType::Thread,tt,QString("/"+board+"/"+thread)};
@@ -223,13 +222,8 @@ void MainWindow::addTab(){
 
 void MainWindow::on_treeView_clicked(QModelIndex index)
 {
-    //model->findItems()
     int pageId = index.data(Qt::UserRole).toInt();
     ui->stackedWidget->setCurrentWidget(static_cast<QWidget*>(tabsNew.find(pageId)->TabPointer));
-    //qDebug() << index.internalPointer();
-    //ui->stackedWidget->setCurrentWidget(tabs.find(index.internalPointer()));
-    //ui->stackedWidget->setCurrentIndex(index.row());
-    //show_one(index);
 }
 
 void MainWindow::show_one(QModelIndex index){

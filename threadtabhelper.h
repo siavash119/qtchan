@@ -28,7 +28,6 @@ public:
     //void startUp();
     void startUp(QString &board, QString &thread, QWidget* parent);
     static void writeJson(QString &board, QString &thread, QByteArray &rep);
-    void setAutoUpdate(bool update);
 
 private:
     QString threadUrl;
@@ -44,6 +43,7 @@ public slots:
     void loadPosts();
     void getPosts();
     void loadAllImages();
+    void setAutoUpdate(bool update);
 
 signals:
     void postsLoaded(QJsonArray &posts);

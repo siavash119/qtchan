@@ -63,10 +63,6 @@ ThreadForm::~ThreadForm()
     if(gettingThumb)replyThumb->abort();
     //necessary because of the lambda functions?
     disconnect(&watcher);
-    disconnect(connectionThumb);
-    disconnect(connectionImage);
-    disconnect(ui->no);
-    disconnect(this);
     delete ui;
 }
 
