@@ -68,6 +68,9 @@
          <pointsize>16</pointsize>
         </font>
        </property>
+       <property name="tabChangesFocus">
+        <bool>true</bool>
+       </property>
        <property name="placeholderText">
         <string>name</string>
        </property>
@@ -97,6 +100,9 @@
         <font>
          <pointsize>16</pointsize>
         </font>
+       </property>
+       <property name="tabChangesFocus">
+        <bool>true</bool>
        </property>
        <property name="placeholderText">
         <string>email</string>
@@ -128,6 +134,9 @@
          <pointsize>16</pointsize>
         </font>
        </property>
+       <property name="tabChangesFocus">
+        <bool>true</bool>
+       </property>
        <property name="placeholderText">
         <string>subject</string>
        </property>
@@ -137,6 +146,9 @@
    </item>
    <item>
     <widget class="QScrollArea" name="scrollArea">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
@@ -177,6 +189,9 @@
          </property>
          <property name="styleSheet">
           <string notr="true"/>
+         </property>
+         <property name="tabChangesFocus">
+          <bool>true</bool>
          </property>
          <property name="textInteractionFlags">
           <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextEditable|Qt::TextEditorInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>

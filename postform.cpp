@@ -19,7 +19,6 @@ PostForm::PostForm(QWidget *parent) :
     ui->setupUi(this);
     ui->cancel->hide();
     this->setObjectName("PostForm");
-    ui->com->setFocus();
     ui->name->installEventFilter(this);
     ui->email->installEventFilter(this);
     ui->subject->installEventFilter(this);
@@ -33,6 +32,7 @@ void PostForm::load(QString &board, QString thread){
     this->board = board;
     this->thread = thread;
     this->setWindowTitle("post to /" + board + "/" + thread);
+    ui->com->setFocus();
 }
 
 PostForm::~PostForm()
