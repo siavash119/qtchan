@@ -82,7 +82,7 @@ void BoardTab::findText(const QString text){
         mapI.next();
         tf = mapI.value();
         if(pass) { tf->show(); continue;};
-        match = re.match(tf->post.com);
+        match = re.match(tf->post.sub + tf->post.com,0,QRegularExpression::PartialPreferFirstMatch);
         if(!match.hasMatch()){
             tf->hide();
         }
@@ -128,7 +128,7 @@ void BoardTab::loadThreads(){
         for(int i=0;i<allThreads.size();i++){
             pageThreads = allThreads.at(i).toObject().value("threads").toArray();
             for(int j=0;j<pageThreads.size();j++){
-                match = re.match(pageThreads.at(j).toObject().value("com").toString());
+                match = re.match(pageThreads.at(j).toObject().value("sub").toString() + pageThreads.at(j).toObject().value("com").toString(),0,QRegularExpression::PartialPreferFirstMatch);
                 if(match.hasMatch())threads.append(pageThreads.at(j));
             }
         }

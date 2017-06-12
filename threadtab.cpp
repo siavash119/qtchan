@@ -165,7 +165,7 @@ void ThreadTab::findText(const QString text){
         mapI.next();
         tf = mapI.value();
         if(pass) { tf->show(); continue;};
-        match = re.match(tf->post.com);
+        match = re.match(tf->post.sub + tf->post.com,0,QRegularExpression::PartialPreferFirstMatch);
         if(!match.hasMatch()){
             tf->hide();
         }
