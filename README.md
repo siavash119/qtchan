@@ -35,4 +35,5 @@ Create a file ~/.config/qtchan/settings like below. Look at your browser cookies
 ### MINOR
 * save tree tabs order and structure (right now only saves list in opened order)
 * show loading state
+* search/filter by different post fields (right now combo of sub and com)
 * themes
