@@ -309,10 +309,11 @@ void MainWindow::removePage(int searchPage, QAbstractItemModel* model, QModelInd
         int pageId = index.data(Qt::UserRole).toInt();
         if(pageId == searchPage || searchPage == 0){
             QPointer<QWidget> tab = static_cast<QWidget*>(tabsNew.find(pageId)->TabPointer);
-            if(!tab) continue;
-            tab->disconnect();
-            ui->stackedWidget->removeWidget(tab);
-            delete tab;
+            if(tab){
+                tab->disconnect();
+                ui->stackedWidget->removeWidget(tab);
+                delete tab;
+            }
             tabsNew.remove(pageId);
             if( model->hasChildren(index) ) {
                 removePage(0,model,index); //delete all children under match
