@@ -135,7 +135,7 @@ void ThreadForm::load(QJsonObject &p){
 }
 
 void ThreadForm::getFile(){
-    qDebug().noquote() << QString("getting https://i.4cdn.org/")  % fileURL;
+    qDebug().noquote() << QString("getting https://i.4cdn.org/") % fileURL;
     replyImage = nc.fileManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
     gettingFile = true;
     //connect(replyImage, &QNetworkReply::downloadProgress,this,&ThreadForm::downloading);

@@ -29,14 +29,11 @@ void ThreadTabHelper::startUp(QString &board, QString &thread, QWidget* parent){
 ThreadTabHelper::~ThreadTabHelper(){
     updateTimer->stop();
     delete updateTimer;
-    disconnect(connectionUpdate);
-    disconnect(connectionPost);
     if(gettingReply){
         reply->abort();
         disconnect(reply);
         reply->deleteLater();
     }
-    //delete updateTimer;
 }
 
 void ThreadTabHelper::setAutoUpdate(bool update){
@@ -52,7 +49,7 @@ void ThreadTabHelper::getPosts(){
     reply = nc.jsonManager->get(request);
     gettingReply = true;
     connectionPost = connect(reply, &QNetworkReply::finished,
-                             this,&ThreadTabHelper::loadPosts, UniqueDirect);
+                             this,&ThreadTabHelper::loadPosts, Qt::DirectConnection);
 }
 
 void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep){
@@ -70,18 +67,33 @@ void ThreadTabHelper::loadPosts(){
         if(reply->error() == QNetworkReply::ContentNotFoundError){
             qDebug() << "Stopping timer for" << threadUrl;
             updateTimer->stop();
-            emit thread404();
+            emit threadStatus("404");
         }
         reply->deleteLater();
         return;
     }
     //write to file and make json array
     QByteArray rep = reply->readAll();
-    //disconnect(connectionPost);
     QtConcurrent::run(&ThreadTabHelper::writeJson,board, thread, rep);
     posts = QJsonDocument::fromJson(rep).object().value("posts").toArray();
     int length = posts.size();
     qDebug().noquote() << QString("length of ").append(threadUrl).append(" is ").append(QString::number(length));
+    //check OP if archived or closed
+    if(length){
+        p = posts.at(0).toObject();
+        Post OP(p,board);
+        if(OP.archived){
+            qDebug().nospace() << "Stopping timer for " << threadUrl <<". Reason: Archived";
+            updateTimer->stop();
+            emit threadStatus("archived",OP.archived_on);
+        }
+        else if(OP.closed){
+            qDebug().nospace() << "Stopping timer for " << threadUrl <<". Reason: Closed";
+            updateTimer->stop();
+            emit threadStatus("closed");
+        }
+    }
+    //load new posts
     int i = tfMap.size();
     QSettings settings;
     bool loadFile = settings.value("autoExpand",false).toBool() || this->expandAll;
@@ -116,7 +128,6 @@ void ThreadTabHelper::loadPosts(){
     if(!abort) emit addStretch();
     //emit scrollIt();
     reply->deleteLater();
-    //reply->deleteLater();
 }
 
 void ThreadTabHelper::loadAllImages(){

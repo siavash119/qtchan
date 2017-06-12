@@ -23,7 +23,7 @@ public:
     bool sticky = false;
     bool closed = false;
     bool archived = false;
-    int archived_on = 0; //Time when archived
+    QString archived_on = "0"; //Time when archived
 
     QString now; //Date and time (MM\/DD\/YY(Day)HH:MM (:SS on some boards), EST/EDT timezone)
     int time; //Unix timestamp

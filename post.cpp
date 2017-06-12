@@ -2,18 +2,18 @@
 
 Post::Post(){
 }
-
+//toBool doesn't work for QJsonValue(double,1)?
 void Post::load(QJsonObject &p, QString &board){
     this->board = board;
     no = QString::number(p.value("no").toInt());
     resto = p.value("resto").toInt();
-    if(!resto){
-        sticky = p.value("sticky").toBool();
-        closed = p.value("closed").toBool();
-        archived = p.value("archived").toBool();
-        archived_on = p.value("archived_on").toInt();
-        bumplimit = p.value("bumplimit").toBool();
-        imagelimit = p.value("imagelimit").toBool();
+    if(resto == 0){
+        sticky = (p.value("sticky").toInt() == 1) ? true : false;
+        closed = (p.value("closed").toInt() == 1) ? true : false;
+        archived = (p.value("archived").toInt() == 1) ? true : false;
+        archived_on = QString::number(p.value("archived_on").toDouble(),'d',0);
+        bumplimit = (p.value("bumplimit").toInt() == 1) ? true : false;
+        imagelimit = (p.value("imagelimit").toInt() == 1) ? true : false;
         semantic_url = p.value("semantic_url").toString();
     }
     now = p.value("now").toString();
@@ -36,9 +36,9 @@ void Post::load(QJsonObject &p, QString &board){
         h = p.value("h").toInt();
         tn_w = p.value("tn_w").toInt();
         tn_h = p.value("tn_h").toInt();
-        filedeleted = p.value("filedeleted").toBool();
-        spoiler = p.value("spoiler").toBool();
-        custom_spoiler = p.value("custom_spoiler").toInt();
+        filedeleted = (p.value("filedeleted").toInt() == 1) ? true : false;
+        spoiler = (p.value("spoiler").toInt() == 1) ? true : false;
+        custom_spoiler = (p.value("custom_spoiler").toInt() == 1) ? true : false;
     }
 }
 
