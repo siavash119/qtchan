@@ -37,6 +37,8 @@ ThreadTabHelper::~ThreadTabHelper(){
 }
 
 void ThreadTabHelper::setAutoUpdate(bool update){
+    if(gettingReply) reply->abort();
+    disconnect(reply);
     disconnect(connectionUpdate);
     if(update){
         connectionUpdate = connect(updateTimer, &QTimer::timeout,

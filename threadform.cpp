@@ -226,6 +226,7 @@ void ThreadForm::getOrigFinished(){
                 cloned->loadImage(cloned->filePath);
             }
         }
+        emit fileFinished();
     }
     replyImage->deleteLater();
 }
@@ -283,6 +284,9 @@ void ThreadForm::imageClicked(){
             replyImage = nc.fileManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
             //connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::loadFromImageClicked);
             connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::alreadyClicked,Qt::UniqueConnection);
+        }
+        else if(gettingFile) {
+            connect(this,&ThreadForm::fileFinished,this,&ThreadForm::openImage,Qt::UniqueConnection);
         }
         else openImage();
     }

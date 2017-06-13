@@ -91,6 +91,7 @@ signals:
     void floatLink(const QString &link);
     void updateFloat();
     void removeMe(QPointer<ThreadForm> tf);
+    void fileFinished();
     //void searchPost(int position, QString postNum);
 
 public slots:
