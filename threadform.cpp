@@ -217,6 +217,7 @@ void ThreadForm::getOrigFinished(){
         file->open(QIODevice::WriteOnly);
         file->write(replyImage->readAll());
         file->close();
+        replyImage->deleteLater();
         qDebug().noquote() << "saved file "+filePath;
         if(loadIt){
             loadImage(filePath);
@@ -228,7 +229,10 @@ void ThreadForm::getOrigFinished(){
         }
         emit fileFinished();
     }
-    replyImage->deleteLater();
+    else{
+        qDebug() << "getting file:" << filePath << "error. Reason:" << replyImage->errorString();
+        replyImage->deleteLater();
+    }
 }
 
 void ThreadForm::getThumbFinished(){
@@ -239,11 +243,15 @@ void ThreadForm::getThumbFinished(){
         thumb->open(QIODevice::WriteOnly);
         thumb->write(replyThumb->readAll());
         thumb->close();
+        replyThumb->deleteLater();
         qDebug().noquote() << "saved file "+thumbPath;
         //check if orig file somehow dl'd faster than thumbnail
         if(!finished) loadImage(thumbPath);
     }
-    replyThumb->deleteLater();
+    else{
+        qDebug() << "getting file:" << filePath << "error. Reason:" << replyThumb->errorString();
+        replyThumb->deleteLater();
+    }
 }
 
 QImage ThreadForm::scaleImage(QString path){
@@ -392,7 +400,7 @@ ThreadForm* ThreadForm::clone(){
     tfs->ui->no->setText(post.no);
     tfs->ui->com->setText(post.com);
     if(post.sub==QString()) tfs->ui->sub->hide();
-    else ui->sub->setText(htmlParse(post.sub));
+    else tfs->ui->sub->setText(this->ui->sub->text());
     tfs->ui->name->setText(post.name);
     if(this->board != "pol"){
         tfs->ui->country_name->hide();
@@ -409,20 +417,23 @@ ThreadForm* ThreadForm::clone(){
         tfs->thumbURL = thumbURL;
         tfs->thumbPath = thumbPath;
         tfs->thumb = thumb;
-        if(post.ext == QLatin1String(".jpg") || post.ext == QLatin1String(".png")){
-            tfs->loadIt = true;
-            if(file->exists() && tfs->loadIt)tfs->loadImage(tfs->filePath);
-            else tfs->loadImage(tfs->thumbPath);
-        }
-        else {
-            tfs->loadIt = false;
-            tfs->loadImage(tfs->thumbPath);
-        }
+        const QPixmap* px = this->ui->tim->pixmap();
+        //From load image but don't have to scale again
+        tfs->ui->tim->show();
+        tfs->ui->horizontalSpacer->changeSize(250,0);
+        tfs->ui->horizontalSpacer->invalidate();
+        tfs->setMinimumWidth(738);
+        tfs->ui->tim->setPixmap(*px);
+        tfs->ui->tim->setMaximumSize(px->size());
         connect(tfs->ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
     }
     else
         tfs->ui->pictureLayout->deleteLater();
-    tfs->setReplies();
+    if(repliesString.length()){
+        tfs->repliesString = repliesString;
+        tfs->setRepliesString();
+    }
+    //tfs->setReplies();
     this->clones.append(tfs);
     disconnect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::hideClicked);
     connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
