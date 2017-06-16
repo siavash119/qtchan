@@ -86,15 +86,17 @@ void ThreadTab::setShortcuts(){
 ThreadTab::~ThreadTab()
 {
     ui->threads->removeItem(&space);
-    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
+    /*QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
     while (mapI.hasNext()) {
         mapI.next();
         mapI.value()->deleteLater();
         mapI.remove();
-    }
+    }*/
     helper.abort = 1;
-    workerThread.quit();
-    workerThread.wait();
+    disconnect(&helper);
+    disconnect(&workerThread);
+    //workerThread.quit();
+    //workerThread.wait();
     disconnect(connectionAutoUpdate);
     delete ui;
 }

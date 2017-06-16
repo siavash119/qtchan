@@ -208,11 +208,12 @@ void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
     Tab tab = {Tab::TabType::Thread,tt,QString("/"+board+"/"+thread)};
     QStandardItem* parent1 = new QStandardItem("/"+board+"/"+thread);
     //TODO append as child
-    model->appendRow(parent1);
+    //model->appendRow(parent1);
     pages++;
     parent1->setData(pages,Qt::UserRole);
     tabs.insert(parent1,tt);
     tabsNew.insert(pages,tab);
+    model->appendRow(parent1);
     //ui->stackedWidget->setCurrentWidget(tt);
     //selectPage(pages,model);
 }
@@ -236,10 +237,18 @@ void MainWindow::onSelectionChanged(){
     QModelIndexList list = ui->treeView->selectionModel()->selectedRows();
     if(list.size()) {
         int pageId = list.at(0).data(Qt::UserRole).toInt();
-        QPointer<QWidget> curTab = static_cast<QWidget*>(tabsNew.find(pageId)->TabPointer);
-        if(curTab){
-            ui->stackedWidget->setCurrentWidget(curTab);
-            this->setWindowTitle(curTab->windowTitle());
+        QMap<int, Tab>::const_iterator i = tabsNew.find(pageId);
+        QPointer<QWidget> curTab;
+        if(i != tabsNew.constEnd()){
+            Tab tab = i.value();
+            curTab = static_cast<QWidget*>(tab.TabPointer);
+            if(curTab){
+                ui->stackedWidget->setCurrentWidget(curTab);
+                this->setWindowTitle(curTab->windowTitle());
+            }
+        }
+        else{
+            qDebug() << "this shouldn't happen";
         }
     }
     QCoreApplication::processEvents();
@@ -282,10 +291,12 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 }
 
 void MainWindow::deleteSelected(){
+    QCoreApplication::processEvents();
     QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
     int pageId;
     QModelIndex ind;
-    if(!indexList.size() && ui->treeView->currentIndex().isValid()){
+    if(indexList.size() <= 1 && ui->treeView->currentIndex().isValid()){
+        indexList.clear();
         indexList.append(ui->treeView->currentIndex());
     }
     //TODO delete better
@@ -297,6 +308,7 @@ void MainWindow::deleteSelected(){
             model->removeRow(ind.row(),ind.parent());
         }
         indexList = ui->treeView->selectionModel()->selectedRows();
+        QCoreApplication::processEvents();
     }
     ind = ui->treeView->currentIndex();
     if(ind.isValid())
@@ -308,13 +320,19 @@ void MainWindow::removePage(int searchPage, QAbstractItemModel* model, QModelInd
         QModelIndex index = model->index(r, 0, parent);
         int pageId = index.data(Qt::UserRole).toInt();
         if(pageId == searchPage || searchPage == 0){
-            QPointer<QWidget> tab = static_cast<QWidget*>(tabsNew.find(pageId)->TabPointer);
-            if(tab){
-                tab->disconnect();
-                ui->stackedWidget->removeWidget(tab);
-                delete tab;
+            QMap<int, Tab>::iterator i = tabsNew.find(pageId);
+            if(i != tabsNew.end()){
+                QPointer<QWidget> tab = static_cast<QWidget*>(i.value().TabPointer);
+                if(tab){
+                    tab->disconnect();
+                    ui->stackedWidget->removeWidget(tab);
+                    delete tab;
+                }
+                tabsNew.remove(pageId);
             }
-            tabsNew.remove(pageId);
+            else{
+                qDebug() << "this shouldn't happen";
+            }
             if( model->hasChildren(index) ) {
                 removePage(0,model,index); //delete all children under match
             }

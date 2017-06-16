@@ -27,19 +27,29 @@ void ThreadTabHelper::startUp(QString &board, QString &thread, QWidget* parent){
 }
 
 ThreadTabHelper::~ThreadTabHelper(){
+    disconnect(parent);
+    disconnect(this);
+    abort = true;
     updateTimer->stop();
+    disconnect(connectionUpdate);
     delete updateTimer;
     if(gettingReply){
         reply->abort();
         disconnect(reply);
         reply->deleteLater();
     }
+    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
+    while (mapI.hasNext()) {
+        mapI.next();
+        mapI.value()->deleteLater();
+        mapI.remove();
+    }
 }
 
 void ThreadTabHelper::setAutoUpdate(bool update){
-    if(gettingReply) reply->abort();
-    disconnect(reply);
-    disconnect(connectionUpdate);
+    //if(gettingReply) reply->abort();
+    //disconnect(reply);
+    //disconnect(connectionUpdate);
     if(update){
         connectionUpdate = connect(updateTimer, &QTimer::timeout,
                                    this,&ThreadTabHelper::getPosts,UniqueDirect);
@@ -76,6 +86,7 @@ void ThreadTabHelper::loadPosts(){
     }
     //write to file and make json array
     QByteArray rep = reply->readAll();
+    reply->deleteLater();
     QtConcurrent::run(&ThreadTabHelper::writeJson,board, thread, rep);
     posts = QJsonDocument::fromJson(rep).object().value("posts").toArray();
     int length = posts.size();
@@ -129,7 +140,6 @@ void ThreadTabHelper::loadPosts(){
     }
     if(!abort) emit addStretch();
     //emit scrollIt();
-    reply->deleteLater();
 }
 
 void ThreadTabHelper::loadAllImages(){

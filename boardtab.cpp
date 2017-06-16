@@ -118,17 +118,19 @@ void BoardTab::loadThreads(){
         reply->deleteLater();
         return;
     }
-    if(type==BoardType::Index) threads = QJsonDocument::fromJson(reply->readAll()).object().value("threads").toArray();
+    QByteArray rep = reply->readAll();
+    reply->deleteLater();
+    if(type==BoardType::Index) threads = QJsonDocument::fromJson(rep).object().value("threads").toArray();
     else{
         qDebug("searching %s",search.toLatin1().constData());
         QRegularExpression re(search,QRegularExpression::CaseInsensitiveOption);
         QRegularExpressionMatch match;
-        QJsonArray allThreads = QJsonDocument::fromJson(reply->readAll()).array();
+        QJsonArray allThreads = QJsonDocument::fromJson(rep).array();
         QJsonArray pageThreads;
         for(int i=0;i<allThreads.size();i++){
             pageThreads = allThreads.at(i).toObject().value("threads").toArray();
             for(int j=0;j<pageThreads.size();j++){
-                match = re.match(pageThreads.at(j).toObject().value("sub").toString() + pageThreads.at(j).toObject().value("com").toString(),0,QRegularExpression::PartialPreferFirstMatch);
+                match = re.match(pageThreads.at(j).toObject().value("sub").toString() % pageThreads.at(j).toObject().value("com").toString(),0,QRegularExpression::PartialPreferFirstMatch);
                 if(match.hasMatch())threads.append(pageThreads.at(j));
             }
         }
@@ -155,7 +157,6 @@ void BoardTab::loadThreads(){
         //QCoreApplication::processEvents();
     }
     ui->threads->addStretch(1);
-    reply->deleteLater();
 }
 
 void BoardTab::on_pushButton_clicked()
