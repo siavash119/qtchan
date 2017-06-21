@@ -302,12 +302,15 @@
         <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
        <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectItems</enum>
+        <enum>QAbstractItemView::SelectRows</enum>
        </property>
        <property name="autoExpandDelay">
         <number>0</number>
        </property>
        <property name="itemsExpandable">
+        <bool>true</bool>
+       </property>
+       <property name="allColumnsShowFocus">
         <bool>true</bool>
        </property>
        <attribute name="headerVisible">
@@ -396,8 +399,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>712</width>
-             <height>757</height>
+             <width>343</width>
+             <height>755</height>
             </rect>
            </property>
            <property name="sizePolicy">

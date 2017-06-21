@@ -34,7 +34,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //qDebug() << QKeySequence::keyBindings(QKeySequence::PreviousChild);
 }
 
-//TODO next/prev tab on cur stackedWidget index
 void MainWindow::setShortcuts(){
     QAction *nTab = new QAction(this);
     nTab->setShortcut(QKeySequence::NextChild);
@@ -185,9 +184,7 @@ void MainWindow::loadFromSearch(QString searchString, bool select){
         displayString = "/"+searchString+"/";
     }
     qDebug().noquote() << "loading " + displayString;
-    //ui->verticalLayout_3->addWidget(bt);
     ui->stackedWidget->addWidget(bt);
-    //ui->stackedWidget
     Tab tab = {Tab::TabType::Board,bt,searchString};
     QStandardItem* parent1 = new QStandardItem(displayString);
     model->appendRow(parent1);
@@ -208,7 +205,6 @@ void MainWindow::onNewThread(QWidget* parent, QString board, QString thread){
     Tab tab = {Tab::TabType::Thread,tt,QString("/"+board+"/"+thread)};
     QStandardItem* parent1 = new QStandardItem("/"+board+"/"+thread);
     //TODO append as child
-    //model->appendRow(parent1);
     pages++;
     parent1->setData(pages,Qt::UserRole);
     tabs.insert(parent1,tt);

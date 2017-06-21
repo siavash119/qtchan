@@ -60,6 +60,7 @@ public:
     bool hidden = false;
     bool root;
     bool autoExpand;
+    bool seen = false;
     static QImage scaleImage(QString path);
     QFutureWatcher<QImage> watcher;
     QString repliesString;

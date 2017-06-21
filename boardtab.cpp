@@ -41,12 +41,7 @@ void BoardTab::startUp(){
 
 BoardTab::~BoardTab()
 {
-    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
-    while (mapI.hasNext()) {
-        mapI.next();
-        mapI.value()->deleteLater();
-        mapI.remove();
-    }
+    qDeleteAll(tfMap);
     emit finished();
     delete ui;
 }
@@ -105,13 +100,7 @@ void BoardTab::updatePosts(){
 }
 
 void BoardTab::loadThreads(){
-    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
-    while (mapI.hasNext()) {
-        mapI.next();
-        delete mapI.value();
-        mapI.remove();
-        //QCoreApplication::processEvents();
-    }
+    qDeleteAll(tfMap);
     QJsonArray threads;
     if(reply->error()){
         qDebug().noquote() << "loading post error:" << reply->errorString();
@@ -149,7 +138,6 @@ void BoardTab::loadThreads(){
             ui->threads->addWidget(tf);
             tf->load(p);
             tfMap.insert(tf->post.no,tf);
-            //posts.push_back(tf);
         }
         else{
             qDebug("threadNum %s filtered!",threadNum.toLatin1().constData());

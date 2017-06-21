@@ -38,18 +38,10 @@ ThreadTabHelper::~ThreadTabHelper(){
         disconnect(reply);
         reply->deleteLater();
     }
-    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
-    while (mapI.hasNext()) {
-        mapI.next();
-        mapI.value()->deleteLater();
-        mapI.remove();
-    }
+    qDeleteAll(tfMap);
 }
 
 void ThreadTabHelper::setAutoUpdate(bool update){
-    //if(gettingReply) reply->abort();
-    //disconnect(reply);
-    //disconnect(connectionUpdate);
     if(update){
         connectionUpdate = connect(updateTimer, &QTimer::timeout,
                                    this,&ThreadTabHelper::getPosts,UniqueDirect);
@@ -129,10 +121,13 @@ void ThreadTabHelper::loadPosts(){
         QPointer<ThreadForm> replyTo;
         foreach (const QString &orig, tf->quotelinks)
         {
-            replyTo = tfMap.find(orig).value();
-            if(replyTo != tfMap.end().value()){
-                replyTo->replies.insert(tf->post.no.toDouble(),tf->post.no);
-                replyTo->setReplies();
+            QMap<QString,ThreadForm*>::iterator i = tfMap.find(orig);
+            if(i != tfMap.end()){
+                replyTo = i.value();
+                if(replyTo){
+                    replyTo->replies.insert(tf->post.no.toDouble(),tf->post.no);
+                    replyTo->setReplies();
+                }
             }
         }
         i++;

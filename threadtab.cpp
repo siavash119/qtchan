@@ -11,6 +11,9 @@
 #include <QProcess>
 #include <QScrollBar>
 #include <QTimer>
+#include <QDesktopWidget>
+#include <QScreen>
+#include <QFuture>
 #include "netcontroller.h"
 #include "mainwindow.h"
 
@@ -37,7 +40,30 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
     this->installEventFilter(this);
     connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,UniqueDirect);
     connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
+    QScrollBar* vBar = ui->scrollArea->verticalScrollBar();
+    connect(&watcher,&QFutureWatcherBase::finished,[=](){
+        formsUnseen += newImage.result();
+        qDebug() << formsUnseen;
+    });
+    connect(vBar, &QScrollBar::sliderMoved,[=](int value){
+        newImage = QtConcurrent::run(&ThreadTab::checkIfVisible, tfMap);
+        watcher.setFuture(newImage);
+    });
     //connect(&helper,&ThreadTabHelper::refresh,[=](ThreadForm* tf){onRefresh(tf);});
+}
+
+int ThreadTab::checkIfVisible(QMap<QString,ThreadForm*> &tfMap){
+    int newUnseen = 0;
+    QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
+    while (mapI.hasNext()) {
+        mapI.next();
+        ThreadForm* tf = mapI.value();
+        if(!tf->visibleRegion().isEmpty() && !(tf->seen)){
+            tf->seen = true;
+            newUnseen--;
+        }
+    }
+    return newUnseen;
 }
 
 /*void ThreadTab::checkScroll(){
@@ -86,17 +112,9 @@ void ThreadTab::setShortcuts(){
 ThreadTab::~ThreadTab()
 {
     ui->threads->removeItem(&space);
-    /*QMutableMapIterator<QString,ThreadForm*> mapI(tfMap);
-    while (mapI.hasNext()) {
-        mapI.next();
-        mapI.value()->deleteLater();
-        mapI.remove();
-    }*/
     helper.abort = 1;
     disconnect(&helper);
     disconnect(&workerThread);
-    //workerThread.quit();
-    //workerThread.wait();
     disconnect(connectionAutoUpdate);
     delete ui;
 }
@@ -135,6 +153,8 @@ void ThreadTab::onNewTF(ThreadForm* tf){
     ui->threads->addWidget(tf);
     tfMap.insert(tf->post.no,tf);
     connect(tf,&ThreadForm::floatLink,this,&ThreadTab::floatReply);
+    formsTotal++;
+    formsUnseen++;
 }
 
 void ThreadTab::onWindowTitle(QString title){
@@ -204,12 +224,9 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
         else{
             return QObject::eventFilter(obj, event);
         }
-        return true;
-        break;
     }
     //check cursor change instead?
     case QEvent::Leave:
-    case QEvent::Wheel:
         deleteFloat();
     default:
         return QObject::eventFilter(obj, event);
@@ -235,18 +252,26 @@ void ThreadTab::floatReply(const QString &link){
     floating->setObjectName("reply");
     floating->setWindowFlags(Qt::ToolTip);
     floating->setWindowTitle("reply");
+    QRect rec = QApplication::desktop()->availableGeometry(this);
     QPoint globalCursorPos = QCursor::pos();
     QSize sizeHint = floating->sizeHint();
-    floating->setGeometry(globalCursorPos.x()+10,globalCursorPos.y()+10,sizeHint.width(),sizeHint.height());
+    int x, y;
+    if(globalCursorPos.x()  - rec.topLeft().x() + sizeHint.width() + 10 > rec.width()){
+        x = globalCursorPos.x() - sizeHint.width() - 10;
+    }
+    else x = globalCursorPos.x()+10;
+    if(globalCursorPos.y() - rec.topLeft().y() + sizeHint.height() + 10 > rec.height()){
+        y = globalCursorPos.y() - sizeHint.height() - 10;
+    }
+    else y = globalCursorPos.y()+10;
+    floating->setGeometry(x,y,sizeHint.width(),sizeHint.height());
+    floating->update();
     //floating->setStyleSheet("border-style:solid;border-width: 4px;");
     floating->setStyleSheet(QString::fromUtf8("QWidget#ThreadForm\n"
     "{\n"
     "    border: 3px solid black;\n"
     "}\n"
     ""));
-    //floating->move(globalCursorPos.x()+10,globalCursorPos.y()+10);
-    floating->updateGeometry();
-    floating->update();
     floating->show();
 }
 
@@ -256,14 +281,20 @@ void ThreadTab::deleteFloat(){
     }
 }
 
-//TODO compensate for float on edges of screen
 void ThreadTab::updateFloat(){
     if(floating){
+        QRect rec = QApplication::desktop()->availableGeometry(this);
         QPoint globalCursorPos = QCursor::pos();
         QSize sizeHint = floating->sizeHint();
-        floating->setGeometry(globalCursorPos.x()+10,globalCursorPos.y()+10,sizeHint.width(),sizeHint.height());
-        //floating->move(globalCursorPos.x()+10,globalCursorPos.y()+10);
-        floating->updateGeometry();
-        floating->update();
+        int x, y;
+        if(globalCursorPos.x() - rec.topLeft().x() + sizeHint.width() + 10 > rec.width()){
+            x = globalCursorPos.x() - sizeHint.width() - 10;
+        }
+        else x = globalCursorPos.x()+10;
+        if(globalCursorPos.y() - rec.topLeft().y() + sizeHint.height() + 10 > rec.height()){
+            y = globalCursorPos.y() - sizeHint.height() - 10;
+        }
+        else y = globalCursorPos.y()+10;
+        floating->move(x,y);
     }
 }

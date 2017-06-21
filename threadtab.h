@@ -6,6 +6,8 @@
 #include <QPointer>
 #include <QThread>
 #include <QSpacerItem>
+#include <QFutureWatcher>
+#include <QtConcurrent/QtConcurrent>
 #include "clickablelabel.h"
 #include "threadtabhelper.h"
 #include "postform.h"
@@ -39,6 +41,9 @@ public:
     bool floatIt;
     QThread workerThread;
     ThreadTabHelper helper;
+    int formsTotal = 0;
+    int formsUnseen = 0;
+    static int checkIfVisible(QMap<QString,ThreadForm*> &tfMap);
 
 public slots:
     void addStretch();
@@ -56,6 +61,8 @@ private:
     Ui::ThreadTab *ui;
     QMetaObject::Connection connectionAutoUpdate;
     void setShortcuts();
+    QFuture<int> newImage;
+    QFutureWatcher<int> watcher;
 
 private slots:
     void gallery();
@@ -65,6 +72,7 @@ private slots:
 
 signals:
     void autoUpdate(bool update);
+    void unseen(int totalUnseen);
 };
 
 #endif // THREADTAB_H
