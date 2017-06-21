@@ -28,7 +28,8 @@ Create a file ~/.config/qtchan/settings like below. Look at your browser cookies
 ### MAJOR
 * captcha
 * process-threading (done for thread tabs and forms; still need to do for board tabs)
-* better geometry for hovered and embedded replies
+* unread, read, (You) display
+* notifications
 * instructions
 * settings
 
