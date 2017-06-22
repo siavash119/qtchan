@@ -101,6 +101,7 @@ void BoardTab::updatePosts(){
 
 void BoardTab::loadThreads(){
     qDeleteAll(tfMap);
+    tfMap.clear();
     QJsonArray threads;
     if(reply->error()){
         qDebug().noquote() << "loading post error:" << reply->errorString();
