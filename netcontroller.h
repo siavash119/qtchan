@@ -9,29 +9,23 @@
 #include "filter.h"
 
 class netController: public QObject  {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    QNetworkAccessManager *thumbManager;
-    QNetworkAccessManager *fileManager;
-    QNetworkAccessManager *jsonManager;
-    QNetworkCookieJar *cookies;
-    QNetworkDiskCache *diskCache;
-    QJsonObject settingsFile;
-    explicit netController(QObject * parent = nullptr);
-    Filter *filter;
+	QNetworkAccessManager *thumbManager;
+	QNetworkAccessManager *fileManager;
+	QNetworkAccessManager *jsonManager;
+	QNetworkCookieJar *cookies;
+	QNetworkDiskCache *diskCache;
+	QJsonObject settingsFile;
+	explicit netController(QObject *parent = Q_NULLPTR);
+	Filter *filter;
 };
 
 extern netController nc;
 //extern std::vector<BoardTab*> bts;
 
-struct Tab{
-    enum TabType {Board,Thread} type;
-    void* TabPointer;
-    QString searchString;
-};
-
 struct Settings{
-    QObject hidden;
+	QObject hidden;
 };
 
 //extern std::vector<Tab> tabs;

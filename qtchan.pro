@@ -23,7 +23,9 @@ SOURCES += main.cpp\
     postform.cpp \
     filter.cpp \
     overlay.cpp \
-    threadtabhelper.cpp
+    threadtabhelper.cpp \
+    treemodel.cpp \
+    treeitem.cpp
 
 HEADERS  += mainwindow.h \
     threadform.h \
@@ -35,12 +37,12 @@ HEADERS  += mainwindow.h \
     postform.h \
     filter.h \
     overlay.h \
-    threadtabhelper.h
+    threadtabhelper.h \
+    treeitem.h \
+    treemodel.h
 
 FORMS    += mainwindow.ui \
     threadform.ui \
     boardtab.ui \
     threadtab.ui \
     postform.ui
-
-RESOURCES +=

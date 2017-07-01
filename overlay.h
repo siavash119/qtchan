@@ -4,15 +4,15 @@
 
 class Overlay : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit Overlay(QWidget* parent);
-    QString displayText;
+	explicit Overlay(QWidget *parent);
+	QString displayText;
 private:
-    QRect rect;
-    const QColor color;
+	QRect rect;
+	const QColor color;
 protected:
-    void paintEvent(QPaintEvent*);
+	void paintEvent(QPaintEvent*);
 };
 
 #endif // OVERLAY_H

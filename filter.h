@@ -13,15 +13,15 @@
 class Filter
 {
 public:
-    Filter();
-    void regexp(QString search);
-    //void htmlParse(QString search);
-    static QSet<QString> findQuotes(QString post);
+	Filter();
+	void regexp(QString search);
+	//void htmlParse(QString search);
+	static QSet<QString> findQuotes(QString post);
 
 private:
-    QRegularExpression quotelink;
-    QRegularExpressionMatch quotelinkMatch;
-    QRegularExpressionMatchIterator quotelinkMatches;
+	QRegularExpression quotelink;
+	QRegularExpressionMatch quotelinkMatch;
+	QRegularExpressionMatchIterator quotelinkMatches;
 };
 
 #endif // FILTER_H

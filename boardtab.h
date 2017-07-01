@@ -13,39 +13,37 @@ class BoardTab;
 enum BoardType{Index,Catalog};
 class BoardTab : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    QString tabType;
-    QString board;
-    QString boardUrl;
-    BoardType type;
-    QString search;
-    explicit BoardTab(QString board, BoardType type = BoardType::Index, QString search = "", QWidget *parent = 0);
-    ~BoardTab();
-    void addThread();
-    QNetworkReply *reply;
-    //TODO change to map
-    QMap<QString,ThreadForm*> tfMap;
-    void updatePosts();
-    void setShortcuts();
-    void getPosts();
-    void focusIt();
-    void startUp();
+	QString tabType;
+	QString board;
+	QString boardUrl;
+	BoardType type;
+	QString search;
+	explicit BoardTab(QString board, BoardType type = BoardType::Index, QString search = "", QWidget *parent = 0);
+	~BoardTab();
+	void addThread();
+	QNetworkReply *reply;
+	QMap<QString,ThreadForm*> tfMap;
+	void updatePosts();
+	void setShortcuts();
+	void getPosts();
+	void focusIt();
+	void startUp();
 
 public slots:
-    void findText(const QString text);
+	void findText(const QString text);
 
 private:
-    Ui::BoardTab *ui;
+	Ui::BoardTab *ui;
 
 private slots:
-    void loadThreads();
-    void on_pushButton_clicked();
-    void on_lineEdit_returnPressed();
-
-signals:
-    void finished();
+	void loadThreads();
+	void on_pushButton_clicked();
+	void on_lineEdit_returnPressed();
 };
+
+Q_DECLARE_METATYPE(BoardTab*)
 
 #endif // BOARDTAB_H

@@ -9,69 +9,88 @@
 #include "netcontroller.h"
 #include "boardtab.h"
 #include "threadform.h"
+#include "treemodel.h"
+#include "treeitem.h"
+
+struct Tab{
+	enum TabType {Board,Thread} type;
+	void *TabPointer;
+	TreeItem *tn;
+	QString query;
+	QString display;
+};
+
+struct TreeTab{
+	QString query;
+	QString display = "";
+	bool isExpanded = true;
+	QList<TreeTab> children = QList<TreeTab>();
+	//TreeTab *parent = 0;
+};
+
+Q_DECLARE_METATYPE(TreeTab)
 
 namespace Ui {
 class MainWindow;
 }
 
+
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
-    QNetworkReply *reply;
-    QMap<QStandardItem*,QWidget*> tabs;
-    QMap<int,Tab> tabsNew;
-
+	Q_OBJECT
 protected:
-    bool eventFilter(QObject *obj, QEvent *ev);
+	bool eventFilter(QObject *obj, QEvent *ev);
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    QStandardItemModel *model;
-    int pages = 0;
+	explicit MainWindow(QWidget *parent = 0);
+	TreeModel *model = new TreeModel(this);
+	QItemSelectionModel *selectionModel;
+	QMap<QWidget*,Tab> tabs;
+	~MainWindow();
 
-    void addTab();
-    ~MainWindow();
-    void removePage(int searchPage, QAbstractItemModel* model, QModelIndex parent = QModelIndex());
-    void selectPage(int searchPage, QAbstractItemModel* model, QModelIndex parent = QModelIndex());
-
-    void show_one(QModelIndex index);
-    void deleteSelected();
-    void loadSession();
-    QObject* currentWidget();
+	void addTab(TreeItem *child, TreeItem *parent = Q_NULLPTR, bool select = false);
+	void deleteSelected();
+	void loadSession();
+	QObject *currentWidget();
 
 private slots:
-    void on_pushButton_clicked();
-
-    void on_treeView_clicked(QModelIndex index);
-    void onSelectionChanged();
-    //void onSelectionChanged(const QItemSelection &, const QItemSelection &);
-
-    void on_lineEdit_returnPressed();
+	void on_pushButton_clicked();
+	void on_treeView_clicked(QModelIndex index);
+	void onSelectionChanged();
+	void on_lineEdit_returnPressed();
 
 public slots:
-    void onNewThread(QWidget* parent, QString board, QString thread);
-    void focusTree();
-    void focusBar();
-    void loadFromSearch(QString searchString, bool select);
-    void saveSession();
-    void nextTab(QModelIndex qmi);
-    void prevTab(QModelIndex qmi);
-    void toggleAutoUpdate();
-    void toggleAutoExpand();
+	void focusTree();
+	void focusBar();
+	TreeItem *loadFromSearch(QString query, QString display, TreeItem *childOf, bool select = false);
+	TreeItem *onNewThread(QWidget *parent, QString board, QString thread, QString display, TreeItem *childOf);
+	void saveSession();
+	void loadSessionFromFile(QString sessionFile);
+	void nextTab(QModelIndex qmi);
+	void prevTab(QModelIndex qmi);
+	void toggleAutoUpdate();
+	void toggleAutoExpand();
+	void openExplorer();
 
 private:
-    Ui::MainWindow *ui;
-    QModelIndexList boardsSelected;
-    void setShortcuts();
+	Ui::MainWindow *ui;
+	void setShortcuts();
+	void removeTabs(TreeItem *tn);
+	TreeTab saveChildren(TreeItem *tn, TreeTab *parent);
+	void saveTreeToFile(QString fileName);
+	void saveChildrenToFile(TreeItem *tn, int indent, QTextStream *out);
+	void loadChildren(TreeTab session, TreeItem *parent = 0);
 
 signals:
-    void requestCatalog(QString);
-    void setAutoUpdate(bool autoUpdate);
-    void setAutoExpand(bool autoExpand);
+	void requestCatalog(QString);
+	void setAutoUpdate(bool autoUpdate);
+	void setAutoExpand(bool autoExpand);
 };
 
-extern MainWindow* mw;
+extern MainWindow *mw;
 
 enum FilterType{id,comment,trip};
 enum BoardName{b,g,diy,h,pol,d};
+
+
 #endif // MAINWINDOW_H

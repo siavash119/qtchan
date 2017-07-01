@@ -18,61 +18,67 @@ class ThreadTab;
 
 class ThreadTab : public QWidget
 {
-    Q_OBJECT
-    Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
-    QSpacerItem space = QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
+	Q_OBJECT
+	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
+	QSpacerItem space = QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
 protected:
-    bool eventFilter(QObject *obj, QEvent *event);
+	bool eventFilter(QObject *obj, QEvent *event);
 public:
-    QString board;
-    QString thread;
-    QString threadUrl;
-    explicit ThreadTab(QString board, QString thread, QWidget *parent = 0);
-    ~ThreadTab();
-    QMap<QString,ThreadForm*> tfMap;
-    bool updated;
-    void findText(const QString text);
-    PostForm myPostForm;
-    void loadAllImages();
-    ThreadForm* findPost(QString postNum);
-    int getMinWidth();
-    void setMinWidth(int minw);
-    QPointer<ThreadForm> floating;
-    bool floatIt;
-    QThread workerThread;
-    ThreadTabHelper helper;
-    int formsTotal = 0;
-    int formsUnseen = 0;
-    static int checkIfVisible(QMap<QString,ThreadForm*> &tfMap);
+	QString board;
+	QString thread;
+	QString threadUrl;
+	explicit ThreadTab(QString board, QString thread, QWidget *parent = 0);
+	~ThreadTab();
+	QMap<QString,ThreadForm*> tfMap;
+	QList<ThreadForm*> unseenList;
+	bool updated;
+	void findText(const QString text);
+	void loadAllImages();
+	ThreadForm *findPost(QString postNum);
+	int getMinWidth();
+	void setMinWidth(int minw);
+	bool floatIt;
+	QPointer<ThreadForm> floating;
+	PostForm myPostForm;
+	QThread workerThread;
+	ThreadTabHelper helper;
+	int formsTotal = 0;
+	int formsUnseen = 0;
+	static QList<ThreadForm*> checkIfVisible(QList<ThreadForm*> &unseenList);
+
 
 public slots:
-    void addStretch();
-    void focusIt();
-    void updateWidth();
-    void quoteIt(QString text);
-    void floatReply(const QString &link);
-    void deleteFloat();
-    void updateFloat();
-    void onNewTF(ThreadForm* tf);
-    void onWindowTitle(QString title);
-    //void checkScroll();
+	void addStretch();
+	void focusIt();
+	void updateWidth();
+	void quoteIt(QString text);
+	void floatReply(const QString &link);
+	void deleteFloat();
+	void updateFloat();
+	void onNewTF(ThreadForm *tf);
+	void onWindowTitle(QString title);
+	//void checkScroll();
 
 private:
-    Ui::ThreadTab *ui;
-    QMetaObject::Connection connectionAutoUpdate;
-    void setShortcuts();
-    QFuture<int> newImage;
-    QFutureWatcher<int> watcher;
+	Ui::ThreadTab *ui;
+	QMetaObject::Connection connectionAutoUpdate;
+	QMetaObject::Connection connectionVisibleChecker;
+	void setShortcuts();
+	QFuture<QList<ThreadForm*>> newImage;
+	QFutureWatcher<QList<ThreadForm*>> watcher;
 
 private slots:
-    void gallery();
-    void openPostForm();
-    void on_pushButton_clicked();
-    void on_lineEdit_returnPressed();
+	void gallery();
+	void openPostForm();
+	void on_pushButton_clicked();
+	void on_lineEdit_returnPressed();
+	void removeTF(ThreadForm *tf);
 
 signals:
-    void autoUpdate(bool update);
-    void unseen(int totalUnseen);
+	void autoUpdate(bool update);
+	void unseen(int totalUnseen);
 };
+
+Q_DECLARE_METATYPE(ThreadTab*)
 
 #endif // THREADTAB_H
