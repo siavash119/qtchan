@@ -36,53 +36,100 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::setShortcuts()
 {
-	QAction *nTab = new QAction(this);
-	nTab->setShortcut(QKeySequence::NextChild);
-	nTab->setShortcutContext(Qt::ApplicationShortcut);
-	connect(nTab, &QAction::triggered, [=]{
-		nextTab(ui->treeView->currentIndex());
-	});
-	this->addAction(nTab);
 	QAction *pTab = new QAction(this);
 	pTab->setShortcut(QKeySequence("Ctrl+Shift+Tab"));
 	pTab->setShortcutContext(Qt::ApplicationShortcut);
-	connect(pTab, &QAction::triggered,[=]{
-		prevTab(ui->treeView->currentIndex());
-	});
+	connect(pTab, &QAction::triggered,this,&MainWindow::prevTab);
 	this->addAction(pTab);
+
+	QAction *nTab = new QAction(this);
+	nTab->setShortcut(QKeySequence("Ctrl+Tab"));
+	nTab->setShortcutContext(Qt::ApplicationShortcut);
+	connect(nTab, &QAction::triggered,this,&MainWindow::nextTab);
+	this->addAction(nTab);
+
+	QAction *firstItem = new QAction(this);
+	firstItem->setShortcut(QKeySequence("Ctrl+1"));
+	firstItem->setShortcutContext(Qt::ApplicationShortcut);
+	connect(firstItem, &QAction::triggered,[=]{
+		if(!model->rowCount()) return;
+		selectionModel->setCurrentIndex(model->index(0,0),
+						QItemSelectionModel::ClearAndSelect);
+	});
+	this->addAction(firstItem);
+
+	QAction *pParent = new QAction(this);
+	pParent->setShortcut(QKeySequence("Ctrl+2"));
+	pParent->setShortcutContext(Qt::ApplicationShortcut);
+	connect(pParent, &QAction::triggered,this,&MainWindow::prevParent);
+	this->addAction(pParent);
+
+	QAction *nParent = new QAction(this);
+	nParent->setShortcut(QKeySequence("Ctrl+3"));
+	nParent->setShortcutContext(Qt::ApplicationShortcut);
+	connect(nParent, &QAction::triggered,this,&MainWindow::nextParent);
+	this->addAction(nParent);
+
+	QAction *lastItem = new QAction(this);
+	lastItem->setShortcut(QKeySequence("Ctrl+4"));
+	lastItem->setShortcutContext(Qt::ApplicationShortcut);
+	connect(lastItem, &QAction::triggered,[=]{
+		if(!model->rowCount()) return;
+		TreeItem* tm = model->getItem(model->index(model->rowCount(),0));
+		while(tm->childCount()){
+			tm = tm->child(tm->childCount()-1);
+		}
+		selectionModel->setCurrentIndex(model->getIndex(tm),
+						QItemSelectionModel::ClearAndSelect);
+	});
+	this->addAction(lastItem);
+
 	QAction *del = new QAction(this);
 	del->setShortcut(QKeySequence::Delete);
 	connect(del, &QAction::triggered, this, &MainWindow::deleteSelected);
 	this->addAction(del);
+
 	QAction *closeTab = new QAction(this);
 	closeTab->setShortcut(QKeySequence::Close);
 	closeTab->setShortcutContext(Qt::ApplicationShortcut);
 	connect(closeTab, &QAction::triggered, this, &MainWindow::deleteSelected);
 	this->addAction(closeTab);
+
 	QAction *navBar = new QAction(this);
 	navBar->setShortcut(QKeySequence("Ctrl+l"));
 	navBar->setShortcutContext(Qt::ApplicationShortcut);
 	connect(navBar, &QAction::triggered, this, &MainWindow::focusBar);
 	this->addAction(navBar);
+
 	QAction *setAutoUpdate = new QAction(this);
 	setAutoUpdate->setShortcut(QKeySequence("Ctrl+u"));
 	setAutoUpdate->setShortcutContext(Qt::ApplicationShortcut);
 	connect(setAutoUpdate, &QAction::triggered, this, &MainWindow::toggleAutoUpdate);
 	this->addAction(setAutoUpdate);
+
 	QAction *setAutoExpand = new QAction(this);
 	setAutoExpand->setShortcut(QKeySequence("Ctrl+e"));
 	setAutoExpand->setShortcutContext(Qt::ApplicationShortcut);
 	connect(setAutoExpand, &QAction::triggered, this, &MainWindow::toggleAutoExpand);
 	this->addAction(setAutoExpand);
+
 	QAction *saveState = new QAction(this);
 	saveState->setShortcut(QKeySequence(Qt::Key_F10));
 	saveState->setShortcutContext(Qt::ApplicationShortcut);
 	connect(saveState, &QAction::triggered, this, &MainWindow::saveSession);
 	this->addAction(saveState);
-	ui->actionSave->setShortcut(QKeySequence("Ctrl+S"));
+
+	QAction *openExplorer = new QAction(this);
+	openExplorer->setShortcut(QKeySequence("Ctrl+o"));
+	openExplorer->setShortcutContext(Qt::ApplicationShortcut);
+	connect(openExplorer, &QAction::triggered, this, &MainWindow::openExplorer);
+	this->addAction(openExplorer);
+
+	ui->actionSave->setShortcut(QKeySequence("Ctrl+s"));
 	ui->actionSave->setShortcutContext(Qt::ApplicationShortcut);
 	connect(ui->actionSave,&QAction::triggered,this,&MainWindow::saveSession);
-	ui->actionReload->setShortcut(QKeySequence("Ctrl+R"));
+
+	ui->actionReload->setShortcut(QKeySequence("Ctrl+r"));
 	connect(ui->actionReload,&QAction::triggered,[=]{
 		QMapIterator<QWidget*,Tab> i(tabs);
 		while(i.hasNext()) {
@@ -91,11 +138,6 @@ void MainWindow::setShortcuts()
 			else static_cast<ThreadTab*>(tab.TabPointer)->helper.getPosts();
 		}
 	});
-	QAction *openExplorer = new QAction(this);
-	openExplorer->setShortcut(QKeySequence("Ctrl+o"));
-	openExplorer->setShortcutContext(Qt::ApplicationShortcut);
-	connect(openExplorer, &QAction::triggered, this, &MainWindow::openExplorer);
-	this->addAction(openExplorer);
 }
 
 MainWindow::~MainWindow()
@@ -140,11 +182,12 @@ void MainWindow::openExplorer(){
 }
 
 //for next/prev tab just send up and down key and loop to beginning/end if no change in selection?
-void MainWindow::nextTab(QModelIndex qmi)
+void MainWindow::nextTab()
 {
 	/*QKeyEvent event(QEvent::KeyPress,Qt::Key_Down,0);
 	QApplication::sendEvent(ui->treeView, &event);*/
-	if(!model->rowCount(qmi.parent())) return; //necessary?
+	QModelIndex qmi = ui->treeView->currentIndex();
+	if(!model->rowCount(qmi.parent())) return;
 	if(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)) {
 		selectionModel->setCurrentIndex(model->index(0,0,qmi),QItemSelectionModel::ClearAndSelect);
 		return;
@@ -152,17 +195,18 @@ void MainWindow::nextTab(QModelIndex qmi)
 	while(qmi.row() == model->rowCount(qmi.parent())-1) { //is last child and no children
 		qmi = qmi.parent();
 	}
-	if(qmi.row()+1<model->rowCount(qmi.parent())) {
+	if(qmi.row()+1 < model->rowCount(qmi.parent())) {
 		selectionModel->setCurrentIndex(model->index(qmi.row()+1,0,qmi.parent()),QItemSelectionModel::ClearAndSelect);
 		return;
 	}
 	selectionModel->setCurrentIndex(model->index(0,0),QItemSelectionModel::ClearAndSelect);
 }
 
-void MainWindow::prevTab(QModelIndex qmi)
+void MainWindow::prevTab()
 {
-	if(!model->rowCount(qmi.parent())) return; //necessary?
-	if(qmi.row()-1>=0) {
+	QModelIndex qmi = ui->treeView->currentIndex();
+	if(!model->rowCount(qmi.parent())) return;
+	if(qmi.row()-1 >= 0) {
 		qmi = qmi.sibling(qmi.row()-1,0);
 		while(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)) {
 			qmi = qmi.child(model->rowCount(qmi)-1,0);
@@ -171,12 +215,43 @@ void MainWindow::prevTab(QModelIndex qmi)
 		return;
 	}
 	qmi = qmi.parent();
-	if(qmi.row()==-1) { //we're at the very first row so select last row
+	if(qmi.row() == -1) { //we're at the very first row so select last row
 		qmi = model->index(model->rowCount()-1,0);
 		while(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)) {
 			qmi = qmi.child(model->rowCount(qmi)-1,0);
 		}
 	}
+	selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
+}
+
+void MainWindow::prevParent(){
+	int rowCount = model->rowCount();
+	if(!rowCount) return;
+	QModelIndex qmi = ui->treeView->currentIndex();
+	if(qmi.parent() != QModelIndex()){
+		while(qmi.parent() != QModelIndex()){
+			qmi = qmi.parent();
+		}
+		selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
+		return;
+	}
+	int row = qmi.row()-1;
+	if(row == -1) row = rowCount-1;
+	qmi = qmi.sibling(row,0);
+	selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
+
+}
+
+void MainWindow::nextParent(){
+	int rowCount = model->rowCount();
+	if(!rowCount) return;
+	QModelIndex qmi = ui->treeView->currentIndex();
+	while(qmi.parent() != QModelIndex()){
+		qmi = qmi.parent();
+	}
+	int row = qmi.row()+1;
+	if(row == rowCount) row = 0;
+	qmi = qmi.sibling(row,0);
 	selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
 }
 
@@ -317,21 +392,22 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 	}
 }
 
+//TODO make non-recursive version
 void MainWindow::deleteSelected()
 {
 	QCoreApplication::processEvents();
 	QModelIndexList indexList = selectionModel->selectedRows();
 	QModelIndex ind;
-	if(!indexList.size() && ui->treeView->currentIndex().isValid()) {
+	if(!indexList.size() && selectionModel->currentIndex().isValid()) {
 		indexList.clear();
-		indexList.append(ui->treeView->currentIndex());
+		indexList.append(selectionModel->currentIndex());
 	}
 	while(indexList.size()) {
 		removeTabs(model->getItem(indexList.first()));
 		indexList.pop_front();
 	}
 	QCoreApplication::processEvents();
-	ind = ui->treeView->currentIndex();
+	ind = selectionModel->currentIndex();
 	if(ind.isValid())
 		selectionModel->setCurrentIndex(ind,QItemSelectionModel::ClearAndSelect);
 }

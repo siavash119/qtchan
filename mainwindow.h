@@ -66,8 +66,10 @@ public slots:
 	TreeItem *onNewThread(QWidget *parent, QString board, QString thread, QString display, TreeItem *childOf);
 	void saveSession();
 	void loadSessionFromFile(QString sessionFile);
-	void nextTab(QModelIndex qmi);
-	void prevTab(QModelIndex qmi);
+	void prevTab();
+	void nextTab();
+	void prevParent();
+	void nextParent();
 	void toggleAutoUpdate();
 	void toggleAutoExpand();
 	void openExplorer();
