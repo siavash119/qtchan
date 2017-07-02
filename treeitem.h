@@ -33,8 +33,8 @@ public:
 	QString display;
 
 private:
-	QList<TreeItem*> children;
 	QList<QVariant> itemData;
+	QList<TreeItem*> children;
 };
 
 #endif // TREEITEM_H

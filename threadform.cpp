@@ -21,22 +21,16 @@
 //TODO Possibly refactor file checks and pointers to dir and file objects
 //TODO Possibly decouple the file and thumb getters to the post class
 ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool root, bool autoExpand, QWidget *parent) :
-	QWidget(parent),
+	QWidget(parent), board(board), threadNum(threadNum), type(type), root(root), autoExpand(autoExpand),
 	ui(new Ui::ThreadForm)
 {
-	this->board = board;
-	this->threadNum = threadNum;
-	this->type = type;
-	this->root = root;
-	this->tab = parent;
-	this->autoExpand = autoExpand;
 	ui->setupUi(this);
 	ui->tim->hide();
 	ui->horizontalSpacer->changeSize(0,0);
 	ui->replies->hide();
 	if(board != "pol") ui->country_name->hide();
 	this->setMinimumWidth(488);
-	pathBase = "./"%board%"/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
+	pathBase = "./" % board % "/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
 	connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
 	connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	connect(ui->replies,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);

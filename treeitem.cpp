@@ -3,14 +3,16 @@
 #include <QDebug>
 
 TreeItem::TreeItem(const QList<QVariant> &data, TreeItem *parent)
-	: parent(parent), itemData(data)
+	: parent(parent)
 {
+	itemData = data;
 }
 
 TreeItem::TreeItem(const QList<QVariant> &data,
 					TreeItem *parent, QWidget *tab, TreeItemType type)
-	: parent(parent), itemData(data), tab(tab), type(type)
+	: parent(parent), tab(tab), type(type)
 {
+	itemData = data;
 }
 
 TreeItem::~TreeItem()

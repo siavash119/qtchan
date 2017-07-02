@@ -1,3 +1,4 @@
+#include <QJsonArray>
 #include "threadtabhelper.h"
 #include "netcontroller.h"
 
@@ -5,10 +6,11 @@ ThreadTabHelper::ThreadTabHelper() {
 
 }
 
-void ThreadTabHelper::startUp(QString &board, QString &thread, QWidget *parent) {
-	this->board = board;
-	this->thread = thread;
+void ThreadTabHelper::startUp(QString &board, QString &thread, QWidget *parent)
+{
 	this->parent = parent;
+	this->thread = thread;
+	this->board = board;
 	this->threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
 	QSettings settings;
 	this->expandAll = settings.value("autoExpand",false).toBool();
@@ -80,10 +82,11 @@ void ThreadTabHelper::loadPosts() {
 	QByteArray rep = reply->readAll();
 	reply->deleteLater();
 	QtConcurrent::run(&ThreadTabHelper::writeJson,board, thread, rep);
-	posts = QJsonDocument::fromJson(rep).object().value("posts").toArray();
+	QJsonArray posts = QJsonDocument::fromJson(rep).object().value("posts").toArray();
 	int length = posts.size();
 	qDebug().noquote() << QString("length of ").append(threadUrl).append(" is ").append(QString::number(length));
 	//check OP if archived or closed
+	QJsonObject p;
 	if(length) {
 		p = posts.at(0).toObject();
 		Post OP(p,board);

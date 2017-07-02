@@ -34,9 +34,11 @@ public:
 	void load(QJsonObject &p);
 	void loadImage(QString path);
 	void openImage();
-	PostType type;
-	QString threadNum;
 	QString board;
+	QString threadNum;
+	PostType type;
+	bool root;
+	bool autoExpand;
 	static QString htmlParse(QString &html);
 	static QString titleParse(QString &title);
 	//Post *post;
@@ -58,8 +60,6 @@ public:
 	QList<QPointer<ThreadForm>> clones;
 	//TODO check settings -> filter
 	bool hidden = false;
-	bool root;
-	bool autoExpand;
 	bool seen = false;
 	static QImage scaleImage(QString path);
 	QFutureWatcher<QImage> watcher;

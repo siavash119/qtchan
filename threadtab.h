@@ -24,14 +24,15 @@ class ThreadTab : public QWidget
 protected:
 	bool eventFilter(QObject *obj, QEvent *event);
 public:
+	explicit ThreadTab(QString board, QString thread, QWidget *parent = 0);
+	~ThreadTab();
+
 	QString board;
 	QString thread;
 	QString threadUrl;
-	explicit ThreadTab(QString board, QString thread, QWidget *parent = 0);
-	~ThreadTab();
 	QMap<QString,ThreadForm*> tfMap;
 	QList<ThreadForm*> unseenList;
-	bool updated;
+	bool updated = false;
 	void findText(const QString text);
 	void loadAllImages();
 	ThreadForm *findPost(QString postNum);

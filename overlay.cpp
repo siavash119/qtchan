@@ -19,4 +19,3 @@ void Overlay::paintEvent(QPaintEvent*)
 	painter.setFont({"arial,helvetica", 48});
 	painter.drawText(rect, displayText, Qt::AlignHCenter | Qt::AlignVCenter);
 }
-

@@ -1,6 +1,5 @@
 #ifndef THREADTABHELPER_H
 #define THREADTABHELPER_H
-#include <QJsonArray>
 #include <QNetworkReply>
 #include <QtConcurrent/QtConcurrent>
 #include <QFutureWatcher>
@@ -20,12 +19,9 @@ public:
 	QString board;
 	QString thread;
 	QMap<QString,ThreadForm*> tfMap;
-	QJsonArray posts;
-	QJsonObject p;
 	QFutureWatcher<QImage> *imageScaler;
 	bool abort = false;
 	bool expandAll;
-	//void startUp();
 	void startUp(QString &board, QString &thread, QWidget *parent);
 	static void writeJson(QString &board, QString &thread, QByteArray &rep);
 

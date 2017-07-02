@@ -2,6 +2,12 @@
 
 Post::Post() {
 }
+
+Post::Post(QJsonObject &p, QString &board)
+{
+	load(p,board);
+}
+
 //toBool doesn't work for QJsonValue(double,1)?
 void Post::load(QJsonObject &p, QString &board)
 {
@@ -41,11 +47,6 @@ void Post::load(QJsonObject &p, QString &board)
 		spoiler = (p.value("spoiler").toInt() == 1) ? true : false;
 		custom_spoiler = (p.value("custom_spoiler").toInt() == 1) ? true : false;
 	}
-}
-
-Post::Post(QJsonObject &p, QString &board)
-{
-	load(p,board);
 }
 
 Post::~Post() {

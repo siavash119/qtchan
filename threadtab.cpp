@@ -18,13 +18,10 @@
 #include "mainwindow.h"
 
 ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
-	QWidget(parent),
+	QWidget(parent), board(board), thread(thread),
 	ui(new Ui::ThreadTab)
 {
-	this->updated = false;
 	ui->setupUi(this);
-	this->board = board;
-	this->thread = thread;
 	this->setWindowTitle("/"+board+"/"+thread);
 	helper.startUp(board,thread, this);
 	helper.moveToThread(&workerThread);

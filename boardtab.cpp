@@ -10,14 +10,11 @@
 #include "threadform.h"
 
 BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *parent) :
-	QWidget(parent),
+	QWidget(parent), board(board), type(type), search(search),
 	ui(new Ui::BoardTab)
 {
 	ui->setupUi(this);
 	//TODO check if actual board
-	this->board = board;
-	this->type = type;
-	this->search = search;
 	this->setWindowTitle("/"+board+"/"+search);
 	if(type == BoardType::Index) boardUrl = "https://a.4cdn.org/"+board+"/1.json";
 	else boardUrl = "https://a.4cdn.org/"+board+"/catalog.json";

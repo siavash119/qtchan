@@ -12,10 +12,11 @@ class Post
 	QString colorString = "class=\"quote\" style=\"color:#8ba446\"";
 	QString quoteString = "class=\"quote\" style=\"color:#897399\"";
 public:
-	Post(QJsonObject &p,QString &board);
 	Post();
-	void load(QJsonObject &p,QString &board);
+	Post(QJsonObject &p,QString &board);
 	~Post();
+	void load(QJsonObject &p,QString &board);
+
 	QString no;
 	int resto;
 

@@ -16,16 +16,18 @@ class BoardTab : public QWidget
 	Q_OBJECT
 
 public:
-	QString tabType;
-	QString board;
-	QString boardUrl;
-	BoardType type;
-	QString search;
 	explicit BoardTab(QString board, BoardType type = BoardType::Index, QString search = "", QWidget *parent = 0);
 	~BoardTab();
-	void addThread();
+
+	QString board;
+	BoardType type;
+	QString search;
+	QString tabType;
+	QString boardUrl;
 	QNetworkReply *reply;
 	QMap<QString,ThreadForm*> tfMap;
+
+	void addThread();
 	void updatePosts();
 	void setShortcuts();
 	void getPosts();
