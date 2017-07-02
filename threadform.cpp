@@ -21,7 +21,7 @@
 //TODO Possibly refactor file checks and pointers to dir and file objects
 //TODO Possibly decouple the file and thumb getters to the post class
 ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool root, bool autoExpand, QWidget *parent) :
-	QWidget(parent), board(board), threadNum(threadNum), type(type), root(root), autoExpand(autoExpand),
+	QWidget(parent), board(board), threadNum(threadNum), type(type), root(root), autoExpand(autoExpand), tab(parent),
 	ui(new Ui::ThreadForm)
 {
 	ui->setupUi(this);

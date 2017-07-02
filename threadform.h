@@ -66,6 +66,7 @@ public:
 	QString repliesString;
 
 private:
+	QWidget *tab;
 	Ui::ThreadForm *ui;
 	bool loadIt;
 	QString fileURL;
@@ -83,7 +84,6 @@ private:
 	void getFile();
 	void getThumb();
 	bool finished = false;
-	QWidget *tab; //pointer to tab
 
 signals:
 	void loadThreadTab(ThreadForm*, QJsonArray&);
