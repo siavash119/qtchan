@@ -303,7 +303,8 @@ void ThreadForm::imageClicked()
 		else openImage();
 	}
 	else{
-		mw->onNewThread(this,board,threadNum,QString(),Q_NULLPTR);
+		TreeItem* childOf = mw->model->getItem(mw->selectionModel->currentIndex());
+		mw->onNewThread(this,board,threadNum,QString(),childOf);
 	}
 }
 
