@@ -1,16 +1,15 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QStandardItemModel>
-#include <QUrl>
-#include <QTreeView>
-#include <QMap>
-#include "netcontroller.h"
-#include "boardtab.h"
-#include "threadform.h"
-#include "treemodel.h"
+#include "settings.h"
 #include "treeitem.h"
+#include "treemodel.h"
+#include "threadform.h"
+#include "netcontroller.h"
+#include <QUrl>
+#include <QMap>
+#include <QItemSelectionModel>
+#include <QMainWindow>
 
 struct Tab{
 	enum TabType {Board,Thread} type;
@@ -19,16 +18,6 @@ struct Tab{
 	QString query;
 	QString display;
 };
-
-struct TreeTab{
-	QString query;
-	QString display = "";
-	bool isExpanded = true;
-	QList<TreeTab> children = QList<TreeTab>();
-	//TreeTab *parent = 0;
-};
-
-Q_DECLARE_METATYPE(TreeTab)
 
 namespace Ui {
 class MainWindow;
@@ -50,8 +39,8 @@ public:
 
 	void addTab(TreeItem *child, TreeItem *parent = Q_NULLPTR, bool select = false);
 	void deleteSelected();
-	void loadSession();
 	QObject *currentWidget();
+	Settings settingsView;
 
 private slots:
 	void on_pushButton_clicked();
@@ -65,7 +54,7 @@ public slots:
 	TreeItem *loadFromSearch(QString query, QString display, TreeItem *childOf, bool select = false);
 	TreeItem *onNewThread(QWidget *parent, QString board, QString thread, QString display, TreeItem *childOf);
 	void saveSession();
-	void loadSessionFromFile(QString sessionFile);
+	void loadSession();
 	void prevTab();
 	void nextTab();
 	void prevParent();
@@ -73,15 +62,14 @@ public slots:
 	void toggleAutoUpdate();
 	void toggleAutoExpand();
 	void openExplorer();
+	void updateSettings(QString setting, QVariant value);
 
 private:
 	Ui::MainWindow *ui;
 	void setShortcuts();
 	void removeTabs(TreeItem *tn);
-	TreeTab saveChildren(TreeItem *tn, TreeTab *parent);
-	void saveTreeToFile(QString fileName);
-	void saveChildrenToFile(TreeItem *tn, int indent, QTextStream *out);
-	void loadChildren(TreeTab session, TreeItem *parent = 0);
+	void saveSessionToFile(QString fileName);
+	void loadSessionFromFile(QString sessionFile);
 
 signals:
 	void requestCatalog(QString);

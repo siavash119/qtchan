@@ -399,7 +399,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>712</width>
+             <width>714</width>
              <height>755</height>
             </rect>
            </property>
@@ -471,6 +471,7 @@
      <string>Actions</string>
     </property>
     <addaction name="actionReload"/>
+    <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -503,6 +504,11 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

@@ -13,6 +13,7 @@
 #include <QShortcut>
 #include <stdio.h>
 #include <QDesktopServices>
+#include "boardtab.h"
 #include "threadtab.h"
 #include "threadform.h"
 
@@ -21,8 +22,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
-	qRegisterMetaType<TreeTab>("TreeTab");
-	qRegisterMetaTypeStreamOperators<TreeTab>("TreeTab");
 	ui->setupUi(this);
 	ui->splitter->setStretchFactor(0,0);
 	ui->splitter->setStretchFactor(1,1);
@@ -31,7 +30,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	selectionModel = ui->treeView->selectionModel();
 	connect(selectionModel,&QItemSelectionModel::selectionChanged,this,
 			&MainWindow::onSelectionChanged);
-	setShortcuts();
+	settingsView.setParent(this,Qt::Tool
+						 | Qt::WindowMaximizeButtonHint
+						 | Qt::WindowCloseButtonHint);
+	this->setShortcuts();
 }
 
 void MainWindow::setShortcuts()
@@ -75,7 +77,7 @@ void MainWindow::setShortcuts()
 	lastItem->setShortcutContext(Qt::ApplicationShortcut);
 	connect(lastItem, &QAction::triggered,[=]{
 		if(!model->rowCount()) return;
-		TreeItem* tm = model->getItem(model->index(model->rowCount(),0));
+		TreeItem *tm = model->getItem(model->index(model->rowCount(),0));
 		while(tm->childCount()){
 			tm = tm->child(tm->childCount()-1);
 		}
@@ -134,8 +136,20 @@ void MainWindow::setShortcuts()
 		QMapIterator<QWidget*,Tab> i(tabs);
 		while(i.hasNext()) {
 			Tab tab = i.next().value();
-			if(tab.type == Tab::TabType::Board) static_cast<BoardTab*>(tab.TabPointer)->getPosts();
+			if(tab.type == Tab::TabType::Board) static_cast<BoardTab*>(tab.TabPointer)->helper.getPosts();
 			else static_cast<ThreadTab*>(tab.TabPointer)->helper.getPosts();
+		}
+	});
+
+	ui->actionSettings->setShortcut(QKeySequence("Ctrl+p"));
+	connect(ui->actionSettings,&QAction::triggered,[=]{
+		if(settingsView.isVisible()){
+			qDebug() << "hiding settings window";
+			settingsView.hide();
+		}
+		else{
+			qDebug() << "showing settings window";
+			settingsView.show();
 		}
 	});
 }
@@ -155,6 +169,7 @@ void MainWindow::toggleAutoUpdate()
 	qDebug () << "setting autoUpdate to" << autoUpdate;
 	settings.setValue("autoUpdate",autoUpdate);
 	emit setAutoUpdate(autoUpdate);
+	settingsView.refreshValues();
 }
 
 void MainWindow::toggleAutoExpand()
@@ -164,21 +179,30 @@ void MainWindow::toggleAutoExpand()
 	qDebug () << "setting autoExpand to" << autoExpand;
 	settings.setValue("autoExpand",autoExpand);
 	emit setAutoExpand(autoExpand);
+	settingsView.refreshValues();
+}
+
+void MainWindow::updateSettings(QString setting, QVariant value){
+	if(setting == "autoUpdate")
+		emit setAutoUpdate(value.toBool());
+	else if(setting == "autoExpand")
+		emit setAutoExpand(value.toBool());
 }
 
 void MainWindow::openExplorer(){
 	QString url;
 	if(!ui->stackedWidget->count()) return;
-	TreeItem* item = model->getItem(selectionModel->currentIndex());
+	TreeItem *item = model->getItem(selectionModel->currentIndex());
 	if(item->type == TreeItemType::thread){
-		ThreadTab* tab = static_cast<ThreadTab*>(item->tab);
+		ThreadTab *tab = static_cast<ThreadTab*>(item->tab);
 		url = QDir("./"+tab->board+"/"+tab->thread).absolutePath();
 	}
 	else{
-		BoardTab* tab = static_cast<BoardTab*>(item->tab);
+		BoardTab *tab = static_cast<BoardTab*>(item->tab);
 		url = QDir("./"+tab->board).absolutePath();
 	}
-	QDesktopServices::openUrl(QUrl(url));
+	qDebug() << "Opening folder" << url;
+	QDesktopServices::openUrl(QUrl::fromLocalFile(url));
 }
 
 //for next/prev tab just send up and down key and loop to beginning/end if no change in selection?
@@ -449,59 +473,14 @@ void MainWindow::focusBar()
 	ui->lineEdit->selectAll();
 }
 
-QDataStream &operator<<(QDataStream &out, const TreeTab &obj)
-{
-	out << obj.query << obj.display << obj.isExpanded << obj.children;
-	return out;
-}
-
-QDataStream &operator>>(QDataStream &in, TreeTab &obj)
-{
-	in >> obj.query >> obj.display >> obj.isExpanded >> obj.children;
-	return in;
-}
-
 void MainWindow::saveSession()
 {
 	qDebug().noquote() << "Saving session.";
 	QSettings settings;
-	TreeTab root;
-	TreeTab pp = saveChildren(model->root, &root);
-	/*QFile data("session.txt");
-	if (data.open(QFile::WriteOnly | QFile::Truncate)) {
-		QTextStream out(&data);
-		saveChildrenToFile(model->root,0,&out);
-	}*/
-	saveTreeToFile("session.txt");
-	settings.setValue("realSession",qVariantFromValue(pp));
+	saveSessionToFile(settings.value("sessionFile","settings.txt").toString());
 }
 
-//recursive helper to save tree to qvariant with TreeTab
-TreeTab MainWindow::saveChildren(TreeItem *tn, TreeTab *parent)
-{
-	for(int i=0;i<tn->childCount();i++) {
-		TreeItem *childItem = tn->child(i);
-		TreeTab temp;
-		temp.query = childItem->query;
-		temp.display = childItem->display;
-		parent->children.append(saveChildren(childItem,&temp));
-	}
-	return *parent;
-}
-
-//recursive save tree to file in redable format
-void MainWindow::saveChildrenToFile(TreeItem *tn, int indent, QTextStream *out)
-{
-	for(int i=0;i<tn->childCount();i++) {
-		TreeItem *childItem = tn->child(i);
-		for(int i=0;i<indent;i++) *out << QChar::Tabulation;
-		*out << childItem->query << QChar::Tabulation << childItem->display << endl;
-		saveChildrenToFile(childItem,indent+1,out);
-	}
-}
-
-//Non recursive save tree to file in readable format
-void MainWindow::saveTreeToFile(QString fileName)
+void MainWindow::saveSessionToFile(QString fileName)
 {
 	QFile data(fileName);
 	data.open(static_cast<QFile::OpenMode>(QFile::WriteOnly | QFile::Truncate));
@@ -538,21 +517,9 @@ void MainWindow::saveTreeToFile(QString fileName)
 
 void MainWindow::loadSession()
 {
-	/*QSettings settings;
-	QVariant var = settings.value("realSession");
-	TreeTab realSession = var.value<TreeTab>();
-	loadChildren(realSession,model->root);*/
-	loadSessionFromFile("session.txt");
-}
-
-void MainWindow::loadChildren(TreeTab session, TreeItem *parent)
-{
-	TreeItem *newParent;
-	for(int i=0;i<session.children.size();i++) {
-		TreeTab temp = {session.children.at(i)};
-		newParent = loadFromSearch(temp.query,temp.display,parent,false);
-		loadChildren(temp,newParent);
-	}
+	QSettings settings;
+	QString sessionFile = settings.value("sessionFile","settings.txt").toString();
+	loadSessionFromFile(sessionFile);
 }
 
 void MainWindow::loadSessionFromFile(QString sessionFile)
