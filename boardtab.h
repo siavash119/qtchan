@@ -1,19 +1,19 @@
 #ifndef BOARDTAB_H
 #define BOARDTAB_H
 
-#include <QWidget>
-#include <QNetworkReply>
-#include <QNetworkRequest>
+#include "boardtabhelper.h"
 #include "threadform.h"
+#include <QWidget>
+#include <QThread>
 
 namespace Ui {
 class BoardTab;
 }
 
-enum BoardType{Index,Catalog};
 class BoardTab : public QWidget
 {
 	Q_OBJECT
+	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
 
 public:
 	explicit BoardTab(QString board, BoardType type = BoardType::Index, QString search = "", QWidget *parent = 0);
@@ -23,25 +23,25 @@ public:
 	BoardType type;
 	QString search;
 	QString tabType;
+	QThread workerThread;
+	BoardTabHelper helper;
 	QString boardUrl;
 	QNetworkReply *reply;
 	QMap<QString,ThreadForm*> tfMap;
 
-	void addThread();
-	void updatePosts();
 	void setShortcuts();
 	void getPosts();
 	void focusIt();
-	void startUp();
 
 public slots:
 	void findText(const QString text);
+	void onNewThread(ThreadForm *tf);
+	void onNewTF(ThreadForm *tf, ThreadForm* thread);
 
 private:
 	Ui::BoardTab *ui;
 
 private slots:
-	void loadThreads();
 	void on_pushButton_clicked();
 	void on_lineEdit_returnPressed();
 };

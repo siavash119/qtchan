@@ -1,13 +1,8 @@
 #include "boardtab.h"
 #include "ui_boardtab.h"
+#include "mainwindow.h"
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <QJsonObject>
-#include <QDir>
-#include <QSettings>
-#include "netcontroller.h"
-#include "mainwindow.h"
-#include "threadform.h"
 
 BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *parent) :
 	QWidget(parent), board(board), type(type), search(search),
@@ -18,37 +13,28 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 	this->setWindowTitle("/"+board+"/"+search);
 	if(type == BoardType::Index) boardUrl = "https://a.4cdn.org/"+board+"/1.json";
 	else boardUrl = "https://a.4cdn.org/"+board+"/catalog.json";
-	startUp();
-	//QDir().mkdir(board);
-	/*QDir().mkpath(board+"/index/thumbs");
-	//QDir().mkdir(board+"/thumbs");
-	setShortcuts();
-	reply = nc.jsonManager->get(QNetworkRequest(QUrl(boardUrl)));
-	connect(reply, &QNetworkReply::finished, this, &BoardTab::loadThreads);*/
-}
-
-
-void BoardTab::startUp()
-{
-	QDir().mkpath(board+"/index/thumbs");
-	//QDir().mkdir(board+"/thumbs");
-	setShortcuts();
-	reply = nc.jsonManager->get(QNetworkRequest(QUrl(boardUrl)));
-	connect(reply, &QNetworkReply::finished, this, &BoardTab::loadThreads);
+	helper.startUp(board, type, search, this);
+	helper.moveToThread(&workerThread);
+	connect(&helper,&BoardTabHelper::newThread,this,&BoardTab::onNewThread,UniqueDirect);
+	connect(&helper,&BoardTabHelper::newTF,this,&BoardTab::onNewTF,UniqueDirect);
+	this->setShortcuts();
 }
 
 BoardTab::~BoardTab()
 {
-	qDebug() << "deleting board";
-	qDeleteAll(tfMap);
+	//qDeleteAll(tfMap);
+	helper.abort = 1;
+	disconnect(&helper);
+	disconnect(&workerThread);
 	delete ui;
+	qDebug().noquote().nospace() << "deleting board /" << board+"/";
 }
 
 void BoardTab::setShortcuts()
 {
 	QAction *refresh = new QAction(this);
 	refresh->setShortcut(Qt::Key_R);
-	connect(refresh, &QAction::triggered, this, &BoardTab::getPosts);
+	connect(refresh, &QAction::triggered, &helper, &BoardTabHelper::getPosts, UniqueDirect);
 	this->addAction(refresh);
 	QAction *focuser = new QAction(this);
 	focuser->setShortcut(Qt::Key_F3);
@@ -85,70 +71,19 @@ void BoardTab::findText(const QString text)
 	}
 }
 
-void BoardTab::getPosts()
+void BoardTab::onNewTF(ThreadForm *tf, ThreadForm* thread)
 {
-	qDebug("refreshing /%s/",board.toLatin1().constData());
-	reply = nc.jsonManager->get(QNetworkRequest(QUrl(boardUrl)));
-	connect(reply, &QNetworkReply::finished, this, &BoardTab::loadThreads);
+	connect(thread,&ThreadForm::removeMe,tf,&ThreadForm::deleteLater,Qt::DirectConnection);
+	//tfMap.insert(tf->post.no,tf);
+	//ui->threads->addWidget(tf);
+	//tf->setContentsMargins(280,0,0,0);
+	thread->addReply(tf);
 }
 
-
-void BoardTab::updatePosts()
+void BoardTab::onNewThread(ThreadForm *tf)
 {
-	/*int length = posts.size();
-	for(int i=0;i<length;i++) {
-		((ThreadForm*)posts.at(i))->updateComHeight();
-	}*/
-}
-
-void BoardTab::loadThreads()
-{
-	qDeleteAll(tfMap);
-	tfMap.clear();
-	QJsonArray threads;
-	if(reply->error()) {
-		qDebug().noquote() << "loading post error:" << reply->errorString();
-		reply->deleteLater();
-		return;
-	}
-	QByteArray rep = reply->readAll();
-	reply->deleteLater();
-	if(type==BoardType::Index) threads = QJsonDocument::fromJson(rep).object().value("threads").toArray();
-	else{
-		qDebug("searching %s",search.toLatin1().constData());
-		QRegularExpression re(search,QRegularExpression::CaseInsensitiveOption);
-		QRegularExpressionMatch match;
-		QJsonArray allThreads = QJsonDocument::fromJson(rep).array();
-		QJsonArray pageThreads;
-		for(int i=0;i<allThreads.size();i++) {
-			pageThreads = allThreads.at(i).toObject().value("threads").toArray();
-			for(int j=0;j<pageThreads.size();j++) {
-				match = re.match(pageThreads.at(j).toObject().value("sub").toString() % pageThreads.at(j).toObject().value("com").toString(),0,QRegularExpression::PartialPreferFirstMatch);
-				if(match.hasMatch())threads.append(pageThreads.at(j));
-			}
-		}
-	}
-	int length = threads.size();
-	qDebug("%s",QString("length is ").append(QString::number(length)).toLatin1().constData());
-	QSettings settings;
-	QStringList idFilters = settings.value("filters/"+board+"/id").toStringList();
-	for(int i=0;i<length;i++) {
-		QJsonObject p;
-		if(type==BoardType::Index) p = threads.at(i).toObject().value("posts").toArray().at(0).toObject();
-		else p = threads.at(i).toObject();
-		QString threadNum = QString("%1").arg(p.value("no").toDouble(),0,'f',0);
-		if (!idFilters.contains(threadNum)) {
-			ThreadForm *tf = new ThreadForm(board,threadNum,Thread,true,false,this);
-			ui->threads->addWidget(tf);
-			tf->load(p);
-			tfMap.insert(tf->post.no,tf);
-		}
-		else{
-			qDebug("threadNum %s filtered!",threadNum.toLatin1().constData());
-		}
-		//QCoreApplication::processEvents();
-	}
-	ui->threads->addStretch(1);
+	ui->threads->addWidget(tf);
+	tfMap.insert(tf->post.no,tf);
 }
 
 void BoardTab::on_pushButton_clicked()
