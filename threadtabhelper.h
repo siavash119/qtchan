@@ -1,12 +1,13 @@
 #ifndef THREADTABHELPER_H
 #define THREADTABHELPER_H
+
+#include "threadform.h"
 #include <QNetworkReply>
 #include <QtConcurrent/QtConcurrent>
 #include <QFutureWatcher>
 #include <QImage>
 #include <QMetaObject>
 #include <QSettings>
-#include "threadform.h"
 
 class ThreadTabHelper : public QObject
 {
@@ -27,7 +28,7 @@ public:
 
 private:
 	QString threadUrl;
-	QNetworkReply *reply;
+	QPointer<QNetworkReply> reply;
 	QNetworkRequest request;
 	QWidget *parent;
 	QMetaObject::Connection connectionPost;

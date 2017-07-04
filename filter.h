@@ -1,12 +1,9 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-#include <QSettings>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QRegularExpressionMatchIterator>
-#include <QString>
-#include <QStringList>
 #include <QSet>
 
 

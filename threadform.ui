@@ -831,6 +831,9 @@
        <property name="topMargin">
         <number>0</number>
        </property>
+       <property name="spacing">
+        <number>0</number>
+       </property>
       </layout>
      </item>
     </layout>

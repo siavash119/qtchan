@@ -1,11 +1,11 @@
 #ifndef POSTFORM_H
 #define POSTFORM_H
 
+#include "overlay.h"
 #include <QWidget>
 #include <QNetworkReply>
 #include <QFileDialog>
 #include <QMimeData>
-#include "overlay.h"
 
 namespace Ui {
 class PostForm;

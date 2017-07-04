@@ -1,22 +1,17 @@
 #include "threadform.h"
 #include "ui_threadform.h"
+#include "threadtab.h"
+#include "mainwindow.h"
 #include <QPixmap>
 #include <QImageReader>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QStringBuilder>
 #include <QDesktopServices>
 #include <QSettings>
 #include <QStringList>
-#include <iostream>
 #include <QListIterator>
-#include <QThreadPool>
-#include "netcontroller.h"
-#include "mainwindow.h"
-#include "threadtab.h"
-//#include "resizer.h"
 
 //TODO Possibly refactor file checks and pointers to dir and file objects
 //TODO Possibly decouple the file and thumb getters to the post class
@@ -140,8 +135,8 @@ void ThreadForm::getFile()
 }
 
 void ThreadForm::getThumb() {
-	qDebug().noquote() << QString("getting https://i.4cdn.org/")  % thumbURL;
-	replyThumb = nc.thumbManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % thumbURL)));
+	qDebug().noquote() << QString("getting https://t.4cdn.org/")  % thumbURL;
+	replyThumb = nc.thumbManager->get(QNetworkRequest(QUrl("https://t.4cdn.org/" % thumbURL)));
 	gettingThumb = true;
 	connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished,Qt::UniqueConnection);
 }
@@ -303,7 +298,7 @@ void ThreadForm::imageClicked()
 		else openImage();
 	}
 	else{
-		TreeItem* childOf = mw->model->getItem(mw->selectionModel->currentIndex());
+		TreeItem *childOf = mw->model->getItem(mw->selectionModel->currentIndex());
 		mw->onNewThread(this,board,threadNum,QString(),childOf);
 	}
 }
@@ -400,6 +395,10 @@ void ThreadForm::insert(ThreadForm *tf)
 	//this->setMinimumWidth(this->sizeHint().width());
 	//((ThreadTab*)tab)->updateWidth();
 	//this->update();
+}
+
+void ThreadForm::addReply(ThreadForm *tf){
+	ui->quotes->addWidget(tf);
 }
 
 ThreadForm *ThreadForm::clone()

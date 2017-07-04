@@ -1,5 +1,6 @@
 #ifndef POST_H
 #define POST_H
+
 #include <QString>
 #include <QJsonDocument>
 #include <QJsonObject>

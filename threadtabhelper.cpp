@@ -1,6 +1,6 @@
-#include <QJsonArray>
 #include "threadtabhelper.h"
 #include "netcontroller.h"
+#include <QJsonArray>
 
 ThreadTabHelper::ThreadTabHelper() {
 
@@ -34,7 +34,7 @@ ThreadTabHelper::~ThreadTabHelper() {
 	abort = true;
 	updateTimer->stop();
 	disconnect(connectionUpdate);
-	delete updateTimer;
+	if(updateTimer) delete updateTimer;
 	if(gettingReply) {
 		reply->abort();
 		disconnect(reply);
@@ -51,11 +51,13 @@ void ThreadTabHelper::setAutoUpdate(bool update) {
 }
 
 void ThreadTabHelper::getPosts() {
+	disconnect(connectionPost);
+	if(reply) reply->abort();
 	qDebug() << "getting posts for" << threadUrl;
 	reply = nc.jsonManager->get(request);
 	gettingReply = true;
 	connectionPost = connect(reply, &QNetworkReply::finished,
-							 this,&ThreadTabHelper::loadPosts, Qt::DirectConnection);
+							 this,&ThreadTabHelper::loadPosts, UniqueDirect);
 }
 
 void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep) {
@@ -67,6 +69,7 @@ void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep
 }
 
 void ThreadTabHelper::loadPosts() {
+	if(!reply) return;
 	gettingReply = false;
 	if(reply->error()) {
 		qDebug().noquote() << "loading post error:" << reply->errorString();
@@ -81,7 +84,7 @@ void ThreadTabHelper::loadPosts() {
 	//write to file and make json array
 	QByteArray rep = reply->readAll();
 	reply->deleteLater();
-	QtConcurrent::run(&ThreadTabHelper::writeJson,board, thread, rep);
+	if(rep.isEmpty()) return;
 	QJsonArray posts = QJsonDocument::fromJson(rep).object().value("posts").toArray();
 	int length = posts.size();
 	qDebug().noquote() << QString("length of ").append(threadUrl).append(" is ").append(QString::number(length));
@@ -102,6 +105,7 @@ void ThreadTabHelper::loadPosts() {
 		}
 	}
 	else return;
+	QtConcurrent::run(&ThreadTabHelper::writeJson,board, thread, rep);
 	//load new posts
 	int i = tfMap.size();
 	QSettings settings;

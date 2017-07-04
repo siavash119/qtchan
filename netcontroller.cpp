@@ -1,4 +1,5 @@
 #include "netcontroller.h"
+#include <QDir>
 #include <QNetworkCookie>
 #include <QSettings>
 #include <QJsonDocument>
@@ -41,7 +42,6 @@ netController::netController(QObject *parent) : QObject(parent)
 		jsonManager->cookieJar()->insertCookie(temp);
 	}
 	filter = new Filter();
-	//settingsFile = d.object().value("settings").toObject();
 }
 
 netController nc;

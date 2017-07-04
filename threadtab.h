@@ -1,6 +1,9 @@
 #ifndef THREADTAB_H
 #define THREADTAB_H
 
+#include "postform.h"
+#include "threadtabhelper.h"
+#include "clickablelabel.h"
 #include <QWidget>
 #include <QMutableMapIterator>
 #include <QPointer>
@@ -8,9 +11,6 @@
 #include <QSpacerItem>
 #include <QFutureWatcher>
 #include <QtConcurrent/QtConcurrent>
-#include "clickablelabel.h"
-#include "threadtabhelper.h"
-#include "postform.h"
 
 namespace Ui {
 class ThreadTab;

@@ -1,17 +1,17 @@
 #ifndef THREADFORM_H
 #define THREADFORM_H
 
+#include "post.h"
+#include <QFutureWatcher>
 #include <QWidget>
+#include <QPointer>
 #include <QNetworkReply>
 #include <QByteArray>
-#include <QString>
 #include <QDir>
 #include <QSet>
 #include <QList>
 #include <QSignalMapper>
 #include <QMouseEvent>
-#include <QFutureWatcher>
-#include "post.h"
 
 namespace Ui {
 class ThreadForm;
@@ -101,6 +101,7 @@ public slots:
 	void imageClicked();
 	void hideClicked();
 	void removeClone(QPointer<ThreadForm> tf);
+	void addReply(ThreadForm *tf);
 
 private slots:
 	void quoteClicked(const QString &link);

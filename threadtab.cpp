@@ -121,13 +121,13 @@ void ThreadTab::setShortcuts()
 
 ThreadTab::~ThreadTab()
 {
-	qDebug() << "deleting tab";
 	ui->threads->removeItem(&space);
 	helper.abort = 1;
 	disconnect(&helper);
 	disconnect(&workerThread);
 	disconnect(connectionAutoUpdate);
 	delete ui;
+	qDebug().noquote().nospace() << "deleting tab /" << board+"/"+thread;
 }
 
 void ThreadTab::openPostForm()
