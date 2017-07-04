@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT      += core gui network
 DEFINES *= QT_USE_QSTRINGBUILDER
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -15,7 +15,7 @@ TEMPLATE = app
 QMAKE_CXXFLAGS_RELEASE += -flto -O3
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
+    mainwindow.cpp \
     threadform.cpp \
     clickablelabel.cpp \
     boardtab.cpp \
@@ -27,9 +27,11 @@ SOURCES += main.cpp\
     overlay.cpp \
     threadtabhelper.cpp \
     treemodel.cpp \
-    treeitem.cpp
+    treeitem.cpp \
+    settings.cpp \
+    boardtabhelper.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS += mainwindow.h \
     threadform.h \
     clickablelabel.h \
     boardtab.h \
@@ -41,10 +43,15 @@ HEADERS  += mainwindow.h \
     overlay.h \
     threadtabhelper.h \
     treeitem.h \
-    treemodel.h
+    treemodel.h \
+    settings.h \
+    boardtabhelper.h
 
-FORMS    += mainwindow.ui \
+FORMS   += mainwindow.ui \
     threadform.ui \
     boardtab.ui \
     threadtab.ui \
-    postform.ui
+    postform.ui \
+    settings.ui
+
+RC_ICONS = icon.ico
