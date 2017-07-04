@@ -27,13 +27,12 @@ Create a file ~/.config/qtchan/settings like below. Look at your browser cookies
 ## TODO
 ### MAJOR
 * captcha
-* process-threading (done for thread tabs and forms; still need to do for board tabs)
 * unread, read, (You) display
 * notifications
 * instructions
-* settings
 
 ### MINOR
 * show loading state
 * search/filter by different post fields (right now combo of sub and com)
+* more settings
 * themes
