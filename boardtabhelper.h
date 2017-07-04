@@ -25,7 +25,7 @@ public:
 
 private:
 	QString boardUrl;
-	QNetworkReply *reply;
+	QPointer<QNetworkReply> reply;
 	QNetworkRequest request;
 	QWidget *parent;
 	QMetaObject::Connection connectionPost;

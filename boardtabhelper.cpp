@@ -57,11 +57,13 @@ void BoardTabHelper::setAutoUpdate(bool update) {
 }
 
 void BoardTabHelper::getPosts() {
+	disconnect(connectionPost);
+	if(reply) reply->abort();
 	qDebug() << "getting posts for" << boardUrl;
 	reply = nc.jsonManager->get(request);
 	gettingReply = true;
 	connectionPost = connect(reply, &QNetworkReply::finished,
-							 this,&BoardTabHelper::loadPosts, Qt::DirectConnection);
+							 this,&BoardTabHelper::loadPosts, UniqueDirect);
 }
 
 void BoardTabHelper::writeJson(QString &board, QByteArray &rep) {
@@ -73,6 +75,7 @@ void BoardTabHelper::writeJson(QString &board, QByteArray &rep) {
 }
 
 void BoardTabHelper::loadPosts() {
+	if(!reply) return;
 	gettingReply = false;
 	if(reply->error()) {
 		qDebug().noquote() << "loading post error:" << reply->errorString();

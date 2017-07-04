@@ -71,7 +71,7 @@ void BoardTab::findText(const QString text)
 	}
 }
 
-void BoardTab::onNewTF(ThreadForm *tf, ThreadForm* thread)
+void BoardTab::onNewTF(ThreadForm *tf, ThreadForm *thread)
 {
 	connect(thread,&ThreadForm::removeMe,tf,&ThreadForm::deleteLater,Qt::DirectConnection);
 	//tfMap.insert(tf->post.no,tf);
