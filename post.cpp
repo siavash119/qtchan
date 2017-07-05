@@ -1,4 +1,5 @@
 #include "post.h"
+#include <QDateTime>
 
 Post::Post() {
 }
@@ -25,6 +26,9 @@ void Post::load(QJsonObject &p, QString &board)
 	}
 	now = p.value("now").toString();
 	time = p.value("time").toInt();
+	QDateTime timestamp;
+	timestamp.setTime_t(time);
+	realNow = timestamp.toString(Qt::SystemLocaleShortDate);
 	name = p.value("name").toString();
 	id = p.value("id").toString();
 	capcode = p.value("id").toString();

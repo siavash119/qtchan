@@ -29,6 +29,7 @@ public:
 
 	QString now; //Date and time (MM\/DD\/YY(Day)HH:MM (:SS on some boards), EST/EDT timezone)
 	int time; //Unix timestamp
+	QString realNow;
 
 	//might not be present
 	QString name;

@@ -134,7 +134,8 @@ void ThreadTabHelper::loadPosts() {
 				replyTo = i.value();
 				if(replyTo) {
 					replyTo->replies.insert(tf->post.no.toDouble(),tf->post.no);
-					replyTo->setReplies();
+					//replyTo->setReplies();
+					replyTo->addReplyLink(tf->post.no);
 				}
 			}
 		}

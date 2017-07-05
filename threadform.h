@@ -55,6 +55,7 @@ public:
 	QMap<double,QString> replies;
 	void setReplies();
 	void setRepliesString();
+	void setInfoString();
 	void loadOrig();
 	ThreadForm *clone();
 	QList<QPointer<ThreadForm>> clones;
@@ -64,6 +65,8 @@ public:
 	static QImage scaleImage(QString path);
 	QFutureWatcher<QImage> watcher;
 	QString repliesString;
+	QString infoString();
+	void addReplyLink(QString &reply);
 
 private:
 	QWidget *tab;
@@ -105,15 +108,16 @@ public slots:
 
 private slots:
 	void quoteClicked(const QString &link);
-	void on_replies_linkHovered(const QString &link);
 	void appendQuote();
 	void alreadyClicked();
 	//void downloading(qint64 read, qint64 total);
 
 	void on_com_linkHovered(const QString &link);
+	void on_info_linkHovered(const QString &link);
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *event);
+	void paintEvent(QPaintEvent *e);
 	//void mouseMoveEvent(QMouseEvent *event);
 };
 
