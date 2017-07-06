@@ -144,7 +144,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="postLayout" stretch="0,0">
+    <layout class="QVBoxLayout" name="postLayout" stretch="0,1">
      <property name="spacing">
       <number>0</number>
      </property>
@@ -192,9 +192,9 @@
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
        <property name="bottomMargin">
-        <number>10</number>
+        <number>0</number>
        </property>
        <item>
         <layout class="QVBoxLayout" name="pictureLayout">
@@ -299,7 +299,7 @@
          <item>
           <widget class="QLabel" name="com">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -524,8 +524,14 @@
          </item>
          <item>
           <layout class="QGridLayout" name="quotes">
-           <property name="spacing">
+           <property name="topMargin">
             <number>0</number>
+           </property>
+           <property name="horizontalSpacing">
+            <number>0</number>
+           </property>
+           <property name="verticalSpacing">
+            <number>6</number>
            </property>
           </layout>
          </item>

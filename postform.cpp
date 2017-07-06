@@ -141,8 +141,6 @@ void PostForm::addOverlay()
 {
 	qDebug().noquote() << "adding overlay";
 	overlay = new Overlay(this);
-	overlay->setObjectName("overlay");
-	overlay->setParent(this);
 	overlay->show();
 	focused = this->focusWidget();
 	ui->com->setFocusPolicy(Qt::NoFocus);

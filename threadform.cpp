@@ -540,12 +540,13 @@ void ThreadForm::on_com_linkHovered(const QString &link)
 void ThreadForm::deleteHideLayout()
 {
 	delete this->ui->hideLayout;
+	hideButtonShown = false;
 }
 
 void ThreadForm::paintEvent(QPaintEvent *e){
 	QPainter painter(this);
 	int x = 0;
-	if(root){
+	if(hideButtonShown){
 		painter.setPen(QColor(100,100,100));
 		x = ui->hide->width();
 	}

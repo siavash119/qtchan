@@ -87,6 +87,7 @@ private:
 	void getFile();
 	void getThumb();
 	bool finished = false;
+	bool hideButtonShown = true;
 
 signals:
 	void loadThreadTab(ThreadForm*, QJsonArray&);

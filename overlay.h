@@ -9,10 +9,11 @@ public:
 	explicit Overlay(QWidget *parent);
 	QString displayText;
 private:
-	QRect rect;
+	QWidget* parent;
 	const QColor color;
+	QRect rectToFill;
 protected:
-	void paintEvent(QPaintEvent*);
+	void paintEvent(QPaintEvent *event);
 };
 
 #endif // OVERLAY_H
