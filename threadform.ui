@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1051</width>
-    <height>396</height>
+    <width>504</width>
+    <height>64</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -155,10 +155,10 @@
       <number>1</number>
      </property>
      <property name="rightMargin">
-      <number>1</number>
+      <number>8</number>
      </property>
      <property name="bottomMargin">
-      <number>1</number>
+      <number>11</number>
      </property>
      <item>
       <widget class="QLabel" name="info">
@@ -174,7 +174,7 @@
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">padding: 4px 4px 2px 2px</string>
+        <string notr="true">padding: 8px 8px 4px 8px;</string>
        </property>
        <property name="text">
         <string/>
@@ -187,6 +187,9 @@
        </property>
        <property name="margin">
         <number>0</number>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
        </property>
       </widget>
      </item>
@@ -220,7 +223,7 @@
           <number>6</number>
          </property>
          <property name="bottomMargin">
-          <number>8</number>
+          <number>6</number>
          </property>
          <item>
           <widget class="ClickableLabel" name="tim">
@@ -251,6 +254,9 @@
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
+           <property name="styleSheet">
+            <string notr="true">padding:3px 7px 3px 7px;</string>
+           </property>
            <property name="text">
             <string notr="true"/>
            </property>
@@ -272,7 +278,7 @@
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>4</width>
+             <width>0</width>
              <height>0</height>
             </size>
            </property>
@@ -484,7 +490,7 @@
           <bool>false</bool>
          </property>
          <property name="styleSheet">
-          <string notr="true">padding:2px 4px 4px 4px;</string>
+          <string notr="true">padding:3px 8px 0px 8px;</string>
          </property>
          <property name="frameShape">
           <enum>QFrame::NoFrame</enum>
@@ -517,7 +523,7 @@
      <item>
       <layout class="QVBoxLayout" name="quotes">
        <property name="spacing">
-        <number>6</number>
+        <number>8</number>
        </property>
       </layout>
      </item>
