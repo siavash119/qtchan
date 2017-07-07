@@ -20,7 +20,7 @@ class ThreadTab : public QWidget
 {
 	Q_OBJECT
 	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
-	//QSpacerItem space = QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
+	QSpacerItem space = QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
 protected:
 	bool eventFilter(QObject *obj, QEvent *event);
 public:
@@ -49,7 +49,7 @@ public:
 
 
 public slots:
-	//void addStretch();
+	void addStretch();
 	void focusIt();
 	void updateWidth();
 	void quoteIt(QString text);

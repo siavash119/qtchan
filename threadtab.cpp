@@ -23,6 +23,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 {
 	ui->setupUi(this);
 	this->setWindowTitle("/"+board+"/"+thread);
+	ui->searchWidget->hide();
 	helper.startUp(board,thread, this);
 	helper.moveToThread(&workerThread);
 	connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF,UniqueDirect);
@@ -34,7 +35,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	this->setShortcuts();
 	this->installEventFilter(this);
 	connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,UniqueDirect);
-	//connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
+	connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
 
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
@@ -121,7 +122,7 @@ void ThreadTab::setShortcuts()
 
 ThreadTab::~ThreadTab()
 {
-	//ui->threads->removeItem(&space);
+	ui->threads->removeItem(&space);
 	helper.abort = 1;
 	disconnect(&helper);
 	disconnect(&workerThread);
@@ -149,11 +150,11 @@ void ThreadTab::gallery()
 	QProcess().startDetached(command,arguments);
 }
 
-/*void ThreadTab::addStretch()
+void ThreadTab::addStretch()
 {
-	//ui->threads->removeItem(&space);
-	//ui->threads->insertItem(-1,&space);
-}*/
+	ui->threads->removeItem(&space);
+	ui->threads->insertItem(-1,&space);
+}
 
 int ThreadTab::getMinWidth()
 {
@@ -191,6 +192,7 @@ void ThreadTab::onWindowTitle(QString title)
 {
 	this->setWindowTitle(title);
 	if(mw->currentWidget() == this) mw->setWindowTitle(title);
+	myPostForm.setWindowTitle("post to " + title);
 }
 
 void ThreadTab::loadAllImages()
@@ -210,6 +212,7 @@ ThreadForm *ThreadTab::findPost(QString postNum)
 
 void ThreadTab::findText(const QString text)
 {
+	if(text == "") ui->searchWidget->hide();
 	QRegularExpression re(text,QRegularExpression::CaseInsensitiveOption);
 	QRegularExpressionMatch match;
 	ThreadForm *tf;
@@ -275,6 +278,7 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 
 void ThreadTab::focusIt()
 {
+	if(ui->searchWidget->isHidden())ui->searchWidget->show();
 	ui->lineEdit->setFocus();
 }
 

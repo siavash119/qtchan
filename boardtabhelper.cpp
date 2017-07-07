@@ -93,6 +93,7 @@ void BoardTabHelper::loadPosts() {
 	QByteArray rep = reply->readAll();
 	reply->deleteLater();
 	if(rep.isEmpty()) return;
+	emit clearMap();
 	QJsonArray threads = filterThreads(rep);
 	int length = threads.size();
 	qDebug().noquote() << "length of" << boardUrl << "is" << QString::number(length);
@@ -135,7 +136,7 @@ void BoardTabHelper::loadPosts() {
 		i++;
 		QCoreApplication::processEvents();
 	}
-	//if(!abort) emit addStretch();
+	if(!abort) emit addStretch();
 }
 
 QJsonArray BoardTabHelper::filterThreads(QByteArray &rep){

@@ -9,6 +9,7 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 	ui(new Ui::BoardTab)
 {
 	ui->setupUi(this);
+	ui->searchWidget->hide();
 	//TODO check if actual board
 	this->setWindowTitle("/"+board+"/"+search);
 	if(type == BoardType::Index) boardUrl = "https://a.4cdn.org/"+board+"/1.json";
@@ -17,13 +18,14 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 	helper.moveToThread(&workerThread);
 	connect(&helper,&BoardTabHelper::newThread,this,&BoardTab::onNewThread,UniqueDirect);
 	connect(&helper,&BoardTabHelper::newTF,this,&BoardTab::onNewTF,UniqueDirect);
-	//connect(&helper,&BoardTabHelper::addStretch,this,&BoardTab::addStretch,UniqueDirect);
+	connect(&helper,&BoardTabHelper::addStretch,this,&BoardTab::addStretch,UniqueDirect);
+	connect(&helper,&BoardTabHelper::clearMap,this,&BoardTab::clearMap,UniqueDirect);
 	this->setShortcuts();
 }
 
 BoardTab::~BoardTab()
 {
-	//ui->threads->removeItem(&space);
+	ui->threads->removeItem(&space);
 	//qDeleteAll(tfMap);
 	helper.abort = 1;
 	disconnect(&helper);
@@ -54,6 +56,7 @@ void BoardTab::setShortcuts()
 
 void BoardTab::findText(const QString text)
 {
+	if(text == "") ui->searchWidget->hide();
 	QRegularExpression re(text,QRegularExpression::CaseInsensitiveOption);
 	QRegularExpressionMatch match;
 	ThreadForm *tf;
@@ -73,11 +76,11 @@ void BoardTab::findText(const QString text)
 	}
 }
 
-/*void BoardTab::addStretch()
+void BoardTab::addStretch()
 {
 	ui->threads->removeItem(&space);
 	ui->threads->insertItem(-1,&space);
-}*/
+}
 
 void BoardTab::onNewTF(ThreadForm *tf, ThreadForm *thread)
 {
@@ -106,5 +109,10 @@ void BoardTab::on_lineEdit_returnPressed()
 
 void BoardTab::focusIt()
 {
+	if(ui->searchWidget->isHidden())ui->searchWidget->show();
 	ui->lineEdit->setFocus();
+}
+
+void BoardTab::clearMap(){
+	tfMap.clear();
 }

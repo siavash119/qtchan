@@ -33,9 +33,6 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
 	connect(ui->info,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	if(root) ui->hide->setStyleSheet("padding:0 10px; background-color: #191919;");
 
-
-
-
 	//TODO quote for boardtab too
 	//if(type==Reply)connect(ui->no,&ClickableLabel::clicked,this,&ThreadForm::appendQuote);
 	//ui->replies->installEventFilter(this);
@@ -71,6 +68,7 @@ void ThreadForm::setText(QString text)
 QString ThreadForm::infoString(){
 	return	"<span style=\"color: rgb(152, 125, 62); font-weight: bold;\">" + htmlParse(post.sub) + "</span> " +
 			"<span style=\"color: rgb(163, 68, 67);\">" + post.name + "</span> " +
+			((this->board == "pol") ? ("<span style=\"color: lightblue;\">" + post.country_name + "</span> ") : QString()) +
 			"<span>" + post.realNow + "</span> " +
 			"<a href=\"#op" % post.no % "\" style=\"color:#897399\">No." % post.no % "</a> " +
 			repliesString;

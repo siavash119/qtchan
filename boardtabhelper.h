@@ -48,6 +48,7 @@ signals:
 	void addStretch();
 	void boardStatus(QString status, QString value = "0");
 	void refresh(QPointer<ThreadForm> tf);
+	void clearMap();
 	//void scrollIt();
 };
 

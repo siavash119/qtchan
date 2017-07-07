@@ -70,6 +70,7 @@ private:
 	void removeTabs(TreeItem *tn);
 	void saveSessionToFile(QString fileName);
 	void loadSessionFromFile(QString sessionFile);
+	QMetaObject::Connection selectionConnection;
 
 signals:
 	void requestCatalog(QString);

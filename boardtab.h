@@ -15,7 +15,7 @@ class BoardTab : public QWidget
 {
 	Q_OBJECT
 	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
-	//QSpacerItem space = QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
+	QSpacerItem space = QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
 public:
 	explicit BoardTab(QString board, BoardType type = BoardType::Index, QString search = "", QWidget *parent = 0);
 	~BoardTab();
@@ -38,7 +38,8 @@ public slots:
 	void findText(const QString text);
 	void onNewThread(ThreadForm *tf);
 	void onNewTF(ThreadForm *tf, ThreadForm *thread);
-	//void addStretch();
+	void addStretch();
+	void clearMap();
 
 private:
 	Ui::BoardTab *ui;

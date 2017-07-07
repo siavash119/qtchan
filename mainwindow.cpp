@@ -24,12 +24,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->splitter->setStretchFactor(0,0);
-	ui->splitter->setStretchFactor(1,1);
+	ui->splitter->setStretchFactor(1,10);
+	ui->pushButton->hide();
+	ui->lineEdit->hide();
+	ui->lineEdit->installEventFilter(this);
 	ui->treeView->setModel(model);
 	ui->treeView->installEventFilter(this);
 	selectionModel = ui->treeView->selectionModel();
-	connect(selectionModel,&QItemSelectionModel::selectionChanged,this,
-			&MainWindow::onSelectionChanged);
+	selectionConnection = connect(selectionModel,&QItemSelectionModel::selectionChanged,this,
+			&MainWindow::onSelectionChanged, Qt::UniqueConnection);
 	settingsView.setParent(this,Qt::Tool
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);
@@ -38,6 +41,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::setShortcuts()
 {
+	QAction *toggleMenuBar = new QAction(this);
+	toggleMenuBar->setShortcut(QKeySequence("F11"));
+	toggleMenuBar->setShortcutContext(Qt::ApplicationShortcut);
+	connect(toggleMenuBar, &QAction::triggered, [=]{
+		ui->menuBar->isHidden() ? ui->menuBar->show() : ui->menuBar->hide();
+	});
+	this->addAction(toggleMenuBar);
+
 	QAction *pTab = new QAction(this);
 	pTab->setShortcut(QKeySequence("Ctrl+Shift+Tab"));
 	pTab->setShortcutContext(Qt::ApplicationShortcut);
@@ -282,6 +293,7 @@ void MainWindow::nextParent(){
 void MainWindow::on_pushButton_clicked()
 {
 	QString searchString = ui->lineEdit->text();
+	ui->lineEdit->hide();
 	loadFromSearch(searchString,QString(),Q_NULLPTR,true);
 }
 
@@ -387,7 +399,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 		int key = keyEvent->key();
 		//int mod = keyEvent->modifiers();
-		//qDebug("Ate key press %d", key);
+		//qDebug("Ate key press %d, key");
 		//qDebug("Modifers %d", mod);
 		if(key == 53) {
 			/*const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
@@ -395,6 +407,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 			qDebug() << (Tab::TabType)tabs.at(row).type;
 			((Tab::TabType)tabs.at(row).type) == Tab::TabType::Board ? ((BoardTab*)tabs.at(row).TabPointer)->updatePosts() :
 														  ((ThreadTab*)tabs.at(row).TabPointer)->updatePosts();*/
+		}
+		else if(key == 16777216){
+			if(ui->lineEdit->focusWidget() == ui->lineEdit && !ui->lineEdit->isHidden()){
+				ui->lineEdit->hide();
+			}
 		}
 		else if(key == 16777269) {
 			ui->lineEdit->setFocus();
@@ -409,17 +426,17 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 		else {
 			return QObject::eventFilter(obj, event);
 		}
-		return true;
-	} else {
-		// standard event processing
-		return QObject::eventFilter(obj, event);
+		return false;
 	}
+	// standard event processing
+	return QObject::eventFilter(obj, event);
 }
 
 //TODO make non-recursive version
 void MainWindow::deleteSelected()
 {
 	QCoreApplication::processEvents();
+	ui->treeView->blockSignals(true);
 	QModelIndexList indexList = selectionModel->selectedRows();
 	QModelIndex ind;
 	if(!indexList.size() && selectionModel->currentIndex().isValid()) {
@@ -430,10 +447,11 @@ void MainWindow::deleteSelected()
 		removeTabs(model->getItem(indexList.first()));
 		indexList.pop_front();
 	}
-	QCoreApplication::processEvents();
+	ui->treeView->blockSignals(false);
 	ind = selectionModel->currentIndex();
 	if(ind.isValid())
 		selectionModel->setCurrentIndex(ind,QItemSelectionModel::ClearAndSelect);
+	QCoreApplication::processEvents();
 }
 
 void MainWindow::removeTabs(TreeItem *tn) {
@@ -469,6 +487,8 @@ void MainWindow::focusTree()
 
 void MainWindow::focusBar()
 {
+	if(ui->tst->isHidden()) ui->tst->show();
+	if(ui->lineEdit->isHidden()) ui->lineEdit->show();
 	ui->lineEdit->setFocus();
 	ui->lineEdit->selectAll();
 }
