@@ -14,15 +14,14 @@
 #include <QListIterator>
 #include <QPainter>
 
-//TODO Possibly refactor file checks and pointers to dir and file objects
-//TODO Possibly decouple the file and thumb getters to the post class
+//TODO get rid of #include threadtab.h and mainwindow.h by using signals/slots
+//TODO Possibly decouple the file and thumb getters to another class class
 ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool root, bool autoExpand, QWidget *parent) :
 	QWidget(parent), board(board), threadNum(threadNum), type(type), root(root), autoExpand(autoExpand), tab(parent),
 	ui(new Ui::ThreadForm)
 {
 	ui->setupUi(this);
 	ui->tim->hide();
-	ui->horizontalSpacer->changeSize(0,0);
 	//ui->replies->hide();
 	//if(board != "pol") ui->country_name->hide();
 	this->setMinimumWidth(488);
@@ -31,6 +30,11 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
 	connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	//connect(ui->replies,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	connect(ui->info,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
+	if(root) ui->hide->setStyleSheet("padding:0 10px; background-color: #191919;");
+
+
+
+
 	//TODO quote for boardtab too
 	//if(type==Reply)connect(ui->no,&ClickableLabel::clicked,this,&ThreadForm::appendQuote);
 	//ui->replies->installEventFilter(this);
@@ -130,8 +134,9 @@ void ThreadForm::load(QJsonObject &p)
 		connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
 	}
 	else{
-		//ui->pictureLayout->deleteLater();
 		delete ui->pictureLayout;
+		ui->contentLayout->layout()->takeAt(0);
+		//delete ui->tim;
 	}
 	this->show();
 	//updateComHeight();
@@ -280,8 +285,6 @@ void ThreadForm::loadImage(QString path) {
 		QImage scaled = newImage.result();
 		if(!scaled.isNull()) {
 			ui->tim->show();
-			//ui->horizontalSpacer->changeSize(250,0);
-			//ui->horizontalSpacer->invalidate();
 			this->setMinimumWidth(738);
 			ui->tim->setPixmap(QPixmap::fromImage(scaled));
 			ui->tim->setMaximumSize(scaled.size());
@@ -329,19 +332,21 @@ void ThreadForm::hideClicked()
 	idFilters.append(threadNum);
 	settings.setValue("filters/"+board+"/id",idFilters);
 	qDebug().noquote() << "hide Clicked so "+threadNum+" filtered!";
-	QListIterator<QPointer<ThreadForm>> i(clones);
-	while(i.hasNext()) {
-		i.next()->deleteLater();
-	}
-	QSet<QString> quotes = quotelinks;
-	ThreadForm *replyTo;
-	foreach (const QString &orig, quotes)
-	{
-		replyTo = static_cast<ThreadTab*>(tab)->tfMap.find(orig).value();
-		if(replyTo != nullptr) {
-			//replyTo->replies.insert(tf->post.no);
-			replyTo->replies.remove(post.no.toDouble());
-			replyTo->setReplies();
+	if(this->type == Reply){
+		QListIterator<QPointer<ThreadForm>> i(clones);
+		while(i.hasNext()) {
+			i.next()->deleteLater();
+		}
+		QSet<QString> quotes = quotelinks;
+		ThreadForm *replyTo;
+		foreach (const QString &orig, quotes)
+		{
+			replyTo = static_cast<ThreadTab*>(tab)->tfMap.find(orig).value();
+			if(replyTo != nullptr) {
+				//replyTo->replies.insert(tf->post.no);
+				replyTo->replies.remove(post.no.toDouble());
+				replyTo->setReplies();
+			}
 		}
 	}
 	this->hidden = true;
@@ -432,8 +437,6 @@ ThreadForm *ThreadForm::clone()
 		const QPixmap *px = this->ui->tim->pixmap();
 		//From load image but don't have to scale again
 		tfs->ui->tim->show();
-		//tfs->ui->horizontalSpacer->changeSize(250,0);
-		//tfs->ui->horizontalSpacer->invalidate();
 		tfs->setMinimumWidth(738);
 		if(px){
 			tfs->ui->tim->setPixmap(*px);
@@ -442,6 +445,8 @@ ThreadForm *ThreadForm::clone()
 		}
 	} else {
 		tfs->ui->pictureLayout->deleteLater();
+		tfs->ui->contentLayout->layout()->takeAt(0);
+		//tfs->ui->tim->deleteLater();
 	}
 	if(repliesString.length()) {
 		tfs->repliesString = repliesString;
@@ -453,8 +458,12 @@ ThreadForm *ThreadForm::clone()
 	connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
 	connect(tfs,&ThreadForm::removeMe,this,&ThreadForm::removeClone);
 	//TODO load and connect cross thread replies
-	if(this->type == PostType::Reply)
-		connect(tfs,&ThreadForm::floatLink,static_cast<ThreadTab*>(tab),&ThreadTab::floatReply);
+	if(this->type == PostType::Reply){
+		ThreadTab* temp = static_cast<ThreadTab*>(tab);
+		connect(tfs,&ThreadForm::floatLink,temp,&ThreadTab::floatReply);
+		connect(tfs,&ThreadForm::updateFloat,temp,&ThreadTab::updateFloat);
+		connect(tfs,&ThreadForm::deleteFloat,temp,&ThreadTab::deleteFloat);
+	}
 	return tfs;
 }
 
@@ -509,25 +518,32 @@ void ThreadForm::setInfoString()
 	ui->info->setText(infoString());
 }
 
+//showing and supposedToShow to save states and restore floating replies and quotes
+void ThreadForm::on_info_linkHovered(const QString &link)
+{
+	if(this->type == PostType::Reply) {
+		if(link.startsWith("#op")){
+			emit deleteFloat();
+		}
+		else if(link.startsWith("#p")) {
+			qDebug().noquote() << "hovering" << link;
+			emit floatLink(link.mid(2));
+		} else {
+			//TODO check mouse cursor?
+			emit deleteFloat();
+		}
+	}
+}
+
 bool ThreadForm::eventFilter(QObject *obj, QEvent *event)
 {
-	//check cursor type instead?
-	//qDebug() << cursor.shape();
-	/*if (event->type() == QEvent::CursorChange) {
-		QMouseEvent *mE = static_cast<QMouseEvent *>(event);
-		if(cursor.shape()==Qt::PointingHandCursor) {
-			qDebug() << "do it";
+	if(this->type == PostType::Reply){
+		if(event->type() == QEvent::MouseMove) {
+			emit updateFloat();
 		}
-		return QObject::eventFilter(obj, event);
-	}*/
-	if(event->type() == QEvent::MouseMove) {
-		if(this->type == PostType::Reply)
-			static_cast<ThreadTab*>(tab)->updateFloat();
-	} else if(event->type() == QEvent::Leave) {
-		if(this->type == PostType::Reply)
-			static_cast<ThreadTab*>(tab)->deleteFloat();
-	} else if(event->type() == QEvent::DragEnter) {
-		return true;
+		else if(event->type() == QEvent::Leave) {
+			emit deleteFloat();
+		}
 	}
 	return QObject::eventFilter(obj, event);
 }
@@ -543,7 +559,7 @@ void ThreadForm::deleteHideLayout()
 	hideButtonShown = false;
 }
 
-void ThreadForm::paintEvent(QPaintEvent *e){
+void ThreadForm::paintEvent(QPaintEvent *){
 	QPainter painter(this);
 	int x = 0;
 	if(hideButtonShown){
@@ -553,7 +569,9 @@ void ThreadForm::paintEvent(QPaintEvent *e){
 	else
 		painter.setPen(QColor(75,75,75));
 	painter.drawRect(x,0,width()-x-1,height()-1);
-	QWidget::paintEvent(e);
+	if(root){
+		painter.fillRect(x+1,1,width()-x-2,height()-2,QColor(34,34,34));
+	}
 }
 
 /*void ThreadForm::setBorder() {
@@ -563,19 +581,3 @@ void ThreadForm::paintEvent(QPaintEvent *e){
 void ThreadForm::removeBorder() {
 	ui->com->setStyleSheet("");
 }*/
-
-void ThreadForm::on_info_linkHovered(const QString &link)
-{
-	if(this->type == PostType::Reply) {
-		if(link.startsWith("#op")){
-			static_cast<ThreadTab*>(tab)->deleteFloat();
-		}
-		else if(link.startsWith("#p")) {
-			//qDebug().noquote() << "hovering" << link;
-			emit floatLink(link.mid(2));
-		} else {
-			//TODO check mouse cursor?
-			static_cast<ThreadTab*>(tab)->deleteFloat();
-		}
-	}
-}

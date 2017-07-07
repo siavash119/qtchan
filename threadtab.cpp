@@ -171,6 +171,8 @@ void ThreadTab::onNewTF(ThreadForm *tf)
 	tfMap.insert(tf->post.no,tf);
 	connect(tf,&ThreadForm::floatLink,this,&ThreadTab::floatReply);
 	connect(tf,&ThreadForm::removeMe,this,&ThreadTab::removeTF, Qt::DirectConnection);
+	connect(tf,&ThreadForm::deleteFloat,this,&ThreadTab::deleteFloat,Qt::DirectConnection);
+	connect(tf,&ThreadForm::updateFloat,this,&ThreadTab::updateFloat,Qt::DirectConnection);
 	unseenList.append(tf);
 	formsTotal++;
 	formsUnseen++;

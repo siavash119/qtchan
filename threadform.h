@@ -88,6 +88,7 @@ private:
 	void getThumb();
 	bool finished = false;
 	bool hideButtonShown = true;
+	QString lastLink;
 
 signals:
 	void loadThreadTab(ThreadForm*, QJsonArray&);
@@ -97,6 +98,7 @@ signals:
 	void updateFloat();
 	void removeMe(QPointer<ThreadForm> tf);
 	void fileFinished();
+	void deleteFloat();
 	//void searchPost(int position, QString postNum);
 
 public slots:
