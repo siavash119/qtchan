@@ -135,7 +135,7 @@ void BoardTabHelper::loadPosts() {
 		i++;
 		QCoreApplication::processEvents();
 	}
-	if(!abort) emit addStretch();
+	//if(!abort) emit addStretch();
 }
 
 QJsonArray BoardTabHelper::filterThreads(QByteArray &rep){

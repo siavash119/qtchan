@@ -21,6 +21,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
 	ui(new Ui::ThreadForm)
 {
 	ui->setupUi(this);
+	ui->quoteWidget->hide();
 	ui->tim->hide();
 	//ui->replies->hide();
 	//if(board != "pol") ui->country_name->hide();
@@ -396,6 +397,7 @@ void ThreadForm::quoteClicked(const QString &link)
 void ThreadForm::insert(ThreadForm *tf)
 {
 	ThreadForm *newtf = tf->clone();
+	if(ui->quoteWidget->isHidden())ui->quoteWidget->show();
 	ui->quotes->addWidget(newtf);
 	newtf->show();
 	//newtf->setMinimumWidth(newtf->sizeHint().width());
@@ -405,6 +407,7 @@ void ThreadForm::insert(ThreadForm *tf)
 }
 
 void ThreadForm::addReply(ThreadForm *tf){
+	if(ui->quoteWidget->isHidden())ui->quoteWidget->show();
 	ui->quotes->addWidget(tf);
 }
 

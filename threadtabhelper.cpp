@@ -142,7 +142,7 @@ void ThreadTabHelper::loadPosts() {
 		i++;
 		QCoreApplication::processEvents();
 	}
-	if(!abort) emit addStretch();
+	//if(!abort) emit addStretch();
 	//emit scrollIt();
 }
 

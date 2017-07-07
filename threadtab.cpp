@@ -34,7 +34,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	this->setShortcuts();
 	this->installEventFilter(this);
 	connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,UniqueDirect);
-	connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
+	//connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
 
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
@@ -121,7 +121,7 @@ void ThreadTab::setShortcuts()
 
 ThreadTab::~ThreadTab()
 {
-	ui->threads->removeItem(&space);
+	//ui->threads->removeItem(&space);
 	helper.abort = 1;
 	disconnect(&helper);
 	disconnect(&workerThread);
@@ -149,11 +149,11 @@ void ThreadTab::gallery()
 	QProcess().startDetached(command,arguments);
 }
 
-void ThreadTab::addStretch()
+/*void ThreadTab::addStretch()
 {
-	ui->threads->removeItem(&space);
-	ui->threads->insertItem(-1,&space);
-}
+	//ui->threads->removeItem(&space);
+	//ui->threads->insertItem(-1,&space);
+}*/
 
 int ThreadTab::getMinWidth()
 {
