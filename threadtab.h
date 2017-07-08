@@ -53,7 +53,7 @@ public slots:
 	void focusIt();
 	void updateWidth();
 	void quoteIt(QString text);
-	void floatReply(const QString &link);
+	void floatReply(const QString &link, int replyLevel = 0);
 	void deleteFloat();
 	void updateFloat();
 	void onNewTF(ThreadForm *tf);

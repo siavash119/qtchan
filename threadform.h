@@ -26,7 +26,8 @@ class ThreadForm : public QWidget
 	bool gettingThumb = false;
 	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
 public:
-	explicit ThreadForm(QString board, QString threadNum, PostType type = Reply, bool root = true, bool autoExpand = false, QWidget *parent = 0);
+	explicit ThreadForm(QString board, QString threadNum, PostType type = Reply,
+						bool root = true, bool autoExpand = false, QWidget *parent = 0, int replyLevel = 0);
 	~ThreadForm();
 	void setText(QString text);
 	void setImage(QByteArray img);
@@ -57,7 +58,7 @@ public:
 	void setRepliesString();
 	void setInfoString();
 	void loadOrig();
-	ThreadForm *clone();
+	ThreadForm *clone(int replyLevel = 0);
 	QList<QPointer<ThreadForm>> clones;
 	//TODO check settings -> filter
 	bool hidden = false;
@@ -67,9 +68,11 @@ public:
 	QString repliesString;
 	QString infoString();
 	void addReplyLink(QString &reply);
+	int replyLevel;
 
 private:
 	QWidget *tab;
+	QString lastLink;
 	Ui::ThreadForm *ui;
 	bool loadIt;
 	QString fileURL;
@@ -88,13 +91,14 @@ private:
 	void getThumb();
 	bool finished = false;
 	bool hideButtonShown = true;
-	QString lastLink;
+	int darkness = 22;
+	QColor background;
 
 signals:
 	void loadThreadTab(ThreadForm*, QJsonArray&);
 	void loadThread(ThreadForm*,QString&,QString&);
 	void updateWidth();
-	void floatLink(const QString &link);
+	void floatLink(const QString &link, int replyLevel = 0);
 	void updateFloat();
 	void removeMe(QPointer<ThreadForm> tf);
 	void fileFinished();

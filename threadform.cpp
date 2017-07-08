@@ -16,11 +16,20 @@
 
 //TODO get rid of #include threadtab.h and mainwindow.h by using signals/slots
 //TODO Possibly decouple the file and thumb getters to another class class
-ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool root, bool autoExpand, QWidget *parent) :
-	QWidget(parent), board(board), threadNum(threadNum), type(type), root(root), autoExpand(autoExpand), tab(parent),
+ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool root, bool autoExpand, QWidget *parent, int replyLevel) :
+	QWidget(parent), board(board), threadNum(threadNum), type(type), root(root), autoExpand(autoExpand), replyLevel(replyLevel), tab(parent),
 	ui(new Ui::ThreadForm)
 {
 	ui->setupUi(this);
+	for(int i=0;i<replyLevel;i++){
+		if(i == replyLevel-1){
+			background.setRgb(darkness,darkness,darkness);
+			ui->hide->setStyleSheet("padding: 0 10px; background-color:"+ background.name());
+		}
+		darkness = darkness*0.8;
+	}
+	background.setRgb(darkness,darkness,darkness);
+	this->setStyleSheet("background-color:" + background.name() + "; color:#bbbbbb;");
 	ui->quoteWidget->hide();
 	ui->tim->hide();
 	//ui->replies->hide();
@@ -394,7 +403,7 @@ void ThreadForm::quoteClicked(const QString &link)
 
 void ThreadForm::insert(ThreadForm *tf)
 {
-	ThreadForm *newtf = tf->clone();
+	ThreadForm *newtf = tf->clone(replyLevel);
 	if(ui->quoteWidget->isHidden())ui->quoteWidget->show();
 	ui->quotes->addWidget(newtf);
 	newtf->show();
@@ -409,10 +418,10 @@ void ThreadForm::addReply(ThreadForm *tf){
 	ui->quotes->addWidget(tf);
 }
 
-ThreadForm *ThreadForm::clone()
+ThreadForm *ThreadForm::clone(int replyLevel)
 {
 	//TODO? just tfs->load(post);
-	ThreadForm *tfs = new ThreadForm(this->board,this->threadNum,this->type,false,false,tab);
+	ThreadForm *tfs = new ThreadForm(this->board,this->threadNum,this->type,false,false,tab,replyLevel+1);
 	tfs->tab = tab;
 	tfs->post = this->post;
 	//tfs->ui->no->setText(post.no);
@@ -528,7 +537,7 @@ void ThreadForm::on_info_linkHovered(const QString &link)
 		}
 		else if(link.startsWith("#p")) {
 			qDebug().noquote() << "hovering" << link;
-			emit floatLink(link.mid(2));
+			emit floatLink(link.mid(2),replyLevel);
 		} else {
 			//TODO check mouse cursor?
 			emit deleteFloat();
@@ -570,9 +579,7 @@ void ThreadForm::paintEvent(QPaintEvent *){
 	else
 		painter.setPen(QColor(75,75,75));
 	painter.drawRect(x,0,width()-x-1,height()-1);
-	if(root){
-		painter.fillRect(x+1,1,width()-x-2,height()-2,QColor(34,34,34));
-	}
+	painter.fillRect(x+1,1,width()-x-2,height()-2,background);
 }
 
 /*void ThreadForm::setBorder() {

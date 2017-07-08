@@ -287,12 +287,14 @@ void ThreadTab::on_lineEdit_returnPressed()
 	findText(ui->lineEdit->text());
 }
 
-void ThreadTab::floatReply(const QString &link)
+void ThreadTab::floatReply(const QString &link, int replyLevel)
 {
 	deleteFloat();
 	QPointer<ThreadForm> tf = findPost(link);
 	if(!tf) return;
-	floating = tf->clone();
+	qDebug() << tf->styleSheet();
+	floating = tf->clone(replyLevel);
+	qDebug() << floating->styleSheet();
 	floating->deleteHideLayout();
 	floating->setParent(this);
 	floating->setObjectName("reply");
@@ -313,7 +315,7 @@ void ThreadTab::floatReply(const QString &link)
 	floating->setGeometry(x,y,sizeHint.width(),sizeHint.height());
 	floating->update();
 	//floating->setStyleSheet("border-style:solid;border-width: 4px;");
-	floating->setStyleSheet(QString::fromUtf8("QWidget#ThreadForm\n"
+	floating->setStyleSheet(floating->styleSheet()+QString::fromUtf8(" QWidget#ThreadForm\n"
 											  "{\n"
 											  "    border: 3px solid black;\n"
 											  "}\n"

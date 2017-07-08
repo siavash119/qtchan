@@ -120,14 +120,14 @@ void BoardTabHelper::loadPosts() {
 			i++;
 			continue;
 		}
-		ThreadForm *tf = new ThreadForm(board,threadNum,Thread,true,loadFile,parent);
+		ThreadForm *tf = new ThreadForm(board,threadNum,Thread,true,loadFile,parent,0);
 		tf->load(p);
 		tfMap.insert(tf->post.no,tf);
 		emit newThread(tf);
 		if(type==BoardType::Index && showIndexReplies){
 			for(int j=1;j<t.size();j++){
 				p = t.at(j).toObject();
-				ThreadForm *tfChild = new ThreadForm(board,threadNum,Thread,false,loadFile,parent);
+				ThreadForm *tfChild = new ThreadForm(board,threadNum,Thread,false,loadFile,parent,1);
 				tfChild->load(p);
 				//tfMap.insert(tfChild->post.no,tfChild);
 				emit newTF(tfChild,tf);
