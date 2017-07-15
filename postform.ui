@@ -44,32 +44,11 @@
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
      <item>
-      <widget class="QPlainTextEdit" name="name">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>100</width>
-         <height>36</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>36</height>
-        </size>
-       </property>
+      <widget class="QLineEdit" name="name">
        <property name="font">
         <font>
-         <pointsize>16</pointsize>
+         <pointsize>14</pointsize>
         </font>
-       </property>
-       <property name="tabChangesFocus">
-        <bool>true</bool>
        </property>
        <property name="placeholderText">
         <string>name</string>
@@ -77,32 +56,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QPlainTextEdit" name="email">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>100</width>
-         <height>36</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>36</height>
-        </size>
-       </property>
+      <widget class="QLineEdit" name="email">
        <property name="font">
         <font>
-         <pointsize>16</pointsize>
+         <pointsize>14</pointsize>
         </font>
-       </property>
-       <property name="tabChangesFocus">
-        <bool>true</bool>
        </property>
        <property name="placeholderText">
         <string>email</string>
@@ -110,32 +68,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QPlainTextEdit" name="subject">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>36</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>36</height>
-        </size>
-       </property>
+      <widget class="QLineEdit" name="subject">
        <property name="font">
         <font>
-         <pointsize>16</pointsize>
+         <pointsize>14</pointsize>
         </font>
-       </property>
-       <property name="tabChangesFocus">
-        <bool>true</bool>
        </property>
        <property name="placeholderText">
         <string>subject</string>
@@ -158,7 +95,7 @@
         <x>0</x>
         <y>0</y>
         <width>526</width>
-        <height>237</height>
+        <height>242</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">

@@ -34,7 +34,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
 	ui->tim->hide();
 	//ui->replies->hide();
 	//if(board != "pol") ui->country_name->hide();
-	this->setMinimumWidth(488);
+	//this->setMinimumWidth(488);
 	pathBase = "./" % board % "/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
 	connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
 	connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
@@ -144,6 +144,7 @@ void ThreadForm::load(QJsonObject &p)
 	else{
 		delete ui->pictureLayout;
 		ui->contentLayout->layout()->takeAt(0);
+		this->hasImage = false;
 		//delete ui->tim;
 	}
 	this->show();
@@ -164,6 +165,10 @@ void ThreadForm::getThumb() {
 	replyThumb = nc.thumbManager->get(QNetworkRequest(QUrl("https://t.4cdn.org/" % thumbURL)));
 	gettingThumb = true;
 	connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished,Qt::UniqueConnection);
+}
+
+void ThreadForm::clickImage(){
+	if(QPointer<ClickableLabel>(ui->tim)) ui->tim->clicked();
 }
 
 /*void ThreadForm::downloading(qint64 read, qint64 total)
@@ -293,9 +298,9 @@ void ThreadForm::loadImage(QString path) {
 		QImage scaled = newImage.result();
 		if(!scaled.isNull()) {
 			ui->tim->show();
-			this->setMinimumWidth(738);
+			//this->setMinimumWidth(738);
 			ui->tim->setPixmap(QPixmap::fromImage(scaled));
-			ui->tim->setMaximumSize(scaled.size());
+			ui->tim->setFixedSize(scaled.size());
 			/*if(this->type == PostType::Reply) {
 				static_cast<ThreadTab*>(tab)->checkScroll();
 			}*/
@@ -306,6 +311,7 @@ void ThreadForm::loadImage(QString path) {
 
 void ThreadForm::imageClicked()
 {
+	if(!QPointer<ClickableLabel>(ui->tim)) return;
 	qDebug().noquote() << "clicked "+post.filename;
 	if(this->type == PostType::Reply) {
 		if(!file->exists() && !gettingFile) {
@@ -447,15 +453,16 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 		const QPixmap *px = this->ui->tim->pixmap();
 		//From load image but don't have to scale again
 		tfs->ui->tim->show();
-		tfs->setMinimumWidth(738);
+		//tfs->setMinimumWidth(738);
 		if(px){
 			tfs->ui->tim->setPixmap(*px);
-			tfs->ui->tim->setMaximumSize(px->size());
+			tfs->ui->tim->setFixedSize(px->size());
 			connect(tfs->ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
 		}
 	} else {
 		tfs->ui->pictureLayout->deleteLater();
 		tfs->ui->contentLayout->layout()->takeAt(0);
+		tfs->hasImage = false;
 		//tfs->ui->tim->deleteLater();
 	}
 	if(repliesString.length()) {
@@ -566,6 +573,7 @@ void ThreadForm::on_com_linkHovered(const QString &link)
 void ThreadForm::deleteHideLayout()
 {
 	delete this->ui->hideLayout;
+	delete this->ui->quoteWidget;
 	hideButtonShown = false;
 }
 

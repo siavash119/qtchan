@@ -3,6 +3,7 @@
 #include "mainwindow.h"
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QScrollBar>
 
 BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *parent) :
 	QWidget(parent), board(board), type(type), search(search),
@@ -52,7 +53,36 @@ void BoardTab::setShortcuts()
 	focusSearch->setShortcut(QKeySequence("Ctrl+f"));
 	connect(focusSearch,&QAction::triggered,this,&BoardTab::focusIt);
 	this->addAction(focusSearch);
+
+	QAction *scrollUp = new QAction(this);
+	scrollUp->setShortcut(Qt::Key_J);
+	connect(scrollUp, &QAction::triggered,[=]{
+		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() - 150);
+	});
+	this->addAction(scrollUp);
+
+	QAction *scrollDown = new QAction(this);
+	scrollDown->setShortcut(Qt::Key_K);
+	connect(scrollDown, &QAction::triggered,[=]{
+		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() + 150);
+	});
+	this->addAction(scrollDown);
+
+	QAction *selectPost = new QAction(this);
+	selectPost->setShortcut(Qt::Key_O);
+	connect(selectPost, &QAction::triggered,[=]{
+		QWidget *selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value());
+		qDebug() << selected;
+		while(selected->parent()->objectName() != "scrollAreaWidgetContents") {
+			  selected = qobject_cast<QWidget*>(selected->parent());
+		}
+		if(selected->objectName() == "ThreadForm"){
+			static_cast<ThreadForm*>(selected)->imageClicked();
+		}
+	});
+	this->addAction(selectPost);
 }
+
 
 void BoardTab::findText(const QString text)
 {

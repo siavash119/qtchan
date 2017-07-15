@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>600</height>
+    <height>0</height>
    </size>
   </property>
   <property name="font">
@@ -87,7 +87,7 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>600</height>
+       <height>0</height>
       </size>
      </property>
      <property name="autoFillBackground">
@@ -100,7 +100,7 @@
       <number>0</number>
      </property>
      <property name="sizeAdjustPolicy">
-      <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+      <enum>QAbstractScrollArea::AdjustToContents</enum>
      </property>
      <property name="widgetResizable">
       <bool>true</bool>
@@ -114,11 +114,11 @@
         <x>0</x>
         <y>0</y>
         <width>400</width>
-        <height>600</height>
+        <height>582</height>
        </rect>
       </property>
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -128,7 +128,7 @@
         <number>11</number>
        </property>
        <property name="sizeConstraint">
-        <enum>QLayout::SetMinimumSize</enum>
+        <enum>QLayout::SetMinAndMaxSize</enum>
        </property>
        <property name="leftMargin">
         <number>0</number>

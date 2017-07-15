@@ -63,6 +63,7 @@ public slots:
 	void toggleAutoExpand();
 	void openExplorer();
 	void updateSettings(QString setting, QVariant value);
+	void updateSeen(int formsUnseen);
 
 private:
 	Ui::MainWindow *ui;

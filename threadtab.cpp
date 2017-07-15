@@ -48,6 +48,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 			if(!curTF->seen) {
 				formsUnseen--;
 				unseenList.removeOne(curTF);
+				emit unseen(formsUnseen);
 			}
 			curTF->seen = true;
 			//curTF->setStyleSheet("background-color: #c80808; color:#bbbbbb;");
@@ -118,6 +119,20 @@ void ThreadTab::setShortcuts()
 	focusBar->setShortcut(Qt::Key_F6);
 	connect(focusBar,&QAction::triggered,mw,&MainWindow::focusBar);
 	this->addAction(focusBar);
+
+	QAction *selectPost = new QAction(this);
+	selectPost->setShortcut(Qt::Key_O);
+	connect(selectPost, &QAction::triggered,[=]{
+		QWidget *selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value());
+		qDebug() << selected;
+		while(selected->parent()->objectName() != "scrollAreaWidgetContents") {
+			  selected = qobject_cast<QWidget*>(selected->parent());
+		}
+		if(selected->objectName() == "ThreadForm"){
+			static_cast<ThreadForm*>(selected)->imageClicked();
+		}
+	});
+	this->addAction(selectPost);
 }
 
 ThreadTab::~ThreadTab()
@@ -252,17 +267,21 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 		int key = keyEvent->key();
 		//qDebug("Ate modifier %d",mod);
 		//qDebug("Ate key press %d", key);
-		if(key == 16777220) {
+		if(key == 74){
+			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() - 150);
+		}
+		else if(key == 75){
+			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() + 150);
+		}
+		else if(key == 16777220) {
 			on_pushButton_clicked();
 			return false;
 		} else if(key == 16777269) {
 			ui->lineEdit->setFocus();
 			return false;
-		} else{
-			return QObject::eventFilter(obj, event);
 		}
+		break;
 	}
-		//check cursor change instead?
 	case QEvent::Wheel: {
 		newImage = QtConcurrent::run(&ThreadTab::checkIfVisible, unseenList);
 		watcher.setFuture(newImage);
@@ -270,10 +289,11 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 	case QEvent::Leave: {
 		deleteFloat();
 	}
-	default: {
+	default:{
 		return QObject::eventFilter(obj, event);
 	}
 	}
+	return QObject::eventFilter(obj, event);
 }
 
 void ThreadTab::focusIt()
@@ -292,9 +312,7 @@ void ThreadTab::floatReply(const QString &link, int replyLevel)
 	deleteFloat();
 	QPointer<ThreadForm> tf = findPost(link);
 	if(!tf) return;
-	qDebug() << tf->styleSheet();
 	floating = tf->clone(replyLevel);
-	qDebug() << floating->styleSheet();
 	floating->deleteHideLayout();
 	floating->setParent(this);
 	floating->setObjectName("reply");
@@ -303,6 +321,17 @@ void ThreadTab::floatReply(const QString &link, int replyLevel)
 	QRect rec = QApplication::desktop()->availableGeometry(this);
 	QPoint globalCursorPos = QCursor::pos();
 	QSize sizeHint = floating->sizeHint();
+	/*qDebug() << sizeHint;
+	if(floating->hasImage && sizeHint.width() < 850){
+		sizeHint.setWidth(850);
+		sizeHint.setHeight(floating->heightForWidth(850));
+	}
+	else if(!floating->hasImage && sizeHint.width() < 600){
+			sizeHint.setWidth(600);
+			sizeHint.setHeight(floating->heightForWidth(600));
+	}
+	qDebug() << sizeHint;*/
+	//floating->setFixedSize(sizeHint);
 	int x = -1, y = -1;
 	if(globalCursorPos.x()  - rec.topLeft().x() + sizeHint.width() + 10 > rec.width()) {
 		x = globalCursorPos.x() - sizeHint.width() - 10;
@@ -314,12 +343,8 @@ void ThreadTab::floatReply(const QString &link, int replyLevel)
 	if(y<0) y = globalCursorPos.y()+10;
 	floating->setGeometry(x,y,sizeHint.width(),sizeHint.height());
 	floating->update();
-	//floating->setStyleSheet("border-style:solid;border-width: 4px;");
-	floating->setStyleSheet(floating->styleSheet()+QString::fromUtf8(" QWidget#ThreadForm\n"
-											  "{\n"
-											  "    border: 3px solid black;\n"
-											  "}\n"
-											  ""));
+	/*floating->setStyleSheet(floating->styleSheet()
+							+QString::fromUtf8(" QWidget#ThreadForm{border: 3px solid black;}"));*/
 	floating->show();
 }
 

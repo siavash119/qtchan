@@ -72,10 +72,10 @@ void PostForm::postIt()
 	resto.setBody(thread.toStdString().c_str());
 	QHttpPart name;
 	name.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"name\""));
-	name.setBody(ui->name->toPlainText().toStdString().c_str());
+	name.setBody(ui->name->text().toStdString().c_str());
 	QHttpPart email;
 	email.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"email\""));
-	email.setBody(ui->email->toPlainText().toStdString().c_str());
+	email.setBody(ui->email->text().toStdString().c_str());
 	QHttpPart com;
 	com.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"com\""));
 	qDebug().noquote() << ui->com->toPlainText().toStdString().c_str();

@@ -69,6 +69,7 @@ public:
 	QString infoString();
 	void addReplyLink(QString &reply);
 	int replyLevel;
+	bool hasImage = true;
 
 private:
 	QWidget *tab;
@@ -93,6 +94,7 @@ private:
 	bool hideButtonShown = true;
 	int darkness = 22;
 	QColor background;
+	void clickImage();
 
 signals:
 	void loadThreadTab(ThreadForm*, QJsonArray&);

@@ -31,6 +31,7 @@ public:
 	TreeItemType type;
 	QString query;
 	QString display;
+	int unseen;
 
 private:
 	QList<QVariant> itemData;

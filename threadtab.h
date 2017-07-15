@@ -4,6 +4,7 @@
 #include "postform.h"
 #include "threadtabhelper.h"
 #include "clickablelabel.h"
+#include "treeitem.h"
 #include <QWidget>
 #include <QMutableMapIterator>
 #include <QPointer>
@@ -46,6 +47,7 @@ public:
 	int formsTotal = 0;
 	int formsUnseen = 0;
 	static QList<ThreadForm*> checkIfVisible(QList<ThreadForm*> &unseenList);
+	TreeItem *tn;
 
 
 public slots:
@@ -78,6 +80,7 @@ private slots:
 signals:
 	void autoUpdate(bool update);
 	void unseen(int totalUnseen);
+	void formSeen();
 };
 
 Q_DECLARE_METATYPE(ThreadTab*)

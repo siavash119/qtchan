@@ -24,7 +24,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->splitter->setStretchFactor(0,0);
-	ui->splitter->setStretchFactor(1,10);
+	ui->splitter->setStretchFactor(1,1);
+	QList<int> sizes;
+	sizes << 200 << (ui->splitter->size().width() - 200);
+	ui->splitter->setSizes(sizes);
 	ui->pushButton->hide();
 	ui->lineEdit->hide();
 	ui->lineEdit->installEventFilter(this);
@@ -163,6 +166,15 @@ void MainWindow::setShortcuts()
 			settingsView.show();
 		}
 	});
+
+	QAction *sizeUp = new QAction(this);
+	sizeUp->setShortcut(QKeySequence("Ctrl+8"));
+	connect(sizeUp,&QAction::triggered,[=]{
+		qDebug() << QString::number(qgetenv("QT_SCALE_FACTOR").toInt()+1).toStdString().c_str();
+		qputenv("QT_SCALE_FACTOR",QString::number(qgetenv("QT_SCALE_FACTOR").toInt()+1).toStdString().c_str());
+	});
+	sizeUp->setShortcutContext(Qt::ApplicationShortcut);
+	this->addAction(sizeUp);
 }
 
 MainWindow::~MainWindow()
@@ -202,7 +214,7 @@ void MainWindow::updateSettings(QString setting, QVariant value){
 
 void MainWindow::openExplorer(){
 	QString url;
-	if(!ui->stackedWidget->count()) return;
+	if(!ui->content->count()) return;
 	TreeItem *item = model->getItem(selectionModel->currentIndex());
 	if(item->type == TreeItemType::thread){
 		ThreadTab *tab = static_cast<ThreadTab*>(item->tab);
@@ -322,7 +334,7 @@ TreeItem *MainWindow::loadFromSearch(QString query, QString display, TreeItem *c
 		if(!display.length()) display = "/"+query+"/";
 	}
 	qDebug().noquote() << "loading" << display;
-	ui->stackedWidget->addWidget(bt);
+	ui->content->addWidget(bt);
 
 	QList<QVariant> list;
 	list.append(display);
@@ -344,7 +356,7 @@ TreeItem *MainWindow::onNewThread(QWidget *parent, QString board, QString thread
 	(void)parent;
 	qDebug().noquote().nospace()  << "loading /" << board << "/" << thread;
 	ThreadTab *tt = new ThreadTab(board,thread,this);
-	ui->stackedWidget->addWidget(tt);
+	ui->content->addWidget(tt);
 	QString query = "/"+board+"/"+thread;
 	if(!display.length()) display = query;
 	QList<QVariant> list;
@@ -353,10 +365,18 @@ TreeItem *MainWindow::onNewThread(QWidget *parent, QString board, QString thread
 	TreeItem *tnNew = new TreeItem(list,model->root,tt, TreeItemType::thread);
 	tnNew->query = query;
 	tnNew->display = display;
+	tt->tn = tnNew;
 	Tab tab = {Tab::TabType::Thread,tt,tnNew,query,display};
 	tabs.insert(tt,tab);
+	connect(tt,&ThreadTab::unseen,this,&MainWindow::updateSeen);
 	addTab(tnNew,childOf,false);
 	return tnNew;
+}
+
+void MainWindow::updateSeen(int formsUnseen){
+	TreeItem *tn = static_cast<ThreadTab*>(sender())->tn;
+	tn->setData(1,formsUnseen);
+	tn->unseen = formsUnseen;
 }
 
 void MainWindow::addTab(TreeItem *child, TreeItem *parent, bool select)
@@ -377,7 +397,7 @@ void MainWindow::addTab(TreeItem *child, TreeItem *parent, bool select)
 void MainWindow::on_treeView_clicked(QModelIndex index)
 {
 	QWidget *tab = model->getItem(index)->tab;
-	ui->stackedWidget->setCurrentWidget(tab);
+	ui->content->setCurrentWidget(tab);
 	this->setWindowTitle(tab->windowTitle());
 }
 
@@ -386,7 +406,7 @@ void MainWindow::onSelectionChanged()
 	QModelIndexList list = selectionModel->selectedIndexes();
 	if(list.size()) {
 		QWidget *tab = model->getItem(list.at(0))->tab;
-		ui->stackedWidget->setCurrentWidget(tab);
+		ui->content->setCurrentWidget(tab);
 		this->setWindowTitle(tab->windowTitle());
 	}
 	QCoreApplication::processEvents();
@@ -421,7 +441,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 			ui->treeView->setFocus();
 		}
 		else if(key == 16777267) {
-			ui->scrollAreaWidgetContents->setFocus();
+			ui->content->setFocus();
 		}
 		else {
 			return QObject::eventFilter(obj, event);
@@ -460,18 +480,18 @@ void MainWindow::removeTabs(TreeItem *tn) {
 		removeTabs(tn->child(0));
 	}
 	model->removeItem(tn);
-	ui->stackedWidget->removeWidget(tn->tab);
+	ui->content->removeWidget(tn->tab);
 	tabs.remove(tn->tab);
 	tn->tab->disconnect();
 	tn->tab->deleteLater();
 	delete tn;
-	if(!ui->stackedWidget->count())
+	if(!ui->content->count())
 		this->setWindowTitle("qtchan");
 }
 
 QObject *MainWindow::currentWidget()
 {
-	return ui->stackedWidget->currentWidget();
+	return ui->content->currentWidget();
 }
 
 void MainWindow::on_lineEdit_returnPressed()
