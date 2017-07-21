@@ -98,7 +98,7 @@ void BoardTab::findText(const QString text)
 		mapI.next();
 		tf = mapI.value();
 		if(pass) { tf->show(); continue;};
-		match = re.match(tf->post.sub + tf->post.com,0,QRegularExpression::PartialPreferFirstMatch);
+		match = re.match(tf->post.sub + tf->post.com);
 		if(!match.hasMatch()) {
 			tf->hide();
 		}
@@ -115,9 +115,6 @@ void BoardTab::addStretch()
 void BoardTab::onNewTF(ThreadForm *tf, ThreadForm *thread)
 {
 	connect(thread,&ThreadForm::removeMe,tf,&ThreadForm::deleteLater,Qt::DirectConnection);
-	//tfMap.insert(tf->post.no,tf);
-	//ui->threads->addWidget(tf);
-	//tf->setContentsMargins(280,0,0,0);
 	thread->addReply(tf);
 }
 

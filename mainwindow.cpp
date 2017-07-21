@@ -1,5 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "boardtab.h"
+#include "threadtab.h"
+#include "threadform.h"
 #include <QFile>
 #include <QString>
 #include <QJsonArray>
@@ -11,11 +14,8 @@
 #include <QKeyEvent>
 #include <QSettings>
 #include <QShortcut>
-#include <stdio.h>
 #include <QDesktopServices>
-#include "boardtab.h"
-#include "threadtab.h"
-#include "threadform.h"
+#include <stdio.h>
 
 //TODO decouple item model/view logic to another class
 MainWindow::MainWindow(QWidget *parent) :
@@ -39,6 +39,13 @@ MainWindow::MainWindow(QWidget *parent) :
 	settingsView.setParent(this,Qt::Tool
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);
+	connect(&settingsView,&Settings::update,[=](QString field, QVariant value){
+		if(field == "use4chanPass" && value.toBool() == true){
+			QSettings settings;
+			QString defaultCookies = QDir::homePath() + "/.config/qtchan/cookies";
+			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
+		}
+	});
 	this->setShortcuts();
 }
 
@@ -205,11 +212,22 @@ void MainWindow::toggleAutoExpand()
 	settingsView.refreshValues();
 }
 
-void MainWindow::updateSettings(QString setting, QVariant value){
-	if(setting == "autoUpdate")
+void MainWindow::updateSettings(QString field, QVariant value){
+	if(field == "autoUpdate")
 		emit setAutoUpdate(value.toBool());
-	else if(setting == "autoExpand")
+	else if(field == "autoExpand")
 		emit setAutoExpand(value.toBool());
+	else if(field == "use4chanPass"){
+		emit setUse4chanPass(value.toBool());
+		if(value.toBool()){
+			QSettings settings;
+			QString defaultCookies = QDir::homePath() + "/.config/qtchan/cookies";
+			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
+		}
+		else{
+			nc.removeCookies();
+		}
+	}
 }
 
 void MainWindow::openExplorer(){

@@ -80,8 +80,6 @@ void TreeItem::insertChild(int pos, TreeItem *child)
 
 bool TreeItem::setData(int column, const QVariant &value)
 {
-	qDebug() << column;
-	qDebug() << value;
 	if (column < 0 || column >= itemData.size())
 		return false;
 

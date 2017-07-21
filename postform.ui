@@ -19,7 +19,7 @@
   <property name="styleSheet">
    <string notr="true">background-color: #222222; color:white</string>
   </property>
-  <layout class="QVBoxLayout" name="main" stretch="0,1,0">
+  <layout class="QVBoxLayout" name="main" stretch="0,1,0,0">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -95,7 +95,7 @@
         <x>0</x>
         <y>0</y>
         <width>526</width>
-        <height>242</height>
+        <height>161</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -201,8 +201,46 @@
      </item>
     </layout>
    </item>
+   <item>
+    <widget class="QWidget" name="captcha" native="true">
+     <layout class="QVBoxLayout" name="captchaLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>1</number>
+      </property>
+      <item>
+       <widget class="ClickableLabel" name="challenge">
+        <property name="minimumSize">
+         <size>
+          <width>300</width>
+          <height>57</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="response"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ClickableLabel</class>
+   <extends>QLabel</extends>
+   <header>clickablelabel.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

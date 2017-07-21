@@ -14,9 +14,11 @@ Settings::Settings(QWidget *parent) :
 	connect(ui->autoUpdateLabel,&ClickableLabel::clicked,this,&Settings::clicked);
 	connect(ui->sessionFileLabel,&ClickableLabel::clicked,this,&Settings::clicked);
 	connect(ui->showIndexRepliesLabel,&ClickableLabel::clicked,this,&Settings::clicked);
+	connect(ui->use4chanPassLabel,&ClickableLabel::clicked,this,&Settings::clicked);
 	connect(ui->autoExpand,&QCheckBox::clicked,this,&Settings::checked);
 	connect(ui->autoUpdate,&QCheckBox::clicked,this,&Settings::checked);
 	connect(ui->showIndexReplies,&QCheckBox::clicked,this,&Settings::checked);
+	connect(ui->use4chanPass,&QCheckBox::clicked,this,&Settings::checked);
 }
 
 Settings::~Settings()
@@ -50,6 +52,12 @@ void Settings::checked(bool checked){
 		settings.setValue("showIndexReplies",showIndexReplies);
 		emit update("showIndexReplies", showIndexReplies);
 		//refreshValues();
+	}
+	else if(sender == "use4chanPass"){
+		bool use4chanPass = !settings.value("use4chanPass",!ui->use4chanPass->isChecked()).toBool();
+		qDebug () << "setting use4chanPass to" << use4chanPass;
+		settings.setValue("use4chanPass",use4chanPass);
+		emit update("use4chanPass", use4chanPass);
 	}
 }
 
@@ -87,6 +95,13 @@ void Settings::clicked()
 		emit update("showIndexReplies", showIndexReplies);
 		ui->showIndexReplies->setChecked(showIndexReplies);
 	}
+	else if(sender == "use4chanPassLabel") {
+		bool use4chanPass = !settings.value("use4chanPass", !ui->use4chanPass->isChecked()).toBool();
+		qDebug () << "setting use4chanPass to" << use4chanPass;
+		settings.setValue("use4chanPass",use4chanPass);
+		emit update("use4chanPass", use4chanPass);
+		ui->use4chanPass->setChecked(use4chanPass);
+	}
 }
 
 void Settings::refreshValues()
@@ -96,6 +111,7 @@ void Settings::refreshValues()
 	ui->autoUpdate->setChecked(settings.value("autoUpdate",false).toBool());
 	ui->showIndexReplies->setChecked(settings.value("showIndexReplies",false).toBool());
 	ui->sessionFile->setText(settings.value("sessionFile","session.txt").toString());
+	ui->use4chanPass->setChecked(settings.value("use4chanPass",false).toBool());
 }
 
 void Settings::showEvent(QShowEvent *event)

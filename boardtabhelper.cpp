@@ -129,14 +129,13 @@ void BoardTabHelper::loadPosts() {
 				p = t.at(j).toObject();
 				ThreadForm *tfChild = new ThreadForm(board,threadNum,Thread,false,loadFile,parent,1);
 				tfChild->load(p);
-				//tfMap.insert(tfChild->post.no,tfChild);
 				emit newTF(tfChild,tf);
 			}
 		}
-		i++;
 		QCoreApplication::processEvents();
+		i++;
 	}
-	if(!abort) emit addStretch();
+	//if(!abort) emit addStretch();
 }
 
 QJsonArray BoardTabHelper::filterThreads(QByteArray &rep){
@@ -151,7 +150,7 @@ QJsonArray BoardTabHelper::filterThreads(QByteArray &rep){
 		for(int i=0;i<allThreads.size();i++) {
 			pageThreads = allThreads.at(i).toObject().value("threads").toArray();
 			for(int j=0;j<pageThreads.size();j++) {
-				match = re.match(pageThreads.at(j).toObject().value("sub").toString() % pageThreads.at(j).toObject().value("com").toString(),0,QRegularExpression::PartialPreferFirstMatch);
+				match = re.match(pageThreads.at(j).toObject().value("sub").toString() % pageThreads.at(j).toObject().value("com").toString());
 				if(match.hasMatch())threads.append(pageThreads.at(j));
 			}
 		}

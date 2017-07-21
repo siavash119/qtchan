@@ -26,13 +26,6 @@
    <property name="horizontalSpacing">
     <number>30</number>
    </property>
-   <item row="0" column="1">
-    <widget class="QCheckBox" name="autoExpand">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="1">
     <widget class="QCheckBox" name="autoUpdate">
      <property name="text">
@@ -58,12 +51,53 @@
      </property>
     </widget>
    </item>
+   <item row="0" column="1">
+    <widget class="QCheckBox" name="autoExpand">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="ClickableLabel" name="autoUpdateLabel">
+     <property name="font">
+      <font>
+       <pointsize>16</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Auto Update</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="ClickableLabel" name="showIndexRepliesLabel">
+     <property name="font">
+      <font>
+       <pointsize>16</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Show replies on board index</string>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="1">
     <widget class="QLineEdit" name="sessionFile">
      <property name="font">
       <font>
        <pointsize>16</pointsize>
       </font>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QCheckBox" name="showIndexReplies">
+     <property name="text">
+      <string/>
      </property>
     </widget>
    </item>
@@ -85,37 +119,25 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="ClickableLabel" name="autoUpdateLabel">
+   <item row="4" column="0">
+    <widget class="ClickableLabel" name="use4chanPassLabel">
      <property name="font">
       <font>
        <pointsize>16</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Auto Update</string>
+      <string>Use 4chan Pass</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
-    <widget class="QCheckBox" name="showIndexReplies">
+   <item row="4" column="1">
+    <widget class="QCheckBox" name="use4chanPass">
      <property name="text">
       <string/>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="ClickableLabel" name="showIndexRepliesLabel">
-     <property name="font">
-      <font>
-       <pointsize>16</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Show replies on board index</string>
      </property>
     </widget>
    </item>

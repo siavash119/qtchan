@@ -127,8 +127,7 @@ void ThreadTabHelper::loadPosts() {
 			}
 		}
 		QPointer<ThreadForm> replyTo;
-		foreach (const QString &orig, tf->quotelinks)
-		{
+		foreach (const QString &orig, tf->quotelinks) {
 			QMap<QString,ThreadForm*>::iterator i = tfMap.find(orig);
 			if(i != tfMap.end()) {
 				replyTo = i.value();

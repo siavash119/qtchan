@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     treemodel.cpp \
     treeitem.cpp \
     settings.cpp \
-    boardtabhelper.cpp
+    boardtabhelper.cpp \
+    captcha.cpp
 
 HEADERS += mainwindow.h \
     threadform.h \
@@ -45,7 +46,8 @@ HEADERS += mainwindow.h \
     treeitem.h \
     treemodel.h \
     settings.h \
-    boardtabhelper.h
+    boardtabhelper.h \
+    captcha.h
 
 FORMS   += mainwindow.ui \
     threadform.ui \

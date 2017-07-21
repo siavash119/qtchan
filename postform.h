@@ -2,10 +2,12 @@
 #define POSTFORM_H
 
 #include "overlay.h"
+#include "captcha.h"
 #include <QWidget>
 #include <QNetworkReply>
 #include <QFileDialog>
 #include <QMimeData>
+#include <QTextEdit>
 
 namespace Ui {
 class PostForm;
@@ -33,11 +35,14 @@ public:
 
 public slots:
 	void appendText(QString &text);
+	void loadCaptchaImage(QString &challenege, QPixmap &challengeImage);
+	void usePass(bool use4chanPass);
 
 private:
 	Ui::PostForm *ui;
 	Overlay *overlay;
 	QWidget *focused;
+	Captcha captcha;
 
 private slots:
 	void postFinished();

@@ -161,8 +161,8 @@ void ThreadForm::getFile()
 }
 
 void ThreadForm::getThumb() {
-	qDebug().noquote() << QString("getting https://t.4cdn.org/")  % thumbURL;
-	replyThumb = nc.thumbManager->get(QNetworkRequest(QUrl("https://t.4cdn.org/" % thumbURL)));
+	qDebug().noquote() << QString("getting https://i.4cdn.org/")  % thumbURL;
+	replyThumb = nc.thumbManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % thumbURL)));
 	gettingThumb = true;
 	connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished,Qt::UniqueConnection);
 }
@@ -314,7 +314,7 @@ void ThreadForm::imageClicked()
 	if(!QPointer<ClickableLabel>(ui->tim)) return;
 	qDebug().noquote() << "clicked "+post.filename;
 	if(this->type == PostType::Reply) {
-		if(!file->exists() && !gettingFile) {
+		if(file && !file->exists() && !gettingFile) {
 			qDebug().noquote() << QString("getting https://i.4cdn.org/")  % fileURL;
 			gettingFile=true;
 			replyImage = nc.fileManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));

@@ -35,7 +35,7 @@
     <number>0</number>
    </property>
    <property name="sizeConstraint">
-    <enum>QLayout::SetDefaultConstraint</enum>
+    <enum>QLayout::SetMinimumSize</enum>
    </property>
    <property name="leftMargin">
     <number>0</number>
@@ -100,7 +100,7 @@
       <number>0</number>
      </property>
      <property name="sizeAdjustPolicy">
-      <enum>QAbstractScrollArea::AdjustToContents</enum>
+      <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
      </property>
      <property name="widgetResizable">
       <bool>true</bool>
@@ -118,10 +118,16 @@
        </rect>
       </property>
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
       </property>
       <layout class="QVBoxLayout" name="threads">
        <property name="spacing">

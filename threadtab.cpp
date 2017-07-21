@@ -1,5 +1,7 @@
 #include "threadtab.h"
 #include "ui_threadtab.h"
+#include "netcontroller.h"
+#include "mainwindow.h"
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -14,8 +16,6 @@
 #include <QDesktopWidget>
 #include <QScreen>
 #include <QFuture>
-#include "netcontroller.h"
-#include "mainwindow.h"
 
 ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	QWidget(parent), board(board), thread(thread),
@@ -35,6 +35,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	this->setShortcuts();
 	this->installEventFilter(this);
 	connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,UniqueDirect);
+	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 	connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
 
 	//check visible thread forms
@@ -239,7 +240,7 @@ void ThreadTab::findText(const QString text)
 		mapI.next();
 		tf = mapI.value();
 		if(pass) { tf->show(); continue;};
-		match = re.match(tf->post.sub + tf->post.com,0,QRegularExpression::PartialPreferFirstMatch);
+		match = re.match(tf->post.sub + tf->post.com);
 		if(!match.hasMatch()) {
 			tf->hide();
 		}

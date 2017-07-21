@@ -1,5 +1,6 @@
 #include "postform.h"
 #include "ui_postform.h"
+#include "netcontroller.h"
 #include <QUrl>
 #include <QUrlQuery>
 #include <QHttpMultiPart>
@@ -10,7 +11,7 @@
 #include <QShortcut>
 #include <iostream>
 #include <QGraphicsEffect>
-#include "netcontroller.h"
+#include <QSettings>
 
 PostForm::PostForm(QWidget *parent) :
 	QWidget(parent),
@@ -18,14 +19,33 @@ PostForm::PostForm(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->cancel->hide();
+	QSettings settings;
+	if(settings.value("use4chanPass", false).toBool() == true){
+		ui->captcha->hide();
+	}
+	else {
+		ui->challenge->hide();
+	}
 	this->setObjectName("PostForm");
 	ui->name->installEventFilter(this);
 	ui->email->installEventFilter(this);
 	ui->subject->installEventFilter(this);
 	ui->com->installEventFilter(this);
 	ui->browse->installEventFilter(this);
+	ui->response->installEventFilter(this);
 	submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
 	setShortcuts();
+	connect(&captcha,&Captcha::challengeInfo,this,&PostForm::loadCaptchaImage);
+	connect(ui->challenge,&ClickableLabel::clicked,[=]{
+		captcha.getCaptcha();
+	});
+}
+
+void PostForm::loadCaptchaImage(QString &challenege, QPixmap &challengeImage){
+	(void)challenege;
+	ui->challenge->show();
+	qDebug() << "setting captcha image";
+	ui->challenge->setPixmap(challengeImage);
 }
 
 void PostForm::load(QString &board, QString thread)
@@ -34,6 +54,16 @@ void PostForm::load(QString &board, QString thread)
 	this->thread = thread;
 	this->setWindowTitle("post to /" + board + "/" + thread);
 	ui->com->setFocus();
+}
+
+void PostForm::usePass(bool use4chanPass){
+	if(use4chanPass){
+		ui->captcha->hide();
+	}
+	else {
+		ui->captcha->show();
+		ui->challenge->hide();
+	}
 }
 
 PostForm::~PostForm()
@@ -80,16 +110,34 @@ void PostForm::postIt()
 	com.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"com\""));
 	qDebug().noquote() << ui->com->toPlainText().toStdString().c_str();
 	com.setBody(ui->com->toPlainText().toStdString().c_str());
-	/*QHttpPart recaptcha;
-	com.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"g-recaptcha-response\""));
-	com.setBody("");*/
 
 	multiPart->append(mode);
 	multiPart->append(resto);
 	multiPart->append(name);
 	multiPart->append(email);
 	multiPart->append(com);
-	//multiPart->append(recaptcha);
+	QSettings settings;
+	if(settings.value("use4chanPass", false).toBool() == false){
+		QHttpPart captchaChallenge;
+		captchaChallenge.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"recaptcha_challenge_field\""));
+		if(captcha.challenge.isEmpty()){
+			multiPart->deleteLater();
+			return;
+		}
+		qDebug().noquote() << captcha.challenge.toStdString().c_str();
+		captchaChallenge.setBody(captcha.challenge.toStdString().c_str());
+
+		QHttpPart captchaResponse;
+		captchaResponse.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"recaptcha_response_field\""));
+		if(ui->response->text().isEmpty()){
+			multiPart->deleteLater();
+			return;
+		}
+		captchaResponse.setBody(ui->response->text().toStdString().c_str());
+
+		multiPart->append(captchaChallenge);
+		multiPart->append(captchaResponse);
+	}
 
 	if(filename != "") {
 		QHttpPart uploadFile;
@@ -113,14 +161,19 @@ void PostForm::postIt()
 
 void PostForm::postFinished()
 {
-	QTextEdit reply;
-	reply.setWindowTitle("post to /"+board+"/"+thread+" response");
-	//reply.setMinimumSize(640,480);
+	QTextEdit *reply = new QTextEdit();
+	reply->setAttribute(Qt::WA_DeleteOnClose);
+	connect(reply,&QTextEdit::destroyed,[=]{
+		qDebug() << "response window destroyed";
+	});
+	reply->setWindowTitle("post to /"+board+"/"+thread+" response");
+	reply->setMinimumSize(800,600);
 	QByteArray temp = postReply->readAll();
-	reply.setHtml(temp);
-	reply.setGeometry(0,0,this->width(),this->height());
+	reply->setHtml(temp);
+	reply->setGeometry(0,0,this->width(),this->height());
 	qDebug().noquote() << temp;
-	if(reply.toPlainText().contains(QRegularExpression("uploaded.$|Post successful!$")))
+	qDebug() << "showing reply";
+	if(reply->toPlainText().contains(QRegularExpression("uploaded.$|Post successful!$")))
 	{
 		overlay->displayText = "Post successful!";
 		ui->com->clear();
@@ -130,7 +183,7 @@ void PostForm::postFinished()
 		//QTimer::singleShot(1000, reply, &QTextEdit::close);
 	}
 	else{
-		reply.show();
+		reply->show();
 	}
 	QTimer::singleShot(1000, this,&PostForm::removeOverlay);
 	this->installEventFilter(this);
@@ -186,6 +239,11 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
 		fileChecker(mimeData);
 		qDebug().noquote() << "DROPPED";
 		return false;
+	}
+	if(obj->objectName() == "response"){
+		if(event->type() == QEvent::FocusIn){
+			if(!captcha.loaded) captcha.getCaptcha();
+		}
 	}
 	return QObject::eventFilter(obj, event);
 }
