@@ -4,6 +4,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QScrollBar>
+#include <QRegularExpressionMatch>
 
 BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *parent) :
 	QWidget(parent), board(board), type(type), search(search),
@@ -21,7 +22,18 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 	connect(&helper,&BoardTabHelper::newTF,this,&BoardTab::onNewTF,UniqueDirect);
 	connect(&helper,&BoardTabHelper::addStretch,this,&BoardTab::addStretch,UniqueDirect);
 	connect(&helper,&BoardTabHelper::clearMap,this,&BoardTab::clearMap,UniqueDirect);
+
+	myPostForm.setParent(this,Qt::Tool
+						 | Qt::WindowMaximizeButtonHint
+						 | Qt::WindowCloseButtonHint);
+	myPostForm.load(board,"");
+	connect(&myPostForm,&PostForm::loadThread,[=](QString threadNum){
+		TreeItem *childOf = mw->model->getItem(mw->selectionModel->currentIndex());
+		mw->onNewThread(mw,board,threadNum,QString(),childOf);
+	});
+
 	this->setShortcuts();
+	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 }
 
 BoardTab::~BoardTab()
@@ -41,14 +53,22 @@ void BoardTab::setShortcuts()
 	refresh->setShortcut(Qt::Key_R);
 	connect(refresh, &QAction::triggered, &helper, &BoardTabHelper::getPosts, UniqueDirect);
 	this->addAction(refresh);
+
+	QAction *postForm = new QAction(this);
+	postForm->setShortcut(Qt::Key_Q);
+	connect(postForm, &QAction::triggered, this, &BoardTab::openPostForm, UniqueDirect);
+	this->addAction(postForm);
+
 	QAction *focuser = new QAction(this);
 	focuser->setShortcut(Qt::Key_F3);
 	connect(focuser,&QAction::triggered,mw,&MainWindow::focusTree);
 	this->addAction(focuser);
+
 	QAction *focusBar = new QAction(this);
 	focusBar->setShortcut(Qt::Key_F6);
 	connect(focusBar,&QAction::triggered,mw,&MainWindow::focusBar);
 	this->addAction(focusBar);
+
 	QAction *focusSearch = new QAction(this);
 	focusSearch->setShortcut(QKeySequence("Ctrl+f"));
 	connect(focusSearch,&QAction::triggered,this,&BoardTab::focusIt);
@@ -83,6 +103,12 @@ void BoardTab::setShortcuts()
 	this->addAction(selectPost);
 }
 
+void BoardTab::openPostForm()
+{
+	myPostForm.show();
+	myPostForm.activateWindow();
+	myPostForm.raise();
+}
 
 void BoardTab::findText(const QString text)
 {

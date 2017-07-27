@@ -95,7 +95,7 @@
         <x>0</x>
         <y>0</y>
         <width>526</width>
-        <height>161</height>
+        <height>153</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -149,6 +149,12 @@
      </property>
      <item>
       <widget class="QPushButton" name="browse">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="acceptDrops">
         <bool>true</bool>
        </property>
@@ -159,6 +165,12 @@
      </item>
      <item>
       <widget class="QLabel" name="filename">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>No File Selected</string>
        </property>
@@ -194,6 +206,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="submit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Submit</string>
        </property>

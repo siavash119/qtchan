@@ -311,10 +311,10 @@ void ThreadForm::loadImage(QString path) {
 
 void ThreadForm::imageClicked()
 {
-	if(!QPointer<ClickableLabel>(ui->tim)) return;
+	if(!QPointer<ClickableLabel>(ui->tim) || (ui->tim && ui->tim->isHidden())) return;
 	qDebug().noquote() << "clicked "+post.filename;
 	if(this->type == PostType::Reply) {
-		if(file && !file->exists() && !gettingFile) {
+		if(!post.filename.isEmpty() && file && !file->exists() && !gettingFile) {
 			qDebug().noquote() << QString("getting https://i.4cdn.org/")  % fileURL;
 			gettingFile=true;
 			replyImage = nc.fileManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
@@ -328,7 +328,7 @@ void ThreadForm::imageClicked()
 	}
 	else{
 		TreeItem *childOf = mw->model->getItem(mw->selectionModel->currentIndex());
-		mw->onNewThread(this,board,threadNum,QString(),childOf);
+		mw->onNewThread(mw,board,threadNum,QString(),childOf);
 	}
 }
 

@@ -11,6 +11,7 @@
 #include <QShortcut>
 #include <iostream>
 #include <QGraphicsEffect>
+#include <QRegularExpressionMatch>
 #include <QSettings>
 
 PostForm::PostForm(QWidget *parent) :
@@ -94,28 +95,35 @@ void PostForm::postIt()
 	this->removeEventFilter(this);
 	qDebug().noquote() << "posting";
 	QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+
 	QHttpPart mode;
 	mode.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"mode\""));
 	mode.setBody("regist");
-	QHttpPart resto;
-	resto.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"resto\""));
-	resto.setBody(thread.toStdString().c_str());
+	multiPart->append(mode);
+
+	if(thread != ""){
+		QHttpPart resto;
+		resto.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"resto\""));
+		resto.setBody(thread.toStdString().c_str());
+		multiPart->append(resto);
+	}
+
 	QHttpPart name;
 	name.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"name\""));
 	name.setBody(ui->name->text().toStdString().c_str());
+	multiPart->append(name);
+
 	QHttpPart email;
 	email.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"email\""));
 	email.setBody(ui->email->text().toStdString().c_str());
+	multiPart->append(email);
+
 	QHttpPart com;
 	com.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"com\""));
 	qDebug().noquote() << ui->com->toPlainText().toStdString().c_str();
 	com.setBody(ui->com->toPlainText().toStdString().c_str());
-
-	multiPart->append(mode);
-	multiPart->append(resto);
-	multiPart->append(name);
-	multiPart->append(email);
 	multiPart->append(com);
+
 	QSettings settings;
 	if(settings.value("use4chanPass", false).toBool() == false){
 		QHttpPart captchaChallenge;
@@ -173,13 +181,28 @@ void PostForm::postFinished()
 	reply->setGeometry(0,0,this->width(),this->height());
 	qDebug().noquote() << temp;
 	qDebug() << "showing reply";
-	if(reply->toPlainText().contains(QRegularExpression("uploaded.$|Post successful!$")))
+	QString replyString(reply->toPlainText());
+	if(replyString.contains(QRegularExpression("uploaded.$|Post successful!$")))
 	{
-		overlay->displayText = "Post successful!";
+		overlay->displayText = replyString;
 		ui->com->clear();
-		ui->filename->setText("No file selected");
+		setFilenameText(empty);
 		filename = "";
+		ui->cancel->hide();
 		QTimer::singleShot(1000, this, &PostForm::close);
+		if(thread == ""){
+			//QRegularExpression re("<h1.*?>(?<upMessage>.*?)</h1><!-- thread:0,no:(?<threadNum>\\d+)");
+			QRegularExpression re("<!-- thread:0,no:(?<threadNum>\\d+)");
+			QRegularExpressionMatch match = re.match(temp);
+			if(match.hasMatch()){
+				qDebug() << "post successful; loading thread:" << match.captured("threadNum");
+				emit loadThread(match.captured("threadNum"));
+			}
+			else{
+				qDebug() << "post succesful; but some other error";
+				qDebug() << replyString;
+			}
+		}
 		//QTimer::singleShot(1000, reply, &QTextEdit::close);
 	}
 	else{
@@ -225,11 +248,6 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
 			postIt();
 			return true;
 		}
-		if(key==53) {
-			addOverlay();
-			QTimer::singleShot(1000, this, &PostForm::removeOverlay);
-			//qDebug() << filename;
-		}
 		return QObject::eventFilter(obj, event);
 	} else if(event->type() == QEvent::DragEnter) {
 		static_cast<QDragEnterEvent*>(event)->acceptProposedAction();
@@ -250,29 +268,34 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
 
 void PostForm::fileChecker(const QMimeData *mimeData)
 {
+	QString output;
 	qDebug().noquote() << "checking file";
 	if (mimeData->hasImage()) {
 		//ui->label->setPixmap(qvariant_cast<QPixmap>(mimeData->imageData()));
 	} else if (mimeData->hasHtml()) {
-		ui->filename->setText(mimeData->text());
+		output = QUrl::fromPercentEncoding(mimeData->text().toUtf8());
+		setFilenameText(output);
 	} else if (mimeData->hasText()) {
 		qDebug().noquote() << mimeData->text();
+		output = QUrl::fromPercentEncoding(mimeData->text().toUtf8());
 #if defined(Q_OS_WIN)
-		filename = mimeData->text().mid(8); //remove file:///
+		filename = output.mid(8); //remove file:///
 #else
-		filename = mimeData->text().mid(7); //remove file://
+		filename = output.mid(7); //remove file://
 #endif
 		filename.remove(QRegularExpression("[\\n\\t\\r]"));
 		qDebug() << "added file to upload:" << filename;
-		ui->filename->setText(filename);
+		setFilenameText(filename);
 	} else if (mimeData->hasUrls()) {
 		QList<QUrl> urlList = mimeData->urls();
 		QString text;
 		for (int i = 0; i < urlList.size() && i < 32; ++i)
 			text += urlList.at(i).path() + QLatin1Char('\n');
-		ui->filename->setText(text);
+		output = QUrl::fromPercentEncoding(text.toUtf8());
+		setFilenameText(output);
 	} else {
-		ui->filename->setText("Cannot display data");
+		QString temp("Cannot display data");
+		setFilenameText(temp);
 	}
 	qDebug().noquote() << filename;
 	ui->cancel->show();
@@ -293,11 +316,11 @@ void PostForm::fileSelected(const QString &file)
 	//qDebug() << dialog->;
 	//qDebug() << dialog->getOpenFileName();
 	if(filename == "") {
-		ui->filename->setText("No file selected");
+		setFilenameText(empty);
 		ui->cancel->hide();
 	}
 	else {
-		ui->filename->setText(file);
+		setFilenameText(filename);
 		ui->cancel->show();
 	}
 	dialog->close();
@@ -307,11 +330,23 @@ void PostForm::fileSelected(const QString &file)
 void PostForm::on_cancel_clicked()
 {
 	filename = "";
-	ui->filename->setText("No file selected");
+	setFilenameText(empty);
 	ui->cancel->hide();
 }
 
 void PostForm::droppedItem()
 {
 	qDebug().noquote() << "dropped!";
+}
+
+void PostForm::setFilenameText(QString &text){
+	QFontMetrics metrics(ui->filename->font());
+	QString elidedText = metrics.elidedText(text, Qt::ElideRight, ui->filename->width());
+	ui->filename->setText(elidedText);
+}
+
+void PostForm::resizeEvent(QResizeEvent *event){
+	if(filename != "") setFilenameText(filename);
+	else setFilenameText(empty);
+	return QWidget::resizeEvent(event);
 }

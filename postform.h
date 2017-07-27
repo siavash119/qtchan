@@ -3,6 +3,7 @@
 
 #include "overlay.h"
 #include "captcha.h"
+#include <QFontMetrics>
 #include <QWidget>
 #include <QNetworkReply>
 #include <QFileDialog>
@@ -16,7 +17,6 @@ class PostForm;
 class PostForm : public QWidget
 {
 	Q_OBJECT
-
 public:
 	explicit PostForm(QWidget *parent = 0);
 	void load(QString &board, QString thread = "0");
@@ -31,7 +31,11 @@ public:
 	void fileChecker(const QMimeData *mimedata);
 	void addOverlay();
 	void removeOverlay();
+	QString empty = "No file selected";
 	//TODO links in com?
+
+signals:
+	void loadThread(QString thread);
 
 public slots:
 	void appendText(QString &text);
@@ -43,6 +47,7 @@ private:
 	Overlay *overlay;
 	QWidget *focused;
 	Captcha captcha;
+	void setFilenameText(QString &text);
 
 private slots:
 	void postFinished();
@@ -54,6 +59,7 @@ private slots:
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *event);
+	void resizeEvent(QResizeEvent *event);
 };
 
 #endif // POSTFORM_H

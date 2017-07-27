@@ -95,27 +95,33 @@ void ThreadTab::setShortcuts()
 	foo->setShortcut(Qt::Key_G);
 	connect(foo, &QAction::triggered, this, &ThreadTab::gallery);
 	this->addAction(foo);
+
 	QAction *postForm = new QAction(this);
 	postForm->setShortcut(Qt::Key_Q);
 	connect(postForm, &QAction::triggered, this, &ThreadTab::openPostForm);
 	this->addAction(postForm);
+
 	QAction *expandAll = new QAction(this);
 	expandAll->setShortcut(Qt::Key_E);
 	connect(expandAll, &QAction::triggered,&helper,&ThreadTabHelper::loadAllImages,UniqueDirect);
 	this->addAction(expandAll);
+
 	QAction *refresh = new QAction(this);
 	refresh->setShortcut(Qt::Key_R);
 	refresh->setShortcutContext(Qt::ApplicationShortcut);
 	connect(refresh, &QAction::triggered,&helper,&ThreadTabHelper::getPosts,UniqueDirect);
 	this->addAction(refresh);
+
 	QAction *focusSearch = new QAction(this);
 	focusSearch->setShortcut(QKeySequence("Ctrl+f"));
 	connect(focusSearch,&QAction::triggered,this,&ThreadTab::focusIt);
 	this->addAction(focusSearch);
+
 	QAction *focusTree = new QAction(this);
 	focusTree->setShortcut(Qt::Key_F3);
 	connect(focusTree,&QAction::triggered,mw,&MainWindow::focusTree);
 	this->addAction(focusTree);
+
 	QAction *focusBar = new QAction(this);
 	focusBar->setShortcut(Qt::Key_F6);
 	connect(focusBar,&QAction::triggered,mw,&MainWindow::focusBar);

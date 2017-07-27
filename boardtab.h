@@ -3,6 +3,7 @@
 
 #include "boardtabhelper.h"
 #include "threadform.h"
+#include "postform.h"
 #include <QSpacerItem>
 #include <QWidget>
 #include <QThread>
@@ -29,6 +30,8 @@ public:
 	QString boardUrl;
 	QNetworkReply *reply;
 	QMap<QString,ThreadForm*> tfMap;
+	PostForm myPostForm;
+	void openPostForm();
 
 	void setShortcuts();
 	void getPosts();

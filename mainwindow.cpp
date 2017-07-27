@@ -163,6 +163,7 @@ void MainWindow::setShortcuts()
 	});
 
 	ui->actionSettings->setShortcut(QKeySequence("Ctrl+p"));
+	ui->actionSettings->setShortcutContext(Qt::ApplicationShortcut);
 	connect(ui->actionSettings,&QAction::triggered,[=]{
 		if(settingsView.isVisible()){
 			qDebug() << "hiding settings window";
@@ -439,14 +440,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 		//int mod = keyEvent->modifiers();
 		//qDebug("Ate key press %d, key");
 		//qDebug("Modifers %d", mod);
-		if(key == 53) {
-			/*const QModelIndexList indexList = ui->treeView->selectionModel()->selectedRows();
-			int row = indexList.at(0).row();
-			qDebug() << (Tab::TabType)tabs.at(row).type;
-			((Tab::TabType)tabs.at(row).type) == Tab::TabType::Board ? ((BoardTab*)tabs.at(row).TabPointer)->updatePosts() :
-														  ((ThreadTab*)tabs.at(row).TabPointer)->updatePosts();*/
-		}
-		else if(key == 16777216){
+		if(key == 16777216){
 			if(ui->lineEdit->focusWidget() == ui->lineEdit && !ui->lineEdit->isHidden()){
 				ui->lineEdit->hide();
 			}
