@@ -2,6 +2,7 @@ qtchan is a 4chan browser written with qt5.\
 I started developing it because browsers suck.\
 There's still a lot to do.
 
+
 # Features
 * browse and post on 4chan
 * auto update threads and auto download original file
@@ -9,6 +10,17 @@ There's still a lot to do.
 * tree style tabs and save state (./session.txt)
 * open files in OS's default application
 * search and filter
+
+
+## a few keyboard commands and instructions
+* ctrl+l opens up the nav bar; you can type g or g/boardnum or /g/ or https://boards.4chan... etc
+* ctrl+w (ctrl+f4 on windows) or delete to close tab
+* ctrl+p opens settings-ctrl+tab ctrl+shift+tab, ctrl+1-4 to switch tabs
+* q opens up post form, shift+enter to post from there
+* e expands all images and auto expands future posts on current tab
+there are more shortcuts; look at the source for now for info.
+
+need to restart qtchan if changing to use 4chan pass or not. signals/slots still not finished for that.
 
 ## Using 4chan pass to post
 Create a file ~/.config/qtchan/settings like below. Look at your browser cookies for values.
