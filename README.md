@@ -13,7 +13,8 @@ There's still a lot to do.
 
 
 ## a few keyboard commands and instructions
-* ctrl+l opens up the nav bar; you can type g or g/boardnum or /g/ or https://boards.4chan... etc
+* ctrl+l opens up the nav bar; you can type g or g/boardnum or /g/ or https://boards.4chan... etc.\
+g for first page, /g/ for catalogue, g/search to get catalogue and search
 * ctrl+w (ctrl+f4 on windows) or delete to close tab
 * ctrl+p opens settings-ctrl+tab ctrl+shift+tab, ctrl+1-4 to switch tabs
 * ctrl+f to search and filter
@@ -43,12 +44,15 @@ pass_enabled:1
 
 ## TODO
 ### MAJOR
+* fix catalogue view (i.e. /boardname/; boardtab clears after almost finishing loading)
 * unread, read, (You) display
 * notifications
+* better settings
 * instructions
 
 ### MINOR
 * show loading state
 * search/filter by different post fields (right now combo of sub and com)
-* more settings
+* scaling
 * themes
+* more settings
