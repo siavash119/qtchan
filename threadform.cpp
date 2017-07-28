@@ -400,7 +400,8 @@ void ThreadForm::quoteClicked(const QString &link)
 		if(tf != nullptr && !tf->hidden) this->insert(tf);
 	}
 	else if(link.startsWith("#op")){
-		static_cast<ThreadTab*>(tab)->quoteIt(">>"+post.no);
+		if(this->type == PostType::Reply) static_cast<ThreadTab*>(tab)->quoteIt(">>"+post.no);
+		else imageClicked();
 	}
 	else if(!link.isEmpty() && link.at(0)=='/') {
 		mw->loadFromSearch(link,QString(),Q_NULLPTR,false);
