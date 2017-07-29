@@ -20,7 +20,7 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 	helper.moveToThread(&workerThread);
 	connect(&helper,&BoardTabHelper::newThread,this,&BoardTab::onNewThread,UniqueDirect);
 	connect(&helper,&BoardTabHelper::newTF,this,&BoardTab::onNewTF,UniqueDirect);
-	connect(&helper,&BoardTabHelper::addStretch,this,&BoardTab::addStretch,UniqueDirect);
+	//connect(&helper,&BoardTabHelper::addStretch,this,&BoardTab::addStretch,UniqueDirect);
 	connect(&helper,&BoardTabHelper::clearMap,this,&BoardTab::clearMap,UniqueDirect);
 
 	myPostForm.setParent(this,Qt::Tool
@@ -38,7 +38,7 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 
 BoardTab::~BoardTab()
 {
-	ui->threads->removeItem(&space);
+	//ui->threads->removeItem(&space);
 	//qDeleteAll(tfMap);
 	helper.abort = 1;
 	disconnect(&helper);
@@ -134,8 +134,8 @@ void BoardTab::findText(const QString text)
 
 void BoardTab::addStretch()
 {
-	ui->threads->removeItem(&space);
-	ui->threads->insertItem(-1,&space);
+	//ui->threads->removeItem(&space);
+	//ui->threads->insertItem(-1,&space);
 }
 
 void BoardTab::onNewTF(ThreadForm *tf, ThreadForm *thread)

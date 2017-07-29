@@ -209,6 +209,7 @@ void PostForm::postFinished()
 		reply->show();
 	}
 	QTimer::singleShot(1000, this,&PostForm::removeOverlay);
+	captcha.loaded = false;
 	this->installEventFilter(this);
 	submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
 }

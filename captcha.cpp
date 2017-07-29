@@ -12,7 +12,6 @@ Captcha::~Captcha(){
 
 void Captcha::getCaptcha(){
 	qDebug() << "getting captcha from " + urlChallenge;
-	loaded = true;
 	replyChallenge = nc.jsonManager->get(requestChallenge);
 	QObject::connect(replyChallenge,&QNetworkReply::finished,this,&Captcha::loadCaptcha);
 }
@@ -66,5 +65,7 @@ void Captcha::loadImage(){
 	if(rep.isEmpty()) return;
 	QPixmap challengeImage;
 	challengeImage.loadFromData(rep);
+	loaded = true;
+	QTimer::singleShot(180000, [=](){loaded = false;});
 	emit challengeInfo(challenge,challengeImage);
 }
