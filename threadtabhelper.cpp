@@ -121,9 +121,9 @@ void ThreadTabHelper::loadPosts() {
 			else if(tf->post.com.length()) {
 				QString temp = tf->post.com;
 				emit windowTitle("/"+board+"/"+thread + " - " +
-								 ThreadForm::htmlParse(temp
-													   .replace(QRegExp("</?span( class=\"quote\" style=\"color:#[\\d|\\w]{6}\")?>"),""))
-								 .replace("\n"," "));
+									temp
+										.replace("<br>"," ")
+										.remove(QRegExp("<[^>]*>")));
 			}
 		}
 		QPointer<ThreadForm> replyTo;
