@@ -47,7 +47,7 @@ signals:
 	void newTF(ThreadForm *tf);
 	void windowTitle(QString windowTitle);
 	void setReplies(ThreadForm *tf);
-	void addStretch();
+	//void addStretch();
 	void threadStatus(QString status, QString value = "0");
 	void refresh(QPointer<ThreadForm> tf);
 	//void scrollIt();

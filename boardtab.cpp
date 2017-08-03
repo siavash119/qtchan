@@ -17,6 +17,7 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 	if(type == BoardType::Index) boardUrl = "https://a.4cdn.org/"+board+"/1.json";
 	else boardUrl = "https://a.4cdn.org/"+board+"/catalog.json";
 	helper.startUp(board, type, search, this);
+	QCoreApplication::processEvents();
 	helper.moveToThread(&workerThread);
 	connect(&helper,&BoardTabHelper::newThread,this,&BoardTab::onNewThread,UniqueDirect);
 	connect(&helper,&BoardTabHelper::newTF,this,&BoardTab::onNewTF,UniqueDirect);
@@ -40,9 +41,11 @@ BoardTab::~BoardTab()
 {
 	//ui->threads->removeItem(&space);
 	//qDeleteAll(tfMap);
-	helper.abort = 1;
-	disconnect(&helper);
-	disconnect(&workerThread);
+	helper.abort = true;
+	workerThread.quit();
+	workerThread.wait();
+	/*disconnect(&helper);
+	disconnect(&workerThread);*/
 	delete ui;
 	qDebug().noquote().nospace() << "deleting board /" << board+"/";
 }
@@ -75,14 +78,14 @@ void BoardTab::setShortcuts()
 	this->addAction(focusSearch);
 
 	QAction *scrollUp = new QAction(this);
-	scrollUp->setShortcut(Qt::Key_J);
+	scrollUp->setShortcut(Qt::Key_K);
 	connect(scrollUp, &QAction::triggered,[=]{
 		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() - 150);
 	});
 	this->addAction(scrollUp);
 
 	QAction *scrollDown = new QAction(this);
-	scrollDown->setShortcut(Qt::Key_K);
+	scrollDown->setShortcut(Qt::Key_J);
 	connect(scrollDown, &QAction::triggered,[=]{
 		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() + 150);
 	});
@@ -112,31 +115,41 @@ void BoardTab::openPostForm()
 
 void BoardTab::findText(const QString text)
 {
-	if(text == "") ui->searchWidget->hide();
+	bool pass = false;
+	if(text.isEmpty()){
+		ui->searchWidget->hide();
+		pass = true;
+	}
 	QRegularExpression re(text,QRegularExpression::CaseInsensitiveOption);
 	QRegularExpressionMatch match;
 	ThreadForm *tf;
-	bool pass = false;
-	if (text == "") pass = true;
 	qDebug().noquote() << "searching " + text;
 	QMapIterator<QString,ThreadForm*> mapI(tfMap);
 	while (mapI.hasNext()) {
 		mapI.next();
 		tf = mapI.value();
-		if(pass) { tf->show(); continue;};
-		match = re.match(tf->post.sub + tf->post.com);
-		if(!match.hasMatch()) {
-			tf->hide();
+		if(pass){
+			tf->show();
+			continue;
+		};
+		QString toMatch(tf->post.sub + " " + tf->post.com);
+		toMatch.replace("<br>"," ");
+		toMatch.remove(QRegExp("<[^>]*>"));
+		match = re.match(toMatch);
+		if(match.hasMatch()){
+			tf->show();
+			qDebug().noquote().nospace() << "found " << text << " in thread #" << tf->post.no;
 		}
-		else qDebug().noquote().nospace() << "found " << text << " in thread #" << tf->post.no;
+		else tf->hide();
 	}
 }
 
+/*
 void BoardTab::addStretch()
 {
-	//ui->threads->removeItem(&space);
-	//ui->threads->insertItem(-1,&space);
-}
+	ui->threads->removeItem(&space);
+	ui->threads->insertItem(-1,&space);
+}*/
 
 void BoardTab::onNewTF(ThreadForm *tf, ThreadForm *thread)
 {

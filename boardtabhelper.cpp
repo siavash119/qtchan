@@ -87,12 +87,12 @@ void BoardTabHelper::loadPosts() {
 		reply->deleteLater();
 		return;
 	}
-	qDeleteAll(tfMap);
-	tfMap.clear();
 	//write to file and make json array
 	QByteArray rep = reply->readAll();
 	reply->deleteLater();
 	if(rep.isEmpty()) return;
+	qDeleteAll(tfMap);
+	tfMap.clear();
 	emit clearMap();
 	QJsonArray threads = filterThreads(rep);
 	int length = threads.size();
@@ -141,6 +141,19 @@ void BoardTabHelper::loadPosts() {
 QJsonArray BoardTabHelper::filterThreads(QByteArray &rep){
 	QJsonArray threads;
 	if(type==BoardType::Index) threads = QJsonDocument::fromJson(rep).object().value("threads").toArray();
+	else if(search.isEmpty()){
+		QJsonArray allThreads = QJsonDocument::fromJson(rep).array();
+		int numPages = allThreads.size();
+		QJsonArray pageThreads;
+		//-3 for some reason catalog goes blank on last 3 pages
+		for(int i=0;i<numPages-3;i++){
+			pageThreads = allThreads.at(i).toObject().value("threads").toArray();
+			int numThreads = pageThreads.size();
+			for(int j=0;j<numThreads;j++){
+				threads.append(pageThreads.at(j));
+			}
+		}
+	}
 	else{ //TODO put this is static concurrent function with future or stream?
 		qDebug("searching %s",search.toLatin1().constData());
 		QRegularExpression re(search,QRegularExpression::CaseInsensitiveOption);

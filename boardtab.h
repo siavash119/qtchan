@@ -41,7 +41,7 @@ public slots:
 	void findText(const QString text);
 	void onNewThread(ThreadForm *tf);
 	void onNewTF(ThreadForm *tf, ThreadForm *thread);
-	void addStretch();
+	//void addStretch();
 	void clearMap();
 
 private:

@@ -25,6 +25,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	this->setWindowTitle("/"+board+"/"+thread);
 	ui->searchWidget->hide();
 	helper.startUp(board,thread, this);
+	QCoreApplication::processEvents();
 	helper.moveToThread(&workerThread);
 	connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF,UniqueDirect);
 	connect(&helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle,UniqueDirect);
@@ -36,7 +37,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	this->installEventFilter(this);
 	connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,UniqueDirect);
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
-	connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
+	//connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
 
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
@@ -144,10 +145,12 @@ void ThreadTab::setShortcuts()
 
 ThreadTab::~ThreadTab()
 {
-	ui->threads->removeItem(&space);
-	helper.abort = 1;
-	disconnect(&helper);
-	disconnect(&workerThread);
+	//ui->threads->removeItem(&space);
+	helper.abort = true;
+	workerThread.quit();
+	workerThread.wait();
+	/*disconnect(&helper);
+	disconnect(&workerThread);*/
 	disconnect(connectionAutoUpdate);
 	delete ui;
 	qDebug().noquote().nospace() << "deleting tab /" << board+"/"+thread;
@@ -172,11 +175,11 @@ void ThreadTab::gallery()
 	QProcess().startDetached(command,arguments);
 }
 
-void ThreadTab::addStretch()
+/*void ThreadTab::addStretch()
 {
 	ui->threads->removeItem(&space);
 	ui->threads->insertItem(-1,&space);
-}
+}*/
 
 int ThreadTab::getMinWidth()
 {
@@ -274,10 +277,10 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 		int key = keyEvent->key();
 		//qDebug("Ate modifier %d",mod);
 		//qDebug("Ate key press %d", key);
-		if(key == 74){
+		if(key == Qt::Key_K){
 			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() - 150);
 		}
-		else if(key == 75){
+		else if(key == Qt::Key_J){
 			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() + 150);
 		}
 		else if(key == 16777220) {
