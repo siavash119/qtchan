@@ -120,9 +120,10 @@ void ThreadTabHelper::loadPosts() {
 			if(tf->post.sub.length())emit windowTitle("/"+board+"/"+thread + " - " + tf->post.sub);
 			else if(tf->post.com.length()) {
 				QString temp = tf->post.com;
+				//TODO clean this
 				emit windowTitle("/"+board+"/"+thread + " - " +
-									temp
-										.replace("<br>"," ")
+									 ThreadForm::htmlParse(temp)
+										.replace("\n"," ")
 										.remove(QRegExp("<[^>]*>")));
 			}
 		}
