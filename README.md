@@ -21,9 +21,10 @@ g for first page, /g/ for catalogue, g/search to get catalogue and search
 * r manually refreshes thread
 * q opens up post form, shift+enter to post from there
 * e expands all images and auto expands future posts on current tab
+* ctrl+plus/ctrl+minus to zoom in/zoom out
 * f10 saves tree state (it'll also save on exit)
 * f11 hides menubar
-* j and k scroll (opposite of standard vim)
+* j and k scroll
 * o opens image at top of view
 * if you have mpv, g opens all the images/videos in the thread.
 
