@@ -114,6 +114,7 @@ public slots:
 	void hideClicked();
 	void removeClone(QPointer<ThreadForm> tf);
 	void addReply(ThreadForm *tf);
+	void setFontSize(int size);
 
 private slots:
 	void quoteClicked(const QString &link);

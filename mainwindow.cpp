@@ -33,6 +33,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->lineEdit->installEventFilter(this);
 	ui->treeView->setModel(model);
 	ui->treeView->installEventFilter(this);
+	QSettings settings;
+	int fontSize = settings.value("fontSize",14).toInt();
+	QFont temp = ui->treeView->font();
+	temp.setPointSize(fontSize);
+	ui->treeView->setFont(temp);
 	selectionModel = ui->treeView->selectionModel();
 	selectionConnection = connect(selectionModel,&QItemSelectionModel::selectionChanged,this,
 			&MainWindow::onSelectionChanged, Qt::UniqueConnection);
@@ -147,6 +152,36 @@ void MainWindow::setShortcuts()
 	openExplorer->setShortcutContext(Qt::ApplicationShortcut);
 	connect(openExplorer, &QAction::triggered, this, &MainWindow::openExplorer);
 	this->addAction(openExplorer);
+
+	QAction *zoomOut = new QAction(this);
+	zoomOut->setShortcut(QKeySequence::ZoomOut);
+	connect(zoomOut, &QAction::triggered, [=](){
+		qDebug() << "decreasing text size";
+		QSettings settings;
+		int fontSize = settings.value("fontSize",14).toInt()-2;
+		if(fontSize < 2) fontSize = 2;
+		settings.setValue("fontSize",fontSize);
+		QFont temp = ui->treeView->font();
+		temp.setPointSize(fontSize);
+		ui->treeView->setFont(temp);
+		emit setFontSize(fontSize);
+	});
+	this->addAction(zoomOut);
+
+	QAction *zoomIn = new QAction(this);
+	zoomIn->setShortcut(QKeySequence::ZoomIn);
+	connect(zoomIn, &QAction::triggered, [=](){
+		qDebug() << "increasing text size";
+		QSettings settings;
+		int fontSize = settings.value("fontSize",14).toInt()+2;
+		settings.setValue("fontSize",fontSize);
+		QFont temp = ui->treeView->font();
+		temp.setPointSize(fontSize);
+		ui->treeView->setFont(temp);
+		emit setFontSize(fontSize);
+	});
+	this->addAction(zoomIn);
+
 
 	ui->actionSave->setShortcut(QKeySequence("Ctrl+s"));
 	ui->actionSave->setShortcutContext(Qt::ApplicationShortcut);

@@ -78,6 +78,7 @@ signals:
 	void setAutoUpdate(bool autoUpdate);
 	void setAutoExpand(bool autoExpand);
 	void setUse4chanPass(bool use4chanPass);
+	void setFontSize(int fontSize);
 };
 
 extern MainWindow *mw;

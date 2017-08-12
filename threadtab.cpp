@@ -38,7 +38,11 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,UniqueDirect);
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 	//connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
-
+	connect(mw,&MainWindow::setFontSize,[=](int fontSize){
+		foreach(ThreadForm *tf, tfMap){
+			tf->setFontSize(fontSize);
+		}
+	});
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
 	connect(&watcher,&QFutureWatcherBase::finished,[=]()
@@ -92,10 +96,10 @@ QList<ThreadForm*> ThreadTab::checkIfVisible(QList<ThreadForm*> &unseenList)
 
 void ThreadTab::setShortcuts()
 {
-	QAction *foo = new QAction(this);
-	foo->setShortcut(Qt::Key_G);
-	connect(foo, &QAction::triggered, this, &ThreadTab::gallery);
-	this->addAction(foo);
+	QAction *gallery = new QAction(this);
+	gallery->setShortcut(Qt::Key_G);
+	connect(gallery, &QAction::triggered, this, &ThreadTab::gallery);
+	this->addAction(gallery);
 
 	QAction *postForm = new QAction(this);
 	postForm->setShortcut(Qt::Key_Q);

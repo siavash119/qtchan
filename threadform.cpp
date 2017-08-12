@@ -32,6 +32,8 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
 	this->setStyleSheet("background-color:" + background.name() + "; color:#bbbbbb;");
 	ui->quoteWidget->hide();
 	ui->tim->hide();
+	QSettings settings;
+	setFontSize(settings.value("fontSize",14).toInt());
 	//ui->replies->hide();
 	//if(board != "pol") ui->country_name->hide();
 	//this->setMinimumWidth(488);
@@ -379,6 +381,20 @@ QString ThreadForm::htmlParse(QString &html)
 			.replace("&gt;",">").replace("&lt;","<")
 			.replace("&quot;","\"").replace("&#039;","'")
 			.replace("<wb>","\n").replace("<wbr>","\n");
+}
+
+void ThreadForm::setFontSize(int size){
+	QFont temp = this->ui->info->font();
+	temp.setPointSize(size-2);
+	this->ui->info->setFont(temp);
+	temp.setPointSize(size);
+	this->ui->com->setFont(temp);
+	QListIterator<QPointer<ThreadForm>> i(clones);
+	while(i.hasNext()) {
+		QPointer<ThreadForm> next = i.next();
+		if(!next) continue;
+		next->setFontSize(size);
+	}
 }
 
 QString ThreadForm::titleParse(QString &title)
