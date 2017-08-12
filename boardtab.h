@@ -43,6 +43,7 @@ public slots:
 	void onNewTF(ThreadForm *tf, ThreadForm *thread);
 	//void addStretch();
 	void clearMap();
+	void setFontSize(int fontSize, int imageSize);
 
 private:
 	Ui::BoardTab *ui;

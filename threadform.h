@@ -63,7 +63,7 @@ public:
 	//TODO check settings -> filter
 	bool hidden = false;
 	bool seen = false;
-	static QImage scaleImage(QString path);
+	static QImage scaleImage(QString path, int scale);
 	QFutureWatcher<QImage> watcher;
 	QString repliesString;
 	QString infoString();
@@ -80,9 +80,9 @@ private:
 	QString thumbURL;
 	QString pathBase;
 	QString filePath;
-	QFile *file;
+	QPointer<QFile> file;
 	QString thumbPath;
-	QFile *thumb;
+	QPointer<QFile> thumb;
 	QMetaObject::Connection connectionThumb;
 	QMetaObject::Connection connectionImage;
 	//QNetworkReply *reply; //Use for cross-thread gets later?
@@ -114,7 +114,7 @@ public slots:
 	void hideClicked();
 	void removeClone(QPointer<ThreadForm> tf);
 	void addReply(ThreadForm *tf);
-	void setFontSize(int size);
+	void setFontSize(int fontSize, int imageSize);
 
 private slots:
 	void quoteClicked(const QString &link);

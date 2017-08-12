@@ -38,11 +38,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,UniqueDirect);
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 	//connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
-	connect(mw,&MainWindow::setFontSize,[=](int fontSize){
-		foreach(ThreadForm *tf, tfMap){
-			tf->setFontSize(fontSize);
-		}
-	});
+	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize,UniqueDirect);
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
 	connect(&watcher,&QFutureWatcherBase::finished,[=]()
@@ -68,6 +64,12 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 		watcher.setFuture(newImage);
 	});
 	//connect(&helper,&ThreadTabHelper::refresh,[=](ThreadForm *tf) {onRefresh(tf);});
+}
+
+void ThreadTab::setFontSize(int fontSize, int imageSize){
+	foreach(ThreadForm *tf, tfMap){
+		tf->setFontSize(fontSize, imageSize);
+	}
 }
 
 QList<ThreadForm*> ThreadTab::checkIfVisible(QList<ThreadForm*> &unseenList)

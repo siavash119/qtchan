@@ -161,10 +161,13 @@ void MainWindow::setShortcuts()
 		int fontSize = settings.value("fontSize",14).toInt()-2;
 		if(fontSize < 2) fontSize = 2;
 		settings.setValue("fontSize",fontSize);
+		int imageSize = settings.value("imageSize",250).toInt()-25;
+		if(imageSize < 25) imageSize = 25;
+		settings.setValue("imageSize",imageSize);
 		QFont temp = ui->treeView->font();
 		temp.setPointSize(fontSize);
 		ui->treeView->setFont(temp);
-		emit setFontSize(fontSize);
+		emit setFontSize(fontSize,imageSize);
 	});
 	this->addAction(zoomOut);
 
@@ -175,10 +178,12 @@ void MainWindow::setShortcuts()
 		QSettings settings;
 		int fontSize = settings.value("fontSize",14).toInt()+2;
 		settings.setValue("fontSize",fontSize);
+		int imageSize = settings.value("imageSize",250).toInt()+25;
+		settings.setValue("imageSize",imageSize);
 		QFont temp = ui->treeView->font();
 		temp.setPointSize(fontSize);
 		ui->treeView->setFont(temp);
-		emit setFontSize(fontSize);
+		emit setFontSize(fontSize,imageSize);
 	});
 	this->addAction(zoomIn);
 

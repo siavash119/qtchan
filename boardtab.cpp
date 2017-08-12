@@ -35,12 +35,13 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 
 	this->setShortcuts();
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
+	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,UniqueDirect);
+}
 
-	connect(mw,&MainWindow::setFontSize,[=](int fontSize){
-		foreach(ThreadForm *tf, tfMap){
-			tf->setFontSize(fontSize);
-		}
-	});
+void BoardTab::setFontSize(int fontSize, int imageSize){
+	foreach(ThreadForm *tf, tfMap){
+		tf->setFontSize(fontSize,imageSize);
+	}
 }
 
 BoardTab::~BoardTab()

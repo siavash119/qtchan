@@ -60,6 +60,7 @@ public slots:
 	void updateFloat();
 	void onNewTF(ThreadForm *tf);
 	void onWindowTitle(QString title);
+	void setFontSize(int fontSize, int imageSize);
 	//void checkScroll();
 
 private:

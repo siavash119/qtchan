@@ -33,7 +33,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
 	ui->quoteWidget->hide();
 	ui->tim->hide();
 	QSettings settings;
-	setFontSize(settings.value("fontSize",14).toInt());
+	setFontSize(settings.value("fontSize",14).toInt(),settings.value("imageSize",250).toInt());
 	//ui->replies->hide();
 	//if(board != "pol") ui->country_name->hide();
 	//this->setMinimumWidth(488);
@@ -282,9 +282,8 @@ void ThreadForm::getThumbFinished()
 	}
 }
 
-QImage ThreadForm::scaleImage(QString path)
+QImage ThreadForm::scaleImage(QString path, int scale)
 {
-	int scale = 250;
 	QImage pic;
 	pic.load(path);
 	QImage scaled = (pic.height() > pic.width()) ?
@@ -294,7 +293,9 @@ QImage ThreadForm::scaleImage(QString path)
 }
 
 void ThreadForm::loadImage(QString path) {
-	QFuture<QImage> newImage = QtConcurrent::run(scaleImage, path);
+	QSettings settings;
+	QFuture<QImage> newImage = QtConcurrent::run(scaleImage,
+												 path, settings.value("imageSize",250).toInt());
 	connect(&watcher, &QFutureWatcherBase::finished,[=]()
 	{
 		QImage scaled = newImage.result();
@@ -383,17 +384,21 @@ QString ThreadForm::htmlParse(QString &html)
 			.replace("<wb>","\n").replace("<wbr>","\n");
 }
 
-void ThreadForm::setFontSize(int size){
+void ThreadForm::setFontSize(int fontSize, int imageSize){
 	QFont temp = this->ui->info->font();
-	temp.setPointSize(size-2);
+	temp.setPointSize(fontSize-2);
 	this->ui->info->setFont(temp);
-	temp.setPointSize(size);
+	temp.setPointSize(fontSize);
 	this->ui->com->setFont(temp);
+	if(file && file->exists()) loadImage(filePath);
+	else if(thumb && thumb->exists()) loadImage(thumbPath);
 	QListIterator<QPointer<ThreadForm>> i(clones);
+//TODO don't call setFontSize on clones
+//set font and image directly from here
 	while(i.hasNext()) {
 		QPointer<ThreadForm> next = i.next();
 		if(!next) continue;
-		next->setFontSize(size);
+		next->setFontSize(fontSize, imageSize);
 	}
 }
 
