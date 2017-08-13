@@ -2,7 +2,7 @@
 #define THREADFORM_H
 
 #include "post.h"
-#include <QFutureWatcher>
+//#include <QFutureWatcher>
 #include <QWidget>
 #include <QPointer>
 #include <QNetworkReply>
@@ -64,7 +64,7 @@ public:
 	bool hidden = false;
 	bool seen = false;
 	static QImage scaleImage(QString path, int scale);
-	QFutureWatcher<QImage> watcher;
+	//QFutureWatcher<QImage> watcher;
 	QString repliesString;
 	QString infoString();
 	void addReplyLink(QString &reply);

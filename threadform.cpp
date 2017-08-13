@@ -63,11 +63,11 @@ void ThreadForm::appendQuote()
 
 ThreadForm::~ThreadForm()
 {
-	watcher.waitForFinished();
+	//watcher.waitForFinished();
 	if(gettingFile)replyImage->abort();
 	if(gettingThumb)replyThumb->abort();
 	//necessary because of the lambda functions?
-	disconnect(&watcher);
+	//disconnect(&watcher);
 	delete ui;
 }
 
@@ -294,7 +294,7 @@ QImage ThreadForm::scaleImage(QString path, int scale)
 
 void ThreadForm::loadImage(QString path) {
 	QSettings settings;
-	QFuture<QImage> newImage = QtConcurrent::run(scaleImage,
+	/*QFuture<QImage> newImage = QtConcurrent::run(scaleImage,
 												 path, settings.value("imageSize",250).toInt());
 	connect(&watcher, &QFutureWatcherBase::finished,[=]()
 	{
@@ -304,12 +304,18 @@ void ThreadForm::loadImage(QString path) {
 			//this->setMinimumWidth(738);
 			ui->tim->setPixmap(QPixmap::fromImage(scaled));
 			ui->tim->setFixedSize(scaled.size());
-			/*if(this->type == PostType::Reply) {
-				static_cast<ThreadTab*>(tab)->checkScroll();
-			}*/
+			//if(this->type == PostType::Reply) {
+			//	static_cast<ThreadTab*>(tab)->checkScroll();
+			//}
 		}
 	});
-	watcher.setFuture(newImage);
+	watcher.setFuture(newImage);*/
+	QImage scaled = scaleImage(path, settings.value("imageSize",250).toInt());
+	if(!scaled.isNull()) {
+		ui->tim->show();
+		ui->tim->setPixmap(QPixmap::fromImage(scaled));
+		ui->tim->setFixedSize(scaled.size());
+	}
 }
 
 void ThreadForm::imageClicked()

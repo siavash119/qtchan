@@ -17,7 +17,6 @@ public:
 	BoardType type;
 	QString search;
 	QMap<QString,ThreadForm*> tfMap;
-	QFutureWatcher<QImage> *imageScaler;
 	bool abort = false;
 	bool expandAll;
 	void startUp(QString &board, BoardType type, QString search, QWidget *parent);
