@@ -42,6 +42,7 @@ void BoardTab::setFontSize(int fontSize, int imageSize){
 	foreach(ThreadForm *tf, tfMap){
 		tf->setFontSize(fontSize,imageSize);
 	}
+	myPostForm.setFontSize(fontSize);
 }
 
 BoardTab::~BoardTab()

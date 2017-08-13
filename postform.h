@@ -41,6 +41,7 @@ public slots:
 	void appendText(QString &text);
 	void loadCaptchaImage(QString &challenege, QPixmap &challengeImage);
 	void usePass(bool use4chanPass);
+	void setFontSize(int fontSize);
 
 private:
 	Ui::PostForm *ui;

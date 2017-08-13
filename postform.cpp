@@ -28,6 +28,7 @@ PostForm::PostForm(QWidget *parent) :
 		ui->challenge->hide();
 	}
 	this->setObjectName("PostForm");
+	setFontSize(settings.value("fontSize",14).toInt());
 	ui->name->installEventFilter(this);
 	ui->email->installEventFilter(this);
 	ui->subject->installEventFilter(this);
@@ -350,4 +351,18 @@ void PostForm::resizeEvent(QResizeEvent *event){
 	if(filename != "") setFilenameText(filename);
 	else setFilenameText(empty);
 	return QWidget::resizeEvent(event);
+}
+
+void PostForm::setFontSize(int fontSize){
+	QFont temp = ui->com->font();
+	temp.setPointSize(fontSize);
+	ui->com->setFont(temp);
+	temp.setPointSize(fontSize-2);
+	ui->name->setFont(temp);
+	ui->email->setFont(temp);
+	ui->subject->setFont(temp);
+	ui->response->setFont(temp);
+	ui->browse->setFont(temp);
+	ui->filename->setFont(temp);
+	ui->submit->setFont(temp);
 }

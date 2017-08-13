@@ -262,9 +262,6 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <property name="handleWidth">
-       <number>2</number>
-      </property>
       <widget class="QWidget" name="tst" native="true">
        <layout class="QVBoxLayout" name="tstLayout">
         <property name="leftMargin">
