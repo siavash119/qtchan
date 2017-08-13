@@ -33,6 +33,12 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);
 	myPostForm.load(board,thread);
+	QSettings settings;
+	QFont temp = ui->lineEdit->font();
+	temp.setPointSize(settings.value("fontSize",14).toInt()-2);
+	ui->label->setFont(temp);
+	ui->lineEdit->setFont(temp);
+	ui->pushButton->setFont(temp);
 	this->setShortcuts();
 	this->installEventFilter(this);
 	connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,UniqueDirect);
@@ -67,10 +73,16 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 }
 
 void ThreadTab::setFontSize(int fontSize, int imageSize){
+	QFont temp = ui->lineEdit->font();
+	temp.setPointSize(fontSize-2);
+	ui->label->setFont(temp);
+	ui->lineEdit->setFont(temp);
+	ui->pushButton->setFont(temp);
+	temp.setPointSize(fontSize);
+	myPostForm.setFontSize(fontSize);
 	foreach(ThreadForm *tf, tfMap){
 		tf->setFontSize(fontSize, imageSize);
 	}
-	myPostForm.setFontSize(fontSize);
 }
 
 QList<ThreadForm*> ThreadTab::checkIfVisible(QList<ThreadForm*> &unseenList)

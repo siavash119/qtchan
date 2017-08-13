@@ -1,6 +1,7 @@
 #include "boardtab.h"
 #include "ui_boardtab.h"
 #include "mainwindow.h"
+#include <QSettings>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QScrollBar>
@@ -32,17 +33,27 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 		TreeItem *childOf = mw->model->getItem(mw->selectionModel->currentIndex());
 		mw->onNewThread(mw,board,threadNum,QString(),childOf);
 	});
-
+	QSettings settings;
+	QFont temp = ui->lineEdit->font();
+	temp.setPointSize(settings.value("fontSize",14).toInt()-2);
+	ui->label->setFont(temp);
+	ui->lineEdit->setFont(temp);
+	ui->pushButton->setFont(temp);
 	this->setShortcuts();
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,UniqueDirect);
 }
 
 void BoardTab::setFontSize(int fontSize, int imageSize){
+	QFont temp = ui->lineEdit->font();
+	temp.setPointSize(fontSize);
+	ui->label->setFont(temp);
+	ui->lineEdit->setFont(temp);
+	ui->pushButton->setFont(temp);
+	myPostForm.setFontSize(fontSize);
 	foreach(ThreadForm *tf, tfMap){
 		tf->setFontSize(fontSize,imageSize);
 	}
-	myPostForm.setFontSize(fontSize);
 }
 
 BoardTab::~BoardTab()

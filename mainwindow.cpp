@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	QFont temp = ui->treeView->font();
 	temp.setPointSize(fontSize);
 	ui->treeView->setFont(temp);
+	ui->lineEdit->setFont(temp);
 	selectionModel = ui->treeView->selectionModel();
 	selectionConnection = connect(selectionModel,&QItemSelectionModel::selectionChanged,this,
 			&MainWindow::onSelectionChanged, Qt::UniqueConnection);
@@ -167,6 +168,7 @@ void MainWindow::setShortcuts()
 		QFont temp = ui->treeView->font();
 		temp.setPointSize(fontSize);
 		ui->treeView->setFont(temp);
+		ui->lineEdit->setFont(temp);
 		emit setFontSize(fontSize,imageSize);
 	});
 	this->addAction(zoomOut);
