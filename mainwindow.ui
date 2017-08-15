@@ -282,7 +282,7 @@
            <enum>QLayout::SetMaximumSize</enum>
           </property>
           <item>
-           <widget class="QLineEdit" name="lineEdit">
+           <widget class="QLineEdit" name="navBar">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
               <horstretch>1</horstretch>

@@ -46,7 +46,7 @@ private slots:
 	void on_pushButton_clicked();
 	void on_treeView_clicked(QModelIndex index);
 	void onSelectionChanged();
-	void on_lineEdit_returnPressed();
+	void on_navBar_returnPressed();
 
 public slots:
 	void focusTree();
@@ -78,7 +78,8 @@ signals:
 	void setAutoUpdate(bool autoUpdate);
 	void setAutoExpand(bool autoExpand);
 	void setUse4chanPass(bool use4chanPass);
-	void setFontSize(int fontSize, int imageSize);
+	void setFontSize(int fontSize);
+	void setImageSize(int imageSize);
 };
 
 extern MainWindow *mw;

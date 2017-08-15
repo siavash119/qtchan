@@ -45,6 +45,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 	//connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
 	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize,UniqueDirect);
+	connect(mw,&MainWindow::setImageSize,this,&ThreadTab::setImageSize,UniqueDirect);
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
 	connect(&watcher,&QFutureWatcherBase::finished,[=]()
@@ -72,7 +73,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	//connect(&helper,&ThreadTabHelper::refresh,[=](ThreadForm *tf) {onRefresh(tf);});
 }
 
-void ThreadTab::setFontSize(int fontSize, int imageSize){
+void ThreadTab::setFontSize(int fontSize){
 	QFont temp = ui->lineEdit->font();
 	temp.setPointSize(fontSize-2);
 	ui->label->setFont(temp);
@@ -81,7 +82,13 @@ void ThreadTab::setFontSize(int fontSize, int imageSize){
 	temp.setPointSize(fontSize);
 	myPostForm.setFontSize(fontSize);
 	foreach(ThreadForm *tf, tfMap){
-		tf->setFontSize(fontSize, imageSize);
+		tf->setFontSize(fontSize);
+	}
+}
+
+void ThreadTab::setImageSize(int imageSize){
+	foreach(ThreadForm *tf, tfMap){
+		tf->setImageSize(imageSize);
 	}
 }
 

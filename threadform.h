@@ -114,7 +114,8 @@ public slots:
 	void hideClicked();
 	void removeClone(QPointer<ThreadForm> tf);
 	void addReply(ThreadForm *tf);
-	void setFontSize(int fontSize, int imageSize);
+	void setFontSize(int fontSize);
+	void setImageSize(int imageSize);
 
 private slots:
 	void quoteClicked(const QString &link);

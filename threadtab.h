@@ -55,13 +55,13 @@ public slots:
 	void focusIt();
 	void updateWidth();
 	void quoteIt(QString text);
-	void floatReply
-	(const QString &link, int replyLevel = 0);
+	void floatReply(const QString &link, int replyLevel = 0);
 	void deleteFloat();
 	void updateFloat();
 	void onNewTF(ThreadForm *tf);
 	void onWindowTitle(QString title);
-	void setFontSize(int fontSize, int imageSize);
+	void setFontSize(int fontSize);
+	void setImageSize(int imageSize);
 	//void checkScroll();
 
 private:

@@ -42,9 +42,11 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 	this->setShortcuts();
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,UniqueDirect);
+	connect(mw,&MainWindow::setImageSize,this,&BoardTab::setImageSize,UniqueDirect);
+
 }
 
-void BoardTab::setFontSize(int fontSize, int imageSize){
+void BoardTab::setFontSize(int fontSize){
 	QFont temp = ui->lineEdit->font();
 	temp.setPointSize(fontSize);
 	ui->label->setFont(temp);
@@ -52,7 +54,13 @@ void BoardTab::setFontSize(int fontSize, int imageSize){
 	ui->pushButton->setFont(temp);
 	myPostForm.setFontSize(fontSize);
 	foreach(ThreadForm *tf, tfMap){
-		tf->setFontSize(fontSize,imageSize);
+		tf->setFontSize(fontSize);
+	}
+}
+
+void BoardTab::setImageSize(int imageSize){
+	foreach(ThreadForm *tf, tfMap){
+		tf->setImageSize(imageSize);
 	}
 }
 

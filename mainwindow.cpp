@@ -29,8 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	sizes << 200 << (ui->splitter->size().width() - 200);
 	ui->splitter->setSizes(sizes);
 	ui->pushButton->hide();
-	ui->lineEdit->hide();
-	ui->lineEdit->installEventFilter(this);
+	ui->navBar->hide();
+	ui->navBar->installEventFilter(this);
 	ui->treeView->setModel(model);
 	ui->treeView->installEventFilter(this);
 	QSettings settings;
@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	QFont temp = ui->treeView->font();
 	temp.setPointSize(fontSize);
 	ui->treeView->setFont(temp);
-	ui->lineEdit->setFont(temp);
+	ui->navBar->setFont(temp);
 	selectionModel = ui->treeView->selectionModel();
 	selectionConnection = connect(selectionModel,&QItemSelectionModel::selectionChanged,this,
 			&MainWindow::onSelectionChanged, Qt::UniqueConnection);
@@ -162,14 +162,11 @@ void MainWindow::setShortcuts()
 		int fontSize = settings.value("fontSize",14).toInt()-2;
 		if(fontSize < 2) fontSize = 2;
 		settings.setValue("fontSize",fontSize);
-		int imageSize = settings.value("imageSize",250).toInt()-25;
-		if(imageSize < 25) imageSize = 25;
-		settings.setValue("imageSize",imageSize);
 		QFont temp = ui->treeView->font();
 		temp.setPointSize(fontSize);
 		ui->treeView->setFont(temp);
-		ui->lineEdit->setFont(temp);
-		emit setFontSize(fontSize,imageSize);
+		ui->navBar->setFont(temp);
+		emit setFontSize(fontSize);
 	});
 	this->addAction(zoomOut);
 
@@ -180,14 +177,35 @@ void MainWindow::setShortcuts()
 		QSettings settings;
 		int fontSize = settings.value("fontSize",14).toInt()+2;
 		settings.setValue("fontSize",fontSize);
-		int imageSize = settings.value("imageSize",250).toInt()+25;
-		settings.setValue("imageSize",imageSize);
 		QFont temp = ui->treeView->font();
 		temp.setPointSize(fontSize);
 		ui->treeView->setFont(temp);
-		emit setFontSize(fontSize,imageSize);
+		emit setFontSize(fontSize);
 	});
 	this->addAction(zoomIn);
+
+	QAction *scaleImagesDown = new QAction(this);
+	scaleImagesDown->setShortcut(QKeySequence("Ctrl+9"));
+	connect(scaleImagesDown, &QAction::triggered, [=](){
+		qDebug() << "decreasing image size";
+		QSettings settings;
+		int imageSize = settings.value("imageSize",250).toInt()-25;
+		if(imageSize < 25) imageSize = 25;
+		settings.setValue("imageSize",imageSize);
+		emit setImageSize(imageSize);
+	});
+	this->addAction(scaleImagesDown);
+
+	QAction *scaleImagesUp = new QAction(this);
+	scaleImagesUp->setShortcut(QKeySequence("Ctrl+0"));
+	connect(scaleImagesUp, &QAction::triggered, [=](){
+		qDebug() << "increasing image size";
+		QSettings settings;
+		int imageSize = settings.value("imageSize",250).toInt()+25;
+		settings.setValue("imageSize",imageSize);
+		emit setImageSize(imageSize);
+	});
+	this->addAction(scaleImagesUp);
 
 
 	ui->actionSave->setShortcut(QKeySequence("Ctrl+s"));
@@ -365,8 +383,8 @@ void MainWindow::nextParent(){
 
 void MainWindow::on_pushButton_clicked()
 {
-	QString searchString = ui->lineEdit->text();
-	ui->lineEdit->hide();
+	QString searchString = ui->navBar->text();
+	ui->navBar->hide();
 	loadFromSearch(searchString,QString(),Q_NULLPTR,true);
 }
 
@@ -483,12 +501,12 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 		//qDebug("Ate key press %d, key");
 		//qDebug("Modifers %d", mod);
 		if(key == 16777216){
-			if(ui->lineEdit->focusWidget() == ui->lineEdit && !ui->lineEdit->isHidden()){
-				ui->lineEdit->hide();
+			if(ui->navBar->focusWidget() == ui->navBar && !ui->navBar->isHidden()){
+				ui->navBar->hide();
 			}
 		}
 		else if(key == 16777269) {
-			ui->lineEdit->setFocus();
+			ui->navBar->setFocus();
 		}
 		else if(key == 16777266) {
 			qDebug("setting focus");
@@ -548,7 +566,7 @@ QObject *MainWindow::currentWidget()
 	return ui->content->currentWidget();
 }
 
-void MainWindow::on_lineEdit_returnPressed()
+void MainWindow::on_navBar_returnPressed()
 {
 	on_pushButton_clicked();
 	ui->treeView->setFocus();
@@ -562,9 +580,9 @@ void MainWindow::focusTree()
 void MainWindow::focusBar()
 {
 	if(ui->tst->isHidden()) ui->tst->show();
-	if(ui->lineEdit->isHidden()) ui->lineEdit->show();
-	ui->lineEdit->setFocus();
-	ui->lineEdit->selectAll();
+	if(ui->navBar->isHidden()) ui->navBar->show();
+	ui->navBar->setFocus();
+	ui->navBar->selectAll();
 }
 
 void MainWindow::saveSession()

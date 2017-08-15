@@ -21,7 +21,8 @@ g for first page, /g/ for catalogue, g/search to get catalogue and search
 * r manually refreshes thread
 * q opens up post form, shift+enter to post from there
 * e expands all images and auto expands future posts on current tab
-* ctrl+plus/ctrl+minus to zoom in/zoom out
+* ctrl+plus/minus to zoom in/zoom out text
+* ctrl+9/0 to scale down/up images
 * f10 saves tree state (it'll also save on exit)
 * f11 hides menubar
 * j and k scroll

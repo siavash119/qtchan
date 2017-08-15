@@ -33,7 +33,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
 	ui->quoteWidget->hide();
 	ui->tim->hide();
 	QSettings settings;
-	setFontSize(settings.value("fontSize",14).toInt(),settings.value("imageSize",250).toInt());
+	setFontSize(settings.value("fontSize",14).toInt());
 	//ui->replies->hide();
 	//if(board != "pol") ui->country_name->hide();
 	//this->setMinimumWidth(488);
@@ -390,22 +390,34 @@ QString ThreadForm::htmlParse(QString &html)
 			.replace("<wb>","\n").replace("<wbr>","\n");
 }
 
-void ThreadForm::setFontSize(int fontSize, int imageSize){
+void ThreadForm::setFontSize(int fontSize){
 	QFont temp = this->ui->info->font();
 	temp.setPointSize(fontSize-2);
 	this->ui->info->setFont(temp);
 	temp.setPointSize(fontSize);
 	this->ui->com->setFont(temp);
+	if(root && clones.size()){
+		QListIterator<QPointer<ThreadForm>> i(clones);
+		while(i.hasNext()) {
+			QPointer<ThreadForm> next = i.next();
+			if(!next) continue;
+			next->setFontSize(fontSize);
+		}
+	}
+}
+
+void ThreadForm::setImageSize(int imageSize){
 	if(file && file->exists()) loadImage(filePath);
 	else if(thumb && thumb->exists()) loadImage(thumbPath);
-	QListIterator<QPointer<ThreadForm>> i(clones);
-//TODO don't call setFontSize on clones
-//set font and image directly from here
-	while(i.hasNext()) {
-		QPointer<ThreadForm> next = i.next();
-		if(!next) continue;
-		next->setFontSize(fontSize, imageSize);
+	if(root && clones.size()){
+		QListIterator<QPointer<ThreadForm>> i(clones);
+		while(i.hasNext()) {
+			QPointer<ThreadForm> next = i.next();
+			if(!next) continue;
+			next->setImageSize(imageSize);
+		}
 	}
+
 }
 
 QString ThreadForm::titleParse(QString &title)
