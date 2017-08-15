@@ -23,6 +23,7 @@ g for first page, /g/ for catalogue, g/search to get catalogue and search
 * e expands all images and auto expands future posts on current tab
 * ctrl+plus/minus to zoom in/zoom out text
 * ctrl+9/0 to scale down/up images
+* ctrl+q to quit
 * f10 saves tree state (it'll also save on exit)
 * f11 hides menubar
 * j and k scroll

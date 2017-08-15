@@ -235,6 +235,10 @@ void MainWindow::setShortcuts()
 		}
 	});
 
+	ui->actionExit->setShortcut(QKeySequence("Ctrl+q"));
+	ui->actionExit->setShortcutContext(Qt::ApplicationShortcut);
+	connect(ui->actionExit,&QAction::triggered,this,&QApplication::quit);
+
 	QAction *sizeUp = new QAction(this);
 	sizeUp->setShortcut(QKeySequence("Ctrl+8"));
 	connect(sizeUp,&QAction::triggered,[=]{
