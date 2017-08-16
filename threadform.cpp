@@ -20,6 +20,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
 	QWidget(parent), board(board), threadNum(threadNum), type(type), root(root), autoExpand(autoExpand), replyLevel(replyLevel), tab(parent),
 	ui(new Ui::ThreadForm)
 {
+	if(root) rootTF = this;
 	ui->setupUi(this);
 	for(int i=0;i<replyLevel;i++){
 		if(i == replyLevel-1){
@@ -248,11 +249,12 @@ void ThreadForm::getOrigFinished()
 		qDebug().noquote() << "saved file "+filePath;
 		if(loadIt) {
 			loadImage(filePath);
-			QListIterator<QPointer<ThreadForm>> i(clones);
+			QListIterator<QPointer<ThreadForm>> i(rootTF->clones);
+			QPointer<ThreadForm> cloned;
 			while(i.hasNext()) {
-				ThreadForm *cloned = i.next();
-				if(!cloned) return;
-				cloned->loadImage(cloned->filePath);
+				cloned = i.next();
+				if(!cloned) continue;
+				cloned->loadImage(filePath);
 			}
 		}
 		emit fileFinished();
@@ -320,18 +322,18 @@ void ThreadForm::loadImage(QString path) {
 
 void ThreadForm::imageClicked()
 {
-	if(!QPointer<ClickableLabel>(ui->tim) || (ui->tim && ui->tim->isHidden())) return;
 	qDebug().noquote() << "clicked "+post.filename;
 	if(this->type == PostType::Reply) {
+		if(!QPointer<ClickableLabel>(ui->tim) || (ui->tim && ui->tim->isHidden())) return;
 		if(!post.filename.isEmpty() && file && !file->exists() && !gettingFile) {
 			qDebug().noquote() << QString("getting https://i.4cdn.org/")  % fileURL;
 			gettingFile=true;
 			replyImage = nc.fileManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
 			//connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::loadFromImageClicked);
-			connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::alreadyClicked,Qt::UniqueConnection);
+			connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::imageClickedFinished,Qt::UniqueConnection);
 		}
 		else if(gettingFile) {
-			connect(this,&ThreadForm::fileFinished,this,&ThreadForm::openImage,Qt::UniqueConnection);
+			connect(this,&ThreadForm::fileFinished,this,&ThreadForm::imageClickedFinished,Qt::UniqueConnection);
 		}
 		else openImage();
 	}
@@ -341,7 +343,7 @@ void ThreadForm::imageClicked()
 	}
 }
 
-void ThreadForm::alreadyClicked()
+void ThreadForm::imageClickedFinished()
 {
 	getOrigFinished();
 	openImage();
@@ -468,6 +470,7 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 {
 	//TODO? just tfs->load(post);
 	ThreadForm *tfs = new ThreadForm(this->board,this->threadNum,this->type,false,false,tab,replyLevel+1);
+	tfs->rootTF = this->rootTF;
 	tfs->tab = tab;
 	tfs->post = this->post;
 	//tfs->ui->no->setText(post.no);
@@ -497,7 +500,7 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 		if(px){
 			tfs->ui->tim->setPixmap(*px);
 			tfs->ui->tim->setFixedSize(px->size());
-			connect(tfs->ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
+			connect(tfs->ui->tim,&ClickableLabel::clicked,rootTF,&ThreadForm::imageClicked);
 		}
 	} else {
 		tfs->ui->pictureLayout->deleteLater();
@@ -510,10 +513,10 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 		tfs->setRepliesString();
 	}
 	//tfs->setReplies();
-	this->clones.append(tfs);
+	rootTF->clones.append(tfs);
 	disconnect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::hideClicked);
 	connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
-	connect(tfs,&ThreadForm::removeMe,this,&ThreadForm::removeClone);
+	connect(tfs,&ThreadForm::removeMe,rootTF,&ThreadForm::removeClone);
 	//TODO load and connect cross thread replies
 	if(this->type == PostType::Reply){
 		ThreadTab* temp = static_cast<ThreadTab*>(tab);

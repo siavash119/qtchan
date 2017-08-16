@@ -73,6 +73,7 @@ public:
 
 private:
 	QWidget *tab;
+	ThreadForm *rootTF;
 	QString lastLink;
 	Ui::ThreadForm *ui;
 	bool loadIt;
@@ -120,7 +121,7 @@ public slots:
 private slots:
 	void quoteClicked(const QString &link);
 	void appendQuote();
-	void alreadyClicked();
+	void imageClickedFinished();
 	//void downloading(qint64 read, qint64 total);
 
 	void on_com_linkHovered(const QString &link);
