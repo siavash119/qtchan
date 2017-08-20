@@ -160,7 +160,7 @@ void MainWindow::setShortcuts()
 		qDebug() << "decreasing text size";
 		QSettings settings;
 		int fontSize = settings.value("fontSize",14).toInt()-2;
-		if(fontSize < 2) fontSize = 2;
+		if(fontSize < 4) fontSize = 4;
 		settings.setValue("fontSize",fontSize);
 		QFont temp = ui->treeView->font();
 		temp.setPointSize(fontSize);

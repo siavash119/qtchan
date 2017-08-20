@@ -33,6 +33,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
 	this->setStyleSheet("background-color:" + background.name() + "; color:#bbbbbb;");
 	ui->quoteWidget->hide();
 	ui->tim->hide();
+	ui->fileInfo->hide();
 	QSettings settings;
 	setFontSize(settings.value("fontSize",14).toInt());
 	//ui->replies->hide();
@@ -114,6 +115,10 @@ void ThreadForm::load(QJsonObject &p)
 		fileURL = this->board % "/" % post.tim % post.ext;
 		filePath = pathBase%post.no%"-"%post.filename%post.ext;
 		file = new QFile(filePath,this);
+		//TODO fsize in human readable format
+		ui->fileInfo->show();
+		QString infoText = post.filename % post.ext % " (" % QString("%1").arg(post.w) % "x" % QString("%1").arg(post.h) % ", " % QString("%1").arg(post.fsize/1024,0,'f',0) % " KB)";
+		ui->fileInfo->setText(infoText);
 		if((post.ext == QLatin1String(".jpg") || post.ext == QLatin1String(".png"))) {
 			loadIt = true;
 			if(!file->exists()) {
@@ -394,6 +399,8 @@ QString ThreadForm::htmlParse(QString &html)
 
 void ThreadForm::setFontSize(int fontSize){
 	QFont temp = this->ui->info->font();
+	temp.setPointSize(fontSize-4);
+	this->ui->fileInfo->setFont(temp);
 	temp.setPointSize(fontSize-2);
 	this->ui->info->setFont(temp);
 	temp.setPointSize(fontSize);

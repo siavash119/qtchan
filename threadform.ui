@@ -200,6 +200,19 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="fileInfo">
+       <property name="styleSheet">
+        <string notr="true">padding: 0px 0px 0px 8px;</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::RichText</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
       <layout class="QHBoxLayout" name="contentLayout" stretch="0,0,0">
        <property name="spacing">
         <number>0</number>
