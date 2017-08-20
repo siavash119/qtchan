@@ -47,15 +47,15 @@ pass_enabled:1
 
 ## TODO
 ### MAJOR
-* fix catalogue view (i.e. /boardname/; boardtab clears after almost finishing loading)
+* filters
 * unread, read, (You) display
 * notifications
 * better settings
 * instructions
 
 ### MINOR
+* support other chans
+* fix catalogue view (i.e. /boardname/; boardtab clears after almost finishing loading)
 * show loading state
-* search/filter by different post fields (right now combo of sub and com)
-* scaling
 * themes
 * more settings
