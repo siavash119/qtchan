@@ -30,7 +30,6 @@
   </property>
   <property name="font">
    <font>
-    <family>Liberation Sans</family>
     <pointsize>16</pointsize>
    </font>
   </property>
@@ -92,7 +91,6 @@
        </property>
        <property name="font">
         <font>
-         <family>Liberation Sans</family>
          <pointsize>23</pointsize>
         </font>
        </property>

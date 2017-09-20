@@ -488,9 +488,11 @@ void MainWindow::onSelectionChanged()
 {
 	QModelIndexList list = selectionModel->selectedIndexes();
 	if(list.size()) {
-		QWidget *tab = model->getItem(list.at(0))->tab;
-		ui->content->setCurrentWidget(tab);
-		this->setWindowTitle(tab->windowTitle());
+		QPointer<QWidget> tab = model->getItem(list.at(0))->tab;
+		if(tab){
+			ui->content->setCurrentWidget(tab);
+			this->setWindowTitle(tab->windowTitle());
+		}
 	}
 	QCoreApplication::processEvents();
 }
