@@ -500,6 +500,8 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 		tfs->thumbURL = thumbURL;
 		tfs->thumbPath = thumbPath;
 		tfs->thumb = thumb;
+        tfs->ui->fileInfo->show();
+        tfs->ui->fileInfo->setText(ui->fileInfo->text());
 		const QPixmap *px = this->ui->tim->pixmap();
 		//From load image but don't have to scale again
 		tfs->ui->tim->show();
