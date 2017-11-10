@@ -247,6 +247,12 @@ void MainWindow::setShortcuts()
 	});
 	sizeUp->setShortcutContext(Qt::ApplicationShortcut);
 	this->addAction(sizeUp);
+
+    ui->actionReloadFilters->setShortcut(QKeySequence("F7"));
+    ui->actionReloadFilters->setShortcutContext(Qt::ApplicationShortcut);
+    connect(ui->actionReloadFilters,&QAction::triggered,[=](){
+        emit reloadFilters();
+    });
 }
 
 MainWindow::~MainWindow()

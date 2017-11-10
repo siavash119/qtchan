@@ -4,6 +4,7 @@
 #include "boardtabhelper.h"
 #include "threadform.h"
 #include "postform.h"
+#include "filter.h"
 #include <QSpacerItem>
 #include <QWidget>
 #include <QThread>
@@ -48,6 +49,7 @@ public slots:
 
 private:
 	Ui::BoardTab *ui;
+    Filter filter;
 
 private slots:
 	void on_pushButton_clicked();

@@ -5,6 +5,7 @@
 #include "threadtabhelper.h"
 #include "clickablelabel.h"
 #include "treeitem.h"
+#include "filter.h"
 #include <QWidget>
 #include <QMutableMapIterator>
 #include <QPointer>
@@ -71,6 +72,7 @@ private:
 	void setShortcuts();
 	QFuture<QList<ThreadForm*>> newImage;
 	QFutureWatcher<QList<ThreadForm*>> watcher;
+    Filter filter;
 
 private slots:
 	void gallery();

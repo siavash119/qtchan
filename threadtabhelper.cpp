@@ -116,6 +116,7 @@ void ThreadTabHelper::loadPosts() {
 		tf->load(p);
 		tfMap.insert(tf->post.no,tf);
 		emit newTF(tf);
+        //Update windowTitle with OP info
 		if(i==0) {
 			if(tf->post.sub.length())emit windowTitle("/"+board+"/"+thread + " - " + tf->post.sub);
 			else if(tf->post.com.length()) {

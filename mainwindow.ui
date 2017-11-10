@@ -412,6 +412,7 @@
     </property>
     <addaction name="actionReload"/>
     <addaction name="actionSettings"/>
+    <addaction name="actionReloadFilters"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -449,6 +450,11 @@
   <action name="actionSettings">
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionReloadFilters">
+   <property name="text">
+    <string>Reload Filters</string>
    </property>
   </action>
  </widget>

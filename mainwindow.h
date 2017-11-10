@@ -80,6 +80,7 @@ signals:
 	void setUse4chanPass(bool use4chanPass);
 	void setFontSize(int fontSize);
 	void setImageSize(int imageSize);
+    void reloadFilters();
 };
 
 extern MainWindow *mw;

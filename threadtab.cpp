@@ -46,6 +46,9 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	//connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
 	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize,UniqueDirect);
 	connect(mw,&MainWindow::setImageSize,this,&ThreadTab::setImageSize,UniqueDirect);
+    connect(mw,&MainWindow::reloadFilters,[=](){
+        filter = Filter();
+    });
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
 	connect(&watcher,&QFutureWatcherBase::finished,[=]()
@@ -219,6 +222,11 @@ void ThreadTab::updateWidth()
 
 void ThreadTab::onNewTF(ThreadForm *tf)
 {
+    QString temp = tf->post.com % tf->post.sub % tf->post.name;
+    if(filter.filterMatched(temp)){
+        tf->hidden=true;
+        tf->hide();
+    }
 	ui->threads->addWidget(tf);
 	tfMap.insert(tf->post.no,tf);
 	connect(tf,&ThreadForm::floatLink,this,&ThreadTab::floatReply);

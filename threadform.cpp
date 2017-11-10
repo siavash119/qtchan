@@ -1,5 +1,6 @@
 #include "threadform.h"
 #include "ui_threadform.h"
+#include "filter.h"
 #include "threadtab.h"
 #include "mainwindow.h"
 #include <QPixmap>
@@ -155,7 +156,6 @@ void ThreadForm::load(QJsonObject &p)
 		this->hasImage = false;
 		//delete ui->tim;
 	}
-	this->show();
 	//updateComHeight();
 }
 
