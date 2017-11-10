@@ -12,7 +12,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = qtchan
 TEMPLATE = app
 
-QMAKE_CXXFLAGS_RELEASE += -flto -O3
+QMAKE_CXXFLAGS_RELEASE += -O3
 
 SOURCES += main.cpp\
     mainwindow.cpp \
