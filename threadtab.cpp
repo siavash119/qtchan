@@ -25,6 +25,11 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	this->setWindowTitle("/"+board+"/"+thread);
 	ui->searchWidget->hide();
 	helper.startUp(board,thread, this);
+    //this->ui->verticalLayout->insertWidget(0,&info);
+    //info.setParent(this,Qt::Tool | Qt::FramelessWindowHint);
+    info.setParent(this);
+    info.move(this->width()-info.width()-20,this->height()-info.height()-20);
+    info.show();
 	QCoreApplication::processEvents();
 	helper.moveToThread(&workerThread);
 	connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF,UniqueDirect);
@@ -226,6 +231,7 @@ void ThreadTab::onNewTF(ThreadForm *tf)
     if(filter.filterMatched(temp)){
         tf->hidden=true;
         tf->hide();
+        info.hidden++;
     }
 	ui->threads->addWidget(tf);
 	tfMap.insert(tf->post.no,tf);
@@ -236,6 +242,10 @@ void ThreadTab::onNewTF(ThreadForm *tf)
 	unseenList.append(tf);
 	formsTotal++;
 	formsUnseen++;
+    info.posts++;
+    if(!tf->post.tim.isEmpty()) info.files++;
+    info.unseen++;
+    info.updateFields();
 }
 
 void ThreadTab::removeTF(ThreadForm *tf)
@@ -245,6 +255,7 @@ void ThreadTab::removeTF(ThreadForm *tf)
 		formsUnseen--;
 		unseenList.removeOne(tf);
 	}
+    info.updateFields();
 }
 
 void ThreadTab::onWindowTitle(QString title)
@@ -326,6 +337,9 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 		}
 		break;
 	}
+    case QEvent::Resize: {
+        info.move(this->width()-info.width()-20,this->height()-info.height()-20);
+    }
 	case QEvent::Wheel: {
 		newImage = QtConcurrent::run(&ThreadTab::checkIfVisible, unseenList);
 		watcher.setFuture(newImage);

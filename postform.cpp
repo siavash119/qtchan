@@ -38,9 +38,7 @@ PostForm::PostForm(QWidget *parent) :
 	submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
 	setShortcuts();
 	connect(&captcha,&Captcha::challengeInfo,this,&PostForm::loadCaptchaImage);
-	connect(ui->challenge,&ClickableLabel::clicked,[=]{
-		captcha.getCaptcha();
-	});
+    connect(ui->challenge,&ClickableLabel::clicked,&captcha,&Captcha::getCaptcha);
 }
 
 void PostForm::loadCaptchaImage(QString &challenege, QPixmap &challengeImage){

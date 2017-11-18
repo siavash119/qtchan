@@ -51,7 +51,6 @@ bool Filter::filterMatched(QString post){
     QSetIterator<QRegularExpression> i(filters);
     while (i.hasNext()){
         QRegularExpression temp = i.next();
-        qDebug() << temp;
         if(temp.match(post).hasMatch()){
             return true;
         }

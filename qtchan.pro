@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     treeitem.cpp \
     settings.cpp \
     boardtabhelper.cpp \
-    captcha.cpp
+    captcha.cpp \
+    threadinfo.cpp
 
 HEADERS += mainwindow.h \
     threadform.h \
@@ -47,13 +48,15 @@ HEADERS += mainwindow.h \
     treemodel.h \
     settings.h \
     boardtabhelper.h \
-    captcha.h
+    captcha.h \
+    threadinfo.h
 
 FORMS   += mainwindow.ui \
     threadform.ui \
     boardtab.ui \
     threadtab.ui \
     postform.ui \
-    settings.ui
+    settings.ui \
+    threadinfo.ui
 
 RC_ICONS = icon.ico

@@ -4,6 +4,7 @@
 #include "postform.h"
 #include "threadtabhelper.h"
 #include "clickablelabel.h"
+#include "threadinfo.h"
 #include "treeitem.h"
 #include "filter.h"
 #include <QWidget>
@@ -33,7 +34,6 @@ public:
 	QString thread;
 	QString threadUrl;
 	QMap<QString,ThreadForm*> tfMap;
-	QList<ThreadForm*> unseenList;
 	bool updated = false;
 	void findText(const QString text);
 	void loadAllImages();
@@ -45,10 +45,13 @@ public:
 	PostForm myPostForm;
 	QThread workerThread;
 	ThreadTabHelper helper;
-	int formsTotal = 0;
-	int formsUnseen = 0;
 	static QList<ThreadForm*> checkIfVisible(QList<ThreadForm*> &unseenList);
 	TreeItem *tn;
+
+    ThreadInfo info;
+    QList<ThreadForm*> unseenList;
+    int formsTotal = 0;
+    int formsUnseen = 0;
 
 
 public slots:
