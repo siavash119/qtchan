@@ -119,7 +119,7 @@ void MainWindow::setShortcuts()
 	this->addAction(del);
 
 	QAction *closeTab = new QAction(this);
-	closeTab->setShortcut(QKeySequence::Close);
+	closeTab->setShortcut(QKeySequence("Ctrl+W"));
 	closeTab->setShortcutContext(Qt::ApplicationShortcut);
 	connect(closeTab, &QAction::triggered, this, &MainWindow::deleteSelected);
 	this->addAction(closeTab);
