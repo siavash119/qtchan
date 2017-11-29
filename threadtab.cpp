@@ -166,11 +166,10 @@ void ThreadTab::setShortcuts()
 	selectPost->setShortcut(Qt::Key_O);
 	connect(selectPost, &QAction::triggered,[=]{
 		QWidget *selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value());
-		qDebug() << selected;
-		while(selected->parent()->objectName() != "scrollAreaWidgetContents") {
+		while(selected && selected->parent()->objectName() != "scrollAreaWidgetContents") {
 			  selected = qobject_cast<QWidget*>(selected->parent());
 		}
-		if(selected->objectName() == "ThreadForm"){
+		if(selected && selected->objectName() == "ThreadForm"){
 			static_cast<ThreadForm*>(selected)->imageClicked();
 		}
 	});
