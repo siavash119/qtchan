@@ -150,6 +150,13 @@
    <header>clickablelabel.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>autoExpand</tabstop>
+  <tabstop>sessionFile</tabstop>
+  <tabstop>autoUpdate</tabstop>
+  <tabstop>showIndexReplies</tabstop>
+  <tabstop>use4chanPass</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
