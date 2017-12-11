@@ -23,7 +23,8 @@ public:
 	QString challenge;
 	QString response;
 	QTimer timer;
-	bool loaded;
+	bool loaded = false;
+	bool loading = false;
 	void getCaptcha();
 	void getImage(QString challenge);
 private:

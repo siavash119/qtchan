@@ -58,7 +58,7 @@ Post::~Post() {
 
 QString Post::quoteColor(QString string)
 {
-	//QSettings settings;
+	//QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	//QColor color = settings.value("quote_color",);
 	QRegExp quotes("class=\"quote\"");
 	QRegExp quotelinks("class=\"quotelink\"");

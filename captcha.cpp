@@ -11,8 +11,10 @@ Captcha::~Captcha(){
 }
 
 void Captcha::getCaptcha(){
+	loading = true;
+	replyChallenge = NULL;
 	qDebug() << "getting captcha from " + urlChallenge;
-	replyChallenge = nc.jsonManager->get(requestChallenge);
+	replyChallenge = nc.captchaManager->get(requestChallenge);
 	QObject::connect(replyChallenge,&QNetworkReply::finished,this,&Captcha::loadCaptcha);
 }
 
@@ -45,7 +47,7 @@ void Captcha::loadCaptcha(){
 void Captcha::getImage(QString challenge){
 	qDebug() << "getting image";
 	if(challenge.isEmpty()) return;
-	replyImage = nc.jsonManager->get(QNetworkRequest(QUrl(urlImageBase+challenge)));
+	replyImage = nc.captchaManager->get(QNetworkRequest(QUrl(urlImageBase+challenge)));
 	connect(replyImage,&QNetworkReply::finished,this,&Captcha::loadImage);
 }
 

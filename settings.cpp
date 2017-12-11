@@ -28,7 +28,7 @@ Settings::~Settings()
 
 void Settings::checked(bool checked){
 	(void)checked;
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QObject *obj = sender();
 	QString sender = obj->objectName();
 	qDebug() << sender;
@@ -63,7 +63,7 @@ void Settings::checked(bool checked){
 
 void Settings::clicked()
 {
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QObject *obj = sender();
 	QString sender = obj->objectName();
 	qDebug() << sender;
@@ -106,7 +106,7 @@ void Settings::clicked()
 
 void Settings::refreshValues()
 {
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	ui->autoExpand->setChecked(settings.value("autoExpand",false).toBool());
 	ui->autoUpdate->setChecked(settings.value("autoUpdate",false).toBool());
 	ui->showIndexReplies->setChecked(settings.value("showIndexReplies",false).toBool());

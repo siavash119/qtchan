@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkCookieJar>
 #include <QNetworkDiskCache>
+#include <QNetworkProxy>
 
 class netController: public QObject  {
 	Q_OBJECT
@@ -12,6 +13,8 @@ public:
 	QNetworkAccessManager *thumbManager;
 	QNetworkAccessManager *fileManager;
 	QNetworkAccessManager *jsonManager;
+	QNetworkAccessManager *captchaManager;
+	QNetworkProxy proxy;
 	QNetworkCookieJar *cookies;
 	QNetworkDiskCache *diskCache;
 	explicit netController(QObject *parent = Q_NULLPTR);

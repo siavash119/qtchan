@@ -48,11 +48,10 @@ public:
 	static QList<ThreadForm*> checkIfVisible(QList<ThreadForm*> &unseenList);
 	TreeItem *tn;
 
-    ThreadInfo info;
-    QList<ThreadForm*> unseenList;
-    int formsTotal = 0;
-    int formsUnseen = 0;
-
+	ThreadInfo info;
+	QList<ThreadForm*> unseenList;
+	int formsTotal = 0;
+	int formsUnseen = 0;
 
 public slots:
 	//void addStretch();
@@ -75,7 +74,7 @@ private:
 	void setShortcuts();
 	QFuture<QList<ThreadForm*>> newImage;
 	QFutureWatcher<QList<ThreadForm*>> watcher;
-    Filter filter;
+	Filter filter;
 
 private slots:
 	void gallery();

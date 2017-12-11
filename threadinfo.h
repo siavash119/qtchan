@@ -10,25 +10,21 @@ class ThreadInfo;
 
 class ThreadInfo : public QFrame
 {
-    Q_OBJECT
-
+	Q_OBJECT
 public:
-    explicit ThreadInfo(QWidget *parent = 0);
-    ~ThreadInfo();
-    int posts = 0;
-    int files = 0;
-    int hidden = 0;
-    int unseen = 0;
-    void updateFields();
-
+	explicit ThreadInfo(QWidget *parent = 0);
+	~ThreadInfo();
+	int posts = 0;
+	int files = 0;
+	int hidden = 0;
+	int unseen = 0;
+	void updateFields();
 private:
-    Ui::ThreadInfo *ui;
-    QPoint offset;
-
+	Ui::ThreadInfo *ui;
+	QPoint offset;
 protected:
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
 };
 
 #endif // THREADINFO_H

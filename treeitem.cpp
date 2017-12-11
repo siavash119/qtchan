@@ -8,7 +8,7 @@ TreeItem::TreeItem(const QList<QVariant> &data, TreeItem *parent)
 }
 
 TreeItem::TreeItem(const QList<QVariant> &data,
-					TreeItem *parent, QWidget *tab, TreeItemType type)
+				   TreeItem *parent, QWidget *tab, TreeItemType type)
 	: parent(parent), tab(tab), type(type), itemData(data)
 {
 }

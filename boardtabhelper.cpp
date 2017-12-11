@@ -17,7 +17,7 @@ void BoardTabHelper::startUp(QString &board, BoardType type, QString search, QWi
 	//this->threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
 	if(type == BoardType::Index) boardUrl = "https://a.4cdn.org/"+board+"/1.json";
 	else boardUrl = "https://a.4cdn.org/"+board+"/catalog.json";
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	this->expandAll = settings.value("autoExpand",false).toBool();
 	QDir().mkpath(board+"/index/thumbs");
 	qDebug() << boardUrl;
@@ -99,7 +99,7 @@ void BoardTabHelper::loadPosts() {
 	qDebug().noquote() << "length of" << boardUrl << "is" << QString::number(length);
 	QtConcurrent::run(&BoardTabHelper::writeJson,board, rep);
 	//load new posts
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	bool loadFile = settings.value("autoExpand",false).toBool() || this->expandAll;
 	bool showIndexReplies = settings.value("showIndexReplies",false).toBool();
 	QStringList idFilters = settings.value("filters/"+board+"/id").toStringList();
@@ -145,8 +145,8 @@ QJsonArray BoardTabHelper::filterThreads(QByteArray &rep){
 		QJsonArray allThreads = QJsonDocument::fromJson(rep).array();
 		int numPages = allThreads.size();
 		QJsonArray pageThreads;
-        //-5 for some reason catalog goes blank on last 5 pages
-        for(int i=0;i<numPages-5;i++){
+		//-5 for some reason catalog goes blank on last 5 pages
+		for(int i=0;i<numPages-5;i++){
 			pageThreads = allThreads.at(i).toObject().value("threads").toArray();
 			int numThreads = pageThreads.size();
 			for(int j=0;j<numThreads;j++){

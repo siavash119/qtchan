@@ -33,7 +33,7 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 		TreeItem *childOf = mw->model->getItem(mw->selectionModel->currentIndex());
 		mw->onNewThread(mw,board,threadNum,QString(),childOf);
 	});
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QFont temp = ui->lineEdit->font();
 	temp.setPointSize(settings.value("fontSize",14).toInt()-2);
 	ui->label->setFont(temp);
@@ -43,9 +43,9 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,UniqueDirect);
 	connect(mw,&MainWindow::setImageSize,this,&BoardTab::setImageSize,UniqueDirect);
-    connect(mw,&MainWindow::reloadFilters,[=](){
-        filter = Filter();
-    });
+	connect(mw,&MainWindow::reloadFilters,[=](){
+		filter = Filter();
+	});
 
 }
 
@@ -126,7 +126,7 @@ void BoardTab::setShortcuts()
 	connect(selectPost, &QAction::triggered,[=]{
 		QWidget *selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value());
 		while(selected && selected->parent()->objectName() != "scrollAreaWidgetContents") {
-			  selected = qobject_cast<QWidget*>(selected->parent());
+			selected = qobject_cast<QWidget*>(selected->parent());
 		}
 		if(selected && selected->objectName() == "ThreadForm"){
 			static_cast<ThreadForm*>(selected)->imageClicked();
@@ -188,11 +188,11 @@ void BoardTab::onNewTF(ThreadForm *tf, ThreadForm *thread)
 
 void BoardTab::onNewThread(ThreadForm *tf)
 {
-    QString temp = tf->post.com % tf->post.sub % tf->post.name;
-    if(filter.filterMatched(temp)){
-        tf->hidden=true;
-        //tf->hide();
-    }
+	QString temp = tf->post.com % tf->post.sub % tf->post.name;
+	if(filter.filterMatched(temp)){
+		tf->hidden=true;
+		//tf->hide();
+	}
 	ui->threads->addWidget(tf);
 	tfMap.insert(tf->post.no,tf);
 }

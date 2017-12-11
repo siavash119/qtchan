@@ -49,7 +49,7 @@ public slots:
 
 private:
 	Ui::BoardTab *ui;
-    Filter filter;
+	Filter filter;
 
 private slots:
 	void on_pushButton_clicked();

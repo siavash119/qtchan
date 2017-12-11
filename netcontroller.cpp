@@ -1,13 +1,16 @@
 #include "netcontroller.h"
 #include <QDir>
+#include <QStandardPaths>
 #include <QNetworkCookie>
 #include <QSettings>
+#include <QDebug>
 
 netController::netController(QObject *parent) : QObject(parent)
 {
 	thumbManager = new QNetworkAccessManager(this);
 	fileManager = new QNetworkAccessManager(this);
 	jsonManager = new QNetworkAccessManager(this);
+	captchaManager = new QNetworkAccessManager(this);
 
 	cookies = new QNetworkCookieJar(this);
 	//thumbManager->setCookieJar(cookies);
@@ -22,10 +25,21 @@ netController::netController(QObject *parent) : QObject(parent)
 
 	QDir().mkpath(QDir::homePath()+"/.config/qtchan");
 	QString defaultCookies = QDir::homePath() + "/.config/qtchan/cookies";
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QString cookiesFile = settings.value("cookiesFile",defaultCookies).toString();
 	loadCookies(cookiesFile);
-	//filter = new Filter();
+
+	if(settings.value("proxy/enable",false).toBool()==true){
+		qDebug() << "PROXY HOST" << settings.value("proxy/host","127.0.0.1").toString();
+		proxy.setType(QNetworkProxy::ProxyType(settings.value("proxy/type",1).toInt())); //QNetworkProxy::Socks5Proxy
+		proxy.setHostName(settings.value("proxy/host","127.0.0.1").toString());
+		proxy.setPort(settings.value("proxy/port",8080).toInt());
+		if(!settings.value("proxy/user","").toString().isEmpty())
+			proxy.setUser(settings.value("proxy/user","").toString());
+		if(!settings.value("proxy/pass","").toString().isEmpty())
+			proxy.setUser(settings.value("proxy/pass","").toString());
+		captchaManager->setProxy(proxy);
+	}
 }
 
 //cookies include 4chan pass
@@ -59,6 +73,7 @@ void netController::removeCookies(){
 }
 
 netController nc;
+
 //std::vector<BoardTab*> bts;
 //std::vector<Tab> tabs;
 //std::vector<QWidget*> tabs;

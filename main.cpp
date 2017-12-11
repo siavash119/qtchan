@@ -1,6 +1,6 @@
+#include "mainwindow.h"
 #include <QApplication>
 #include <QSettings>
-#include "mainwindow.h"
 
 MainWindow *mw;
 
@@ -13,9 +13,8 @@ int main(int argc, char *argv[])
 	//qputenv("QT_SCALE_FACTOR","0.2");
 	QApplication a(argc, argv);
 	QFont font = QGuiApplication::font();
-	//QSettings settings;
-	//font.setPointSize(settings.value("fontSize",14).toInt());
-	font.setPointSize(14);
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	font.setPointSize(settings.value("fontSize",14).toInt());
 	a.setFont(font);
 	MainWindow w;
 	w.show();

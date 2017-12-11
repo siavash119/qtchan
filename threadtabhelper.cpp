@@ -12,7 +12,7 @@ void ThreadTabHelper::startUp(QString &board, QString &thread, QWidget *parent)
 	this->thread = thread;
 	this->board = board;
 	this->threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	this->expandAll = settings.value("autoExpand",false).toBool();
 	QDir().mkpath(board+"/"+thread+"/thumbs");
 	qDebug() << threadUrl;
@@ -108,7 +108,7 @@ void ThreadTabHelper::loadPosts() {
 	QtConcurrent::run(&ThreadTabHelper::writeJson,board, thread, rep);
 	//load new posts
 	int i = tfMap.size();
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	bool loadFile = settings.value("autoExpand",false).toBool() || this->expandAll;
 	while(!abort && i<length) {
 		p = posts.at(i).toObject();
@@ -116,16 +116,16 @@ void ThreadTabHelper::loadPosts() {
 		tf->load(p);
 		tfMap.insert(tf->post.no,tf);
 		emit newTF(tf);
-        //Update windowTitle with OP info
+		//Update windowTitle with OP info
 		if(i==0) {
 			if(tf->post.sub.length())emit windowTitle("/"+board+"/"+thread + " - " + tf->post.sub);
 			else if(tf->post.com.length()) {
 				QString temp = tf->post.com;
 				//TODO clean this
 				emit windowTitle("/"+board+"/"+thread + " - " +
-									 ThreadForm::htmlParse(temp)
-										.replace("\n"," ")
-										.remove(QRegExp("<[^>]*>")));
+								 ThreadForm::htmlParse(temp)
+								 .replace("\n"," ")
+								 .remove(QRegExp("<[^>]*>")));
 			}
 		}
 		QPointer<ThreadForm> replyTo;

@@ -25,11 +25,11 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	this->setWindowTitle("/"+board+"/"+thread);
 	ui->searchWidget->hide();
 	helper.startUp(board,thread, this);
-    //this->ui->verticalLayout->insertWidget(0,&info);
-    //info.setParent(this,Qt::Tool | Qt::FramelessWindowHint);
-    info.setParent(this);
-    info.move(this->width()-info.width()-20,this->height()-info.height()-20);
-    info.show();
+	//this->ui->verticalLayout->insertWidget(0,&info);
+	//info.setParent(this,Qt::Tool | Qt::FramelessWindowHint);
+	info.setParent(this);
+	info.move(this->width()-info.width()-20,this->height()-info.height()-20);
+	info.show();
 	QCoreApplication::processEvents();
 	helper.moveToThread(&workerThread);
 	connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF,UniqueDirect);
@@ -38,7 +38,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);
 	myPostForm.load(board,thread);
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QFont temp = ui->lineEdit->font();
 	temp.setPointSize(settings.value("fontSize",14).toInt()-2);
 	ui->label->setFont(temp);
@@ -51,9 +51,9 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	//connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
 	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize,UniqueDirect);
 	connect(mw,&MainWindow::setImageSize,this,&ThreadTab::setImageSize,UniqueDirect);
-    connect(mw,&MainWindow::reloadFilters,[=](){
-        filter = Filter();
-    });
+	connect(mw,&MainWindow::reloadFilters,[=](){
+		filter = Filter();
+	});
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
 	connect(&watcher,&QFutureWatcherBase::finished,[=]()
@@ -167,7 +167,7 @@ void ThreadTab::setShortcuts()
 	connect(selectPost, &QAction::triggered,[=]{
 		QWidget *selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value());
 		while(selected && selected->parent()->objectName() != "scrollAreaWidgetContents") {
-			  selected = qobject_cast<QWidget*>(selected->parent());
+			selected = qobject_cast<QWidget*>(selected->parent());
 		}
 		if(selected && selected->objectName() == "ThreadForm"){
 			static_cast<ThreadForm*>(selected)->imageClicked();
@@ -226,12 +226,12 @@ void ThreadTab::updateWidth()
 
 void ThreadTab::onNewTF(ThreadForm *tf)
 {
-    QString temp = tf->post.com % tf->post.sub % tf->post.name;
-    if(filter.filterMatched(temp)){
-        tf->hidden=true;
-        tf->hide();
-        info.hidden++;
-    }
+	QString temp = tf->post.com % tf->post.sub % tf->post.name;
+	if(filter.filterMatched(temp)){
+		tf->hidden=true;
+		tf->hide();
+		info.hidden++;
+	}
 	ui->threads->addWidget(tf);
 	tfMap.insert(tf->post.no,tf);
 	connect(tf,&ThreadForm::floatLink,this,&ThreadTab::floatReply);
@@ -241,10 +241,10 @@ void ThreadTab::onNewTF(ThreadForm *tf)
 	unseenList.append(tf);
 	formsTotal++;
 	formsUnseen++;
-    info.posts++;
-    if(!tf->post.tim.isEmpty()) info.files++;
-    info.unseen++;
-    info.updateFields();
+	info.posts++;
+	if(!tf->post.tim.isEmpty()) info.files++;
+	info.unseen++;
+	info.updateFields();
 }
 
 void ThreadTab::removeTF(ThreadForm *tf)
@@ -254,7 +254,7 @@ void ThreadTab::removeTF(ThreadForm *tf)
 		formsUnseen--;
 		unseenList.removeOne(tf);
 	}
-    info.updateFields();
+	info.updateFields();
 }
 
 void ThreadTab::onWindowTitle(QString title)
@@ -336,15 +336,18 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 		}
 		break;
 	}
-    case QEvent::Resize: {
-        info.move(this->width()-info.width()-20,this->height()-info.height()-20);
-    }
+	case QEvent::Resize: {
+		info.move(this->width()-info.width()-20,this->height()-info.height()-20);
+		[[fallthrough]];
+	}
 	case QEvent::Wheel: {
 		newImage = QtConcurrent::run(&ThreadTab::checkIfVisible, unseenList);
 		watcher.setFuture(newImage);
+		[[fallthrough]];
 	}
 	case QEvent::Leave: {
 		deleteFloat();
+		[[fallthrough]];
 	}
 	default:{
 		return QObject::eventFilter(obj, event);

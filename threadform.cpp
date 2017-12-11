@@ -35,7 +35,7 @@ ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool roo
 	ui->quoteWidget->hide();
 	ui->tim->hide();
 	ui->fileInfo->hide();
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	setFontSize(settings.value("fontSize",14).toInt());
 	//ui->replies->hide();
 	//if(board != "pol") ui->country_name->hide();
@@ -300,7 +300,7 @@ QImage ThreadForm::scaleImage(QString path, int scale)
 }
 
 void ThreadForm::loadImage(QString path) {
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	/*QFuture<QImage> newImage = QtConcurrent::run(scaleImage,
 												 path, settings.value("imageSize",250).toInt());
 	connect(&watcher, &QFutureWatcherBase::finished,[=]()
@@ -357,7 +357,7 @@ void ThreadForm::imageClickedFinished()
 void ThreadForm::hideClicked()
 {
 	this->hide();
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QStringList idFilters = settings.value("filters/"+board+"/id").toStringList();
 	idFilters.append(threadNum);
 	settings.setValue("filters/"+board+"/id",idFilters);
@@ -500,8 +500,8 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 		tfs->thumbURL = thumbURL;
 		tfs->thumbPath = thumbPath;
 		tfs->thumb = thumb;
-        tfs->ui->fileInfo->show();
-        tfs->ui->fileInfo->setText(ui->fileInfo->text());
+		tfs->ui->fileInfo->show();
+		tfs->ui->fileInfo->setText(ui->fileInfo->text());
 		const QPixmap *px = this->ui->tim->pixmap();
 		//From load image but don't have to scale again
 		tfs->ui->tim->show();

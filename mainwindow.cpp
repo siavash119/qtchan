@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->navBar->installEventFilter(this);
 	ui->treeView->setModel(model);
 	ui->treeView->installEventFilter(this);
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	int fontSize = settings.value("fontSize",14).toInt();
 	QFont temp = ui->treeView->font();
 	temp.setPointSize(fontSize);
@@ -41,13 +41,13 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->navBar->setFont(temp);
 	selectionModel = ui->treeView->selectionModel();
 	selectionConnection = connect(selectionModel,&QItemSelectionModel::selectionChanged,this,
-			&MainWindow::onSelectionChanged, Qt::UniqueConnection);
+								  &MainWindow::onSelectionChanged, Qt::UniqueConnection);
 	settingsView.setParent(this,Qt::Tool
-						 | Qt::WindowMaximizeButtonHint
-						 | Qt::WindowCloseButtonHint);
+						   | Qt::WindowMaximizeButtonHint
+						   | Qt::WindowCloseButtonHint);
 	connect(&settingsView,&Settings::update,[=](QString field, QVariant value){
 		if(field == "use4chanPass" && value.toBool() == true){
-			QSettings settings;
+			QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 			QString defaultCookies = QDir::homePath() + "/.config/qtchan/cookies";
 			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
 		}
@@ -83,7 +83,7 @@ void MainWindow::setShortcuts()
 	connect(firstItem, &QAction::triggered,[=]{
 		if(!model->rowCount()) return;
 		selectionModel->setCurrentIndex(model->index(0,0),
-						QItemSelectionModel::ClearAndSelect);
+										QItemSelectionModel::ClearAndSelect);
 	});
 	this->addAction(firstItem);
 
@@ -109,7 +109,7 @@ void MainWindow::setShortcuts()
 			tm = tm->child(tm->childCount()-1);
 		}
 		selectionModel->setCurrentIndex(model->getIndex(tm),
-						QItemSelectionModel::ClearAndSelect);
+										QItemSelectionModel::ClearAndSelect);
 	});
 	this->addAction(lastItem);
 
@@ -158,7 +158,7 @@ void MainWindow::setShortcuts()
 	zoomOut->setShortcut(QKeySequence::ZoomOut);
 	connect(zoomOut, &QAction::triggered, [=](){
 		qDebug() << "decreasing text size";
-		QSettings settings;
+		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int fontSize = settings.value("fontSize",14).toInt()-2;
 		if(fontSize < 4) fontSize = 4;
 		settings.setValue("fontSize",fontSize);
@@ -174,7 +174,7 @@ void MainWindow::setShortcuts()
 	zoomIn->setShortcut(QKeySequence::ZoomIn);
 	connect(zoomIn, &QAction::triggered, [=](){
 		qDebug() << "increasing text size";
-		QSettings settings;
+		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int fontSize = settings.value("fontSize",14).toInt()+2;
 		settings.setValue("fontSize",fontSize);
 		QFont temp = ui->treeView->font();
@@ -188,7 +188,7 @@ void MainWindow::setShortcuts()
 	scaleImagesDown->setShortcut(QKeySequence("Ctrl+9"));
 	connect(scaleImagesDown, &QAction::triggered, [=](){
 		qDebug() << "decreasing image size";
-		QSettings settings;
+		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int imageSize = settings.value("imageSize",250).toInt()-25;
 		if(imageSize < 25) imageSize = 25;
 		settings.setValue("imageSize",imageSize);
@@ -200,7 +200,7 @@ void MainWindow::setShortcuts()
 	scaleImagesUp->setShortcut(QKeySequence("Ctrl+0"));
 	connect(scaleImagesUp, &QAction::triggered, [=](){
 		qDebug() << "increasing image size";
-		QSettings settings;
+		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int imageSize = settings.value("imageSize",250).toInt()+25;
 		settings.setValue("imageSize",imageSize);
 		emit setImageSize(imageSize);
@@ -248,11 +248,11 @@ void MainWindow::setShortcuts()
 	sizeUp->setShortcutContext(Qt::ApplicationShortcut);
 	this->addAction(sizeUp);
 
-    ui->actionReloadFilters->setShortcut(QKeySequence("F7"));
-    ui->actionReloadFilters->setShortcutContext(Qt::ApplicationShortcut);
-    connect(ui->actionReloadFilters,&QAction::triggered,[=](){
-        emit reloadFilters();
-    });
+	ui->actionReloadFilters->setShortcut(QKeySequence("F7"));
+	ui->actionReloadFilters->setShortcutContext(Qt::ApplicationShortcut);
+	connect(ui->actionReloadFilters,&QAction::triggered,[=](){
+		emit reloadFilters();
+	});
 }
 
 MainWindow::~MainWindow()
@@ -265,7 +265,7 @@ MainWindow::~MainWindow()
 //TODO put toggle functions in 1 function with argument
 void MainWindow::toggleAutoUpdate()
 {
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	bool autoUpdate = !settings.value("autoUpdate").toBool();
 	qDebug () << "setting autoUpdate to" << autoUpdate;
 	settings.setValue("autoUpdate",autoUpdate);
@@ -275,7 +275,7 @@ void MainWindow::toggleAutoUpdate()
 
 void MainWindow::toggleAutoExpand()
 {
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	bool autoExpand = !settings.value("autoExpand").toBool();
 	qDebug () << "setting autoExpand to" << autoExpand;
 	settings.setValue("autoExpand",autoExpand);
@@ -291,7 +291,7 @@ void MainWindow::updateSettings(QString field, QVariant value){
 	else if(field == "use4chanPass"){
 		emit setUse4chanPass(value.toBool());
 		if(value.toBool()){
-			QSettings settings;
+			QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 			QString defaultCookies = QDir::homePath() + "/.config/qtchan/cookies";
 			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
 		}
@@ -600,7 +600,7 @@ void MainWindow::focusBar()
 void MainWindow::saveSession()
 {
 	qDebug().noquote() << "Saving session.";
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	saveSessionToFile(settings.value("sessionFile","settings.txt").toString());
 }
 
@@ -641,7 +641,7 @@ void MainWindow::saveSessionToFile(QString fileName)
 
 void MainWindow::loadSession()
 {
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QString sessionFile = settings.value("sessionFile","settings.txt").toString();
 	loadSessionFromFile(sessionFile);
 }

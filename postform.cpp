@@ -20,7 +20,7 @@ PostForm::PostForm(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->cancel->hide();
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	if(settings.value("use4chanPass", false).toBool() == true){
 		ui->captcha->hide();
 	}
@@ -38,7 +38,7 @@ PostForm::PostForm(QWidget *parent) :
 	submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
 	setShortcuts();
 	connect(&captcha,&Captcha::challengeInfo,this,&PostForm::loadCaptchaImage);
-    connect(ui->challenge,&ClickableLabel::clicked,&captcha,&Captcha::getCaptcha);
+	connect(ui->challenge,&ClickableLabel::clicked,&captcha,&Captcha::getCaptcha);
 }
 
 void PostForm::loadCaptchaImage(QString &challenege, QPixmap &challengeImage){
@@ -123,7 +123,7 @@ void PostForm::postIt()
 	com.setBody(ui->com->toPlainText().toStdString().c_str());
 	multiPart->append(com);
 
-	QSettings settings;
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	if(settings.value("use4chanPass", false).toBool() == false){
 		QHttpPart captchaChallenge;
 		captchaChallenge.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"recaptcha_challenge_field\""));
@@ -260,7 +260,7 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
 	}
 	if(obj->objectName() == "response"){
 		if(event->type() == QEvent::FocusIn){
-			if(!captcha.loaded) captcha.getCaptcha();
+			if(!captcha.loading && !captcha.loaded) captcha.getCaptcha();
 		}
 	}
 	return QObject::eventFilter(obj, event);
