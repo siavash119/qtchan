@@ -11,6 +11,17 @@ There's still a lot to do.
 * open files in OS's default application
 * search and filter
 
+### Build Instructions (Linux/BSD based)
+needs qt5
+```
+git clone https://github.com/siavash119/qtchan 
+cd qtchan
+mkdir build
+cd build
+qmake ../
+make
+./qtchan
+```
 
 ## a few keyboard commands and instructions
 * ctrl+l opens up the nav bar; you can type g or g/boardnum or /g/ or https://boards.4chan... etc.\
@@ -44,16 +55,6 @@ pass_enabled:1
 ```
 
 ![qtchan ss](https://i.abcdn.co/qtchan.png)
-
-#Build Instructions (Linux/BSD based)
-```
-cd qtchan
-mkdir build
-cd build
-qmake ../
-make
-./qtchan
-```
 
 ## TODO
 ### MAJOR
