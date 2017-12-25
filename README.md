@@ -45,13 +45,15 @@ pass_enabled:1
 
 ![qtchan ss](https://i.abcdn.co/qtchan.png)
 
-#Build Instructions (Linux)
+#Build Instructions (Linux/BSD based)
+```
 cd qtchan
 mkdir build
 cd build
 qmake ../
 make
 ./qtchan
+```
 
 ## TODO
 ### MAJOR
