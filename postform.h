@@ -45,6 +45,8 @@ public slots:
 
 private:
 	Ui::PostForm *ui;
+	bool isPosting;
+	void cancelPost();
 	Overlay *overlay;
 	QWidget *focused;
 	Captcha captcha;

@@ -16,7 +16,8 @@
 
 PostForm::PostForm(QWidget *parent) :
 	QWidget(parent),
-	ui(new Ui::PostForm)
+	ui(new Ui::PostForm),
+	isPosting(false)
 {
 	ui->setupUi(this);
 	ui->cancel->hide();
@@ -89,9 +90,9 @@ void PostForm::appendText(QString &text)
 
 void PostForm::postIt()
 {
+	this->removeEventFilter(this);
 	addOverlay();
 	disconnect(submitConnection);
-	this->removeEventFilter(this);
 	qDebug().noquote() << "posting";
 	QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
@@ -159,15 +160,21 @@ void PostForm::postIt()
 
 	QUrl url = QUrl("https://sys.4chan.org/"+board+"/post");
 	QNetworkRequest request(url);
-	//request.1
 	postReply = nc.jsonManager->post(request, multiPart);
 	connect(postReply, &QNetworkReply::finished, this, &PostForm::postFinished);
 	multiPart->setParent(postReply); // delete the multiPart with the reply
-	// here connect signals etc.
+	isPosting=true;
 }
 
 void PostForm::postFinished()
 {
+	isPosting = false;
+	captcha.loaded = false;
+	if(postReply->error()){
+		qDebug() << postReply->errorString();
+		submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
+		return;
+	}
 	QTextEdit *reply = new QTextEdit();
 	reply->setAttribute(Qt::WA_DeleteOnClose);
 	connect(reply,&QTextEdit::destroyed,[=]{
@@ -218,9 +225,10 @@ void PostForm::addOverlay()
 	qDebug().noquote() << "adding overlay";
 	overlay = new Overlay(this);
 	overlay->show();
+	overlay->installEventFilter(this);
 	focused = this->focusWidget();
-	ui->com->setFocusPolicy(Qt::NoFocus);
-	ui->filename->setFocus();
+	/*ui->com->setFocusPolicy(Qt::NoFocus);
+	ui->filename->setFocus();*/
 }
 
 void PostForm::removeOverlay()
@@ -231,6 +239,15 @@ void PostForm::removeOverlay()
 	focused->setFocus();
 }
 
+//check isPosting before calling this
+void PostForm::cancelPost(){
+	qDebug() << "canceling post";
+	postReply->abort();
+	isPosting = false;
+	captcha.loaded = false;
+	removeOverlay();
+}
+
 bool PostForm::eventFilter(QObject *obj, QEvent *event)
 {
 	if (event->type() == QEvent::KeyPress) {
@@ -239,12 +256,18 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
 		int key = keyEvent->key();
 		//qDebug("Ate key press %d", key);
 		//qDebug("Ate modifier press %d", mod);
-		//escape to get out
-		if(key == 16777216) {
-			hide();
+		//escape to cancel post or hide postform
+		if(key == Qt::Key_Escape) {
+			if(isPosting) {
+				cancelPost();
+			}
+			else {
+				hide();
+			}
+			return true;
 		}
 		//shift+enter to post
-		if(mod == 33554432 && key == 16777220) {
+		if(mod == 33554432 && key == Qt::Key_Return) {
 			postIt();
 			return true;
 		}
