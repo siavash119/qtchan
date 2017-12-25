@@ -39,6 +39,7 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 	ui->label->setFont(temp);
 	ui->lineEdit->setFont(temp);
 	ui->pushButton->setFont(temp);
+	this->installEventFilter(this);
 	this->setShortcuts();
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,UniqueDirect);
@@ -110,14 +111,20 @@ void BoardTab::setShortcuts()
 	QAction *scrollUp = new QAction(this);
 	scrollUp->setShortcut(Qt::Key_K);
 	connect(scrollUp, &QAction::triggered,[=]{
-		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() - 150);
+		int vimNumber = 1;
+		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
+		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() - vimNumber*150);
+		vimCommand = "";
 	});
 	this->addAction(scrollUp);
 
 	QAction *scrollDown = new QAction(this);
 	scrollDown->setShortcut(Qt::Key_J);
 	connect(scrollDown, &QAction::triggered,[=]{
-		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() + 150);
+		int vimNumber = 1;
+		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
+		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() + vimNumber*150);
+		vimCommand = "";
 	});
 	this->addAction(scrollDown);
 
@@ -215,4 +222,32 @@ void BoardTab::focusIt()
 
 void BoardTab::clearMap(){
 	tfMap.clear();
+}
+
+bool BoardTab::eventFilter(QObject *obj, QEvent *event)
+{
+	switch(event->type())
+	{
+	case QEvent::KeyPress: {
+		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+		int mod = keyEvent->modifiers();
+		int key = keyEvent->key();
+		if(key >= 0x30 && key <= 0x39){
+			vimCommand += QKeySequence(key).toString();
+			qDebug() << vimCommand;
+		}
+		else if(mod == Qt::KeyboardModifier::ShiftModifier && key == Qt::Key_G){
+			int vimNumber = 100;
+			if(!vimCommand.isEmpty())vimNumber = vimCommand.toInt();
+			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollAreaWidgetContents->height()*vimNumber/100);
+			vimCommand = "";
+		}
+		else if(key == Qt::Key_Escape){
+			vimCommand = "";
+		}
+		return QObject::eventFilter(obj, event);
+	}
+	default:
+		return QObject::eventFilter(obj, event);
+	}
 }

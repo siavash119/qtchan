@@ -317,15 +317,33 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 	{
 	case QEvent::KeyPress: {
 		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-		//int mod = keyEvent->modifiers();
+		int mod = keyEvent->modifiers();
 		int key = keyEvent->key();
 		//qDebug("Ate modifier %d",mod);
 		//qDebug("Ate key press %d", key);
 		if(key == Qt::Key_K){
-			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() - 150);
+			int vimNumber = 1;
+			if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
+			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() - vimNumber*150);
+			vimCommand = "";
 		}
 		else if(key == Qt::Key_J){
-			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() + 150);
+			int vimNumber = 1;
+			if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
+			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() + vimNumber*150);
+			vimCommand = "";
+		}
+		else if(mod == Qt::KeyboardModifier::ShiftModifier && key == Qt::Key_G){
+			int vimNumber = 100;
+			if(!vimCommand.isEmpty())vimNumber = vimCommand.toInt();
+			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollAreaWidgetContents->height()*vimNumber/100);
+			vimCommand = "";
+		}
+		else if(key == Qt::Key_Escape){
+			vimCommand = "";
+		}
+		else if(key >= 0x30 && key <= 0x39){
+			vimCommand += QKeySequence(key).toString();
 		}
 		else if(key == 16777220) {
 			on_pushButton_clicked();

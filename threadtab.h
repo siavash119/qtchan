@@ -75,6 +75,7 @@ private:
 	QFuture<QList<ThreadForm*>> newImage;
 	QFutureWatcher<QList<ThreadForm*>> watcher;
 	Filter filter;
+	QString vimCommand;
 
 private slots:
 	void gallery();

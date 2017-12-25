@@ -50,10 +50,14 @@ public slots:
 private:
 	Ui::BoardTab *ui;
 	Filter filter;
+	QString vimCommand;
 
 private slots:
 	void on_pushButton_clicked();
 	void on_lineEdit_returnPressed();
+
+protected:
+	bool eventFilter(QObject *watched, QEvent *event);
 };
 
 Q_DECLARE_METATYPE(BoardTab*)
