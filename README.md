@@ -27,6 +27,11 @@ Archlinux:
 ```
 makepkg --install
 ```
+or from AUR:
+```
+packer -S qtchan
+```
+
 
 ## a few keyboard commands and instructions
 * ctrl+l opens up the nav bar; you can type g or g/boardnum or /g/ or https://boards.4chan... etc.\
