@@ -444,10 +444,11 @@ TreeItem *MainWindow::onNewThread(QWidget *parent, QString board, QString thread
 {
 	(void)parent;
 	qDebug().noquote().nospace()  << "loading /" << board << "/" << thread;
-	ThreadTab *tt = new ThreadTab(board,thread,this);
-	ui->content->addWidget(tt);
 	QString query = "/"+board+"/"+thread;
 	if(!display.length()) display = query;
+	bool isFromSession = (display == query) ? false : true;
+	ThreadTab *tt = new ThreadTab(board,thread,this,isFromSession);
+	ui->content->addWidget(tt);
 	QList<QVariant> list;
 	list.append(display);
 

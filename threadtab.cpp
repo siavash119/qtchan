@@ -17,14 +17,14 @@
 #include <QScreen>
 #include <QFuture>
 
-ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
-	QWidget(parent), board(board), thread(thread),
+ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent, bool isFromSession) :
+	QWidget(parent), board(board), thread(thread), isFromSession(isFromSession),
 	ui(new Ui::ThreadTab)
 {
 	ui->setupUi(this);
 	this->setWindowTitle("/"+board+"/"+thread);
 	ui->searchWidget->hide();
-	helper.startUp(board,thread, this);
+	helper.startUp(board,thread, this, isFromSession);
 	//this->ui->verticalLayout->insertWidget(0,&info);
 	//info.setParent(this,Qt::Tool | Qt::FramelessWindowHint);
 	info.setParent(this);
@@ -34,6 +34,9 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent) :
 	helper.moveToThread(&workerThread);
 	connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF,UniqueDirect);
 	connect(&helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle,UniqueDirect);
+	connect(&helper,&ThreadTabHelper::tabTitle,[=](QString tabTitle){
+		tn->setData(0,tabTitle);
+	});
 	myPostForm.setParent(this,Qt::Tool
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);

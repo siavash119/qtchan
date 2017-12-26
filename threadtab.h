@@ -27,7 +27,7 @@ class ThreadTab : public QWidget
 protected:
 	bool eventFilter(QObject *obj, QEvent *event);
 public:
-	explicit ThreadTab(QString board, QString thread, QWidget *parent = 0);
+	explicit ThreadTab(QString board, QString thread, QWidget *parent = 0, bool isFromSession = false);
 	~ThreadTab();
 
 	QString board;
@@ -68,6 +68,7 @@ public slots:
 	//void checkScroll();
 
 private:
+	bool isFromSession;
 	Ui::ThreadTab *ui;
 	QMetaObject::Connection connectionAutoUpdate;
 	QMetaObject::Connection connectionVisibleChecker;

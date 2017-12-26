@@ -6,11 +6,12 @@ ThreadTabHelper::ThreadTabHelper() {
 
 }
 
-void ThreadTabHelper::startUp(QString &board, QString &thread, QWidget *parent)
+void ThreadTabHelper::startUp(QString &board, QString &thread, QWidget *parent, bool isFromSession = false)
 {
 	this->parent = parent;
 	this->thread = thread;
 	this->board = board;
+	this->isFromSession = isFromSession;
 	this->threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	this->expandAll = settings.value("autoExpand",false).toBool();
@@ -118,14 +119,18 @@ void ThreadTabHelper::loadPosts() {
 		emit newTF(tf);
 		//Update windowTitle with OP info
 		if(i==0) {
-			if(tf->post.sub.length())emit windowTitle("/"+board+"/"+thread + " - " + tf->post.sub);
+			if(tf->post.sub.length()){
+				emit windowTitle("/"+board+"/"+thread + " - " + tf->post.sub);
+				emit tabTitle(tf->post.sub);
+			}
 			else if(tf->post.com.length()) {
 				QString temp = tf->post.com;
 				//TODO clean this
-				emit windowTitle("/"+board+"/"+thread + " - " +
-								 ThreadForm::htmlParse(temp)
-								 .replace("\n"," ")
-								 .remove(QRegExp("<[^>]*>")));
+				temp = ThreadForm::htmlParse(temp)
+						.replace("\n"," ")
+						.remove(QRegExp("<[^>]*>"));
+				emit windowTitle("/"+board+"/"+thread + " - " + temp);
+				if(!isFromSession) emit tabTitle(temp);
 			}
 		}
 		QPointer<ThreadForm> replyTo;

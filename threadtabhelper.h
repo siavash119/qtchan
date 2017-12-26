@@ -23,7 +23,7 @@ public:
 	QFutureWatcher<QImage> *imageScaler;
 	bool abort = false;
 	bool expandAll;
-	void startUp(QString &board, QString &thread, QWidget *parent);
+	void startUp(QString &board, QString &thread, QWidget *parent, bool isFromSession);
 	static void writeJson(QString &board, QString &thread, QByteArray &rep);
 
 private:
@@ -35,6 +35,7 @@ private:
 	QPointer<QTimer> updateTimer;
 	QThread *updateThread;
 	QMetaObject::Connection connectionUpdate;
+	bool isFromSession;
 
 public slots:
 	void loadPosts();
@@ -46,6 +47,7 @@ signals:
 	void postsLoaded(QJsonArray &posts);
 	void newTF(ThreadForm *tf);
 	void windowTitle(QString windowTitle);
+	void tabTitle(QString tabTitle);
 	void setReplies(ThreadForm *tf);
 	//void addStretch();
 	void threadStatus(QString status, QString value = "0");
