@@ -23,6 +23,11 @@ make
 ./qtchan
 ```
 
+Archlinux:
+```
+makepkg --install
+```
+
 ## a few keyboard commands and instructions
 * ctrl+l opens up the nav bar; you can type g or g/boardnum or /g/ or https://boards.4chan... etc.\
 g for first page, /g/ for catalogue, g/search to get catalogue and search
