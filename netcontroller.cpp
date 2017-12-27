@@ -10,12 +10,10 @@ netController::netController(QObject *parent) : QObject(parent)
 	thumbManager = new QNetworkAccessManager(this);
 	fileManager = new QNetworkAccessManager(this);
 	jsonManager = new QNetworkAccessManager(this);
+	postManager = new QNetworkAccessManager(this);
 	captchaManager = new QNetworkAccessManager(this);
 
-	cookies = new QNetworkCookieJar(this);
-	//thumbManager->setCookieJar(cookies);
-	//fileManager->setCookieJar(cookies);
-	jsonManager->setCookieJar(cookies);
+	postManager->setCookieJar(new QNetworkCookieJar());
 
 	diskCache = new QNetworkDiskCache(this);
 	QDir().mkpath("cache");
@@ -60,16 +58,14 @@ void netController::loadCookies(QString passFile){
 			temp.setDomain(".4chan.org");
 			temp.setSecure(1);
 			temp.setPath("/");
-			//thumbManager->cookieJar()->insertCookie(temp);
-			//fileManager->cookieJar()->insertCookie(temp);
-			jsonManager->cookieJar()->insertCookie(temp);
+			postManager->cookieJar()->insertCookie(temp);
 		}
 	}
 }
 
 void netController::removeCookies(){
-	delete jsonManager->cookieJar();
-	jsonManager->setCookieJar(new QNetworkCookieJar());
+	delete postManager->cookieJar();
+	postManager->setCookieJar(new QNetworkCookieJar());
 }
 
 netController nc;

@@ -160,7 +160,7 @@ void PostForm::postIt()
 
 	QUrl url = QUrl("https://sys.4chan.org/"+board+"/post");
 	QNetworkRequest request(url);
-	postReply = nc.jsonManager->post(request, multiPart);
+	postReply = nc.postManager->post(request, multiPart);
 	connect(postReply, &QNetworkReply::finished, this, &PostForm::postFinished);
 	multiPart->setParent(postReply); // delete the multiPart with the reply
 	isPosting=true;

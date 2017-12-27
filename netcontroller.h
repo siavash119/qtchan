@@ -14,8 +14,8 @@ public:
 	QNetworkAccessManager *fileManager;
 	QNetworkAccessManager *jsonManager;
 	QNetworkAccessManager *captchaManager;
+	QNetworkAccessManager *postManager;
 	QNetworkProxy proxy;
-	QNetworkCookieJar *cookies;
 	QNetworkDiskCache *diskCache;
 	explicit netController(QObject *parent = Q_NULLPTR);
 	Filter filter;
