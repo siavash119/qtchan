@@ -11,7 +11,7 @@ class TreeItem
 {
 public:
 	explicit TreeItem(const QList<QVariant> &data, TreeItem *parent);
-	explicit TreeItem(const QList<QVariant> &data, TreeItem *parent, QWidget *tab, TreeItemType type = TreeItemType::thread);
+	explicit TreeItem(const QList<QVariant> &data, TreeItem *parent, QWidget *tab, TreeItemType type = thread);
 	~TreeItem();
 
 	void appendChild(TreeItem *child);
