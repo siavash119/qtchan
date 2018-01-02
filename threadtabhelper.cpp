@@ -20,6 +20,7 @@ void ThreadTabHelper::startUp(Chan *api, QString &board, QString &thread, QWidge
 	QDir().mkpath(board+"/"+thread+"/thumbs");
 	qDebug() << threadUrl;
 	request = QNetworkRequest(QUrl(threadUrl));
+	if(api->requiresUserAgent()) request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
 	request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
 	getPosts();
 	updateTimer = new QTimer();

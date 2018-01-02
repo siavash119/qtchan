@@ -161,16 +161,20 @@ void ThreadForm::load(QJsonObject &p)
 
 void ThreadForm::getFile()
 {
-	qDebug().noquote() << "getting" << api->apiBase() << fileURL;
-	replyImage = nc.fileManager->get(QNetworkRequest(QUrl(api->apiBase() % fileURL)));
+	qDebug().noquote().nospace() << "getting " << api->apiBase() << fileURL;
+	QNetworkRequest request(QUrl(api->apiBase() % fileURL));
+	if(api->requiresUserAgent()) request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
+	replyImage = nc.fileManager->get(request);
 	gettingFile = true;
 	//connect(replyImage, &QNetworkReply::downloadProgress,this,&ThreadForm::downloading);
 	connectionImage = connect(replyImage, &QNetworkReply::finished,this, &ThreadForm::getOrigFinished, Qt::UniqueConnection);
 }
 
 void ThreadForm::getThumb() {
-	qDebug().noquote() << "getting" << api->apiBase() << thumbURL;
-	replyThumb = nc.thumbManager->get(QNetworkRequest(QUrl(api->apiBase() % thumbURL)));
+	qDebug().noquote().nospace() << "getting " << api->apiBase() << thumbURL;
+	QNetworkRequest request(QUrl(api->apiBase() % thumbURL));
+	if(api->requiresUserAgent()) request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
+	replyThumb = nc.thumbManager->get(request);
 	gettingThumb = true;
 	connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished,Qt::UniqueConnection);
 }

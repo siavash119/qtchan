@@ -52,7 +52,7 @@ void PostForm::loadCaptchaImage(QString &challenege, QPixmap &challengeImage){
 void PostForm::load(Chan *api, QString &board, QString thread)
 {
 	this->api = api;
-	captcha.startUp(api);
+	if(api->usesCaptcha()) captcha.startUp(api);
 	this->board = board;
 	this->thread = thread;
 	this->setWindowTitle("post to /" + board + "/" + thread);
@@ -60,10 +60,10 @@ void PostForm::load(Chan *api, QString &board, QString thread)
 }
 
 void PostForm::usePass(bool use4chanPass){
-	if(use4chanPass){
+	if(api->usesCaptcha() && use4chanPass){
 		ui->captcha->hide();
 	}
-	else {
+	else if(api->usesCaptcha()){
 		ui->captcha->show();
 		ui->challenge->hide();
 	}
@@ -127,7 +127,7 @@ void PostForm::postIt()
 	multiPart->append(com);
 
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	if(settings.value("use4chanPass", false).toBool() == false){
+	if(api->usesCaptcha() && settings.value("use4chanPass", false).toBool() == false){
 		QHttpPart captchaChallenge;
 		captchaChallenge.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"recaptcha_challenge_field\""));
 		if(captcha.challenge.isEmpty()){

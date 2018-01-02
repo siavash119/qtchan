@@ -46,8 +46,9 @@ HEADERS += mainwindow.h \
     captcha.h \
     threadinfo.h \
     chans/chan.h \
+    chans.h \
     chans/fourchan.h \
-    chans.h
+    chans/eightchan.h
 
 FORMS   += mainwindow.ui \
     threadform.ui \

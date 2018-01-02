@@ -63,6 +63,18 @@ void netController::loadCookies(QString passFile){
 	}
 }
 
+void netController::loadCookiesIntoAllManagers(QString domain, QString name, QString value){
+	QNetworkCookie temp(name.toStdString().c_str(),value.toStdString().c_str());
+	temp.setDomain(domain.toStdString().c_str());
+	temp.setSecure(1);
+	temp.setPath("/");
+	postManager->cookieJar()->insertCookie(temp);
+	jsonManager->cookieJar()->insertCookie(temp);
+	thumbManager->cookieJar()->insertCookie(temp);
+	fileManager->cookieJar()->insertCookie(temp);
+	captchaManager->cookieJar()->insertCookie(temp);
+}
+
 void netController::removeCookies(){
 	delete postManager->cookieJar();
 	postManager->setCookieJar(new QNetworkCookieJar());

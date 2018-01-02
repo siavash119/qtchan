@@ -23,6 +23,9 @@ void BoardTabHelper::startUp(Chan *api, QString &board, BoardType type, QString 
 	QDir().mkpath(board+"/index/thumbs");
 	qDebug() << boardUrl;
 	request = QNetworkRequest(QUrl(boardUrl));
+	if(api->requiresUserAgent()){
+		request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
+	}
 	request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
 	getPosts();
 	/*updateTimer = new QTimer();

@@ -2,6 +2,7 @@
 #define CHANS_H
 
 #include "chans/fourchan.h"
+#include "chans/eightchan.h"
 
 class Chans
 {
@@ -11,4 +12,5 @@ public:
 };
 
 extern Chan *fourChanAPI;
+extern Chan *eightChanAPI;
 #endif // CHANS_H
