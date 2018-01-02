@@ -2,6 +2,7 @@
 #define THREADFORM_H
 
 #include "post.h"
+#include "chans.h"
 //#include <QFutureWatcher>
 #include <QWidget>
 #include <QPointer>
@@ -26,7 +27,7 @@ class ThreadForm : public QWidget
 	bool gettingThumb = false;
 	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
 public:
-	explicit ThreadForm(QString board, QString threadNum, PostType type = Reply,
+	explicit ThreadForm(Chan *api, QString board, QString threadNum, PostType type = Reply,
 						bool root = true, bool autoExpand = false, QWidget *parent = 0, int replyLevel = 0);
 	~ThreadForm();
 	void setText(QString text);
@@ -35,6 +36,7 @@ public:
 	void load(QJsonObject &p);
 	void loadImage(QString path);
 	void openImage();
+	Chan *api;
 	QString board;
 	QString threadNum;
 	PostType type;

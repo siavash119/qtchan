@@ -17,8 +17,8 @@
 
 //TODO get rid of #include threadtab.h and mainwindow.h by using signals/slots
 //TODO Possibly decouple the file and thumb getters to another class class
-ThreadForm::ThreadForm(QString board, QString threadNum, PostType type, bool root, bool autoExpand, QWidget *parent, int replyLevel) :
-	QWidget(parent), board(board), threadNum(threadNum), type(type), root(root), autoExpand(autoExpand), replyLevel(replyLevel), tab(parent),
+ThreadForm::ThreadForm(Chan *api, QString board, QString threadNum, PostType type, bool root, bool autoExpand, QWidget *parent, int replyLevel) :
+	QWidget(parent), api(api), board(board), threadNum(threadNum), type(type), root(root), autoExpand(autoExpand), replyLevel(replyLevel), tab(parent),
 	ui(new Ui::ThreadForm)
 {
 	if(root) rootTF = this;
@@ -161,16 +161,16 @@ void ThreadForm::load(QJsonObject &p)
 
 void ThreadForm::getFile()
 {
-	qDebug().noquote() << QString("getting https://i.4cdn.org/") % fileURL;
-	replyImage = nc.fileManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
+	qDebug().noquote() << "getting" << api->apiBase() << fileURL;
+	replyImage = nc.fileManager->get(QNetworkRequest(QUrl(api->apiBase() % fileURL)));
 	gettingFile = true;
 	//connect(replyImage, &QNetworkReply::downloadProgress,this,&ThreadForm::downloading);
 	connectionImage = connect(replyImage, &QNetworkReply::finished,this, &ThreadForm::getOrigFinished, Qt::UniqueConnection);
 }
 
 void ThreadForm::getThumb() {
-	qDebug().noquote() << QString("getting https://i.4cdn.org/")  % thumbURL;
-	replyThumb = nc.thumbManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % thumbURL)));
+	qDebug().noquote() << "getting" << api->apiBase() << thumbURL;
+	replyThumb = nc.thumbManager->get(QNetworkRequest(QUrl(api->apiBase() % thumbURL)));
 	gettingThumb = true;
 	connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished,Qt::UniqueConnection);
 }
@@ -331,9 +331,9 @@ void ThreadForm::imageClicked()
 	if(this->type == PostType::Reply) {
 		if(!QPointer<ClickableLabel>(ui->tim) || (ui->tim && ui->tim->isHidden())) return;
 		if(!post.filename.isEmpty() && file && !file->exists() && !gettingFile) {
-			qDebug().noquote() << QString("getting https://i.4cdn.org/")  % fileURL;
+			qDebug().noquote() << QString("getting " % api->apiBase() % fileURL);
 			gettingFile=true;
-			replyImage = nc.fileManager->get(QNetworkRequest(QUrl("https://i.4cdn.org/" % fileURL)));
+			replyImage = nc.fileManager->get(QNetworkRequest(QUrl(api->apiBase() % fileURL)));
 			//connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::loadFromImageClicked);
 			connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::imageClickedFinished,Qt::UniqueConnection);
 		}
@@ -344,7 +344,7 @@ void ThreadForm::imageClicked()
 	}
 	else{
 		TreeItem *childOf = mw->model->getItem(mw->selectionModel->currentIndex());
-		mw->onNewThread(mw,board,threadNum,QString(),childOf);
+		mw->onNewThread(mw,api,board,threadNum,QString(),childOf);
 	}
 }
 
@@ -476,7 +476,7 @@ void ThreadForm::addReply(ThreadForm *tf){
 ThreadForm *ThreadForm::clone(int replyLevel)
 {
 	//TODO? just tfs->load(post);
-	ThreadForm *tfs = new ThreadForm(this->board,this->threadNum,this->type,false,false,tab,replyLevel+1);
+	ThreadForm *tfs = new ThreadForm(this->api,this->board,this->threadNum,this->type,false,false,tab,replyLevel+1);
 	tfs->rootTF = this->rootTF;
 	tfs->tab = tab;
 	tfs->post = this->post;

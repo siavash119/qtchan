@@ -17,14 +17,14 @@
 #include <QScreen>
 #include <QFuture>
 
-ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent, bool isFromSession) :
-	QWidget(parent), board(board), thread(thread), isFromSession(isFromSession),
+ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, bool isFromSession) :
+	QWidget(parent), api(api), board(board), thread(thread), isFromSession(isFromSession),
 	ui(new Ui::ThreadTab)
 {
 	ui->setupUi(this);
 	this->setWindowTitle("/"+board+"/"+thread);
 	ui->searchWidget->hide();
-	helper.startUp(board,thread, this, isFromSession);
+	helper.startUp(api,board,thread, this, isFromSession);
 	//this->ui->verticalLayout->insertWidget(0,&info);
 	//info.setParent(this,Qt::Tool | Qt::FramelessWindowHint);
 	info.setParent(this);
@@ -40,7 +40,7 @@ ThreadTab::ThreadTab(QString board, QString thread, QWidget *parent, bool isFrom
 	myPostForm.setParent(this,Qt::Tool
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);
-	myPostForm.load(board,thread);
+	myPostForm.load(api,board,thread);
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QFont temp = ui->lineEdit->font();
 	temp.setPointSize(settings.value("fontSize",14).toInt()-2);
@@ -314,6 +314,7 @@ void ThreadTab::quoteIt(QString text) {
 	openPostForm();
 }
 
+//TODO put these keybinds as QAction shortcuts
 bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 {
 	switch(event->type())
@@ -345,13 +346,13 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 		else if(key == Qt::Key_Escape){
 			vimCommand = "";
 		}
-		else if(key >= 0x30 && key <= 0x39){
+		else if(key >= Qt::Key_0 && key <= Qt::Key_9){
 			vimCommand += QKeySequence(key).toString();
 		}
-		else if(key == 16777220) {
+		else if(key == Qt::Key_Return) {
 			on_pushButton_clicked();
 			return false;
-		} else if(key == 16777269) {
+		} else if(key == Qt::Key_F6) {
 			ui->lineEdit->setFocus();
 			return false;
 		}

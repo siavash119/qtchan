@@ -1,6 +1,7 @@
 #ifndef BOARDTABHELPER_H
 #define BOARDTABHELPER_H
 
+#include "chans.h"
 #include "threadform.h"
 
 enum BoardType{Index,Catalog};
@@ -19,8 +20,9 @@ public:
 	QMap<QString,ThreadForm*> tfMap;
 	bool abort = false;
 	bool expandAll;
-	void startUp(QString &board, BoardType type, QString search, QWidget *parent);
+	void startUp(Chan *api, QString &board, BoardType type, QString search, QWidget *parent);
 	static void writeJson(QString &board, QByteArray &rep);
+	Chan *api;
 
 private:
 	QString boardUrl;

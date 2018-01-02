@@ -2,6 +2,7 @@
 #define THREADTABHELPER_H
 
 #include "threadform.h"
+#include "chans.h"
 #include <QNetworkReply>
 #include <QtConcurrent/QtConcurrent>
 #include <QFutureWatcher>
@@ -23,8 +24,9 @@ public:
 	QFutureWatcher<QImage> *imageScaler;
 	bool abort = false;
 	bool expandAll;
-	void startUp(QString &board, QString &thread, QWidget *parent, bool isFromSession);
+	void startUp(Chan *api, QString &board, QString &thread, QWidget *parent, bool isFromSession);
 	static void writeJson(QString &board, QString &thread, QByteArray &rep);
+	Chan *api;
 
 private:
 	QString threadUrl;

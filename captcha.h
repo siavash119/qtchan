@@ -1,6 +1,7 @@
 #ifndef CAPTCHA_H
 #define CAPTCHA_H
 #include "netcontroller.h"
+#include "chans.h"
 #include <QObject>
 #include <QNetworkReply>
 #include <QThread>
@@ -11,15 +12,10 @@ class Captcha : public QObject
 {
 	Q_OBJECT
 	int timeout = 120;
-	QString siteKey = "6Ldp2bsSAAAAAAJ5uyx_lx34lJeEpTLVkP5k04qc";
-	QString server = "https://www.google.com/recaptcha/api";
-	QString lang = "en";
-	QString urlChallenge = server+"/challenge?k="+siteKey+"&lang="+lang;
-	QString urlImageBase = server+"/image?c=";
-	QNetworkRequest requestChallenge = QNetworkRequest(QUrl(urlChallenge));
 public:
 	explicit Captcha();
 	virtual ~Captcha();
+	void startUp(Chan *api);
 	QString challenge;
 	QString response;
 	QTimer timer;
@@ -28,6 +24,12 @@ public:
 	void getCaptcha();
 	void getImage(QString challenge);
 private:
+	QString siteKey;
+	QString server;
+	QString lang;
+	QString urlChallenge;
+	QString urlImageBase;
+	QNetworkRequest requestChallenge;
 	QNetworkReply *replyChallenge;
 	QNetworkReply *replyImage;
 signals:

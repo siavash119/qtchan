@@ -1,9 +1,3 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2016-12-11T10:33:38
-#
-#-------------------------------------------------
-
 QT      += core gui network
 DEFINES *= QT_USE_QSTRINGBUILDER
 
@@ -31,7 +25,8 @@ SOURCES += main.cpp\
     settings.cpp \
     boardtabhelper.cpp \
     captcha.cpp \
-    threadinfo.cpp
+    threadinfo.cpp \
+    chans.cpp
 
 HEADERS += mainwindow.h \
     threadform.h \
@@ -49,7 +44,10 @@ HEADERS += mainwindow.h \
     settings.h \
     boardtabhelper.h \
     captcha.h \
-    threadinfo.h
+    threadinfo.h \
+    chans/chan.h \
+    chans/fourchan.h \
+    chans.h
 
 FORMS   += mainwindow.ui \
     threadform.ui \

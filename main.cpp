@@ -4,6 +4,7 @@
 
 MainWindow *mw;
 
+
 int main(int argc, char *argv[])
 {
 	QCoreApplication::setOrganizationName("qtchan");

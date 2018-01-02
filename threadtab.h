@@ -7,6 +7,7 @@
 #include "threadinfo.h"
 #include "treeitem.h"
 #include "filter.h"
+#include "chans.h"
 #include <QWidget>
 #include <QMutableMapIterator>
 #include <QPointer>
@@ -27,9 +28,10 @@ class ThreadTab : public QWidget
 protected:
 	bool eventFilter(QObject *obj, QEvent *event);
 public:
-	explicit ThreadTab(QString board, QString thread, QWidget *parent = 0, bool isFromSession = false);
+	explicit ThreadTab(Chan *api, QString board, QString thread, QWidget *parent = 0, bool isFromSession = false);
 	~ThreadTab();
 
+	Chan *api;
 	QString board;
 	QString thread;
 	QString threadUrl;

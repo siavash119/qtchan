@@ -258,8 +258,9 @@ void MainWindow::setShortcuts()
 MainWindow::~MainWindow()
 {
 	saveSession();
-	delete model;
 	delete ui;
+	delete model;
+	Chans::deleteAPIs();
 }
 
 //TODO put toggle functions in 1 function with argument
@@ -400,26 +401,27 @@ void MainWindow::on_pushButton_clicked()
 
 TreeItem *MainWindow::loadFromSearch(QString query, QString display, TreeItem *childOf, bool select)
 {
-	QRegularExpression re("^(?:(?:https?:\\/\\/)?boards.4chan.org)?\\/?(\\w+)(?:\\/thread)?\\/(\\d+)(?:#p\\d+)?$",QRegularExpression::CaseInsensitiveOption);
+	Chan *api = Chans::stringToType(query);
+	QRegularExpression re(api->regToThread(),QRegularExpression::CaseInsensitiveOption);
 	QRegularExpressionMatch match = re.match(query);
 	QRegularExpressionMatch match2;
 	BoardTab *bt;
 	if (!match.hasMatch()) {
-		QRegularExpression res("^(?:(?:https?:\\/\\/)?boards.4chan.org)?\\/?(\\w+)\\/(?:catalog#s=)?(.+)?$",QRegularExpression::CaseInsensitiveOption);
+		QRegularExpression res(api->regToCatalog(),QRegularExpression::CaseInsensitiveOption);
 		match2 = res.match(query);
 	}
 	else{
 		TreeItem *tnParent;
 		if(childOf == Q_NULLPTR)tnParent = model->root;
 		else tnParent = childOf;
-		return onNewThread(this,match.captured(1),match.captured(2),display,tnParent);
+		return onNewThread(this,api,match.captured(1),match.captured(2),display,tnParent);
 	}
 	if(match2.hasMatch()) {
-		bt = new BoardTab(match2.captured(1),BoardType::Catalog,match2.captured(2),this);
+		bt = new BoardTab(api, match2.captured(1),BoardType::Catalog,match2.captured(2),this);
 		if(!display.length()) display = "/"+match2.captured(1)+"/"+match2.captured(2);
 	}
 	else{
-		bt = new BoardTab(query,BoardType::Index,"",this);
+		bt = new BoardTab(api, query,BoardType::Index,"",this);
 		if(!display.length()) display = "/"+query+"/";
 	}
 	qDebug().noquote() << "loading" << display;
@@ -439,7 +441,7 @@ TreeItem *MainWindow::loadFromSearch(QString query, QString display, TreeItem *c
 	return tnNew;
 }
 
-TreeItem *MainWindow::onNewThread(QWidget *parent, QString board, QString thread,
+TreeItem *MainWindow::onNewThread(QWidget *parent, Chan *api, QString board, QString thread,
 								  QString display, TreeItem *childOf)
 {
 	(void)parent;
@@ -447,7 +449,7 @@ TreeItem *MainWindow::onNewThread(QWidget *parent, QString board, QString thread
 	QString query = "/"+board+"/"+thread;
 	if(!display.length()) display = query;
 	bool isFromSession = (display == query) ? false : true;
-	ThreadTab *tt = new ThreadTab(board,thread,this,isFromSession);
+	ThreadTab *tt = new ThreadTab(api,board,thread,this,isFromSession);
 	ui->content->addWidget(tt);
 	QList<QVariant> list;
 	list.append(display);

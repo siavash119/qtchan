@@ -1,5 +1,6 @@
 #ifndef OVERLAY_H
 #define OVERLAY_H
+
 #include <QWidget>
 
 class Overlay : public QWidget

@@ -6,13 +6,15 @@ ThreadTabHelper::ThreadTabHelper() {
 
 }
 
-void ThreadTabHelper::startUp(QString &board, QString &thread, QWidget *parent, bool isFromSession = false)
+void ThreadTabHelper::startUp(Chan *api, QString &board, QString &thread, QWidget *parent, bool isFromSession = false)
 {
 	this->parent = parent;
 	this->thread = thread;
 	this->board = board;
 	this->isFromSession = isFromSession;
-	this->threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
+	this->api = api;
+	//TODO check type
+	this->threadUrl = api->threadURL(board,thread);
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	this->expandAll = settings.value("autoExpand",false).toBool();
 	QDir().mkpath(board+"/"+thread+"/thumbs");
@@ -113,7 +115,7 @@ void ThreadTabHelper::loadPosts() {
 	bool loadFile = settings.value("autoExpand",false).toBool() || this->expandAll;
 	while(!abort && i<length) {
 		p = posts.at(i).toObject();
-		ThreadForm *tf = new ThreadForm(board,thread,PostType::Reply,true,loadFile,parent);
+		ThreadForm *tf = new ThreadForm(api,board,thread,PostType::Reply,true,loadFile,parent);
 		tf->load(p);
 		tfMap.insert(tf->post.no,tf);
 		emit newTF(tf);

@@ -2,6 +2,7 @@
 #define BOARDTAB_H
 
 #include "boardtabhelper.h"
+#include "chans.h"
 #include "threadform.h"
 #include "postform.h"
 #include "filter.h"
@@ -19,9 +20,9 @@ class BoardTab : public QWidget
 	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
 	//QSpacerItem space = QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
 public:
-	explicit BoardTab(QString board, BoardType type = Index, QString search = "", QWidget *parent = 0);
+	explicit BoardTab(Chan *api, QString board, BoardType type = Index, QString search = "", QWidget *parent = 0);
 	~BoardTab();
-
+	Chan *api;
 	QString board;
 	BoardType type;
 	QString search;

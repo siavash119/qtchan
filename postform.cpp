@@ -49,8 +49,10 @@ void PostForm::loadCaptchaImage(QString &challenege, QPixmap &challengeImage){
 	ui->challenge->setPixmap(challengeImage);
 }
 
-void PostForm::load(QString &board, QString thread)
+void PostForm::load(Chan *api, QString &board, QString thread)
 {
+	this->api = api;
+	captcha.startUp(api);
 	this->board = board;
 	this->thread = thread;
 	this->setWindowTitle("post to /" + board + "/" + thread);
@@ -158,7 +160,7 @@ void PostForm::postIt()
 		multiPart->append(uploadFile);
 	}
 
-	QUrl url = QUrl("https://sys.4chan.org/"+board+"/post");
+	QUrl url = QUrl(api->postURL(board));
 	QNetworkRequest request(url);
 	postReply = nc.postManager->post(request, multiPart);
 	connect(postReply, &QNetworkReply::finished, this, &PostForm::postFinished);

@@ -3,7 +3,17 @@
 
 Captcha::Captcha()
 {
+}
 
+//TODO use the CaptchaLinks object from api instead of locally defined variables
+void Captcha::startUp(Chan *api){
+	CaptchaLinks links = api->captchaLinks();
+	siteKey = links.siteKey;
+	server = links.server;
+	lang = QString(links.lang);
+	urlChallenge = links.challengeURL;
+	urlImageBase = links.imageBaseURL;
+	requestChallenge = QNetworkRequest(QUrl(urlChallenge));
 }
 
 Captcha::~Captcha(){

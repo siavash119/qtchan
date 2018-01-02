@@ -3,6 +3,7 @@
 
 #include "overlay.h"
 #include "captcha.h"
+#include "chans.h"
 #include <QFontMetrics>
 #include <QWidget>
 #include <QNetworkReply>
@@ -19,7 +20,7 @@ class PostForm : public QWidget
 	Q_OBJECT
 public:
 	explicit PostForm(QWidget *parent = 0);
-	void load(QString &board, QString thread = "0");
+	void load(Chan *api, QString &board, QString thread = "0");
 	~PostForm();
 	void postIt();
 	QString board;
@@ -51,6 +52,7 @@ private:
 	QWidget *focused;
 	Captcha captcha;
 	void setFilenameText(QString &text);
+	Chan *api;
 
 private slots:
 	void postFinished();

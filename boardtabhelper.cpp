@@ -1,6 +1,6 @@
-#include <QJsonArray>
 #include "boardtabhelper.h"
 #include "netcontroller.h"
+#include <QJsonArray>
 #include <QSettings>
 #include <QtConcurrent/QtConcurrent>
 
@@ -8,15 +8,16 @@ BoardTabHelper::BoardTabHelper() {
 
 }
 
-void BoardTabHelper::startUp(QString &board, BoardType type, QString search, QWidget *parent)
+void BoardTabHelper::startUp(Chan *api, QString &board, BoardType type, QString search, QWidget *parent)
 {
+	this->api = api;
 	this->parent = parent;
 	this->board = board;
 	this->type = type;
 	this->search = search;
-	//this->threadUrl = "https://a.4cdn.org/"+board+"/thread/"+thread+".json";
-	if(type == BoardType::Index) boardUrl = "https://a.4cdn.org/"+board+"/1.json";
-	else boardUrl = "https://a.4cdn.org/"+board+"/catalog.json";
+	if(type == BoardType::Index) boardUrl = api->boardURL(board);
+	else boardUrl = api->catalogURL(board);
+	qDebug() << "boardURL is" << boardUrl;
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	this->expandAll = settings.value("autoExpand",false).toBool();
 	QDir().mkpath(board+"/index/thumbs");
@@ -120,14 +121,14 @@ void BoardTabHelper::loadPosts() {
 			i++;
 			continue;
 		}
-		ThreadForm *tf = new ThreadForm(board,threadNum,Thread,true,loadFile,parent,0);
+		ThreadForm *tf = new ThreadForm(api,board,threadNum,Thread,true,loadFile,parent,0);
 		tf->load(p);
 		tfMap.insert(tf->post.no,tf);
 		emit newThread(tf);
 		if(type==BoardType::Index && showIndexReplies){
 			for(int j=1;j<t.size();j++){
 				p = t.at(j).toObject();
-				ThreadForm *tfChild = new ThreadForm(board,threadNum,Thread,false,loadFile,parent,1);
+				ThreadForm *tfChild = new ThreadForm(api,board,threadNum,Thread,false,loadFile,parent,1);
 				tfChild->load(p);
 				emit newTF(tfChild,tf);
 			}

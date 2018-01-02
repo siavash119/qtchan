@@ -6,6 +6,7 @@
 #include "treemodel.h"
 #include "threadform.h"
 #include "netcontroller.h"
+#include "chans.h"
 #include <QUrl>
 #include <QMap>
 #include <QItemSelectionModel>
@@ -52,7 +53,7 @@ public slots:
 	void focusTree();
 	void focusBar();
 	TreeItem *loadFromSearch(QString query, QString display, TreeItem *childOf, bool select = false);
-	TreeItem *onNewThread(QWidget *parent, QString board, QString thread, QString display, TreeItem *childOf);
+	TreeItem *onNewThread(QWidget *parent, Chan *api, QString board, QString thread, QString display, TreeItem *childOf);
 	void saveSession();
 	void loadSession();
 	void prevTab();

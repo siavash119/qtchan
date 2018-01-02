@@ -7,17 +7,17 @@
 #include <QScrollBar>
 #include <QRegularExpressionMatch>
 
-BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *parent) :
-	QWidget(parent), board(board), type(type), search(search),
+BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWidget *parent) :
+	QWidget(parent), api(api), board(board), type(type), search(search),
 	ui(new Ui::BoardTab)
 {
 	ui->setupUi(this);
 	ui->searchWidget->hide();
 	//TODO check if actual board
 	this->setWindowTitle("/"+board+"/"+search);
-	if(type == BoardType::Index) boardUrl = "https://a.4cdn.org/"+board+"/1.json";
-	else boardUrl = "https://a.4cdn.org/"+board+"/catalog.json";
-	helper.startUp(board, type, search, this);
+	if(type == BoardType::Index) boardUrl = api->boardURL(board);
+	else boardUrl = api->catalogURL(board);
+	helper.startUp(api,board, type, search, this);
 	QCoreApplication::processEvents();
 	helper.moveToThread(&workerThread);
 	connect(&helper,&BoardTabHelper::newThread,this,&BoardTab::onNewThread,UniqueDirect);
@@ -28,10 +28,10 @@ BoardTab::BoardTab(QString board, BoardType type, QString search, QWidget *paren
 	myPostForm.setParent(this,Qt::Tool
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);
-	myPostForm.load(board,"");
+	myPostForm.load(api,board,"");
 	connect(&myPostForm,&PostForm::loadThread,[=](QString threadNum){
 		TreeItem *childOf = mw->model->getItem(mw->selectionModel->currentIndex());
-		mw->onNewThread(mw,board,threadNum,QString(),childOf);
+		mw->onNewThread(mw,api,board,threadNum,QString(),childOf);
 	});
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QFont temp = ui->lineEdit->font();
@@ -232,7 +232,7 @@ bool BoardTab::eventFilter(QObject *obj, QEvent *event)
 		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 		int mod = keyEvent->modifiers();
 		int key = keyEvent->key();
-		if(key >= 0x30 && key <= 0x39){
+		if(key >= Qt::Key_0 && key <= Qt::Key_9){
 			vimCommand += QKeySequence(key).toString();
 			qDebug() << vimCommand;
 		}
