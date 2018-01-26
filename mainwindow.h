@@ -7,6 +7,7 @@
 #include "threadform.h"
 #include "netcontroller.h"
 #include "chans.h"
+#include "you.h"
 #include <QUrl>
 #include <QMap>
 #include <QItemSelectionModel>

@@ -545,10 +545,17 @@ void ThreadForm::removeClone(QPointer<ThreadForm> tf)
 {
 	if(tf) clones.removeOne(tf);
 }
-void ThreadForm::addReplyLink(QString &reply){
-	QString temp =" <a href=\"#p" % reply % "\" style=\"color:#897399\">>>" % reply % "</a>";
+void ThreadForm::addReplyLink(QString &reply, bool isYou){
+	QString temp =" <a href=\"#p" % reply % "\" style=\"color:#897399\">>>" % reply % ((isYou) ? " (You)</a>" : "</a>");
 	repliesString += temp;
 	ui->info->setText(infoString());
+	//update clones
+	QListIterator<QPointer<ThreadForm>> i(clones);
+	while(i.hasNext()) {
+		QPointer<ThreadForm> next = i.next();
+		if(!next) continue;
+		next->repliesString = repliesString;
+	}
 }
 
 void ThreadForm::setReplies()
@@ -556,23 +563,19 @@ void ThreadForm::setReplies()
 	repliesString = "";
 	QList<QString> list = replies.values();
 	if(list.length()) {
-		//ui->replies->show();
 		foreach (const QString &reply, list)
 		{
-			repliesString+=" <a href=\"#p" % reply % "\" style=\"color:#897399\">>>" % reply % "</a>";
+			repliesString+=" <a href=\"#p" % reply % "\" style=\"color:#897399\">>>" % reply % ((you.hasYou(reply)) ? " (You)</a>" : "</a>");
 		}
 		repliesString = repliesString.mid(1);
 		ui->info->setText(infoString());
-		//ui->replies->setText(repliesString);
-		//also set replies for all clones
+		//update clones
 		QListIterator<QPointer<ThreadForm>> i(clones);
-		//qDebug() << clones;
 		while(i.hasNext()) {
 			QPointer<ThreadForm> next = i.next();
 			if(!next) continue;
 			next->repliesString = repliesString;
 			next->setInfoString();
-			//next->setRepliesString();
 		}
 	}
 	else{

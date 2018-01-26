@@ -75,6 +75,7 @@ public:
 	QString thumbURL;
 	QString thumbPath;
 	*/
+	bool isYou = false;
 private:
 	QString quoteColor(QString string);
 };

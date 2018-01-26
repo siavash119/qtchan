@@ -253,11 +253,47 @@ void MainWindow::setShortcuts()
 	connect(ui->actionReloadFilters,&QAction::triggered,[=](){
 		emit reloadFilters();
 	});
+
+	QAction *focusSearch = new QAction(this);
+	focusSearch->setShortcut(QKeySequence("Ctrl+f"));
+	focusSearch->setShortcutContext(Qt::ApplicationShortcut);
+	connect(focusSearch,&QAction::triggered,[=]{
+		TreeItem *item = model->getItem(selectionModel->currentIndex());
+		if(!item) return;
+		if(item->type == TreeItemType::thread){
+			ThreadTab *tab = static_cast<ThreadTab*>(item->tab);
+			tab->focusIt();
+		}
+		else{
+			BoardTab *tab = static_cast<BoardTab*>(item->tab);
+			tab->focusIt();
+		}
+	});
+	this->addAction(focusSearch);
+
+	QAction *focusTree = new QAction(this);
+	focusTree->setShortcut(Qt::Key_F3);
+	focusTree->setShortcutContext(Qt::ApplicationShortcut);
+	connect(focusTree,&QAction::triggered,this,&MainWindow::focusTree);
+	this->addAction(focusTree);
+
+	QAction *focusContent = new QAction(this);
+	focusContent->setShortcut(Qt::Key_F4);
+	focusContent->setShortcutContext(Qt::ApplicationShortcut);
+	connect(focusContent,&QAction::triggered,[=]{ui->content->setFocus();});
+	this->addAction(focusContent);
+
+	QAction *focusNavBar = new QAction(this);
+	focusNavBar->setShortcut(Qt::Key_F6);
+	focusNavBar->setShortcutContext(Qt::ApplicationShortcut);
+	connect(focusNavBar, &QAction::triggered, this, &MainWindow::focusBar);
+	this->addAction(focusNavBar);
 }
 
 MainWindow::~MainWindow()
 {
 	saveSession();
+	you.saveYou();
 	delete ui;
 	delete model;
 	Chans::deleteAPIs();
@@ -519,16 +555,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 			if(ui->navBar->focusWidget() == ui->navBar && !ui->navBar->isHidden()){
 				ui->navBar->hide();
 			}
-		}
-		else if(key == 16777269) {
-			ui->navBar->setFocus();
-		}
-		else if(key == 16777266) {
-			qDebug("setting focus");
-			ui->treeView->setFocus();
-		}
-		else if(key == 16777267) {
-			ui->content->setFocus();
 		}
 		else {
 			return QObject::eventFilter(obj, event);

@@ -81,6 +81,7 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 		newImage = QtConcurrent::run(&ThreadTab::checkIfVisible, unseenList);
 		watcher.setFuture(newImage);
 	});
+
 	//connect(&helper,&ThreadTabHelper::refresh,[=](ThreadForm *tf) {onRefresh(tf);});
 }
 
@@ -149,16 +150,6 @@ void ThreadTab::setShortcuts()
 	refresh->setShortcutContext(Qt::ApplicationShortcut);
 	connect(refresh, &QAction::triggered,&helper,&ThreadTabHelper::getPosts,UniqueDirect);
 	this->addAction(refresh);
-
-	QAction *focusSearch = new QAction(this);
-	focusSearch->setShortcut(QKeySequence("Ctrl+f"));
-	connect(focusSearch,&QAction::triggered,this,&ThreadTab::focusIt);
-	this->addAction(focusSearch);
-
-	QAction *focusTree = new QAction(this);
-	focusTree->setShortcut(Qt::Key_F3);
-	connect(focusTree,&QAction::triggered,mw,&MainWindow::focusTree);
-	this->addAction(focusTree);
 
 	QAction *focusBar = new QAction(this);
 	focusBar->setShortcut(Qt::Key_F6);
@@ -351,9 +342,6 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 		}
 		else if(key == Qt::Key_Return) {
 			on_pushButton_clicked();
-			return false;
-		} else if(key == Qt::Key_F6) {
-			ui->lineEdit->setFocus();
 			return false;
 		}
 		break;

@@ -70,13 +70,9 @@ void BoardTab::setImageSize(int imageSize){
 
 BoardTab::~BoardTab()
 {
-	//ui->threads->removeItem(&space);
-	//qDeleteAll(tfMap);
 	helper.abort = true;
 	workerThread.quit();
 	workerThread.wait();
-	/*disconnect(&helper);
-	disconnect(&workerThread);*/
 	delete ui;
 	qDebug().noquote().nospace() << "deleting board /" << board+"/";
 }
@@ -92,21 +88,6 @@ void BoardTab::setShortcuts()
 	postForm->setShortcut(Qt::Key_Q);
 	connect(postForm, &QAction::triggered, this, &BoardTab::openPostForm, UniqueDirect);
 	this->addAction(postForm);
-
-	QAction *focuser = new QAction(this);
-	focuser->setShortcut(Qt::Key_F3);
-	connect(focuser,&QAction::triggered,mw,&MainWindow::focusTree);
-	this->addAction(focuser);
-
-	QAction *focusBar = new QAction(this);
-	focusBar->setShortcut(Qt::Key_F6);
-	connect(focusBar,&QAction::triggered,mw,&MainWindow::focusBar);
-	this->addAction(focusBar);
-
-	QAction *focusSearch = new QAction(this);
-	focusSearch->setShortcut(QKeySequence("Ctrl+f"));
-	connect(focusSearch,&QAction::triggered,this,&BoardTab::focusIt);
-	this->addAction(focusSearch);
 
 	QAction *scrollUp = new QAction(this);
 	scrollUp->setShortcut(Qt::Key_K);

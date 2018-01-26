@@ -1,5 +1,6 @@
 #include "threadtabhelper.h"
 #include "netcontroller.h"
+#include "you.h"
 #include <QJsonArray>
 
 ThreadTabHelper::ThreadTabHelper() {
@@ -119,6 +120,9 @@ void ThreadTabHelper::loadPosts() {
 		ThreadForm *tf = new ThreadForm(api,board,thread,PostType::Reply,true,loadFile,parent);
 		tf->load(p);
 		tfMap.insert(tf->post.no,tf);
+		if(you.hasYou(tf->post.no)){
+			tf->post.isYou = true;
+		}
 		emit newTF(tf);
 		//Update windowTitle with OP info
 		if(i==0) {
@@ -144,7 +148,7 @@ void ThreadTabHelper::loadPosts() {
 				if(replyTo) {
 					replyTo->replies.insert(tf->post.no.toDouble(),tf->post.no);
 					//replyTo->setReplies();
-					replyTo->addReplyLink(tf->post.no);
+					replyTo->addReplyLink(tf->post.no,tf->post.isYou);
 				}
 			}
 		}

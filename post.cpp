@@ -1,4 +1,5 @@
 #include "post.h"
+#include "you.h"
 #include <QDateTime>
 
 Post::Post() {
@@ -64,5 +65,12 @@ QString Post::quoteColor(QString string)
 	QRegExp quotelinks("class=\"quotelink\"");
 	string.replace(quotes,colorString);
 	string.replace(quotelinks,quoteString);
+	QRegularExpressionMatchIterator i = you.findYou(string);
+	while (i.hasNext()) {
+		QRegularExpressionMatch match = i.next();
+		if(match.capturedEnd()){
+			string.insert(match.capturedEnd()," (You)");
+		}
+	}
 	return string;
 }

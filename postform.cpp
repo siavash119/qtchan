@@ -1,6 +1,7 @@
 #include "postform.h"
 #include "ui_postform.h"
 #include "netcontroller.h"
+#include "you.h"
 #include <QUrl>
 #include <QUrlQuery>
 #include <QHttpMultiPart>
@@ -198,17 +199,22 @@ void PostForm::postFinished()
 		filename = "";
 		ui->cancel->hide();
 		QTimer::singleShot(1000, this, &PostForm::close);
+		QRegularExpression re("<!-- thread:(?<replyThreadNum>\\d+),no:(?<threadNum>\\d+)");
+		QRegularExpressionMatch match = re.match(temp);
 		if(thread == ""){
-			//QRegularExpression re("<h1.*?>(?<upMessage>.*?)</h1><!-- thread:0,no:(?<threadNum>\\d+)");
-			QRegularExpression re("<!-- thread:0,no:(?<threadNum>\\d+)");
-			QRegularExpressionMatch match = re.match(temp);
 			if(match.hasMatch()){
+				you.addYou(match.captured("threadNum"));
 				qDebug() << "post successful; loading thread:" << match.captured("threadNum");
 				emit loadThread(match.captured("threadNum"));
 			}
 			else{
 				qDebug() << "post succesful; but some other error";
 				qDebug() << replyString;
+			}
+		}
+		else{
+			if(match.hasMatch()){
+				you.addYou(match.captured("threadNum"));
 			}
 		}
 		//QTimer::singleShot(1000, reply, &QTextEdit::close);

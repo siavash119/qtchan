@@ -69,7 +69,7 @@ public:
 	//QFutureWatcher<QImage> watcher;
 	QString repliesString;
 	QString infoString();
-	void addReplyLink(QString &reply);
+	void addReplyLink(QString &reply, bool isYou = false);
 	int replyLevel;
 	bool hasImage = true;
 

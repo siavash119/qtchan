@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     boardtabhelper.cpp \
     captcha.cpp \
     threadinfo.cpp \
-    chans.cpp
+    chans.cpp \
+    you.cpp
 
 HEADERS += mainwindow.h \
     threadform.h \
@@ -48,7 +49,8 @@ HEADERS += mainwindow.h \
     chans/chan.h \
     chans.h \
     chans/fourchan.h \
-    chans/eightchan.h
+    chans/eightchan.h \
+    you.h
 
 FORMS   += mainwindow.ui \
     threadform.ui \

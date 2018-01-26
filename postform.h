@@ -37,6 +37,7 @@ public:
 
 signals:
 	void loadThread(QString thread);
+	void addYou(QString postNum);
 
 public slots:
 	void appendText(QString &text);
