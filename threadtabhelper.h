@@ -15,6 +15,10 @@ class ThreadTabHelper : public QObject
 	Q_OBJECT
 	bool gettingReply = false;
 	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
+	QString colorString = "class=\\\"quote\\\" style=\\\"color:#8ba446\\\"";
+	QString quoteString = "class=\\\"quote\\\" style=\\\"color:#897399\\\"";
+	QRegExp quotesRegExp;
+	QRegExp quotelinksRegExp;
 public:
 	ThreadTabHelper();
 	~ThreadTabHelper();

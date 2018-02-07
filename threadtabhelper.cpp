@@ -4,7 +4,8 @@
 #include <QJsonArray>
 
 ThreadTabHelper::ThreadTabHelper() {
-
+	quotesRegExp.setPattern("class=\\\\\"quote\\\\\"");
+	quotelinksRegExp.setPattern("class=\\\\\"quotelink\\\\\"");
 }
 
 void ThreadTabHelper::startUp(Chan *api, QString &board, QString &thread, QWidget *parent, bool isFromSession = false)

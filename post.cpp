@@ -1,5 +1,6 @@
 #include "post.h"
 #include "you.h"
+#include "filter.h"
 #include <QDateTime>
 
 Post::Post() {
@@ -36,7 +37,10 @@ void Post::load(QJsonObject &p, QString &board)
 	country = p.value("country").toString();
 	country_name = p.value("country_name").toString();
 	sub = p.value("sub").toString();
-	com = quoteColor(p.value("com").toString());
+	//TODO regexp on all posts or do the whole json at once?
+	//com = p.value("com").toString();
+	com = p.value("com").toString();
+	com = Filter::replaceQuoteStrings(com);
 	double temp = p.value("tim").toDouble();
 	if(temp != 0.0) {
 		tim = QString::number(temp,'d',0);
@@ -56,15 +60,13 @@ void Post::load(QJsonObject &p, QString &board)
 
 Post::~Post() {
 }
-
+/*
 QString Post::quoteColor(QString string)
 {
 	//QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	//QColor color = settings.value("quote_color",);
-	QRegExp quotes("class=\"quote\"");
-	QRegExp quotelinks("class=\"quotelink\"");
-	string.replace(quotes,colorString);
-	string.replace(quotelinks,quoteString);
+	string.replace(quotesRegExp,colorString);
+	string.replace(quotelinksRegExp,quoteString);
 	QRegularExpressionMatchIterator i = you.findYou(string);
 	while (i.hasNext()) {
 		QRegularExpressionMatch match = i.next();
@@ -73,4 +75,4 @@ QString Post::quoteColor(QString string)
 		}
 	}
 	return string;
-}
+}*/

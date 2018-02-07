@@ -10,8 +10,6 @@
 
 class Post
 {
-	QString colorString = "class=\"quote\" style=\"color:#8ba446\"";
-	QString quoteString = "class=\"quote\" style=\"color:#897399\"";
 public:
 	Post();
 	Post(QJsonObject &p,QString &board);
@@ -76,8 +74,6 @@ public:
 	QString thumbPath;
 	*/
 	bool isYou = false;
-private:
-	QString quoteColor(QString string);
 };
 
 #endif // POST_H

@@ -20,9 +20,12 @@ public:
 	static QSet<QString> findQuotes(QString post);
 	bool filterMatched(QString post);
 	QSet<QRegularExpression> filters;
-
+	static QRegularExpression quoteRegExp;
+	static QRegularExpression quotelinkRegExp;
+	static QString colorString;
+	static QString quoteString;
+	static QString replaceQuoteStrings(QString &string);
 private:
-	QRegularExpression quotelink;
 	QRegularExpressionMatch quotelinkMatch;
 	QRegularExpressionMatchIterator quotelinkMatches;
 	QSet<QRegularExpression> loadFilterFile();

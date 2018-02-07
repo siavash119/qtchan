@@ -1,4 +1,5 @@
 #include "filter.h"
+#include "you.h"
 #include <QStandardPaths>
 #include <QDebug>
 
@@ -72,3 +73,29 @@ QSet<QString> Filter::crossthread(QString search) {
 	}
 	return quotes;
 }*/
+
+QRegularExpression Filter::quoteRegExp("class=\"quote\"");
+QRegularExpression Filter::quotelinkRegExp("class=\"quotelink\"");
+QString Filter::colorString("class=\"quote\" style=\"color:#8ba446\"");
+QString Filter::quoteString("class=\"quote\" style=\"color:#897399\"");
+/*{
+	QSettings settings;
+	QString colorValue(settings.value("colorString"));
+	return colorValue.isEmpty() ? "class=\"quote\" style=\"color:#8ba446\"" : colorValue;
+}*/
+
+
+QString Filter::replaceQuoteStrings(QString &string){
+	//QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	//QColor color = settings.value("quote_color",);
+	string.replace(quoteRegExp,colorString);
+	string.replace(quotelinkRegExp,quoteString);
+	QRegularExpressionMatchIterator i = you.findYou(string);
+	while (i.hasNext()) {
+		QRegularExpressionMatch match = i.next();
+		if(match.capturedEnd()){
+			string.insert(match.capturedEnd()," (You)");
+		}
+	}
+	return string;
+}
