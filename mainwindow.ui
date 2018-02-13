@@ -326,7 +326,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QTreeView" name="treeView">
+         <widget class="MyTreeView" name="treeView">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -396,7 +396,7 @@
      <x>0</x>
      <y>0</y>
      <width>1247</width>
-     <height>19</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuQtchan">
@@ -459,6 +459,13 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>MyTreeView</class>
+   <extends>QTreeView</extends>
+   <header>mytreeview.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

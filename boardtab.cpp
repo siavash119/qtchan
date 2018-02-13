@@ -22,7 +22,6 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	helper.moveToThread(&workerThread);
 	connect(&helper,&BoardTabHelper::newThread,this,&BoardTab::onNewThread,UniqueDirect);
 	connect(&helper,&BoardTabHelper::newTF,this,&BoardTab::onNewTF,UniqueDirect);
-	//connect(&helper,&BoardTabHelper::addStretch,this,&BoardTab::addStretch,UniqueDirect);
 	connect(&helper,&BoardTabHelper::clearMap,this,&BoardTab::clearMap,UniqueDirect);
 
 	myPostForm.setParent(this,Qt::Tool

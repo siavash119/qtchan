@@ -30,7 +30,7 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 protected:
-	bool eventFilter(QObject *obj, QEvent *ev);
+	bool eventFilter(QObject *watched, QEvent *event);
 
 public:
 	explicit MainWindow(QWidget *parent = 0);
@@ -46,7 +46,6 @@ public:
 
 private slots:
 	void on_pushButton_clicked();
-	void on_treeView_clicked(QModelIndex index);
 	void onSelectionChanged();
 	void on_navBar_returnPressed();
 
@@ -71,6 +70,8 @@ private:
 	Ui::MainWindow *ui;
 	void setShortcuts();
 	void removeTabs(TreeItem *tn);
+	void removeTabs(TreeItem *tn,QModelIndexList &indexList);
+	void removeChildTabs();
 	void saveSessionToFile(QString fileName);
 	void loadSessionFromFile(QString sessionFile);
 	QMetaObject::Connection selectionConnection;

@@ -12,6 +12,7 @@
 #include <QStandardItem>
 #include <QEvent>
 #include <QKeyEvent>
+#include <QMouseEvent>
 #include <QSettings>
 #include <QShortcut>
 #include <QDesktopServices>
@@ -32,7 +33,15 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->navBar->hide();
 	ui->navBar->installEventFilter(this);
 	ui->treeView->setModel(model);
-	ui->treeView->installEventFilter(this);
+	connect(ui->treeView,&MyTreeView::treeMiddleClicked,[=](QPoint pos){
+		QModelIndex index = ui->treeView->indexAt(pos);
+		if(index != ui->treeView->rootIndex()){
+			removeTabs(model->getItem(index));
+		}
+	});
+	connect(ui->treeView,&MyTreeView::hideNavBar,[=](){
+		ui->navBar->hide();
+	});
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	int fontSize = settings.value("fontSize",14).toInt();
 	QFont temp = ui->treeView->font();
@@ -288,6 +297,12 @@ void MainWindow::setShortcuts()
 	focusNavBar->setShortcutContext(Qt::ApplicationShortcut);
 	connect(focusNavBar, &QAction::triggered, this, &MainWindow::focusBar);
 	this->addAction(focusNavBar);
+
+	QAction *closeChildTabs = new QAction(this);
+	closeChildTabs->setShortcut(QKeySequence("ctrl+k"));
+	closeChildTabs->setShortcutContext(Qt::ApplicationShortcut);
+	connect(closeChildTabs,&QAction::triggered,this,&MainWindow::removeChildTabs);
+	this->addAction(closeChildTabs);
 }
 
 MainWindow::~MainWindow()
@@ -297,6 +312,19 @@ MainWindow::~MainWindow()
 	delete ui;
 	delete model;
 	Chans::deleteAPIs();
+}
+
+bool MainWindow::eventFilter(QObject *watched, QEvent *event){
+	if(event->type() == QEvent::KeyPress){
+		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+		int key = keyEvent->key();
+		if(key == Qt::Key_Escape){
+			ui->navBar->hide();
+			return true;
+		}
+		return false;
+	}
+	return QWidget::eventFilter(watched,event);
 }
 
 //TODO put toggle functions in 1 function with argument
@@ -522,13 +550,6 @@ void MainWindow::addTab(TreeItem *child, TreeItem *parent, bool select)
 	}
 }
 
-void MainWindow::on_treeView_clicked(QModelIndex index)
-{
-	QWidget *tab = model->getItem(index)->tab;
-	ui->content->setCurrentWidget(tab);
-	this->setWindowTitle(tab->windowTitle());
-}
-
 void MainWindow::onSelectionChanged()
 {
 	QModelIndexList list = selectionModel->selectedIndexes();
@@ -542,43 +563,22 @@ void MainWindow::onSelectionChanged()
 	QCoreApplication::processEvents();
 }
 
-//TODO? replace with regular QAction shortcuts
-bool MainWindow::eventFilter(QObject *obj, QEvent *event)
-{
-	if (event->type() == QEvent::KeyPress) {
-		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-		int key = keyEvent->key();
-		//int mod = keyEvent->modifiers();
-		//qDebug("Ate key press %d, key");
-		//qDebug("Modifers %d", mod);
-		if(key == 16777216){
-			if(ui->navBar->focusWidget() == ui->navBar && !ui->navBar->isHidden()){
-				ui->navBar->hide();
-			}
-		}
-		else {
-			return QObject::eventFilter(obj, event);
-		}
-		return false;
-	}
-	// standard event processing
-	return QObject::eventFilter(obj, event);
-}
-
 //TODO make non-recursive version
 void MainWindow::deleteSelected()
 {
 	QCoreApplication::processEvents();
 	ui->treeView->blockSignals(true);
+	//Get current selection
 	QModelIndexList indexList = selectionModel->selectedRows();
 	QModelIndex ind;
 	if(!indexList.size() && selectionModel->currentIndex().isValid()) {
 		indexList.clear();
 		indexList.append(selectionModel->currentIndex());
 	}
+	//close tabs
 	while(indexList.size()) {
-		removeTabs(model->getItem(indexList.first()));
-		indexList.pop_front();
+		removeTabs(model->getItem(indexList.first()),indexList);
+		if(indexList.size()) indexList.pop_front();
 	}
 	ui->treeView->blockSignals(false);
 	ind = selectionModel->currentIndex();
@@ -587,10 +587,19 @@ void MainWindow::deleteSelected()
 	QCoreApplication::processEvents();
 }
 
-void MainWindow::removeTabs(TreeItem *tn) {
-	if(tn == model->root) return;
+void MainWindow::removeTabs(TreeItem *tn){
+	QModelIndexList empty;
+	return removeTabs(tn,empty);
+}
+
+void MainWindow::removeTabs(TreeItem *tn, QModelIndexList &indexList) {
+	if(!tn || tn == model->root) return;
 	while(tn->childCount()) {
-		removeTabs(tn->child(0));
+		removeTabs(tn->child(0),indexList);
+	}
+	QModelIndex current = model->getIndex(tn);
+	if(indexList.contains(current)){
+		indexList.removeOne(current);
 	}
 	model->removeItem(tn);
 	ui->content->removeWidget(tn->tab);
@@ -600,6 +609,18 @@ void MainWindow::removeTabs(TreeItem *tn) {
 	delete tn;
 	if(!ui->content->count())
 		this->setWindowTitle("qtchan");
+}
+
+void MainWindow::removeChildTabs(){
+	QModelIndexList indexList = selectionModel->selectedRows();
+	int listCount = indexList.count();
+	for(int i=0;i<listCount;i++){
+		TreeItem *tn = model->getItem(indexList.at(i));
+		if(!tn) continue;
+		while(tn->childCount()) {
+			removeTabs(tn->child(0),indexList);
+		}
+	}
 }
 
 QObject *MainWindow::currentWidget()

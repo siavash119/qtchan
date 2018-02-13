@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     captcha.cpp \
     threadinfo.cpp \
     chans.cpp \
-    you.cpp
+    you.cpp \
+    mytreeview.cpp
 
 HEADERS += mainwindow.h \
     threadform.h \
@@ -50,7 +51,8 @@ HEADERS += mainwindow.h \
     chans.h \
     chans/fourchan.h \
     chans/eightchan.h \
-    you.h
+    you.h \
+    mytreeview.h
 
 FORMS   += mainwindow.ui \
     threadform.ui \
