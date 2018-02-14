@@ -16,7 +16,6 @@
 #include <QSettings>
 #include <QShortcut>
 #include <QDesktopServices>
-#include <stdio.h>
 
 //TODO decouple item model/view logic to another class
 MainWindow::MainWindow(QWidget *parent) :
@@ -33,11 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->navBar->hide();
 	ui->navBar->installEventFilter(this);
 	ui->treeView->setModel(model);
-	connect(ui->treeView,&MyTreeView::treeMiddleClicked,[=](QPoint pos){
-		QModelIndex index = ui->treeView->indexAt(pos);
-		if(index != ui->treeView->rootIndex()){
-			removeTabs(model->getItem(index));
-		}
+	connect(ui->treeView,&MyTreeView::treeMiddleClicked,[=](QModelIndex index){
+		model->removeTab(index);
 	});
 	connect(ui->treeView,&MyTreeView::hideNavBar,[=](){
 		ui->navBar->hide();
@@ -61,11 +57,25 @@ MainWindow::MainWindow(QWidget *parent) :
 			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
 		}
 	});
+	connect(model,&TreeModel::loadFromSearch,this,&MainWindow::loadFromSearch);
+	connect(model,&TreeModel::selectTab,[=](QModelIndex ind){
+		selectionModel->setCurrentIndex(ind,QItemSelectionModel::ClearAndSelect);
+	});
+	connect(model,&TreeModel::removingTab,[=](TreeItem* tn){
+		ui->content->removeWidget(tn->tab);
+		tabs.remove(tn->tab);
+		Tab current = tabs.value(ui->content->currentWidget());
+		if(!current.tn) return;
+		QModelIndex ind = model->getIndex(current.tn);
+		if(ind != ui->treeView->rootIndex())
+			selectionModel->setCurrentIndex(ind,QItemSelectionModel::ClearAndSelect);
+	});
 	this->setShortcuts();
 }
 
 void MainWindow::setShortcuts()
 {
+	//hiding the menu bar disables other qmenu actions shortcuts?
 	QAction *toggleMenuBar = new QAction(this);
 	toggleMenuBar->setShortcut(QKeySequence("F11"));
 	toggleMenuBar->setShortcutContext(Qt::ApplicationShortcut);
@@ -215,7 +225,6 @@ void MainWindow::setShortcuts()
 		emit setImageSize(imageSize);
 	});
 	this->addAction(scaleImagesUp);
-
 
 	ui->actionSave->setShortcut(QKeySequence("Ctrl+s"));
 	ui->actionSave->setShortcutContext(Qt::ApplicationShortcut);
@@ -501,7 +510,7 @@ TreeItem *MainWindow::loadFromSearch(QString query, QString display, TreeItem *c
 	tnNew->display = display;
 	Tab tab = {Tab::TabType::Board,bt,tnNew,query,display};
 	tabs.insert(bt,tab);
-	addTab(tnNew,tnParent,select);
+	model->addTab(tnNew,tnParent,select);
 	return tnNew;
 }
 
@@ -525,7 +534,7 @@ TreeItem *MainWindow::onNewThread(QWidget *parent, Chan *api, QString board, QSt
 	Tab tab = {Tab::TabType::Thread,tt,tnNew,query,display};
 	tabs.insert(tt,tab);
 	connect(tt,&ThreadTab::unseen,this,&MainWindow::updateSeen);
-	addTab(tnNew,childOf,false);
+	model->addTab(tnNew,childOf,false);
 	return tnNew;
 }
 
@@ -535,24 +544,9 @@ void MainWindow::updateSeen(int formsUnseen){
 	tn->unseen = formsUnseen;
 }
 
-void MainWindow::addTab(TreeItem *child, TreeItem *parent, bool select)
-{
-	if(parent == Q_NULLPTR || parent == model->root) {
-		model->addParent(child);
-	}
-	else{
-		QModelIndex ind = model->getIndex(parent);
-		model->addChild(ind,child);
-	}
-	if(select) {
-		QModelIndex ind = model->getIndex(child);
-		selectionModel->setCurrentIndex(ind,QItemSelectionModel::ClearAndSelect);
-	}
-}
-
 void MainWindow::onSelectionChanged()
 {
-	QModelIndexList list = selectionModel->selectedIndexes();
+	QModelIndexList list = ui->treeView->selected();
 	if(list.size()) {
 		QPointer<QWidget> tab = model->getItem(list.at(0))->tab;
 		if(tab){
@@ -560,70 +554,25 @@ void MainWindow::onSelectionChanged()
 			this->setWindowTitle(tab->windowTitle());
 		}
 	}
-	QCoreApplication::processEvents();
 }
 
-//TODO make non-recursive version
 void MainWindow::deleteSelected()
 {
 	QCoreApplication::processEvents();
-	ui->treeView->blockSignals(true);
-	//Get current selection
-	QModelIndexList indexList = selectionModel->selectedRows();
-	QModelIndex ind;
-	if(!indexList.size() && selectionModel->currentIndex().isValid()) {
-		indexList.clear();
-		indexList.append(selectionModel->currentIndex());
+	foreach(QModelIndex index, ui->treeView->selected()) {
+		model->removeTab(index);
 	}
-	//close tabs
-	while(indexList.size()) {
-		removeTabs(model->getItem(indexList.first()),indexList);
-		if(indexList.size()) indexList.pop_front();
-	}
-	ui->treeView->blockSignals(false);
-	ind = selectionModel->currentIndex();
-	if(ind.isValid())
-		selectionModel->setCurrentIndex(ind,QItemSelectionModel::ClearAndSelect);
 	QCoreApplication::processEvents();
 }
 
-void MainWindow::removeTabs(TreeItem *tn){
-	QModelIndexList empty;
-	return removeTabs(tn,empty);
-}
-
-void MainWindow::removeTabs(TreeItem *tn, QModelIndexList &indexList) {
-	if(!tn || tn == model->root) return;
-	while(tn->childCount()) {
-		removeTabs(tn->child(0),indexList);
-	}
-	QModelIndex current = model->getIndex(tn);
-	if(indexList.contains(current)){
-		indexList.removeOne(current);
-	}
-	model->removeItem(tn);
-	ui->content->removeWidget(tn->tab);
-	tabs.remove(tn->tab);
-	tn->tab->disconnect();
-	tn->tab->deleteLater();
-	delete tn;
-	if(!ui->content->count())
-		this->setWindowTitle("qtchan");
-}
-
 void MainWindow::removeChildTabs(){
-	QModelIndexList indexList = selectionModel->selectedRows();
-	int listCount = indexList.count();
-	for(int i=0;i<listCount;i++){
-		TreeItem *tn = model->getItem(indexList.at(i));
-		if(!tn) continue;
-		while(tn->childCount()) {
-			removeTabs(tn->child(0),indexList);
-		}
+	foreach(QModelIndex index, ui->treeView->selected()) {
+		model->removeChildren(index);
 	}
+	QCoreApplication::processEvents();
 }
 
-QObject *MainWindow::currentWidget()
+QWidget *MainWindow::currentWidget()
 {
 	return ui->content->currentWidget();
 }
@@ -651,86 +600,12 @@ void MainWindow::saveSession()
 {
 	qDebug().noquote() << "Saving session.";
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	saveSessionToFile(settings.value("sessionFile","settings.txt").toString());
-}
-
-void MainWindow::saveSessionToFile(QString fileName)
-{
-	QFile data(fileName);
-	data.open(static_cast<QFile::OpenMode>(QFile::WriteOnly | QFile::Truncate));
-	QTextStream out(&data);
-	QList<TreeItem*> parents;
-	QList<int> lines;
-	parents << model->root;
-	lines << 0;
-	int i;
-	TreeItem *parent;
-	TreeItem *child;
-	QString indent = "\t";
-	while(!parents.isEmpty()) {
-		parent = parents.last();
-		i = lines.last();
-		while(i<parent->childCount()) {
-			child = parent->child(i);
-			out << indent.repeated(lines.size()-1);
-			out << child->query << "\t" << child->display << endl;
-			i++;
-			lines.last()++;
-			if(child->childCount()) {
-				parents << child;
-				lines << 0;
-				break;
-			}
-		}
-		while (!parents.isEmpty() && parents.last()->childCount() == lines.last()) {
-			lines.pop_back();
-			parents.pop_back();
-		}
-	}
+	model->saveSessionToFile(settings.value("sessionFile","settings.txt").toString());
 }
 
 void MainWindow::loadSession()
 {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QString sessionFile = settings.value("sessionFile","settings.txt").toString();
-	loadSessionFromFile(sessionFile);
-}
-
-void MainWindow::loadSessionFromFile(QString sessionFile)
-{
-	QFile session(sessionFile);
-	session.open(QFile::ReadOnly);
-	QTextStream in(&session);
-	QString line;
-	QList<TreeItem*> parents;
-	parents.append(model->root);
-	QList<int> indents;
-	indents << 0;
-	int position;
-	while(!in.atEnd()) {
-		line = in.readLine();
-		if(line.isEmpty())continue;
-		position = 0;
-		while(position < line.length()) {
-			if(line.at(position) != '\t') break;
-			position++;
-		}
-		line = line.mid(position).trimmed();
-		if(line.isEmpty())continue;
-		QStringList columns = line.split("\t", QString::SkipEmptyParts);
-		if(columns.size() == 1) columns.append(columns.at(0));
-		if(position > indents.last()) {
-			if(parents.last()->childCount() > 0) {
-				parents << parents.last()->child(parents.last()->childCount()-1);
-				indents << position;
-			}
-		}
-		else{
-			while(position < indents.last() && parents.count() > 0) {
-				parents.pop_back();
-				indents.pop_back();
-			}
-		}
-		loadFromSearch(columns.at(0),columns.at(1),parents.last(),false);
-	}
+	model->loadSessionFromFile(sessionFile);
 }

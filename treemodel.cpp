@@ -5,7 +5,9 @@
 #include <QStringList>
 #include <QMimeData>
 #include <QIODevice>
+#include <QTextStream>
 #include <QDataStream>
+#include <QPointer>
 
 TreeModel::TreeModel(QObject *parent)
 	: QAbstractItemModel(parent)
@@ -185,6 +187,18 @@ void TreeModel::removeItem(TreeItem *item)
 	endRemoveRows();
 }
 
+void TreeModel::removeTab(QModelIndex ind){
+	TreeItem *tn = getItem(ind);
+	if(!tn || tn == root) return;
+	tn->deleteLater();
+}
+
+void TreeModel::removeChildren(QModelIndex ind){
+	TreeItem *tn = getItem(ind);
+	if(!tn || tn == root) return;
+	tn->removeChildren();
+}
+
 QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) const
 {
 	if(!hasIndex(row, column, parent))
@@ -222,3 +236,96 @@ QModelIndex TreeModel::getIndex(TreeItem *item) const
 {
 	return createIndex(item->row(),0,item);
 }
+
+void TreeModel::saveSessionToFile(QString fileName)
+{
+	QFile data(fileName);
+	data.open(static_cast<QFile::OpenMode>(QFile::WriteOnly | QFile::Truncate));
+	QTextStream out(&data);
+	QList<TreeItem*> parents;
+	QList<int> lines;
+	parents << root;
+	lines << 0;
+	int i;
+	TreeItem *parent;
+	TreeItem *child;
+	QString indent = "\t";
+	while(!parents.isEmpty()) {
+		parent = parents.last();
+		i = lines.last();
+		while(i<parent->childCount()) {
+			child = parent->child(i);
+			out << indent.repeated(lines.size()-1);
+			out << child->query << "\t" << child->display << endl;
+			i++;
+			lines.last()++;
+			if(child->childCount()) {
+				parents << child;
+				lines << 0;
+				break;
+			}
+		}
+		while (!parents.isEmpty() && parents.last()->childCount() == lines.last()) {
+			lines.pop_back();
+			parents.pop_back();
+		}
+	}
+}
+
+void TreeModel::loadSessionFromFile(QString sessionFile)
+{
+	QFile session(sessionFile);
+	session.open(QFile::ReadOnly);
+	QTextStream in(&session);
+	QString line;
+	QList<TreeItem*> parents;
+	parents.append(root);
+	QList<int> indents;
+	indents << 0;
+	int position;
+	while(!in.atEnd()) {
+		line = in.readLine();
+		if(line.isEmpty())continue;
+		position = 0;
+		while(position < line.length()) {
+			if(line.at(position) != '\t') break;
+			position++;
+		}
+		line = line.mid(position).trimmed();
+		if(line.isEmpty())continue;
+		QStringList columns = line.split("\t", QString::SkipEmptyParts);
+		if(columns.size() == 1) columns.append(columns.at(0));
+		if(position > indents.last()) {
+			if(parents.last()->childCount() > 0) {
+				parents << parents.last()->child(parents.last()->childCount()-1);
+				indents << position;
+			}
+		}
+		else{
+			while(position < indents.last() && parents.count() > 0) {
+				parents.pop_back();
+				indents.pop_back();
+			}
+		}
+		emit loadFromSearch(columns.at(0),columns.at(1),parents.last(),false);
+	}
+}
+
+void TreeModel::addTab(TreeItem *child, TreeItem *parent, bool select)
+{
+	if(parent == Q_NULLPTR || parent == root) {
+		addParent(child);
+	}
+	else{
+		QModelIndex ind = getIndex(parent);
+		addChild(ind,child);
+	}
+	connect(child,&TreeItem::deleting,[=](TreeItem *tn){
+		removeItem(tn);
+		emit removingTab(tn);
+	});
+	if(select) {
+		emit selectTab(getIndex(child));
+	}
+}
+

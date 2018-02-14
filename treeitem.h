@@ -4,14 +4,16 @@
 #include <QList>
 #include <QVariant>
 #include <QWidget>
+#include <QObject>
 
 enum TreeItemType {board, thread};
 
-class TreeItem
+class TreeItem : public QObject
 {
+	Q_OBJECT
 public:
 	explicit TreeItem(const QList<QVariant> &data, TreeItem *parent);
-	explicit TreeItem(const QList<QVariant> &data, TreeItem *parent, QWidget *tab, TreeItemType type = thread);
+	explicit TreeItem(const QList<QVariant> &data, TreeItem *parent, QWidget *tab, TreeItemType type = TreeItemType::thread);
 	~TreeItem();
 
 	void appendChild(TreeItem *child);
@@ -27,15 +29,18 @@ public:
 	bool setData(int column, const QVariant &value);
 
 	TreeItem *parent;
-	QWidget *tab;
+	QWidget *tab = Q_NULLPTR;
 	TreeItemType type;
 	QString query;
 	QString display;
 	int unseen;
+	void removeChildren();
 
 private:
 	QList<QVariant> itemData;
 	QList<TreeItem*> children;
+signals:
+	void deleting(TreeItem *tn);
 };
 
 #endif // TREEITEM_H

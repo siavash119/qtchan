@@ -37,6 +37,17 @@ public:
 	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 	QModelIndex getIndex(TreeItem *item) const;
 	TreeItem *getItem(const QModelIndex &index) const;
+
+	void saveSessionToFile(QString filename);
+	void loadSessionFromFile(QString filename);
+	void addTab(TreeItem *child, TreeItem *parent, bool select);
+	void removeTab(QModelIndex ind);
+	void removeChildren(QModelIndex ind);
+
+signals:
+	void loadFromSearch(QString query,QString display,TreeItem* tn,bool select = false);
+	void selectTab(QModelIndex ind);
+	void removingTab(TreeItem *tn);
 };
 
 #endif // TREEMODEL_H

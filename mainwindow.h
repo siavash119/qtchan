@@ -34,6 +34,7 @@ protected:
 
 public:
 	explicit MainWindow(QWidget *parent = 0);
+	//TreeModel *model;
 	TreeModel *model = new TreeModel(this);
 	QItemSelectionModel *selectionModel;
 	QMap<QWidget*,Tab> tabs;
@@ -41,7 +42,7 @@ public:
 
 	void addTab(TreeItem *child, TreeItem *parent = Q_NULLPTR, bool select = false);
 	void deleteSelected();
-	QObject *currentWidget();
+	QWidget *currentWidget();
 	Settings settingsView;
 
 private slots:
@@ -69,11 +70,7 @@ public slots:
 private:
 	Ui::MainWindow *ui;
 	void setShortcuts();
-	void removeTabs(TreeItem *tn);
-	void removeTabs(TreeItem *tn,QModelIndexList &indexList);
 	void removeChildTabs();
-	void saveSessionToFile(QString fileName);
-	void loadSessionFromFile(QString sessionFile);
 	QMetaObject::Connection selectionConnection;
 
 signals:

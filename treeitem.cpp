@@ -15,7 +15,12 @@ TreeItem::TreeItem(const QList<QVariant> &data,
 
 TreeItem::~TreeItem()
 {
+	if(tab != Q_NULLPTR){
+		tab->disconnect();
+		tab->deleteLater();
+	}
 	qDeleteAll(children);
+	emit deleting(this);
 }
 
 void TreeItem::appendChild(TreeItem *item)
@@ -26,6 +31,10 @@ void TreeItem::appendChild(TreeItem *item)
 void TreeItem::removeChild(int row)
 {
 	children.removeAt(row);
+}
+
+void TreeItem::removeChildren(){
+	qDeleteAll(children);
 }
 
 TreeItem *TreeItem::child(int row) const

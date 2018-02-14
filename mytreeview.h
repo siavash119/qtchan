@@ -8,12 +8,15 @@ class MyTreeView : public QTreeView
 	Q_OBJECT
 public:
 	explicit MyTreeView(QWidget *parent = nullptr);
+	QModelIndexList selected();
+	void selectTab(QModelIndex ind);
+
 protected:
 	void mousePressEvent(QMouseEvent *);
 	void keyPressEvent(QKeyEvent *);
 
 signals:
-	void treeMiddleClicked(QPoint);
+	void treeMiddleClicked(QModelIndex);
 	void hideNavBar();
 
 public slots:
