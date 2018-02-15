@@ -22,6 +22,7 @@ public:
 	void loadCookies(QString passFile);
 	void loadCookiesIntoAllManagers(QString domain, QString name, QString value);
 	void removeCookies();
+	void refreshManagers();
 };
 
 extern netController nc;

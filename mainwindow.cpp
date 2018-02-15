@@ -64,7 +64,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(model,&TreeModel::removingTab,[=](TreeItem* tn){
 		ui->content->removeWidget(tn->tab);
 		tabs.remove(tn->tab);
-		Tab current = tabs.value(ui->content->currentWidget());
+		QWidget *cw = currentWidget();
+		if(!cw) return;
+		Tab current = tabs.value(cw);
 		if(!current.tn) return;
 		QModelIndex ind = model->getIndex(current.tn);
 		if(ind != ui->treeView->rootIndex())
@@ -574,7 +576,9 @@ void MainWindow::removeChildTabs(){
 
 QWidget *MainWindow::currentWidget()
 {
-	return ui->content->currentWidget();
+	if(ui->content->count())
+		return ui->content->currentWidget();
+	else return Q_NULLPTR;
 }
 
 void MainWindow::on_navBar_returnPressed()

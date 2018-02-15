@@ -88,6 +88,10 @@ void BoardTabHelper::loadPosts() {
 			//updateTimer->stop();
 			emit boardStatus("404");
 		}
+		//QT bug (network does not refresh after resume from suspend) workaround
+		else if(reply->error() == QNetworkReply::UnknownNetworkError){
+			nc.refreshManagers();
+		}
 		reply->deleteLater();
 		return;
 	}

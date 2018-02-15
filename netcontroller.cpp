@@ -80,6 +80,14 @@ void netController::removeCookies(){
 	postManager->setCookieJar(new QNetworkCookieJar());
 }
 
+void netController::refreshManagers(){
+	postManager->setNetworkAccessible(QNetworkAccessManager::Accessible);
+	jsonManager->setNetworkAccessible(QNetworkAccessManager::Accessible);
+	thumbManager->setNetworkAccessible(QNetworkAccessManager::Accessible);
+	fileManager->setNetworkAccessible(QNetworkAccessManager::Accessible);
+	captchaManager->setNetworkAccessible(QNetworkAccessManager::Accessible);
+}
+
 netController nc;
 
 //std::vector<BoardTab*> bts;
