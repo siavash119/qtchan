@@ -120,3 +120,16 @@ void Settings::showEvent(QShowEvent *event)
 	refreshValues();
 }
 
+
+
+
+void Settings::on_sessionFile_editingFinished()
+{
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QString text = ui->sessionFile->text();
+	if(!text.isEmpty()){
+		qDebug().noquote() << "setting sessionFile to" << text;
+		settings.setValue("sessionFile",text);
+		emit update("sessionFile",text);
+	}
+}

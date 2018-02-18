@@ -24,6 +24,8 @@ private:
 	Ui::Settings *ui;
 protected:
 	void showEvent(QShowEvent *event);
+private slots:
+	void on_sessionFile_editingFinished();
 };
 
 #endif // SETTINGS_H

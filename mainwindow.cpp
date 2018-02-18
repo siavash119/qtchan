@@ -161,11 +161,19 @@ void MainWindow::setShortcuts()
 	connect(setAutoExpand, &QAction::triggered, this, &MainWindow::toggleAutoExpand);
 	this->addAction(setAutoExpand);
 
+	//TODO select session saves slots
 	QAction *saveState = new QAction(this);
 	saveState->setShortcut(QKeySequence(Qt::Key_F10));
 	saveState->setShortcutContext(Qt::ApplicationShortcut);
 	connect(saveState, &QAction::triggered, this, &MainWindow::saveSession);
 	this->addAction(saveState);
+
+	//TODO select session saves slots
+	QAction *loadState = new QAction(this);
+	loadState->setShortcut(QKeySequence(Qt::Key_F12));
+	loadState->setShortcutContext(Qt::ApplicationShortcut);
+	connect(loadState, &QAction::triggered, this, &MainWindow::loadSession);
+	this->addAction(loadState);
 
 	QAction *openExplorer = new QAction(this);
 	openExplorer->setShortcut(QKeySequence("Ctrl+o"));
@@ -616,12 +624,12 @@ void MainWindow::saveSession()
 {
 	qDebug().noquote() << "Saving session.";
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	model->saveSessionToFile(settings.value("sessionFile","settings.txt").toString());
+	model->saveSessionToFile(settings.value("sessionFile","session.txt").toString());
 }
 
 void MainWindow::loadSession()
 {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	QString sessionFile = settings.value("sessionFile","settings.txt").toString();
+	QString sessionFile = settings.value("sessionFile","session.txt").toString();
 	model->loadSessionFromFile(sessionFile);
 }

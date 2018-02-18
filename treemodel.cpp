@@ -8,6 +8,7 @@
 #include <QTextStream>
 #include <QDataStream>
 #include <QPointer>
+#include <QDebug>
 
 TreeModel::TreeModel(QObject *parent)
 	: QAbstractItemModel(parent)
@@ -240,7 +241,10 @@ QModelIndex TreeModel::getIndex(TreeItem *item) const
 void TreeModel::saveSessionToFile(QString fileName)
 {
 	QFile data(fileName);
-	data.open(static_cast<QFile::OpenMode>(QFile::WriteOnly | QFile::Truncate));
+	if(!data.open(static_cast<QFile::OpenMode>(QFile::WriteOnly | QFile::Truncate))){
+		qDebug().noquote() << "unable to open session file" << fileName;
+		return;
+	}
 	QTextStream out(&data);
 	QList<TreeItem*> parents;
 	QList<int> lines;
