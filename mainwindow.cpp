@@ -583,7 +583,13 @@ void MainWindow::onSelectionChanged()
 
 void MainWindow::deleteSelected()
 {
-	foreach(QModelIndex index, ui->treeView->selected()) {
+	if(!tabs.size()) return;
+	QModelIndexList list = ui->treeView->selected();
+	if(!list.size()){
+		Tab tab = tabs.value(ui->content->currentWidget());
+		if(tab.tn) tab.tn->deleteLater();
+	}
+	else foreach(QModelIndex index, list) {
 		model->removeTab(index);
 	}
 }
