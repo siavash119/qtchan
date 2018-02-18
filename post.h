@@ -74,6 +74,7 @@ public:
 	QString thumbPath;
 	*/
 	bool isYou = false;
+	bool hasYou = false;
 };
 
 #endif // POST_H

@@ -66,6 +66,7 @@ public slots:
 	void openExplorer();
 	void updateSettings(QString setting, QVariant value);
 	void updateSeen(int formsUnseen);
+	void onRemoveTab(TreeItem* tn);
 
 private:
 	Ui::MainWindow *ui;

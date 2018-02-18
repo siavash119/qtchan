@@ -1,6 +1,7 @@
 #include "threadtabhelper.h"
 #include "netcontroller.h"
 #include "you.h"
+#include "notificationview.h"
 #include <QJsonArray>
 
 ThreadTabHelper::ThreadTabHelper() {
@@ -35,8 +36,6 @@ void ThreadTabHelper::startUp(Chan *api, QString &board, QString &thread, QWidge
 }
 
 ThreadTabHelper::~ThreadTabHelper() {
-	disconnect(parent);
-	disconnect(this);
 	abort = true;
 	updateTimer->stop();
 	disconnect(connectionUpdate);
@@ -46,7 +45,6 @@ ThreadTabHelper::~ThreadTabHelper() {
 		disconnect(reply);
 		reply->deleteLater();
 	}
-	qDeleteAll(tfMap);
 }
 
 void ThreadTabHelper::setAutoUpdate(bool update) {
@@ -125,7 +123,7 @@ void ThreadTabHelper::loadPosts() {
 		ThreadForm *tf = new ThreadForm(api,board,thread,PostType::Reply,true,loadFile,parent);
 		tf->load(p);
 		tfMap.insert(tf->post.no,tf);
-		if(you.hasYou(tf->post.no)){
+		if(you.hasYou(board,tf->post.no)){
 			tf->post.isYou = true;
 		}
 		emit newTF(tf);
@@ -152,15 +150,20 @@ void ThreadTabHelper::loadPosts() {
 				replyTo = i.value();
 				if(replyTo) {
 					replyTo->replies.insert(tf->post.no.toDouble(),tf->post.no);
-					//replyTo->setReplies();
 					replyTo->addReplyLink(tf->post.no,tf->post.isYou);
 				}
 			}
 		}
+		if(tf->post.hasYou){
+			ThreadForm *cloned = tf->clone(0);
+			cloned->setMinimumSize(640,250);
+			nv->addNotification(cloned);
+		}
 		i++;
+		//TODO change update view processing?
+		//if(i % 10 == 0)
 		QCoreApplication::processEvents();
 	}
-	//if(!abort) emit addStretch();
 	//emit scrollIt();
 }
 

@@ -41,6 +41,9 @@ void Post::load(QJsonObject &p, QString &board)
 	//com = p.value("com").toString();
 	com = p.value("com").toString();
 	com = Filter::replaceQuoteStrings(com);
+	QRegularExpressionMatchIterator i = you.findYou(board,com);
+	if(i.hasNext()) hasYou = true;
+	com = Filter::replaceYouStrings(i,com);
 	double temp = p.value("tim").toDouble();
 	if(temp != 0.0) {
 		tim = QString::number(temp,'d',0);

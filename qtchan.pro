@@ -28,7 +28,9 @@ SOURCES += main.cpp\
     threadinfo.cpp \
     chans.cpp \
     you.cpp \
-    mytreeview.cpp
+    notificationtray.cpp \
+    treeview.cpp \
+    notificationview.cpp
 
 HEADERS += mainwindow.h \
     threadform.h \
@@ -52,7 +54,9 @@ HEADERS += mainwindow.h \
     chans/fourchan.h \
     chans/eightchan.h \
     you.h \
-    mytreeview.h
+    notificationtray.h \
+    treeview.h \
+    notificationview.h
 
 FORMS   += mainwindow.ui \
     threadform.ui \
@@ -60,6 +64,10 @@ FORMS   += mainwindow.ui \
     threadtab.ui \
     postform.ui \
     settings.ui \
-    threadinfo.ui
+    threadinfo.ui \
+    notificationview.ui
 
-RC_ICONS = icon.ico
+RC_ICONS = icons/icon.ico
+
+RESOURCES += \
+    icons.qrc

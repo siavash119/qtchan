@@ -30,7 +30,6 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	info.setParent(this);
 	info.move(this->width()-info.width()-20,this->height()-info.height()-20);
 	info.show();
-	QCoreApplication::processEvents();
 	helper.moveToThread(&workerThread);
 	connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF,UniqueDirect);
 	connect(&helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle,UniqueDirect);

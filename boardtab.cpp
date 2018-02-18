@@ -18,7 +18,6 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	if(type == BoardType::Index) boardUrl = api->boardURL(board);
 	else boardUrl = api->catalogURL(board);
 	helper.startUp(api,board, type, search, this);
-	QCoreApplication::processEvents();
 	helper.moveToThread(&workerThread);
 	connect(&helper,&BoardTabHelper::newThread,this,&BoardTab::onNewThread,UniqueDirect);
 	connect(&helper,&BoardTabHelper::newTF,this,&BoardTab::onNewTF,UniqueDirect);

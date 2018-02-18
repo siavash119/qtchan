@@ -42,21 +42,14 @@ ThreadForm::ThreadForm(Chan *api, QString board, QString threadNum, PostType typ
 	//this->setMinimumWidth(488);
 	pathBase = "./" % board % "/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
 	connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
-	connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
+	comQuoteConnection = connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	//connect(ui->replies,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
-	connect(ui->info,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
+	infoQuoteConnection = connect(ui->info,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	if(root) ui->hide->setStyleSheet("padding:0 10px; background-color: #191919;");
-
-	//TODO quote for boardtab too
-	//if(type==Reply)connect(ui->no,&ClickableLabel::clicked,this,&ThreadForm::appendQuote);
-	//ui->replies->installEventFilter(this);
 	ui->info->installEventFilter(this);
 	ui->com->installEventFilter(this);
 	this->installEventFilter(this);
 	ui->tim->installEventFilter(this);
-	//ui->name->installEventFilter(this);
-	////ui->postLayout->installEventFilter(this);
-	////ui->postLayout->installEventFilter(this);
 }
 
 void ThreadForm::appendQuote()
@@ -66,11 +59,15 @@ void ThreadForm::appendQuote()
 
 ThreadForm::~ThreadForm()
 {
-	//watcher.waitForFinished();
 	if(gettingFile)replyImage->abort();
 	if(gettingThumb)replyThumb->abort();
-	//necessary because of the lambda functions?
-	//disconnect(&watcher);
+	//disconnect clones quote clicking in notifications
+	foreach(QPointer<ThreadForm> tf, clones){
+		if(tf){
+			tf->disconnect(tf->comQuoteConnection);
+			tf->disconnect(tf->infoQuoteConnection);
+		}
+	}
 	delete ui;
 }
 
@@ -484,16 +481,7 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 	tfs->rootTF = this->rootTF;
 	tfs->tab = tab;
 	tfs->post = this->post;
-	//tfs->ui->no->setText(post.no);
 	tfs->ui->com->setText(post.com);
-	//if(post.sub==QString()) tfs->ui->sub->hide();
-	//else tfs->ui->sub->setText(this->ui->sub->text());
-	//tfs->ui->name->setText(post.name);
-	/*if(this->board != "pol") {
-		tfs->ui->country_name->hide();
-	} else {
-		tfs->ui->country_name->setText(post.country_name);
-	}*/
 	tfs->ui->info->setText(ui->info->text());
 	tfs->replies = replies;
 	//TODO check and account for if original is still getting file
@@ -509,6 +497,7 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 		const QPixmap *px = this->ui->tim->pixmap();
 		//From load image but don't have to scale again
 		tfs->ui->tim->show();
+		//TODO make sure clone fits in window
 		//tfs->setMinimumWidth(738);
 		if(px){
 			tfs->ui->tim->setPixmap(*px);
@@ -522,10 +511,8 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 		//tfs->ui->tim->deleteLater();
 	}
 	if(repliesString.length()) {
-		tfs->repliesString = repliesString;
-		tfs->setRepliesString();
+		tfs->setRepliesString(repliesString);
 	}
-	//tfs->setReplies();
 	rootTF->clones.append(tfs);
 	disconnect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::hideClicked);
 	connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
@@ -554,7 +541,7 @@ void ThreadForm::addReplyLink(QString &reply, bool isYou){
 	while(i.hasNext()) {
 		QPointer<ThreadForm> next = i.next();
 		if(!next) continue;
-		next->repliesString = repliesString;
+		next->setRepliesString(repliesString);
 	}
 }
 
@@ -565,7 +552,7 @@ void ThreadForm::setReplies()
 	if(list.length()) {
 		foreach (const QString &reply, list)
 		{
-			repliesString+=" <a href=\"#p" % reply % "\" style=\"color:#897399\">>>" % reply % ((you.hasYou(reply)) ? " (You)</a>" : "</a>");
+			repliesString+=" <a href=\"#p" % reply % "\" style=\"color:#897399\">>>" % reply % (you.hasYou(board,reply) ? " (You)</a>" : "</a>");
 		}
 		repliesString = repliesString.mid(1);
 		ui->info->setText(infoString());
@@ -583,10 +570,10 @@ void ThreadForm::setReplies()
 	}
 }
 
-void ThreadForm::setRepliesString()
+void ThreadForm::setRepliesString(const QString &repliesString)
 {
-	//ui->replies->show();
-	//ui->replies->setText(repliesString);
+	this->repliesString = repliesString;
+	setInfoString();
 }
 
 void ThreadForm::setInfoString()

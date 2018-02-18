@@ -1,13 +1,13 @@
-#include "mytreeview.h"
+#include "treeview.h"
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QDebug>
 
-MyTreeView::MyTreeView(QWidget *parent) : QTreeView(parent)
+TreeView::TreeView(QWidget *parent) : QTreeView(parent)
 {
 }
 
-void MyTreeView::mousePressEvent(QMouseEvent *event){
+void TreeView::mousePressEvent(QMouseEvent *event){
 	if(event->button() == Qt::MiddleButton){
 		QModelIndex index = indexAt(event->pos());
 		if(index != rootIndex()){
@@ -17,14 +17,14 @@ void MyTreeView::mousePressEvent(QMouseEvent *event){
 	else return QTreeView::mousePressEvent(event);
 }
 
-void MyTreeView::keyPressEvent(QKeyEvent *event){
+void TreeView::keyPressEvent(QKeyEvent *event){
 	if(event->key() == Qt::Key_Escape){
 		emit hideNavBar();
 	}
 	return QTreeView::keyPressEvent(event);
 }
 
-QModelIndexList MyTreeView::selected(){
+QModelIndexList TreeView::selected(){
 	QModelIndexList indexList = selectedIndexes();
 	if(!indexList.size() && currentIndex().isValid()) {
 		indexList.clear();
@@ -33,7 +33,9 @@ QModelIndexList MyTreeView::selected(){
 	return indexList;
 }
 
-void MyTreeView::selectTab(QModelIndex ind){
-	if(ind.isValid())
+void TreeView::selectTab(QModelIndex ind){
+	if(ind.isValid()){
 		setCurrentIndex(ind);
+		this->selectionModel()->setCurrentIndex(ind,QItemSelectionModel::ClearAndSelect);
+	}
 }

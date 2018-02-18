@@ -32,12 +32,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->navBar->hide();
 	ui->navBar->installEventFilter(this);
 	ui->treeView->setModel(model);
-	connect(ui->treeView,&MyTreeView::treeMiddleClicked,[=](QModelIndex index){
-		model->removeTab(index);
-	});
-	connect(ui->treeView,&MyTreeView::hideNavBar,[=](){
-		ui->navBar->hide();
-	});
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	int fontSize = settings.value("fontSize",14).toInt();
 	QFont temp = ui->treeView->font();
@@ -57,27 +51,30 @@ MainWindow::MainWindow(QWidget *parent) :
 			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
 		}
 	});
+	connect(ui->treeView,&TreeView::treeMiddleClicked,model,&TreeModel::removeTab,Qt::DirectConnection);
+	connect(ui->treeView,&TreeView::hideNavBar,ui->navBar,&QWidget::hide,Qt::DirectConnection);
+	connect(model,&TreeModel::selectTab,ui->treeView,&TreeView::selectTab,Qt::DirectConnection);
 	connect(model,&TreeModel::loadFromSearch,this,&MainWindow::loadFromSearch);
-	connect(model,&TreeModel::selectTab,[=](QModelIndex ind){
-		selectionModel->setCurrentIndex(ind,QItemSelectionModel::ClearAndSelect);
-	});
-	connect(model,&TreeModel::removingTab,[=](TreeItem* tn){
-		ui->content->removeWidget(tn->tab);
-		tabs.remove(tn->tab);
-		QWidget *cw = currentWidget();
-		if(!cw) return;
-		Tab current = tabs.value(cw);
-		if(!current.tn) return;
-		QModelIndex ind = model->getIndex(current.tn);
-		if(ind != ui->treeView->rootIndex())
-			selectionModel->setCurrentIndex(ind,QItemSelectionModel::ClearAndSelect);
-	});
+	connect(model,&TreeModel::removingTab,this,&MainWindow::onRemoveTab);
 	this->setShortcuts();
+}
+
+void MainWindow::onRemoveTab(TreeItem* tn){
+	//tn->tab->deleteLater();
+	ui->content->removeWidget(tn->tab);
+	tabs.remove(tn->tab);
+	QWidget *cw = currentWidget();
+	if(!cw) return;
+	Tab current = tabs.value(cw);
+	if(!current.tn) return;
+	QModelIndex ind = model->getIndex(current.tn);
+	if(ind != ui->treeView->rootIndex())
+		selectionModel->setCurrentIndex(ind,QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::setShortcuts()
 {
-	//hiding the menu bar disables other qmenu actions shortcuts?
+	//hiding the menu bar disables other qmenu actions shortcuts
 	QAction *toggleMenuBar = new QAction(this);
 	toggleMenuBar->setShortcut(QKeySequence("F11"));
 	toggleMenuBar->setShortcutContext(Qt::ApplicationShortcut);
@@ -318,6 +315,7 @@ void MainWindow::setShortcuts()
 
 MainWindow::~MainWindow()
 {
+	disconnect(selectionConnection);
 	saveSession();
 	you.saveYou();
 	delete ui;
@@ -553,30 +551,28 @@ void MainWindow::onSelectionChanged()
 		QPointer<QWidget> tab = model->getItem(list.at(0))->tab;
 		if(tab){
 			ui->content->setCurrentWidget(tab);
-			this->setWindowTitle(tab->windowTitle());
+			setWindowTitle(tab->windowTitle());
 		}
 	}
+	else setWindowTitle("qtchan");
 }
 
 void MainWindow::deleteSelected()
 {
-	QCoreApplication::processEvents();
 	foreach(QModelIndex index, ui->treeView->selected()) {
 		model->removeTab(index);
 	}
-	QCoreApplication::processEvents();
 }
 
 void MainWindow::removeChildTabs(){
 	foreach(QModelIndex index, ui->treeView->selected()) {
 		model->removeChildren(index);
 	}
-	QCoreApplication::processEvents();
 }
 
 QWidget *MainWindow::currentWidget()
 {
-	if(ui->content->count())
+	if(ui->content && ui->content->count())
 		return ui->content->currentWidget();
 	else return Q_NULLPTR;
 }

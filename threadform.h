@@ -57,7 +57,7 @@ public:
 	QSet<QString> quotelinks;
 	QMap<double,QString> replies;
 	void setReplies();
-	void setRepliesString();
+	void setRepliesString(const QString &repliesString);
 	void setInfoString();
 	void loadOrig();
 	ThreadForm *clone(int replyLevel = 0);
@@ -72,6 +72,8 @@ public:
 	void addReplyLink(QString &reply, bool isYou = false);
 	int replyLevel;
 	bool hasImage = true;
+	QMetaObject::Connection comQuoteConnection;
+	QMetaObject::Connection infoQuoteConnection;
 
 private:
 	QWidget *tab;

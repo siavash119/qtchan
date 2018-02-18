@@ -38,18 +38,12 @@ void BoardTabHelper::startUp(Chan *api, QString &board, BoardType type, QString 
 }
 
 BoardTabHelper::~BoardTabHelper() {
-	disconnect(parent);
-	disconnect(this);
 	abort = true;
-	/*updateTimer->stop();
-	disconnect(connectionUpdate);
-	if(updateTimer) delete updateTimer;*/
 	if(gettingReply) {
 		reply->abort();
 		disconnect(reply);
 		reply->deleteLater();
 	}
-	qDeleteAll(tfMap);
 }
 
 void BoardTabHelper::setAutoUpdate(bool update) {
@@ -140,10 +134,11 @@ void BoardTabHelper::loadPosts() {
 				emit newTF(tfChild,tf);
 			}
 		}
-		QCoreApplication::processEvents();
 		i++;
+		//TODO change update view processing?
+		//if(i % 10 == 0)
+		QCoreApplication::processEvents();
 	}
-	//if(!abort) emit addStretch();
 }
 
 QJsonArray BoardTabHelper::filterThreads(QByteArray &rep){

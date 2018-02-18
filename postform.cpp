@@ -203,7 +203,7 @@ void PostForm::postFinished()
 		QRegularExpressionMatch match = re.match(temp);
 		if(thread == ""){
 			if(match.hasMatch()){
-				you.addYou(match.captured("threadNum"));
+				you.addYou(board,match.captured("threadNum"));
 				qDebug() << "post successful; loading thread:" << match.captured("threadNum");
 				emit loadThread(match.captured("threadNum"));
 			}
@@ -214,7 +214,7 @@ void PostForm::postFinished()
 		}
 		else{
 			if(match.hasMatch()){
-				you.addYou(match.captured("threadNum"));
+				you.addYou(board,match.captured("threadNum"));
 			}
 		}
 		//QTimer::singleShot(1000, reply, &QTextEdit::close);

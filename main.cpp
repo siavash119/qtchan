@@ -1,9 +1,10 @@
 #include "mainwindow.h"
+#include "notificationtray.h"
 #include <QApplication>
 #include <QSettings>
 
 MainWindow *mw;
-
+NotificationView *nv;
 
 int main(int argc, char *argv[])
 {
@@ -18,8 +19,12 @@ int main(int argc, char *argv[])
 	font.setPointSize(settings.value("fontSize",14).toInt());
 	a.setFont(font);
 	MainWindow w;
-	w.show();
 	mw = &w;
-	mw->loadSession();
+	w.show();
+	NotificationTray t;
+	nv = &(t.view);
+	t.setIcon(QIcon(":/icons/icon_22x22.png"));
+	t.show();
+	w.loadSession();
 	return a.exec();
 }

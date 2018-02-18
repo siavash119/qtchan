@@ -25,6 +25,7 @@ public:
 	static QString colorString;
 	static QString quoteString;
 	static QString replaceQuoteStrings(QString &string);
+	static QString replaceYouStrings(QRegularExpressionMatchIterator i, QString &string);
 private:
 	QRegularExpressionMatch quotelinkMatch;
 	QRegularExpressionMatchIterator quotelinkMatches;

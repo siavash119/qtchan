@@ -19,7 +19,7 @@ TreeItem::~TreeItem()
 		tab->disconnect();
 		tab->deleteLater();
 	}
-	qDeleteAll(children);
+	removeChildren();
 	emit deleting(this);
 }
 

@@ -41,8 +41,11 @@ public:
 	void saveSessionToFile(QString filename);
 	void loadSessionFromFile(QString filename);
 	void addTab(TreeItem *child, TreeItem *parent, bool select);
-	void removeTab(QModelIndex ind);
 	void removeChildren(QModelIndex ind);
+
+public slots:
+	void onDeleting(TreeItem *tn);
+	void removeTab(QModelIndex ind);
 
 signals:
 	void loadFromSearch(QString query,QString display,TreeItem* tn,bool select = false);

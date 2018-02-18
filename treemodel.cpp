@@ -320,12 +320,13 @@ void TreeModel::addTab(TreeItem *child, TreeItem *parent, bool select)
 		QModelIndex ind = getIndex(parent);
 		addChild(ind,child);
 	}
-	connect(child,&TreeItem::deleting,[=](TreeItem *tn){
-		removeItem(tn);
-		emit removingTab(tn);
-	});
+	connect(child,&TreeItem::deleting,this,&TreeModel::onDeleting);
 	if(select) {
 		emit selectTab(getIndex(child));
 	}
 }
 
+void TreeModel::onDeleting(TreeItem *tn){
+	removeItem(tn);
+	emit removingTab(tn);
+}

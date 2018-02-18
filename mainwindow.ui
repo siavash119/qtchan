@@ -326,7 +326,7 @@
          </layout>
         </item>
         <item>
-         <widget class="MyTreeView" name="treeView">
+         <widget class="TreeView" name="treeView">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -461,9 +461,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>MyTreeView</class>
+   <class>TreeView</class>
    <extends>QTreeView</extends>
-   <header>mytreeview.h</header>
+   <header>treeview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

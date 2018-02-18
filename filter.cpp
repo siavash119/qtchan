@@ -90,7 +90,10 @@ QString Filter::replaceQuoteStrings(QString &string){
 	//QColor color = settings.value("quote_color",);
 	string.replace(quoteRegExp,colorString);
 	string.replace(quotelinkRegExp,quoteString);
-	QRegularExpressionMatchIterator i = you.findYou(string);
+	return string;
+}
+
+QString Filter::replaceYouStrings(QRegularExpressionMatchIterator i, QString &string){
 	while (i.hasNext()) {
 		QRegularExpressionMatch match = i.next();
 		if(match.capturedEnd()){
