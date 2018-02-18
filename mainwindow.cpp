@@ -61,8 +61,8 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 void MainWindow::onRemoveTab(TreeItem* tn){
-	//tn->tab->deleteLater();
-	ui->content->removeWidget(tn->tab);
+	tn->tab->deleteLater();
+	//ui->content->removeWidget(tn->tab);
 	tabs.remove(tn->tab);
 	QWidget *cw = currentWidget();
 	if(!cw) return;
@@ -596,7 +596,7 @@ void MainWindow::removeChildTabs(){
 
 QWidget *MainWindow::currentWidget()
 {
-	if(ui->content && ui->content->count())
+	if(tabs.size() && ui->content->count())
 		return ui->content->currentWidget();
 	else return Q_NULLPTR;
 }

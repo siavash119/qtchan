@@ -68,6 +68,10 @@ void netController::loadCookiesIntoAllManagers(QString domain, QString name, QSt
 	temp.setDomain(domain.toStdString().c_str());
 	temp.setSecure(1);
 	temp.setPath("/");
+	if(!postManager){
+		qDebug() << "can't set cookies: network access managers not initialized yet";
+		return;
+	}
 	postManager->cookieJar()->insertCookie(temp);
 	jsonManager->cookieJar()->insertCookie(temp);
 	thumbManager->cookieJar()->insertCookie(temp);
