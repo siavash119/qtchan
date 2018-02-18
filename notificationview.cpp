@@ -1,8 +1,6 @@
 #include "notificationview.h"
 #include "ui_notificationview.h"
 #include <QDesktopWidget>
-#include <QMetaObject>
-#include <QDebug>
 
 NotificationView::NotificationView(QWidget *parent) :
 	QFrame(parent),
@@ -14,7 +12,7 @@ NotificationView::NotificationView(QWidget *parent) :
 
 NotificationView::~NotificationView()
 {
-	foreach (QMetaObject::Connection noteConnection, allConnections) {
+	foreach(QMetaObject::Connection noteConnection, allConnections){
 		disconnect(noteConnection);
 	}
 	delete ui;
@@ -45,7 +43,6 @@ void NotificationView::on_clear_clicked(){
 	}
 }
 
-void NotificationView::on_close_clicked()
-{
+void NotificationView::on_close_clicked(){
 	hide();
 }

@@ -3,6 +3,7 @@
 #include "boardtab.h"
 #include "threadtab.h"
 #include "threadform.h"
+#include "notificationview.h"
 #include <QFile>
 #include <QString>
 #include <QJsonArray>
@@ -311,6 +312,21 @@ void MainWindow::setShortcuts()
 	closeChildTabs->setShortcutContext(Qt::ApplicationShortcut);
 	connect(closeChildTabs,&QAction::triggered,this,&MainWindow::removeChildTabs);
 	this->addAction(closeChildTabs);
+
+	//TODO clean-up and fix focus back to mainwindow
+	QAction *toggleNotifications = new QAction(this);
+	toggleNotifications->setShortcut(Qt::Key_F9);
+	toggleNotifications->setShortcutContext(Qt::ApplicationShortcut);
+	connect(toggleNotifications,&QAction::triggered,[=]{
+		if(nv->isVisible()){
+			nv->hide();
+		}
+		else{
+			nv->move(nv->toMove());
+			nv->show();
+		}
+	});
+	this->addAction(toggleNotifications);
 }
 
 MainWindow::~MainWindow()
