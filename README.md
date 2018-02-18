@@ -4,12 +4,13 @@ There's still a lot to do.
 
 
 # Features
-* browse and post on 4chan
+* browse and post (Captcha V1 no longer supported by 4chan; need to use a pass to post until Captcha V2 implemented) on 4chan
 * auto update threads and auto download original file
 * download all media as original filename
 * tree style tabs and save state (./session.txt)
 * open files in OS's default application
 * search and filter
+* (You)
 
 ### Build Instructions (Linux/BSD based)
 needs qt5
@@ -35,7 +36,7 @@ packer -S qtchan
 
 ## a few keyboard commands and instructions
 * ctrl+l opens up the nav bar; you can type g or g/boardnum or /g/ or https://boards.4chan... etc.\
-g for first page, /g/ for catalogue, g/search to get catalogue and search
+g for first page, /g/ for catalog, g/search to get catalog and search
 * ctrl+w (ctrl+f4 on windows) or delete to close tab
 * ctrl+p opens settings-ctrl+tab ctrl+shift+tab, ctrl+1-4 to switch tabs
 * ctrl+f to search and filter
@@ -45,15 +46,19 @@ g for first page, /g/ for catalogue, g/search to get catalogue and search
 * ctrl+plus/minus to zoom in/zoom out text
 * ctrl+9/0 to scale down/up images
 * ctrl+q to quit
-* f10 saves tree state (it'll also save on exit)
-* f11 hides menubar
-* j and k scroll
+* F10 saves tree state (it'll also save on exit)
+* F11 hides menubar
+* #j and #k scroll (e.g. 5j, k)
+* #G puts scrollbar at percent (e.g. G for bottom, 0G for top, 50G for 50%)
+* F9 toggles notification view
 * o opens image at top of view
 * if you have mpv, g opens all the images/videos in the thread.
 
 there are more shortcuts; look at the source for now for info.
 
 need to restart qtchan if changing to use 4chan pass or not. signals/slots still not finished for that.
+
+you can make a filter file and it'll regexp remove posts for you. I'll post an example
 
 ## Using 4chan pass to post
 Create a file ~/.config/qtchan/settings like below. Look at your browser cookies for values.
@@ -68,11 +73,12 @@ pass_enabled:1
 
 ## TODO
 ### MAJOR
-* filters
-* unread, read, (You) display
-* notifications
+* better filter support
+* unread, read display
+* keybinds for prev/next yourPost and (You)
+* better notifications
 * better settings
-* instructions
+* better instructions
 
 ### MINOR
 * support other chans
