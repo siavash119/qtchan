@@ -46,7 +46,6 @@ public:
 	static QString titleParse(QString &title);
 	//Post *post;
 	Post post;
-	void updateComHeight();
 	QDir *folder;
 	QString folderPath;
 	//void setImage(QString text);

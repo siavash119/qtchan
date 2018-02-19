@@ -37,17 +37,14 @@ ThreadForm::ThreadForm(Chan *api, QString board, QString threadNum, PostType typ
 	ui->fileInfo->hide();
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	setFontSize(settings.value("fontSize",14).toInt());
-	//ui->replies->hide();
-	//if(board != "pol") ui->country_name->hide();
-	//this->setMinimumWidth(488);
 	pathBase = "./" % board % "/" % ((type == PostType::Reply) ? threadNum : "index") % "/";
 	connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
 	comQuoteConnection = connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
-	//connect(ui->replies,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	infoQuoteConnection = connect(ui->info,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	if(root) ui->hide->setStyleSheet("padding:0 10px; background-color: #191919;");
 	ui->info->installEventFilter(this);
 	ui->com->installEventFilter(this);
+	ui->fileInfo->installEventFilter(this);
 	this->installEventFilter(this);
 	ui->tim->installEventFilter(this);
 }
@@ -91,18 +88,7 @@ void ThreadForm::load(QJsonObject &p)
 	//post = new Post(p,board);
 	post.load(p,board);
 	ui->info->setText(infoString());
-	/*ui->no->setText(post.no);
 
-	//set subject
-	if(post.sub==QString()) ui->sub->hide();
-	else ui->sub->setText(htmlParse(post.sub));
-
-	//set name
-	ui->name->setText(post.name);
-	ui->country_name->setText(post.country_name);*/
-
-	//set comment
-	//TODO replace <span class="quote"> and <a href="url">
 	ui->com->setText(post.com);
 	quotelinks = Filter::findQuotes(post.com);
 
@@ -203,41 +189,6 @@ void ThreadForm::loadOrig()
 			if(!file->exists()) getFile();
 		}
 	}
-}
-
-void ThreadForm::updateComHeight()
-{
-	//ui->scrollArea->height()
-	/*const QSize newSize = ui->com->sizeHint();
-	const QSize oldSize = ui->scrollArea->size();
-	//ui->scrollArea->setMaximumHeight(newSize.height());
-	//ui->com->setMinimumSize(newSize);
-	if(newSize.height() > oldSize.height()) {
-		if(type == PostType::Thread) {
-			if(newSize.height() > 500) ui->scrollArea->setFixedHeight(500);
-			else ui->scrollArea->setFixedHeight(newSize.height());
-		}
-		else ui->scrollArea->setFixedHeight(newSize.height());
-	}*/
-	//int docHeight = ui->com->document()->size().height();
-	/*int docHeight = ui->com->height();
-	int newHeight = docHeight+ui->sub->height()+ui->verticalLayout_2->BottomToTop;
-	if(newHeight > this->height()) {
-		if(type == PostType::Reply) {
-			ui->com->setMinimumHeight(docHeight);
-			this->setFixedHeight(newHeight);
-			this->setMaximumHeight(newHeight);
-		}
-		else if(newHeight < 500) {
-			ui->com->setMinimumHeight(docHeight);
-			this->setFixedHeight(newHeight);
-			this->setMaximumHeight(newHeight);
-		}
-		else{
-			this->setFixedHeight(500);
-			this->setMaximumHeight(500);
-		}
-	}*/
 }
 
 void ThreadForm::getOrigFinished()
@@ -606,6 +557,25 @@ bool ThreadForm::eventFilter(QObject *obj, QEvent *event)
 		}
 		else if(event->type() == QEvent::Leave) {
 			emit deleteFloat();
+		}
+	}
+	if((obj->objectName() == "com" || obj->objectName() == "info" || obj->objectName() == "fileInfo")
+			&& (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonRelease)){
+		QLabel *temp = static_cast<QLabel*>(obj);
+		if(temp->hasSelectedText()){
+			temp->setTextInteractionFlags(
+				Qt::TextSelectableByKeyboard |
+				Qt::TextSelectableByMouse |
+				Qt::LinksAccessibleByKeyboard |
+				Qt::LinksAccessibleByMouse);
+		}
+		else{
+			temp->setTextInteractionFlags(
+				Qt::TextSelectableByMouse |
+				Qt::LinksAccessibleByKeyboard |
+				Qt::LinksAccessibleByMouse);
+			ui->hide->setFocus();
+			temp->setFocus();
 		}
 	}
 	return QObject::eventFilter(obj, event);
