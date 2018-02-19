@@ -559,8 +559,8 @@ bool ThreadForm::eventFilter(QObject *obj, QEvent *event)
 			emit deleteFloat();
 		}
 	}
-	if((obj->objectName() == "com" || obj->objectName() == "info" || obj->objectName() == "fileInfo")
-			&& (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonRelease)){
+	if((event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonRelease)
+			&& (obj->objectName() == "com" || obj->objectName() == "info" || obj->objectName() == "fileInfo")){
 		QLabel *temp = static_cast<QLabel*>(obj);
 		if(temp->hasSelectedText()){
 			temp->setTextInteractionFlags(
