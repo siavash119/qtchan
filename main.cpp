@@ -21,8 +21,9 @@ int main(int argc, char *argv[])
 	MainWindow w;
 	mw = &w;
 	w.show();
+	NotificationView view;
+	nv = &view;
 	NotificationTray t;
-	nv = &(t.view);
 	t.setIcon(QIcon(":/icons/icon_22x22.png"));
 	t.show();
 	w.loadSession();

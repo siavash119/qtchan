@@ -15,10 +15,10 @@ NotificationTray::NotificationTray(const QIcon &icon, QObject *parent):
 
 void NotificationTray::activate(QSystemTrayIcon::ActivationReason reason){
 	if(reason == QSystemTrayIcon::ActivationReason::Trigger || reason == QSystemTrayIcon::ActivationReason::DoubleClick){
-		if(view.isVisible()) view.hide();
+		if(nv->isVisible()) nv->hide();
 		else{
-			view.move(view.toMove());
-			view.show();
+			nv->move(nv->toMove());
+			nv->show();
 		}
 	}
 }

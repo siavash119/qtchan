@@ -8,7 +8,6 @@ class NotificationTray : public QSystemTrayIcon
 {
 	Q_OBJECT
 public:
-	NotificationView view;
 	NotificationTray(QObject *parent = Q_NULLPTR);
 	NotificationTray(const QIcon &icon, QObject *parent = Q_NULLPTR);
 public slots:
