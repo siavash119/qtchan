@@ -4,7 +4,7 @@ There's still a lot to do.
 
 
 # Features
-* browse and post (Captcha V1 no longer supported by 4chan; need to use a pass to post until Captcha V2 implemented) on 4chan
+* browse and post on 4chan
 * auto update threads and auto download original file
 * download all media as original filename
 * tree style tabs and save state (./session.txt)
@@ -46,6 +46,7 @@ g for first page, /g/ for catalog, g/search to get catalog and search
 * ctrl+f to search and filter
 * r manually refreshes thread
 * q opens up post form, shift+enter to post from there
+* focus the bottom lineEdit to load captcha; press enter to verify/reload
 * e expands all images and auto expands future posts on current tab
 * ctrl+plus/minus to zoom in/zoom out text
 * ctrl+9/0 to scale down/up images
