@@ -306,7 +306,7 @@ void MainWindow::setShortcuts()
 	QAction *focusContent = new QAction(this);
 	focusContent->setShortcut(Qt::Key_F4);
 	focusContent->setShortcutContext(Qt::ApplicationShortcut);
-	connect(focusContent,&QAction::triggered,[=]{ui->content->setFocus();});
+	connect(focusContent,&QAction::triggered,[=]{ui->content->currentWidget()->setFocus();});
 	this->addAction(focusContent);
 
 	QAction *focusNavBar = new QAction(this);
