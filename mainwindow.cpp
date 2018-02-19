@@ -31,7 +31,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->splitter->setSizes(sizes);
 	ui->pushButton->hide();
 	ui->navBar->hide();
-	ui->navBar->installEventFilter(this);
 	ui->treeView->setModel(model);
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	int fontSize = settings.value("fontSize",14).toInt();
@@ -337,6 +336,11 @@ void MainWindow::setShortcuts()
 		}
 	});
 	this->addAction(toggleNotifications);
+
+	QAction *hideNavBar = new QAction(this);
+	hideNavBar->setShortcut(Qt::Key_Escape);
+	connect(hideNavBar,&QAction::triggered,ui->navBar,&QLineEdit::hide,Qt::DirectConnection);
+	this->addAction(hideNavBar);
 }
 
 MainWindow::~MainWindow()
@@ -347,19 +351,6 @@ MainWindow::~MainWindow()
 	delete ui;
 	delete model;
 	Chans::deleteAPIs();
-}
-
-bool MainWindow::eventFilter(QObject *watched, QEvent *event){
-	if(event->type() == QEvent::KeyPress){
-		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-		int key = keyEvent->key();
-		if(key == Qt::Key_Escape){
-			ui->navBar->hide();
-			return true;
-		}
-		return false;
-	}
-	return QWidget::eventFilter(watched,event);
 }
 
 //TODO put toggle functions in 1 function with argument

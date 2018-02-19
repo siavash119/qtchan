@@ -199,7 +199,7 @@ void ThreadTab::setShortcuts()
 	this->addAction(scrollPercent);
 
 	QAction *clearVim = new QAction(this);
-	clearVim->setShortcut(Qt::Key_Escape);
+	clearVim->setShortcut(Qt::Key_Minus);
 	connect(clearVim, &QAction::triggered,[=]{
 		vimCommand = "";
 	});

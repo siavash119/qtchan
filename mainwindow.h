@@ -29,8 +29,6 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
-protected:
-	bool eventFilter(QObject *watched, QEvent *event);
 
 public:
 	explicit MainWindow(QWidget *parent = 0);
