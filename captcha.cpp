@@ -14,6 +14,7 @@ void Captcha::startUp(Chan *api){
 	urlChallenge = links.challengeURL;
 	urlImageBase = links.imageBaseURL;
 	requestChallenge = QNetworkRequest(QUrl(urlChallenge));
+	requestChallenge.setRawHeader(QByteArray("Referer"), QByteArray(links.refererURL.toUtf8()));
 }
 
 Captcha::~Captcha(){
@@ -43,21 +44,24 @@ void Captcha::loadCaptcha(){
 	replyChallenge->deleteLater();
 	if(rep.isEmpty()) return;
 	QString replyString(rep);
-	qDebug() << replyString;
-	int start = replyString.indexOf("{\n    challenge : ");
+	QString matchStart = "src=\"/recaptcha/api2/payload?c=";
+	int start = replyString.indexOf(matchStart);
 	if(start == -1) return;
-	int end = replyString.indexOf("'",start+19);
+	int end = replyString.indexOf("&",start+matchStart.length());
 	if(end == -1) return;
-	qDebug() << start << " " << end;
-	challenge = replyString.mid(start+19,end-start-19);
-	qDebug() << challenge;
+	challenge = replyString.mid(start+matchStart.length(),end-start-matchStart.length());
+	start = replyString.indexOf("<strong>");
+	end = replyString.indexOf("</strong>",start+8);
+	challengeQuestion = replyString.mid(start+8,end-start-8);
+	emit questionInfo(challengeQuestion);
 	getImage(challenge);
 }
 
 void Captcha::getImage(QString challenge){
 	qDebug() << "getting image";
 	if(challenge.isEmpty()) return;
-	replyImage = nc.captchaManager->get(QNetworkRequest(QUrl(urlImageBase+challenge)));
+	QNetworkRequest imageChallenge(QUrl(urlImageBase+challenge+"&k="+siteKey));
+	replyImage = nc.captchaManager->get(imageChallenge);
 	connect(replyImage,&QNetworkReply::finished,this,&Captcha::loadImage);
 }
 

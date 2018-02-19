@@ -27,6 +27,7 @@ PostForm::PostForm(QWidget *parent) :
 		ui->captcha->hide();
 	}
 	else {
+		ui->question->hide();
 		ui->challenge->hide();
 	}
 	this->setObjectName("PostForm");
@@ -39,12 +40,20 @@ PostForm::PostForm(QWidget *parent) :
 	ui->response->installEventFilter(this);
 	submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
 	setShortcuts();
+	connect(&captcha,&Captcha::questionInfo,this,&PostForm::loadCaptchaQuestion);
 	connect(&captcha,&Captcha::challengeInfo,this,&PostForm::loadCaptchaImage);
 	connect(ui->challenge,&ClickableLabel::clicked,&captcha,&Captcha::getCaptcha);
 }
 
+void PostForm::loadCaptchaQuestion(QString &challenge){
+	ui->question->show();
+	qDebug() << "setting captcha question:" << challenge;
+	ui->question->setText(challenge);
+}
+
 void PostForm::loadCaptchaImage(QString &challenege, QPixmap &challengeImage){
 	(void)challenege;
+	ui->challenge->setMinimumSize(280,280);
 	ui->challenge->show();
 	qDebug() << "setting captcha image";
 	ui->challenge->setPixmap(challengeImage);
@@ -91,6 +100,51 @@ void PostForm::appendText(QString &text)
 	ui->com->textCursor().insertText(text);
 }
 
+void PostForm::verifyCaptcha(){
+	QUrlQuery postData;
+	postData.addQueryItem("c", captcha.challenge);
+	QString response = ui->response->text();
+	for(int i=0;i<response.length();i++){
+		postData.addQueryItem("response",response.at(i));
+	}
+	QNetworkRequest request(QUrl(api->captchaLinks().challengeURL));
+	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+	request.setRawHeader(QByteArray("Referer"),api->captchaLinks().challengeURL.toUtf8());
+	captchaReply = nc.captchaManager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+	connect(captchaReply,&QNetworkReply::finished,[=]{
+		captchaReply->deleteLater();
+		if(captchaReply->error()){
+			ui->question->setText("Error: try again");
+			qDebug() << "Error:" << captchaReply->errorString();
+			captcha.getCaptcha();
+		}
+		else{
+			QByteArray reply = captchaReply->readAll();
+			if(reply.contains("fbc-success")){
+				QString matchText = ".select()\">";
+				int start = reply.indexOf(matchText);
+				int end = reply.indexOf("</textarea>",start+matchText.length());
+				captchaCode = reply.mid(start+matchText.length(),end-start-matchText.length());
+				qDebug() << captchaCode;
+				ui->question->setText("Verified");
+				ui->challenge->hide();
+				ui->response->hide();
+				QTimer::singleShot(1200000, [=]{
+					ui->question->setText("Captcha code expired");
+					ui->question->show();
+					captchaCode = "";
+					captcha.getCaptcha();
+				});
+			}
+			else{
+				ui->question->setText("Success but need more: try again");
+				captcha.getCaptcha();
+			}
+
+		}
+	});
+}
+
 void PostForm::postIt()
 {
 	this->removeEventFilter(this);
@@ -129,24 +183,13 @@ void PostForm::postIt()
 
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	if(api->usesCaptcha() && settings.value("use4chanPass", false).toBool() == false){
-		QHttpPart captchaChallenge;
-		captchaChallenge.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"recaptcha_challenge_field\""));
-		if(captcha.challenge.isEmpty()){
-			multiPart->deleteLater();
-			return;
-		}
-		qDebug().noquote() << captcha.challenge.toStdString().c_str();
-		captchaChallenge.setBody(captcha.challenge.toStdString().c_str());
-
 		QHttpPart captchaResponse;
-		captchaResponse.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"recaptcha_response_field\""));
-		if(ui->response->text().isEmpty()){
+		captchaResponse.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"g-recaptcha-response\""));
+		if(captchaCode.isEmpty()){
 			multiPart->deleteLater();
 			return;
 		}
-		captchaResponse.setBody(ui->response->text().toStdString().c_str());
-
-		multiPart->append(captchaChallenge);
+		captchaResponse.setBody(captchaCode.toStdString().c_str());
 		multiPart->append(captchaResponse);
 	}
 
@@ -173,6 +216,7 @@ void PostForm::postFinished()
 {
 	isPosting = false;
 	captcha.loaded = false;
+	captchaCode = "";
 	if(postReply->error()){
 		qDebug() << postReply->errorString();
 		submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
@@ -217,10 +261,15 @@ void PostForm::postFinished()
 				you.addYou(board,match.captured("threadNum"));
 			}
 		}
-		//QTimer::singleShot(1000, reply, &QTextEdit::close);
 	}
 	else{
 		reply->show();
+	}
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	if(api->usesCaptcha() && settings.value("use4chanPass", false).toBool() == false){
+		ui->response->show();
+		ui->question->clear();
+		ui->question->hide();
 	}
 	QTimer::singleShot(1000, this,&PostForm::removeOverlay);
 	captcha.loaded = false;
@@ -394,4 +443,9 @@ void PostForm::setFontSize(int fontSize){
 	ui->browse->setFont(temp);
 	ui->filename->setFont(temp);
 	ui->submit->setFont(temp);
+}
+
+void PostForm::on_response_returnPressed()
+{
+	verifyCaptcha();
 }

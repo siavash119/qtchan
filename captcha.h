@@ -17,6 +17,7 @@ public:
 	virtual ~Captcha();
 	void startUp(Chan *api);
 	QString challenge;
+	QString challengeQuestion;
 	QString response;
 	QTimer timer;
 	bool loaded = false;
@@ -34,6 +35,7 @@ private:
 	QNetworkReply *replyImage;
 signals:
 	void challengeInfo(QString &challenge, QPixmap &challengeImage);
+	void questionInfo(QString &challenge);
 	void timeOut();
 	void success();
 	void fail();

@@ -11,6 +11,7 @@ struct CaptchaLinks{
 	QString lang;
 	QString challengeURL;
 	QString imageBaseURL;
+	QString refererURL;
 };
 
 class Chan

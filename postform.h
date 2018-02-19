@@ -27,12 +27,14 @@ public:
 	QString thread;
 	QString filename;
 	QNetworkReply *postReply;
+	QNetworkReply *captchaReply;
 	QFileDialog *dialog;
 	QMetaObject::Connection submitConnection;
 	void fileChecker(const QMimeData *mimedata);
 	void addOverlay();
 	void removeOverlay();
 	QString empty = "No file selected";
+	void verifyCaptcha();
 	//TODO links in com?
 
 signals:
@@ -44,6 +46,7 @@ public slots:
 	void loadCaptchaImage(QString &challenege, QPixmap &challengeImage);
 	void usePass(bool use4chanPass);
 	void setFontSize(int fontSize);
+	void loadCaptchaQuestion(QString &challenge);
 
 private:
 	Ui::PostForm *ui;
@@ -54,6 +57,7 @@ private:
 	Captcha captcha;
 	void setFilenameText(QString &text);
 	Chan *api;
+	QString captchaCode;
 
 private slots:
 	void postFinished();
@@ -62,6 +66,8 @@ private slots:
 	void on_cancel_clicked();
 	void droppedItem();
 	void setShortcuts();
+
+	void on_response_returnPressed();
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *event);

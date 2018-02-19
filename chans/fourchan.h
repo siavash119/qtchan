@@ -23,11 +23,12 @@ public:
 	//TODO lang from preferences
 	inline QString captchaURL(){return QString("https://www.google.com/recaptcha/api");}
 	CaptchaLinks captchaInfo = {
-		"6Ldp2bsSAAAAAAJ5uyx_lx34lJeEpTLVkP5k04qc",
 		"https://www.google.com/recaptcha/api",
+		"6Ldp2bsSAAAAAAJ5uyx_lx34lJeEpTLVkP5k04qc",
 		"en",
-		"https://www.google.com/recaptcha/api/challenge?k=6Ldp2bsSAAAAAAJ5uyx_lx34lJeEpTLVkP5k04qc&lang=en",
-		"https://www.google.com/recaptcha/api/image?c="
+		"https://www.google.com/recaptcha/api/fallback?k=6Ldp2bsSAAAAAAJ5uyx_lx34lJeEpTLVkP5k04qc",
+		"https://www.google.com/recaptcha/api2/payload?c=",
+		"https://boards.4chan.org/"
 	};
 	inline CaptchaLinks captchaLinks(){return captchaInfo;}
 };

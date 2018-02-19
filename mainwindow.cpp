@@ -339,6 +339,7 @@ void MainWindow::setShortcuts()
 
 	QAction *hideNavBar = new QAction(this);
 	hideNavBar->setShortcut(Qt::Key_Escape);
+	hideNavBar->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 	connect(hideNavBar,&QAction::triggered,ui->navBar,&QLineEdit::hide,Qt::DirectConnection);
 	this->addAction(hideNavBar);
 }
