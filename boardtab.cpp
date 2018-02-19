@@ -37,7 +37,6 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	ui->label->setFont(temp);
 	ui->lineEdit->setFont(temp);
 	ui->pushButton->setFont(temp);
-	this->installEventFilter(this);
 	this->setShortcuts();
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,UniqueDirect);
@@ -87,6 +86,19 @@ void BoardTab::setShortcuts()
 	connect(postForm, &QAction::triggered, this, &BoardTab::openPostForm, UniqueDirect);
 	this->addAction(postForm);
 
+	QAction *selectPost = new QAction(this);
+	selectPost->setShortcut(Qt::Key_O);
+	connect(selectPost, &QAction::triggered,[=]{
+		QWidget *selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value());
+		while(selected && selected->parent()->objectName() != "scrollAreaWidgetContents") {
+			selected = qobject_cast<QWidget*>(selected->parent());
+		}
+		if(selected && selected->objectName() == "ThreadForm"){
+			static_cast<ThreadForm*>(selected)->imageClicked();
+		}
+	});
+	this->addAction(selectPost);
+
 	QAction *scrollUp = new QAction(this);
 	scrollUp->setShortcut(Qt::Key_K);
 	connect(scrollUp, &QAction::triggered,[=]{
@@ -107,18 +119,35 @@ void BoardTab::setShortcuts()
 	});
 	this->addAction(scrollDown);
 
-	QAction *selectPost = new QAction(this);
-	selectPost->setShortcut(Qt::Key_O);
-	connect(selectPost, &QAction::triggered,[=]{
-		QWidget *selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value());
-		while(selected && selected->parent()->objectName() != "scrollAreaWidgetContents") {
-			selected = qobject_cast<QWidget*>(selected->parent());
-		}
-		if(selected && selected->objectName() == "ThreadForm"){
-			static_cast<ThreadForm*>(selected)->imageClicked();
-		}
+	QAction *scrollPercent = new QAction(this);
+	scrollPercent->setShortcut(QKeySequence("Shift+G"));
+	connect(scrollPercent, &QAction::triggered,[=]{
+		int vimNumber = 100;
+		if(!vimCommand.isEmpty())vimNumber = vimCommand.toInt();
+		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollAreaWidgetContents->height()*vimNumber/100);
+		vimCommand = "";
 	});
-	this->addAction(selectPost);
+	this->addAction(scrollPercent);
+
+	QAction *clearVim = new QAction(this);
+	clearVim->setShortcut(Qt::Key_Escape);
+	connect(clearVim, &QAction::triggered,[=]{
+		vimCommand = "";
+	});
+	this->addAction(clearVim);
+
+	for(int i = Qt::Key_0; i<=Qt::Key_9; i++){
+		QAction *numberPressed = new QAction(this);
+		numberPressed->setShortcut(i);
+		connect(numberPressed, &QAction::triggered,this,&BoardTab::updateVim);
+		this->addAction(numberPressed);
+	}
+}
+
+void BoardTab::updateVim(){
+	 QAction* action = qobject_cast<QAction*>(sender());
+	 QKeySequence seq = action->shortcut();
+	 vimCommand += seq.toString();
 }
 
 void BoardTab::openPostForm()
@@ -201,32 +230,4 @@ void BoardTab::focusIt()
 
 void BoardTab::clearMap(){
 	tfMap.clear();
-}
-
-bool BoardTab::eventFilter(QObject *obj, QEvent *event)
-{
-	switch(event->type())
-	{
-	case QEvent::KeyPress: {
-		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-		int mod = keyEvent->modifiers();
-		int key = keyEvent->key();
-		if(key >= Qt::Key_0 && key <= Qt::Key_9){
-			vimCommand += QKeySequence(key).toString();
-			qDebug() << vimCommand;
-		}
-		else if(mod == Qt::KeyboardModifier::ShiftModifier && key == Qt::Key_G){
-			int vimNumber = 100;
-			if(!vimCommand.isEmpty())vimNumber = vimCommand.toInt();
-			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollAreaWidgetContents->height()*vimNumber/100);
-			vimCommand = "";
-		}
-		else if(key == Qt::Key_Escape){
-			vimCommand = "";
-		}
-		return QObject::eventFilter(obj, event);
-	}
-	default:
-		return QObject::eventFilter(obj, event);
-	}
 }

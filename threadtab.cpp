@@ -167,6 +167,56 @@ void ThreadTab::setShortcuts()
 		}
 	});
 	this->addAction(selectPost);
+
+	QAction *scrollUp = new QAction(this);
+	scrollUp->setShortcut(Qt::Key_K);
+	connect(scrollUp, &QAction::triggered,[=]{
+		int vimNumber = 1;
+		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
+		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() - vimNumber*150);
+		vimCommand = "";
+	});
+	this->addAction(scrollUp);
+
+	QAction *scrollDown = new QAction(this);
+	scrollDown->setShortcut(Qt::Key_J);
+	connect(scrollDown, &QAction::triggered,[=]{
+		int vimNumber = 1;
+		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
+		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() + vimNumber*150);
+		vimCommand = "";
+	});
+	this->addAction(scrollDown);
+
+	QAction *scrollPercent = new QAction(this);
+	scrollPercent->setShortcut(QKeySequence("Shift+G"));
+	connect(scrollPercent, &QAction::triggered,[=]{
+		int vimNumber = 100;
+		if(!vimCommand.isEmpty())vimNumber = vimCommand.toInt();
+		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollAreaWidgetContents->height()*vimNumber/100);
+		vimCommand = "";
+	});
+	this->addAction(scrollPercent);
+
+	QAction *clearVim = new QAction(this);
+	clearVim->setShortcut(Qt::Key_Escape);
+	connect(clearVim, &QAction::triggered,[=]{
+		vimCommand = "";
+	});
+	this->addAction(clearVim);
+
+	for(int i = Qt::Key_0; i<=Qt::Key_9; i++){
+		QAction *numberPressed = new QAction(this);
+		numberPressed->setShortcut(i);
+		connect(numberPressed, &QAction::triggered,this,&ThreadTab::updateVim);
+		this->addAction(numberPressed);
+	}
+}
+
+void ThreadTab::updateVim(){
+	 QAction* action = qobject_cast<QAction*>(sender());
+	 QKeySequence seq = action->shortcut();
+	 vimCommand += seq.toString();
 }
 
 ThreadTab::~ThreadTab()
@@ -309,42 +359,6 @@ bool ThreadTab::eventFilter(QObject *obj, QEvent *event)
 {
 	switch(event->type())
 	{
-	case QEvent::KeyPress: {
-		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-		int mod = keyEvent->modifiers();
-		int key = keyEvent->key();
-		//qDebug("Ate modifier %d",mod);
-		//qDebug("Ate key press %d", key);
-		if(key == Qt::Key_K){
-			int vimNumber = 1;
-			if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
-			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() - vimNumber*150);
-			vimCommand = "";
-		}
-		else if(key == Qt::Key_J){
-			int vimNumber = 1;
-			if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
-			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() + vimNumber*150);
-			vimCommand = "";
-		}
-		else if(mod == Qt::KeyboardModifier::ShiftModifier && key == Qt::Key_G){
-			int vimNumber = 100;
-			if(!vimCommand.isEmpty())vimNumber = vimCommand.toInt();
-			ui->scrollArea->verticalScrollBar()->setValue(ui->scrollAreaWidgetContents->height()*vimNumber/100);
-			vimCommand = "";
-		}
-		else if(key == Qt::Key_Escape){
-			vimCommand = "";
-		}
-		else if(key >= Qt::Key_0 && key <= Qt::Key_9){
-			vimCommand += QKeySequence(key).toString();
-		}
-		else if(key == Qt::Key_Return) {
-			on_pushButton_clicked();
-			return false;
-		}
-		break;
-	}
 	case QEvent::Resize: {
 		info.move(this->width()-info.width()-20,this->height()-info.height()-20);
 		[[fallthrough]];

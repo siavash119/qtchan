@@ -86,6 +86,7 @@ private slots:
 	void on_pushButton_clicked();
 	void on_lineEdit_returnPressed();
 	void removeTF(ThreadForm *tf);
+	void updateVim();
 
 signals:
 	void autoUpdate(bool update);

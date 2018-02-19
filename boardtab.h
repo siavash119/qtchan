@@ -56,9 +56,7 @@ private:
 private slots:
 	void on_pushButton_clicked();
 	void on_lineEdit_returnPressed();
-
-protected:
-	bool eventFilter(QObject *watched, QEvent *event);
+	void updateVim();
 };
 
 Q_DECLARE_METATYPE(BoardTab*)
