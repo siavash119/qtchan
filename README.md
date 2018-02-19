@@ -37,6 +37,10 @@ packer -S qtchan
 ## a few keyboard commands and instructions
 * ctrl+l opens up the nav bar; you can type g or g/boardnum or /g/ or https://boards.4chan... etc.\
 g for first page, /g/ for catalog, g/search to get catalog and search
+* o opens thread/image at top of view (expand the tree if you don't see the new tab in the treeview)
+* F3 focuses the tree, F4 focuses the content
+* #j and #k scroll (e.g. 5j, k)
+* #G puts scrollbar at percent (e.g. G for bottom, 0G for top, 50G for 50%)
 * ctrl+w (ctrl+f4 on windows) or delete to close tab
 * ctrl+p opens settings-ctrl+tab ctrl+shift+tab, ctrl+1-4 to switch tabs
 * ctrl+f to search and filter
@@ -46,12 +50,9 @@ g for first page, /g/ for catalog, g/search to get catalog and search
 * ctrl+plus/minus to zoom in/zoom out text
 * ctrl+9/0 to scale down/up images
 * ctrl+q to quit
+* F9 toggles notification view
 * F10 saves tree state (it'll also save on exit)
 * F11 hides menubar
-* #j and #k scroll (e.g. 5j, k)
-* #G puts scrollbar at percent (e.g. G for bottom, 0G for top, 50G for 50%)
-* F9 toggles notification view
-* o opens image at top of view
 * if you have mpv, g opens all the images/videos in the thread.
 
 there are more shortcuts; look at the source for now for info.
