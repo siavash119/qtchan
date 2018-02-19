@@ -18,11 +18,11 @@ void You::loadYou(QString fileName){
 	QSet<QString> posts = yourPosts.value(boardName);
 	while(!in.atEnd()) {
 		QString line = in.readLine();
-		if(line.at(0) == ":"){
+		if(line.at(0) == ':'){
 			boardName = line.mid(1);
 			continue;
 		}
-		if(line.at(0) == ",") line = line.mid(1);
+		if(line.at(0) == ',') line = line.mid(1);
 		QStringList fields = line.split(",");
 		posts = yourPosts.value(boardName);
 		foreach(QString temp, fields){

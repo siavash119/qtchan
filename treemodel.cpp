@@ -8,6 +8,7 @@
 #include <QTextStream>
 #include <QDataStream>
 #include <QPointer>
+#include <QFile>
 #include <QDebug>
 
 TreeModel::TreeModel(QObject *parent)
