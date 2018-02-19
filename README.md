@@ -62,6 +62,18 @@ need to restart qtchan if changing to use 4chan pass or not. signals/slots still
 
 you can make a filter file and it'll regexp remove posts for you. I'll post an example
 
+## how to solve captcha
+1. in the post form, focus the bottom lineEdit. It will load the challenge image
+2. it's a grid:
+* 0 1 2
+* 3 4 5
+* 6 7 8
+3. type in the numbers and hit enter (e.g. 034)
+4. if it says "Verified.", you're good to post.
+* Your code will expire in 2 minutes. If you want to load a new captcha, hit enter in the lineEdit or click the image.
+
+![qtchan captcha](https://i.abcdn.co/qtchan_captcha.png)
+
 ## Using 4chan pass to post
 Create a file ~/.config/qtchan/settings like below. Look at your browser cookies for values.
 Open settings with Ctrl+P and check Use 4chan pass.
@@ -70,7 +82,6 @@ Open settings with Ctrl+P and check Use 4chan pass.
 pass_id:your_pass_id
 pass_enabled:1
 ```
-
 ![qtchan ss](https://i.abcdn.co/qtchan.png)
 
 ## TODO
