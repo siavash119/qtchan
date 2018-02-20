@@ -31,14 +31,30 @@ private:
 	QString urlChallenge;
 	QString urlImageBase;
 	QNetworkRequest requestChallenge;
+	QNetworkRequest requestAntiCaptcha;
+	QNetworkRequest requestAntiSolution;
 	QNetworkReply *replyChallenge;
 	QNetworkReply *replyImage;
+
+	QString antiKey;
+	QString antiType;
+	QString antiMakeUrl;
+	QString antiGetUrl;
+	QString antiCaptchaInfo;
+	QString antiGetInfo;
+	QString antiTaskID;
+	void antiFinish();
+	void antiMake();
+private slots:
+	void antiMade();
+	void antiFinished();
 signals:
 	void challengeInfo(QString &challenge, QPixmap &challengeImage);
 	void questionInfo(QString &challenge);
 	void timeOut();
 	void success();
 	void fail();
+	void captchaCode(QString &code);
 public slots:
 	void loadCaptcha();
 	void loadImage();

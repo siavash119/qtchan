@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QMimeData>
 #include <QTextEdit>
+#include <QTimer>
 
 namespace Ui {
 class PostForm;
@@ -58,6 +59,7 @@ private:
 	void setFilenameText(QString &text);
 	Chan *api;
 	QString captchaCode;
+	QTimer *captchaTimer;
 
 private slots:
 	void postFinished();

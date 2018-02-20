@@ -5,6 +5,8 @@
 
 //TODO: does everything need to be a virtual function?
 
+//TODO each Chan api has its own Captcha object
+
 struct CaptchaLinks{
 	QString server;
 	QString siteKey;

@@ -5,7 +5,6 @@
 #include <QUrl>
 #include <QUrlQuery>
 #include <QHttpMultiPart>
-#include <QTimer>
 #include <QFileDialog>
 #include <QRegularExpression>
 #include <QGraphicsItem>
@@ -29,6 +28,14 @@ PostForm::PostForm(QWidget *parent) :
 	else {
 		ui->question->hide();
 		ui->challenge->hide();
+		captchaTimer = new QTimer(this);
+		captchaTimer->setSingleShot(true);
+		connect(captchaTimer,&QTimer::timeout,[=]{
+			ui->question->setText("Captcha code expired");
+			ui->question->show();
+			captchaCode = "";
+			captcha.getCaptcha();
+		});
 	}
 	this->setObjectName("PostForm");
 	setFontSize(settings.value("fontSize",14).toInt());
@@ -100,6 +107,7 @@ void PostForm::appendText(QString &text)
 	ui->com->textCursor().insertText(text);
 }
 
+//TODO captcha object should do this
 void PostForm::verifyCaptcha(){
 	QUrlQuery postData;
 	postData.addQueryItem("c", captcha.challenge);
@@ -129,12 +137,7 @@ void PostForm::verifyCaptcha(){
 				ui->question->setText("Verified");
 				ui->challenge->hide();
 				ui->response->hide();
-				QTimer::singleShot(1200000, [=]{
-					ui->question->setText("Captcha code expired");
-					ui->question->show();
-					captchaCode = "";
-					captcha.getCaptcha();
-				});
+				captchaTimer->start(12000);
 			}
 			else{
 				ui->question->setText("Success but need more: try again");
@@ -217,6 +220,7 @@ void PostForm::postFinished()
 	isPosting = false;
 	captcha.loaded = false;
 	captchaCode = "";
+	if(captchaTimer->isActive()) captchaTimer->stop();
 	if(postReply->error()){
 		qDebug() << postReply->errorString();
 		submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);

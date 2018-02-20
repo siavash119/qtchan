@@ -1,5 +1,10 @@
 #include "captcha.h"
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QSettings>
 #include <QDebug>
+
+//TODO: test anti-captcha support
 
 Captcha::Captcha()
 {
@@ -13,8 +18,28 @@ void Captcha::startUp(Chan *api){
 	lang = QString(links.lang);
 	urlChallenge = links.challengeURL;
 	urlImageBase = links.imageBaseURL;
-	requestChallenge = QNetworkRequest(QUrl(urlChallenge));
-	requestChallenge.setRawHeader(QByteArray("Referer"), QByteArray(links.refererURL.toUtf8()));
+	QSettings settings;
+	if(settings.value("antiCaptcha/enable",false).toBool() == false){
+		requestChallenge = QNetworkRequest(QUrl(urlChallenge));
+		requestChallenge.setRawHeader(QByteArray("Referer"), QByteArray(links.refererURL.toUtf8()));
+	}
+	else{
+		antiKey = settings.value("antiCaptcha/key","").toString();
+		antiType = settings.value("antiCaptcha/type","NoCaptchaTakeProxyless").toString();
+		antiMakeUrl = settings.value("antiCaptcha/url","https://api.anti-captcha.com/createTask").toString();
+		antiCaptchaInfo =
+					"{ "
+					"\"clientKey\": \"" + antiKey + "\", "
+					"\"task\": {"
+						"\"type\": \"" + antiType + "\", "
+						"\"websiteURL\": \"" + urlChallenge + "\", "
+						"\"websiteKey\": \"" + siteKey + "\""
+					" }";
+		requestChallenge = QNetworkRequest(QUrl(antiMakeUrl));
+		requestChallenge.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+		requestAntiSolution = QNetworkRequest(QUrl(antiGetUrl));
+		requestAntiSolution.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+	}
 }
 
 Captcha::~Captcha(){
@@ -24,9 +49,87 @@ Captcha::~Captcha(){
 void Captcha::getCaptcha(){
 	loading = true;
 	replyChallenge = NULL;
+	QSettings settings;
+	if(settings.value("antiCaptcha/enable",false).toBool() == true){
+		antiMake();
+	}
 	qDebug() << "getting captcha from " + urlChallenge;
 	replyChallenge = nc.captchaManager->get(requestChallenge);
 	QObject::connect(replyChallenge,&QNetworkReply::finished,this,&Captcha::loadCaptcha);
+}
+
+void Captcha::antiMake(){
+	replyChallenge = nc.captchaManager->post(requestAntiCaptcha,antiCaptchaInfo.toUtf8());
+	QObject::connect(replyChallenge,&QNetworkReply::finished,this,&Captcha::antiMade);
+}
+
+void Captcha::antiMade(){
+	if(!replyChallenge){
+		emit fail();
+		return;
+	}
+	else if(replyChallenge->error()) {
+		qDebug().noquote() << "loading antiCaptcha error:" << replyChallenge->errorString();
+		replyChallenge->deleteLater();
+		return;
+	}
+	else{
+		replyChallenge->deleteLater();
+		QByteArray reply = replyChallenge->readAll();
+		QJsonObject json = QJsonDocument::fromBinaryData(reply).object();
+		qDebug() << json;
+		if(json.value("errorId").toString() == QString('0')){
+			antiTaskID = json.value("taskId").toString();
+			antiGetInfo =	"{ "
+							"\"clientKey\": \"" + antiKey + "\", "
+							"\"taskId\": \"" + antiTaskID + "\""
+						" }";
+			antiFinish();
+		}
+		else{
+			qDebug() << json.value("errorDescription").toString();
+		}
+	}
+}
+
+void Captcha::antiFinish(){
+	QTimer::singleShot(10000,[=]{
+		if(!antiGetInfo.isEmpty()){
+			replyImage = nc.captchaManager->post(requestAntiSolution,antiGetInfo.toUtf8());
+			connect(replyImage,&QNetworkReply::finished,this,&Captcha::antiFinished);
+		}
+	});
+}
+
+void Captcha::antiFinished(){
+	if(!replyImage){
+		emit fail();
+		return;
+	}
+	else if(replyImage->error()) {
+		qDebug().noquote() << "solving antiCaptcha error:" << replyChallenge->errorString();
+		replyImage->deleteLater();
+		return;
+	}
+	else{
+		replyImage->deleteLater();
+		QByteArray reply = replyImage->readAll();
+		QJsonObject json = QJsonDocument::fromBinaryData(reply).object();
+		qDebug() << json;
+		if(json.value("errorId").toString() == QString('0')){
+			if(json.value("status").toString() == "ready"){
+				antiGetInfo.clear();
+				QString code = json.value("solution").toObject().value("gRecaptchaResponse").toString();
+				emit captchaCode(code);
+			}
+			else{
+				antiFinish();
+			}
+		}
+		else{
+			qDebug() << json.value("errorDescription").toString();
+		}
+	}
 }
 
 void Captcha::loadCaptcha(){
