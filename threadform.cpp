@@ -273,7 +273,7 @@ void ThreadForm::loadImage(QString path) {
 
 void ThreadForm::imageClicked()
 {
-	qDebug().noquote() << "clicked" << post.filename << post.ext;
+	qDebug().noquote().nospace() << "clicked " << post.filename << post.ext;
 	if(this->type == PostType::Reply) {
 		if(finished) openImage();
 		else if(gettingFile) loadIt = true;
