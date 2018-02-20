@@ -24,6 +24,7 @@ PostForm::PostForm(QWidget *parent) :
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	if(settings.value("use4chanPass", false).toBool() == true){
 		ui->captcha->hide();
+		captchaTimer = Q_NULLPTR;
 	}
 	else {
 		ui->question->hide();
@@ -220,7 +221,7 @@ void PostForm::postFinished()
 	isPosting = false;
 	captcha.loaded = false;
 	captchaCode = "";
-	if(captchaTimer->isActive()) captchaTimer->stop();
+	if(captchaTimer && captchaTimer->isActive()) captchaTimer->stop();
 	if(postReply->error()){
 		qDebug() << postReply->errorString();
 		submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
