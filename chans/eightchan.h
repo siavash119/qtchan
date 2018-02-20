@@ -3,6 +3,7 @@
 
 #include "chan.h"
 #include "netcontroller.h"
+#include <QDebug>
 #include <QString>
 
 //TODO everything

@@ -313,7 +313,7 @@ void ThreadTab::loadAllImages()
 	QMapIterator<QString,ThreadForm*> mapI(tfMap);
 	while (mapI.hasNext()) {
 		mapI.next();
-		static_cast<ThreadForm *>(mapI.value())->loadOrig();
+		static_cast<ThreadForm *>(mapI.value())->getFile();
 	}
 }
 

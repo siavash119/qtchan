@@ -42,12 +42,7 @@ public:
 	PostType type;
 	bool root;
 	bool autoExpand;
-	static QString htmlParse(QString &html);
-	static QString titleParse(QString &title);
-	//Post *post;
 	Post post;
-	QDir *folder;
-	QString folderPath;
 	//void setImage(QString text);
 	QSignalMapper *signalMapper;
 	//void insert(int position, ThreadForm *tf);
@@ -58,7 +53,6 @@ public:
 	void setReplies();
 	void setRepliesString(const QString &repliesString);
 	void setInfoString();
-	void loadOrig();
 	ThreadForm *clone(int replyLevel = 0);
 	QList<QPointer<ThreadForm>> clones;
 	//TODO check settings -> filter
@@ -73,13 +67,15 @@ public:
 	bool hasImage = true;
 	QMetaObject::Connection comQuoteConnection;
 	QMetaObject::Connection infoQuoteConnection;
+	QString countryString;
+	void getFlag();
+	void getFile(bool andOpen = false);
 
+//TODO take care of file downloading in netcontroller
 private:
 	QWidget *tab;
 	ThreadForm *rootTF;
-	QString lastLink;
 	Ui::ThreadForm *ui;
-	bool loadIt;
 	QString fileURL;
 	QString thumbURL;
 	QString pathBase;
@@ -87,18 +83,17 @@ private:
 	QPointer<QFile> file;
 	QString thumbPath;
 	QPointer<QFile> thumb;
-	QMetaObject::Connection connectionThumb;
-	QMetaObject::Connection connectionImage;
-	//QNetworkReply *reply; //Use for cross-thread gets later?
-	QNetworkReply *replyThumb;
-	QNetworkReply *replyImage;
-	void getFile();
+	QString flagPath;
 	void getThumb();
 	bool finished = false;
 	bool hideButtonShown = true;
 	int darkness = 22;
 	QColor background;
 	void clickImage();
+	bool loadIt = false;
+	void downloadFile(const QString &fileUrl,const QString &filePath,QNetworkAccessManager *manager, QString message = QString());
+	QHash<QString,QNetworkReply*> networkReplies;
+
 
 signals:
 	void loadThreadTab(ThreadForm*, QJsonArray&);
@@ -107,24 +102,21 @@ signals:
 	void floatLink(const QString &link, int replyLevel = 0);
 	void updateFloat();
 	void removeMe(QPointer<ThreadForm> tf);
-	void fileFinished();
 	void deleteFloat();
 	//void searchPost(int position, QString postNum);
 
 public slots:
-	void getOrigFinished();
-	void getThumbFinished();
 	void imageClicked();
 	void hideClicked();
 	void removeClone(QPointer<ThreadForm> tf);
 	void addReply(ThreadForm *tf);
 	void setFontSize(int fontSize);
 	void setImageSize(int imageSize);
+	void downloadedSlot(const QString &path, const QString &message);
 
 private slots:
 	void quoteClicked(const QString &link);
 	void appendQuote();
-	void imageClickedFinished();
 	//void downloading(qint64 read, qint64 total);
 
 	void on_com_linkHovered(const QString &link);

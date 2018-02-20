@@ -136,7 +136,7 @@ void ThreadTabHelper::loadPosts() {
 			else if(tf->post.com.length()) {
 				QString temp = tf->post.com;
 				//TODO clean this
-				temp = ThreadForm::htmlParse(temp)
+				temp = Filter::htmlParse(temp)
 						.replace("\n"," ")
 						.remove(QRegExp("<[^>]*>"));
 				emit windowTitle("/"+board+"/"+thread + " - " + temp);
@@ -174,7 +174,7 @@ void ThreadTabHelper::loadAllImages() {
 		QMapIterator<QString,ThreadForm*> mapI(tfMap);
 		while (mapI.hasNext()) {
 			mapI.next();
-			mapI.value()->loadOrig();
+			mapI.value()->getFile();
 		}
 	}
 }

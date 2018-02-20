@@ -35,6 +35,7 @@ void Post::load(QJsonObject &p, QString &board)
 	id = p.value("id").toString();
 	capcode = p.value("id").toString();
 	country = p.value("country").toString();
+	troll_country = p.value("troll_country").toString();
 	country_name = p.value("country_name").toString();
 	sub = p.value("sub").toString();
 	//TODO regexp on all posts or do the whole json at once?

@@ -181,7 +181,7 @@ void BoardTabHelper::loadAllImages() {
 		QMapIterator<QString,ThreadForm*> mapI(tfMap);
 		while (mapI.hasNext()) {
 			mapI.next();
-			mapI.value()->loadOrig();
+			mapI.value()->getFile();
 		}
 	}
 }

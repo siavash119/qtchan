@@ -26,6 +26,9 @@ public:
 	static QString quoteString;
 	static QString replaceQuoteStrings(QString &string);
 	static QString replaceYouStrings(QRegularExpressionMatchIterator i, QString &string);
+	static QString htmlParse(QString &html);
+	static QString titleParse(QString &title);
+
 private:
 	QRegularExpressionMatch quotelinkMatch;
 	QRegularExpressionMatchIterator quotelinkMatches;

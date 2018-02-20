@@ -35,6 +35,7 @@ public:
 	QString id;
 	QString capcode;
 	QString country;
+	QString troll_country;
 	QString country_name;
 	QString sub; //Subject
 	QString com; //Comment

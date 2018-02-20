@@ -46,7 +46,6 @@ ThreadForm::ThreadForm(Chan *api, QString board, QString threadNum, PostType typ
 	ui->com->installEventFilter(this);
 	ui->fileInfo->installEventFilter(this);
 	this->installEventFilter(this);
-	ui->tim->installEventFilter(this);
 }
 
 void ThreadForm::appendQuote()
@@ -56,8 +55,10 @@ void ThreadForm::appendQuote()
 
 ThreadForm::~ThreadForm()
 {
-	if(gettingFile)replyImage->abort();
-	if(gettingThumb)replyThumb->abort();
+	foreach(QNetworkReply *reply, networkReplies){
+		reply->abort();
+		reply->deleteLater();
+	}
 	//disconnect clones quote clicking in notifications
 	foreach(QPointer<ThreadForm> tf, clones){
 		if(tf){
@@ -74,11 +75,11 @@ void ThreadForm::setText(QString text)
 }
 
 QString ThreadForm::infoString(){
-	return	"<span style=\"color: rgb(152, 125, 62); font-weight: bold;\">" + htmlParse(post.sub) + "</span> " +
-			"<span style=\"color: rgb(163, 68, 67);\">" + post.name + "</span> " +
-			((this->board == "pol") ? ("<span style=\"color: lightblue;\">" + post.country_name + "</span> ") : QString()) +
-			"<span>" + post.realNow + "</span> " +
-			"<a href=\"#op" % post.no % "\" style=\"color:#897399\">No." % post.no % "</a> " +
+	return	"<span style=\"color: rgb(152, 125, 62); font-weight: bold;\">" % Filter::htmlParse(post.sub) % "</span> " +
+			"<span style=\"color: rgb(163, 68, 67);\">" % post.name % "</span> " %
+			countryString %
+			"<span>" % post.realNow % "</span> " %
+			"<a href=\"#op" % post.no % "\" style=\"color:#897399\">No." % post.no % "</a> " %
 			repliesString;
 }
 
@@ -92,119 +93,126 @@ void ThreadForm::load(QJsonObject &p)
 	ui->com->setText(post.com);
 	quotelinks = Filter::findQuotes(post.com);
 
+	getFlag();
+
 	//set image
-	//TODO clean if-else's
 	//TODO use filedeleted image
 	if(!post.tim.isNull() && !post.filedeleted) {
-		fileURL = this->board % "/" % post.tim % post.ext;
+		fileURL = board % "/" % post.tim % post.ext;
 		filePath = pathBase%post.no%"-"%post.filename%post.ext;
 		file = new QFile(filePath,this);
 		//TODO fsize in human readable format
 		ui->fileInfo->show();
-		QString infoText = post.filename % post.ext % " (" % QString("%1").arg(post.w) % "x" % QString("%1").arg(post.h) % ", " % QString("%1").arg(post.fsize/1024,0,'f',0) % " KB)";
+		QString infoText = post.filename % post.ext
+				% " (" % QString("%1").arg(post.w)
+				% "x" % QString("%1").arg(post.h)
+				% ", " % QString("%1").arg(post.fsize/1024,0,'f',0)
+				% " KB)";
 		ui->fileInfo->setText(infoText);
-		if((post.ext == QLatin1String(".jpg") || post.ext == QLatin1String(".png"))) {
-			loadIt = true;
-			if(!file->exists()) {
-				if(autoExpand) getFile();
-				thumbURL = this->board % "/" % post.tim % "s.jpg";
-				thumbPath = pathBase%"thumbs/"%post.no%"-"%post.filename%"s.jpg";
-				thumb = new QFile(thumbPath,this);
-				if(!thumb->exists()) getThumb();
-				else loadImage(thumbPath);
-			}
-			else{
-				finished = true;
-				loadImage(filePath);
-			}
-		}
-		else {
-			loadIt = false;
-			if(autoExpand) {
-				if(!file->exists()) {
-					getFile();
-				}
-			}
-			thumbURL = this->board % "/" % post.tim % "s.jpg";
-			thumbPath = pathBase%"thumbs/"%post.no%"-"%post.filename%"s.jpg";
-			thumb = new QFile(thumbPath,this);
-			if(!thumb->exists()) getThumb();
-			else loadImage(thumbPath);
-		}
+		thumbURL = this->board % "/" % post.tim % "s.jpg";
+		thumbPath = pathBase%"thumbs/"%post.no%"-"%post.filename%"s.jpg";
+		thumb = new QFile(thumbPath,this);
+		getThumb();
+		if(autoExpand || file->exists()) getFile();
 		connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
 	}
 	else{
 		delete ui->pictureLayout;
 		ui->contentLayout->layout()->takeAt(0);
 		this->hasImage = false;
-		//delete ui->tim;
 	}
-	//updateComHeight();
 }
 
-void ThreadForm::getFile()
-{
-	qDebug().noquote().nospace() << "getting " << api->apiBase() << fileURL;
-	QNetworkRequest request(QUrl(api->apiBase() % fileURL));
-	if(api->requiresUserAgent()) request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
-	replyImage = nc.fileManager->get(request);
+void ThreadForm::getFlag(){
+	if(post.country_name.isEmpty()) return;
+	QString flagURL, countryCode;
+	if(!post.country.isEmpty()){
+		countryCode = post.country.toLower();
+		flagURL = "https://s.4cdn.org/image/country/" % countryCode % ".gif";
+		flagPath = "flags/" % countryCode % ".gif";
+	}
+	else{
+		countryCode = post.troll_country.toLower();
+		flagURL = "https://s.4cdn.org/image/country/troll/" % post.troll_country.toLower() % ".gif";
+		flagPath = "flags/troll/"+countryCode+".gif";
+	}
+	downloadFile(flagURL,flagPath,nc.thumbManager);
+}
+
+void ThreadForm::getFile(bool andOpen){
+	if(post.tim.isNull() || post.filedeleted || gettingFile) return;
+	QString url = api->apiBase() + fileURL;
+	QString message = andOpen ? "clicked" : "";
+	downloadFile(url,filePath,nc.fileManager,message);
 	gettingFile = true;
-	//connect(replyImage, &QNetworkReply::downloadProgress,this,&ThreadForm::downloading);
-	connectionImage = connect(replyImage, &QNetworkReply::finished,this, &ThreadForm::getOrigFinished, Qt::UniqueConnection);
 }
 
-void ThreadForm::getThumb() {
-	qDebug().noquote().nospace() << "getting " << api->apiBase() << thumbURL;
-	QNetworkRequest request(QUrl(api->apiBase() % thumbURL));
-	if(api->requiresUserAgent()) request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
-	replyThumb = nc.thumbManager->get(request);
+void ThreadForm::getThumb(){
+	if(post.tim.isNull() || post.filedeleted) return;
+	QString url = api->apiBase() + thumbURL;
+	downloadFile(url,thumbPath,nc.thumbManager);
 	gettingThumb = true;
-	connectionThumb = connect(replyThumb, &QNetworkReply::finished,this,&ThreadForm::getThumbFinished,Qt::UniqueConnection);
 }
 
-void ThreadForm::clickImage(){
-	if(QPointer<ClickableLabel>(ui->tim)) ui->tim->clicked();
-}
-
-/*void ThreadForm::downloading(qint64 read, qint64 total)
-{
-	qDebug() << "downloading"+read;
-	QByteArray b = replyImage->readAll();
-	QDataStream out(file);
-	out << b;
-}*/
-
-//TODO avoid copy pasted function
-//TODO clean if-elses
-void ThreadForm::loadOrig()
-{
-	if(!post.tim.isNull()) {
-		if((post.ext == QLatin1String(".jpg") || post.ext == QLatin1String(".png"))) {
-			loadIt = true;
-			if(!file->exists()) getFile();
-			else loadImage(filePath);
+//TODO: I want this in netcontroller
+void ThreadForm::downloadFile(const QString &fileUrl,
+								 const QString &filePath,
+								 QNetworkAccessManager *manager,
+								 QString message){
+	QFile *file = new QFile(filePath);
+	if(file->exists()){
+		downloadedSlot(filePath,message);
+		file->deleteLater();
+		return;
+	}
+	QNetworkRequest request;
+	request.setUrl(fileUrl);
+	if(api->requiresUserAgent()) request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
+	QNetworkReply *reply;
+	if(networkReplies.contains(fileUrl)){
+		reply = networkReplies.value(fileUrl);
+		qDebug().noquote() << "already downloading" << fileUrl << "to" << filePath;
+	}
+	else{
+		reply = manager->get(request);
+		networkReplies.insert(fileUrl,reply);
+		qDebug().noquote() << "downloading" << fileUrl << "to" << filePath;
+	}
+	connect(reply,&QNetworkReply::finished,[=]{
+		networkReplies.remove(fileUrl);
+		reply->deleteLater();
+		file->deleteLater();
+		if(!reply) return;
+		if(reply->error()){
+			qDebug().noquote().nospace() << "error downloading " << fileUrl << ": " << reply->errorString();
 		}
-		else {
-			loadIt = false;
-			if(!file->exists()) getFile();
+		else{
+			file->open(QIODevice::WriteOnly);
+			file->write(reply->readAll());
+			file->close();
+			downloadedSlot(filePath,message);
+		}
+	});
+}
+
+void ThreadForm::downloadedSlot(const QString &path, const QString &message){
+	if(path.compare(flagPath) == 0){
+		countryString = "<img src=\"" % flagPath % "\" width=\"32\" height=\"20\">"
+						% " <span style=\"color:lightblue\">" % post.country_name % "</span> ";
+		ui->info->setText(infoString());
+		QListIterator<QPointer<ThreadForm>> i(rootTF->clones);
+		QPointer<ThreadForm> cloned;
+		while(i.hasNext()) {
+			cloned = i.next();
+			if(!cloned) continue;
+			cloned->countryString = this->countryString;
+			cloned->setInfoString();
 		}
 	}
-}
-
-void ThreadForm::getOrigFinished()
-{
-	disconnect(connectionImage);
-	gettingFile = false;
-	if(replyImage->canReadLine() && replyImage->error() == 0)
-	{
-		disconnect(connectionThumb);
+	else if(path.compare(filePath) == 0){
+		gettingFile = false;
 		finished = true;
-		file->open(QIODevice::WriteOnly);
-		file->write(replyImage->readAll());
-		file->close();
-		replyImage->deleteLater();
-		qDebug().noquote() << "saved file "+filePath;
-		if(loadIt) {
+		if(post.ext.compare(".jpg") == 0 || post.ext.compare(".png") == 0) {
 			loadImage(filePath);
 			QListIterator<QPointer<ThreadForm>> i(rootTF->clones);
 			QPointer<ThreadForm> cloned;
@@ -214,35 +222,20 @@ void ThreadForm::getOrigFinished()
 				cloned->loadImage(filePath);
 			}
 		}
-		emit fileFinished();
+		if(message.compare("clicked") == 0 || loadIt){
+			openImage();
+		}
 	}
-	else {
-		qDebug() << "getting file:" << filePath << "error. Reason:" << replyImage->errorString();
-		replyImage->deleteLater();
-	}
-}
-
-void ThreadForm::getThumbFinished()
-{
-	disconnect(connectionThumb);
-	gettingThumb = false;
-	if(replyThumb->error() == 0) {
-		thumb->open(QIODevice::WriteOnly);
-		thumb->write(replyThumb->readAll());
-		thumb->close();
-		replyThumb->deleteLater();
-		qDebug().noquote() << "saved file "+thumbPath;
-		//check if orig file somehow dl'd faster than thumbnail
+	else if(path.compare(thumbPath) == 0){
 		if(!finished) loadImage(thumbPath);
 	}
-	else {
-		qDebug() << "getting file:" << filePath << "error. Reason:" << replyThumb->errorString();
-		replyThumb->deleteLater();
-	}
 }
 
-QImage ThreadForm::scaleImage(QString path, int scale)
-{
+void ThreadForm::clickImage(){
+	if(QPointer<ClickableLabel>(ui->tim)) ui->tim->clicked();
+}
+
+QImage ThreadForm::scaleImage(QString path, int scale){
 	QImage pic;
 	pic.load(path);
 	QImage scaled = (pic.height() > pic.width()) ?
@@ -253,6 +246,7 @@ QImage ThreadForm::scaleImage(QString path, int scale)
 
 void ThreadForm::loadImage(QString path) {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	//TODO scale in background threads?
 	/*QFuture<QImage> newImage = QtConcurrent::run(scaleImage,
 												 path, settings.value("imageSize",250).toInt());
 	connect(&watcher, &QFutureWatcherBase::finished,[=]()
@@ -279,20 +273,11 @@ void ThreadForm::loadImage(QString path) {
 
 void ThreadForm::imageClicked()
 {
-	qDebug().noquote() << "clicked "+post.filename;
+	qDebug().noquote() << "clicked" << post.filename << post.ext;
 	if(this->type == PostType::Reply) {
-		if(!QPointer<ClickableLabel>(ui->tim) || (ui->tim && ui->tim->isHidden())) return;
-		if(!post.filename.isEmpty() && file && !file->exists() && !gettingFile) {
-			qDebug().noquote() << QString("getting " % api->apiBase() % fileURL);
-			gettingFile=true;
-			replyImage = nc.fileManager->get(QNetworkRequest(QUrl(api->apiBase() % fileURL)));
-			//connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::loadFromImageClicked);
-			connectionImage = connect(replyImage, &QNetworkReply::finished,this,&ThreadForm::imageClickedFinished,Qt::UniqueConnection);
-		}
-		else if(gettingFile) {
-			connect(this,&ThreadForm::fileFinished,this,&ThreadForm::imageClickedFinished,Qt::UniqueConnection);
-		}
-		else openImage();
+		if(finished) openImage();
+		else if(gettingFile) loadIt = true;
+		else getFile(true);
 	}
 	else{
 		TreeItem *childOf = mw->model->getItem(mw->selectionModel->currentIndex());
@@ -300,20 +285,14 @@ void ThreadForm::imageClicked()
 	}
 }
 
-void ThreadForm::imageClickedFinished()
-{
-	getOrigFinished();
-	openImage();
-}
-
 void ThreadForm::hideClicked()
 {
 	this->hide();
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	QStringList idFilters = settings.value("filters/"+board+"/id").toStringList();
+	QStringList idFilters = settings.value("filters/" % board % "/id").toStringList();
 	idFilters.append(threadNum);
-	settings.setValue("filters/"+board+"/id",idFilters);
-	qDebug().noquote() << "hide Clicked so "+threadNum+" filtered!";
+	settings.setValue("filters/" % board % "/id",idFilters);
+	qDebug().noquote() << "hide Clicked so" << threadNum << "filtered!";
 	if(this->type == Reply){
 		QListIterator<QPointer<ThreadForm>> i(clones);
 		while(i.hasNext()) {
@@ -339,14 +318,6 @@ void ThreadForm::hideClicked()
 void ThreadForm::openImage()
 {
 	QDesktopServices::openUrl(QUrl::fromLocalFile(QDir().absoluteFilePath(filePath)));
-}
-
-QString ThreadForm::htmlParse(QString &html)
-{
-	return html.replace("<br>","\n").replace("&amp;","&")
-			.replace("&gt;",">").replace("&lt;","<")
-			.replace("&quot;","\"").replace("&#039;","'")
-			.replace("<wb>","\n").replace("<wbr>","\n");
 }
 
 void ThreadForm::setFontSize(int fontSize){
@@ -378,23 +349,11 @@ void ThreadForm::setImageSize(int imageSize){
 			next->setImageSize(imageSize);
 		}
 	}
-
-}
-
-QString ThreadForm::titleParse(QString &title)
-{
-	QRegularExpression htmlTag;
-	htmlTag.setPattern("<span .*>");
-	return title.replace(htmlTag,"").replace("<br>"," ").replace("&amp;","&")
-			.replace("&gt;",">").replace("&lt;","<")
-			.replace("&quot;","\"").replace("&#039;","'")
-			.replace("<wb>"," ").replace("<wbr>"," ");
 }
 
 void ThreadForm::quoteClicked(const QString &link)
 {
 	qDebug().noquote() << link;
-	//check size > 2 instead of isempty?
 	if(link.startsWith("#p") && this->type == PostType::Reply) {
 		ThreadForm *tf = static_cast<ThreadTab*>(tab)->findPost(link.mid(2));
 		if(tf != nullptr && !tf->hidden) this->insert(tf);
@@ -421,13 +380,12 @@ void ThreadForm::insert(ThreadForm *tf)
 }
 
 void ThreadForm::addReply(ThreadForm *tf){
-	if(ui->quoteWidget->isHidden())ui->quoteWidget->show();
+	if(ui->quoteWidget->isHidden()) ui->quoteWidget->show();
 	ui->quotes->addWidget(tf);
 }
 
 ThreadForm *ThreadForm::clone(int replyLevel)
 {
-	//TODO? just tfs->load(post);
 	ThreadForm *tfs = new ThreadForm(this->api,this->board,this->threadNum,this->type,false,false,tab,replyLevel+1);
 	tfs->rootTF = this->rootTF;
 	tfs->tab = tab;
@@ -461,6 +419,7 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 		tfs->hasImage = false;
 		//tfs->ui->tim->deleteLater();
 	}
+	tfs->countryString = countryString;
 	if(repliesString.length()) {
 		tfs->setRepliesString(repliesString);
 	}
@@ -605,11 +564,3 @@ void ThreadForm::paintEvent(QPaintEvent *){
 	painter.drawRect(x,0,width()-x-1,height()-1);
 	painter.fillRect(x+1,1,width()-x-2,height()-2,background);
 }
-
-/*void ThreadForm::setBorder() {
-	ui->com->setStyleSheet("bottom-border:3px solid black");
-}
-
-void ThreadForm::removeBorder() {
-	ui->com->setStyleSheet("");
-}*/

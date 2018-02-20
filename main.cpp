@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	font.setPointSize(settings.value("fontSize",14).toInt());
 	a.setFont(font);
+	//flag path
+	QDir().mkpath("flags/troll");
 	MainWindow w;
 	mw = &w;
 	w.show();

@@ -102,3 +102,19 @@ QString Filter::replaceYouStrings(QRegularExpressionMatchIterator i, QString &st
 	}
 	return string;
 }
+
+QString Filter::htmlParse(QString &html){
+	return html.replace("<br>","\n").replace("&amp;","&")
+		.replace("&gt;",">").replace("&lt;","<")
+		.replace("&quot;","\"").replace("&#039;","'")
+		.replace("<wb>","\n").replace("<wbr>","\n");
+}
+
+QString Filter::titleParse(QString &title){
+	QRegularExpression htmlTag;
+	htmlTag.setPattern("<span .*>");
+	return title.replace(htmlTag,"").replace("<br>"," ").replace("&amp;","&")
+		.replace("&gt;",">").replace("&lt;","<")
+		.replace("&quot;","\"").replace("&#039;","'")
+		.replace("<wb>"," ").replace("<wbr>"," ");
+	}
