@@ -29,6 +29,22 @@ MainWindow::MainWindow(QWidget *parent) :
 	QList<int> sizes;
 	sizes << 200 << (ui->splitter->size().width() - 200);
 	ui->splitter->setSizes(sizes);
+
+	//instructions
+	QWidget *wig = new QWidget(ui->content);
+	QHBoxLayout *lay = new QHBoxLayout(wig);
+	wig->setLayout(lay);
+	ui->content->addWidget(wig);
+	QLabel *tem = new QLabel;
+	tem->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	tem->setAlignment(Qt::AlignVCenter);
+	QFile file(":/readstartup.md");
+	file.open(QIODevice::ReadOnly);
+	QByteArray dump = file.readAll();
+	file.close();
+	tem->setText(QString(dump));
+	lay->addWidget(tem);
+
 	ui->pushButton->hide();
 	ui->navBar->hide();
 	ui->treeView->setModel(model);
@@ -540,7 +556,7 @@ TreeItem *MainWindow::onNewThread(QWidget *parent, Chan *api, QString board, QSt
 	QString query = "/"+board+"/"+thread;
 	if(!display.length()) display = query;
 	bool isFromSession = (display == query) ? false : true;
-	ThreadTab *tt = new ThreadTab(api,board,thread,this,isFromSession);
+	ThreadTab *tt = new ThreadTab(api,board,thread,ui->content,isFromSession);
 	ui->content->addWidget(tt);
 	QList<QVariant> list;
 	list.append(display);
@@ -566,7 +582,7 @@ void MainWindow::onSelectionChanged()
 {
 	QModelIndexList list = ui->treeView->selected();
 	if(list.size()) {
-		QPointer<QWidget> tab = model->getItem(list.at(0))->tab;
+		QWidget *tab = model->getItem(list.at(0))->tab;
 		if(tab){
 			ui->content->setCurrentWidget(tab);
 			setWindowTitle(tab->windowTitle());

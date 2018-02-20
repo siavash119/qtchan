@@ -70,4 +70,5 @@ FORMS   += mainwindow.ui \
 RC_ICONS = icons/icon.ico
 
 RESOURCES += \
-    icons.qrc
+    icons.qrc \
+    readme.qrc
