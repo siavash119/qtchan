@@ -122,6 +122,11 @@ void ThreadTabHelper::loadPosts() {
 		p = posts.at(i).toObject();
 		ThreadForm *tf = new ThreadForm(api,board,thread,PostType::Reply,true,loadFile,parent);
 		tf->load(p);
+		if(tfMap.contains(tf->post.no)){
+			delete tf;
+			i++;
+			continue;
+		}
 		tfMap.insert(tf->post.no,tf);
 		if(you.hasYou(board,tf->post.no)){
 			tf->post.isYou = true;
