@@ -42,6 +42,7 @@ public:
 	void loadSessionFromFile(QString filename);
 	void addTab(TreeItem *child, TreeItem *parent, bool select);
 	void removeChildren(QModelIndex ind);
+	QList<int> fullIndex(QModelIndex ind);
 
 public slots:
 	void onDeleting(TreeItem *tn);

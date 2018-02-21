@@ -335,3 +335,13 @@ void TreeModel::onDeleting(TreeItem *tn){
 	removeItem(tn);
 	emit removingTab(tn);
 }
+
+QList<int> TreeModel::fullIndex(QModelIndex ind){
+	QList<int> full;
+	QModelIndex rootIndex = QModelIndex();
+	while(ind != rootIndex){
+		full.prepend(ind.row());
+		ind = ind.parent();
+	}
+	return full;
+}
