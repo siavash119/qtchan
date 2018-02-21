@@ -1,5 +1,6 @@
 <p>welcome to <a href="https://github.com/siavash119/qtchan">qtchan</a>. here is some useful info</p>
 <ul>
+<li>F1 shows this help</li>
 <li>ctrl+l opens up the nav bar</li>
 <li>you can type g or g/boardnum or /g/ or https://boards.4chan... etc.</li>
 <li>g for first page, /g/ for catalog, g/search to get catalog and search</li>

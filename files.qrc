@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>icons/icon_22x22.png</file>
         <file>icons/icon_64x64.png</file>
+        <file>readstartup.md</file>
     </qresource>
 </RCC>

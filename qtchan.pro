@@ -6,7 +6,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = qtchan
 TEMPLATE = app
 
-QMAKE_CXXFLAGS_RELEASE += -O3 -flto
+QMAKE_CXXFLAGS_RELEASE += -O3
 
 SOURCES += main.cpp\
     mainwindow.cpp \
@@ -70,5 +70,4 @@ FORMS   += mainwindow.ui \
 RC_ICONS = icons/icon.ico
 
 RESOURCES += \
-    icons.qrc \
-    readme.qrc
+    files.qrc

@@ -358,6 +358,14 @@ void MainWindow::setShortcuts()
 	hideNavBar->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 	connect(hideNavBar,&QAction::triggered,ui->navBar,&QLineEdit::hide,Qt::DirectConnection);
 	this->addAction(hideNavBar);
+
+	QAction *showHelp = new QAction(this);
+	showHelp->setShortcut(Qt::Key_F1);
+	showHelp->setShortcutContext(Qt::ApplicationShortcut);
+	connect(showHelp,&QAction::triggered,[=]{
+		ui->content->setCurrentIndex(0);
+	});
+	this->addAction(showHelp);
 }
 
 MainWindow::~MainWindow()
@@ -582,7 +590,7 @@ void MainWindow::onSelectionChanged()
 {
 	QModelIndexList list = ui->treeView->selected();
 	if(list.size()) {
-		QWidget *tab = model->getItem(list.at(0))->tab;
+		QPointer<QWidget> tab = model->getItem(list.at(0))->tab;
 		if(tab){
 			ui->content->setCurrentWidget(tab);
 			setWindowTitle(tab->windowTitle());
