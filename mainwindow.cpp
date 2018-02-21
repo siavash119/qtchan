@@ -531,26 +531,14 @@ void MainWindow::saveSession()
 {
 	qDebug().noquote() << "Saving session.";
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	model->saveSessionToFile(settings.value("sessionFile","session.txt").toString());
-	QList<int> fullIndex = model->fullIndex(ui->treeView->currentIndex());
-	QString indexString;
-	foreach(int row, fullIndex){
-		indexString += QString::number(row) + QString(',');
-	}
-	indexString.chop(1);
-	settings.setValue("session/currentIndex",indexString);
+	model->saveSessionToFile(settings.value("sessionFile","session.txt").toString(),ui->treeView->currentIndex());
 }
 
 void MainWindow::loadSession()
 {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QString sessionFile = settings.value("sessionFile","session.txt").toString();
-	model->loadSessionFromFile(sessionFile);
-	QString indexString = settings.value("session/currentIndex","0").toString();
-	QModelIndex qmi = QModelIndex();
-	foreach(QString ind, indexString.split(',')){
-		qmi = model->index(ind.toInt(),0,qmi);
-	}
+	QModelIndex qmi = model->loadSessionFromFile(sessionFile);
 	selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
 	ui->treeView->setCurrentIndex(qmi);
 }

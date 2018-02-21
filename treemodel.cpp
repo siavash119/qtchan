@@ -239,7 +239,7 @@ QModelIndex TreeModel::getIndex(TreeItem *item) const
 	return createIndex(item->row(),0,item);
 }
 
-void TreeModel::saveSessionToFile(QString fileName)
+void TreeModel::saveSessionToFile(QString fileName, QModelIndex ind)
 {
 	QFile data(fileName);
 	if(!data.open(static_cast<QFile::OpenMode>(QFile::WriteOnly | QFile::Truncate))){
@@ -275,9 +275,16 @@ void TreeModel::saveSessionToFile(QString fileName)
 			parents.pop_back();
 		}
 	}
+	QList<int> indexList = fullIndex(ind);
+	QString indexString('!');
+	foreach(int row, indexList){
+		indexString += QString::number(row) + QString(',');
+	}
+	indexString.chop(1);
+	out << indexString << endl;
 }
 
-void TreeModel::loadSessionFromFile(QString sessionFile)
+QModelIndex TreeModel::loadSessionFromFile(QString sessionFile)
 {
 	QFile session(sessionFile);
 	session.open(QFile::ReadOnly);
@@ -288,9 +295,14 @@ void TreeModel::loadSessionFromFile(QString sessionFile)
 	QList<int> indents;
 	indents << 0;
 	int position;
+	bool hasSelection = false;
 	while(!in.atEnd()) {
 		line = in.readLine();
-		if(line.isEmpty())continue;
+		if(line.isEmpty() || line.startsWith('#')) continue;
+		if(line.startsWith('!')){
+			hasSelection = true;
+			break;
+		}
 		position = 0;
 		while(position < line.length()) {
 			if(line.at(position) != '\t') break;
@@ -314,6 +326,13 @@ void TreeModel::loadSessionFromFile(QString sessionFile)
 		}
 		emit loadFromSearch(columns.at(0),columns.at(1),parents.last(),false);
 	}
+	QModelIndex qmi = QModelIndex();
+	if(hasSelection){
+		foreach(QString ind, line.split(',')){
+			qmi = index(ind.toInt(),0,qmi);
+		}
+	}
+	return qmi;
 }
 
 void TreeModel::addTab(TreeItem *child, TreeItem *parent, bool select)
