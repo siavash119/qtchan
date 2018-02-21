@@ -48,7 +48,7 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 }
 
 void BoardTab::setFontSize(int fontSize){
-	QFont temp = ui->lineEdit->font();
+	QFont temp = font();
 	temp.setPointSize(fontSize);
 	ui->label->setFont(temp);
 	ui->lineEdit->setFont(temp);

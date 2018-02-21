@@ -71,6 +71,11 @@ private:
 	void setShortcuts();
 	void removeChildTabs();
 	QMetaObject::Connection selectionConnection;
+	template<typename T, typename F>
+	void addShortcut(QKeySequence key, const T connectTo, F func,
+					 Qt::ConnectionType type = Qt::DirectConnection,
+					 Qt::ShortcutContext context = Qt::ApplicationShortcut);
+	void showHelp();
 
 signals:
 	void requestCatalog(QString);

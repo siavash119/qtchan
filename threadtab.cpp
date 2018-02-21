@@ -85,12 +85,14 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 }
 
 void ThreadTab::setFontSize(int fontSize){
-	QFont temp = ui->lineEdit->font();
+	QFont temp = font();
 	temp.setPointSize(fontSize-2);
 	ui->label->setFont(temp);
 	ui->lineEdit->setFont(temp);
 	ui->pushButton->setFont(temp);
 	temp.setPointSize(fontSize);
+	//TODO fix info setFontSize
+	//info.setFont(temp);
 	myPostForm.setFontSize(fontSize);
 	foreach(ThreadForm *tf, tfMap){
 		tf->setFontSize(fontSize);

@@ -18,32 +18,13 @@
 #include <QShortcut>
 #include <QDesktopServices>
 
+
 //TODO decouple item model/view logic to another class
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
-	ui->splitter->setStretchFactor(0,0);
-	ui->splitter->setStretchFactor(1,1);
-	QList<int> sizes;
-	sizes << 200 << (ui->splitter->size().width() - 200);
-	ui->splitter->setSizes(sizes);
-
-	//instructions
-	QWidget *wig = new QWidget(ui->content);
-	QHBoxLayout *lay = new QHBoxLayout(wig);
-	wig->setLayout(lay);
-	ui->content->addWidget(wig);
-	QLabel *tem = new QLabel;
-	tem->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	tem->setAlignment(Qt::AlignVCenter);
-	QFile file(":/readstartup.md");
-	file.open(QIODevice::ReadOnly);
-	QByteArray dump = file.readAll();
-	file.close();
-	tem->setText(QString(dump));
-	lay->addWidget(tem);
 
 	ui->pushButton->hide();
 	ui->navBar->hide();
@@ -54,6 +35,19 @@ MainWindow::MainWindow(QWidget *parent) :
 	temp.setPointSize(fontSize);
 	ui->treeView->setFont(temp);
 	ui->navBar->setFont(temp);
+
+	//instructions
+	QFile file(":/readstartup.md");
+	if(file.open(QIODevice::ReadOnly)){
+		QByteArray dump = file.readAll();
+		file.close();
+		ui->help->setFont(temp);
+		ui->help->setText(QString(dump));
+	}
+	QList<int> sizes;
+	sizes << 175 << 250;
+	ui->splitter->setSizes(sizes);
+
 	selectionModel = ui->treeView->selectionModel();
 	selectionConnection = connect(selectionModel,&QItemSelectionModel::selectionChanged,this,
 								  &MainWindow::onSelectionChanged, Qt::UniqueConnection);
@@ -77,128 +71,66 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::onRemoveTab(TreeItem* tn){
 	tn->tab->deleteLater();
-	//ui->content->removeWidget(tn->tab);
 	tabs.remove(tn->tab);
 	QWidget *cw = currentWidget();
 	if(!cw) return;
 	Tab current = tabs.value(cw);
 	if(!current.tn) return;
 	QModelIndex ind = model->getIndex(current.tn);
-	if(ind != ui->treeView->rootIndex())
+	if(ind != ui->treeView->rootIndex()){
 		selectionModel->setCurrentIndex(ind,QItemSelectionModel::ClearAndSelect);
+		ui->treeView->setCurrentIndex(ind);
+	}
 }
 
 void MainWindow::setShortcuts()
 {
 	//hiding the menu bar disables other qmenu actions shortcuts
-	QAction *toggleMenuBar = new QAction(this);
-	toggleMenuBar->setShortcut(QKeySequence("F11"));
-	toggleMenuBar->setShortcutContext(Qt::ApplicationShortcut);
-	connect(toggleMenuBar, &QAction::triggered, [=]{
+	addShortcut(Qt::Key_F11,this,[=]{
 		ui->menuBar->isHidden() ? ui->menuBar->show() : ui->menuBar->hide();
 	});
-	this->addAction(toggleMenuBar);
 
-	QAction *pTab = new QAction(this);
-	pTab->setShortcut(QKeySequence("Ctrl+Shift+Tab"));
-	pTab->setShortcutContext(Qt::ApplicationShortcut);
-	connect(pTab, &QAction::triggered,this,&MainWindow::prevTab);
-	this->addAction(pTab);
+	addShortcut(QKeySequence("ctrl+shift+tab"),this,&MainWindow::prevTab);
+	addShortcut(QKeySequence("ctrl+tab"),this,&MainWindow::nextTab);
 
-	QAction *nTab = new QAction(this);
-	nTab->setShortcut(QKeySequence("Ctrl+Tab"));
-	nTab->setShortcutContext(Qt::ApplicationShortcut);
-	connect(nTab, &QAction::triggered,this,&MainWindow::nextTab);
-	this->addAction(nTab);
-
-	QAction *firstItem = new QAction(this);
-	firstItem->setShortcut(QKeySequence("Ctrl+1"));
-	firstItem->setShortcutContext(Qt::ApplicationShortcut);
-	connect(firstItem, &QAction::triggered,[=]{
+	addShortcut(QKeySequence("ctrl+1"),this, [=]{
 		if(!model->rowCount()) return;
 		selectionModel->setCurrentIndex(model->index(0,0),
 										QItemSelectionModel::ClearAndSelect);
+		ui->treeView->setCurrentIndex(model->index(0,0));
 	});
-	this->addAction(firstItem);
 
-	QAction *pParent = new QAction(this);
-	pParent->setShortcut(QKeySequence("Ctrl+2"));
-	pParent->setShortcutContext(Qt::ApplicationShortcut);
-	connect(pParent, &QAction::triggered,this,&MainWindow::prevParent);
-	this->addAction(pParent);
+	addShortcut(QKeySequence("ctrl+2"),this,&MainWindow::prevParent);
+	addShortcut(QKeySequence("ctrl+3"),this,&MainWindow::nextParent);
 
-	QAction *nParent = new QAction(this);
-	nParent->setShortcut(QKeySequence("Ctrl+3"));
-	nParent->setShortcutContext(Qt::ApplicationShortcut);
-	connect(nParent, &QAction::triggered,this,&MainWindow::nextParent);
-	this->addAction(nParent);
-
-	QAction *lastItem = new QAction(this);
-	lastItem->setShortcut(QKeySequence("Ctrl+4"));
-	lastItem->setShortcutContext(Qt::ApplicationShortcut);
-	connect(lastItem, &QAction::triggered,[=]{
+	addShortcut(QKeySequence("ctrl+4"),this,[=]{
 		if(!model->rowCount()) return;
 		TreeItem *tm = model->getItem(model->index(model->rowCount(),0));
 		while(tm->childCount()){
 			tm = tm->child(tm->childCount()-1);
 		}
-		selectionModel->setCurrentIndex(model->getIndex(tm),
+		QModelIndex qmi = model->getIndex(tm);
+		selectionModel->setCurrentIndex(qmi,
 										QItemSelectionModel::ClearAndSelect);
+		ui->treeView->setCurrentIndex(qmi);
 	});
-	this->addAction(lastItem);
 
-	QAction *del = new QAction(this);
-	del->setShortcut(QKeySequence::Delete);
-	connect(del, &QAction::triggered, this, &MainWindow::deleteSelected);
-	this->addAction(del);
-
-	QAction *closeTab = new QAction(this);
-	closeTab->setShortcut(QKeySequence("Ctrl+W"));
-	closeTab->setShortcutContext(Qt::ApplicationShortcut);
-	connect(closeTab, &QAction::triggered, this, &MainWindow::deleteSelected);
-	this->addAction(closeTab);
-
-	QAction *navBar = new QAction(this);
-	navBar->setShortcut(QKeySequence("Ctrl+l"));
-	navBar->setShortcutContext(Qt::ApplicationShortcut);
-	connect(navBar, &QAction::triggered, this, &MainWindow::focusBar);
-	this->addAction(navBar);
-
-	QAction *setAutoUpdate = new QAction(this);
-	setAutoUpdate->setShortcut(QKeySequence("Ctrl+u"));
-	setAutoUpdate->setShortcutContext(Qt::ApplicationShortcut);
-	connect(setAutoUpdate, &QAction::triggered, this, &MainWindow::toggleAutoUpdate);
-	this->addAction(setAutoUpdate);
-
-	QAction *setAutoExpand = new QAction(this);
-	setAutoExpand->setShortcut(QKeySequence("Ctrl+e"));
-	setAutoExpand->setShortcutContext(Qt::ApplicationShortcut);
-	connect(setAutoExpand, &QAction::triggered, this, &MainWindow::toggleAutoExpand);
-	this->addAction(setAutoExpand);
+	addShortcut(QKeySequence::Delete, this, &MainWindow::deleteSelected,
+				Qt::AutoConnection,Qt::WindowShortcut);
+	addShortcut(QKeySequence("ctrl+w"),this,&MainWindow::deleteSelected);
+	addShortcut(QKeySequence("Ctrl+l"),this,&MainWindow::focusBar);
+	addShortcut(QKeySequence("Ctrl+u"),this,&MainWindow::toggleAutoUpdate);
+	addShortcut(QKeySequence("Ctrl+e"),this,&MainWindow::toggleAutoExpand);
 
 	//TODO select session saves slots
-	QAction *saveState = new QAction(this);
-	saveState->setShortcut(QKeySequence(Qt::Key_F10));
-	saveState->setShortcutContext(Qt::ApplicationShortcut);
-	connect(saveState, &QAction::triggered, this, &MainWindow::saveSession);
-	this->addAction(saveState);
+	addShortcut(Qt::Key_F10,this,&MainWindow::saveSession);
 
 	//TODO select session saves slots
-	QAction *loadState = new QAction(this);
-	loadState->setShortcut(QKeySequence(Qt::Key_F12));
-	loadState->setShortcutContext(Qt::ApplicationShortcut);
-	connect(loadState, &QAction::triggered, this, &MainWindow::loadSession);
-	this->addAction(loadState);
+	addShortcut(Qt::Key_F12,this,&MainWindow::loadSession);
 
-	QAction *openExplorer = new QAction(this);
-	openExplorer->setShortcut(QKeySequence("Ctrl+o"));
-	openExplorer->setShortcutContext(Qt::ApplicationShortcut);
-	connect(openExplorer, &QAction::triggered, this, &MainWindow::openExplorer);
-	this->addAction(openExplorer);
+	addShortcut(QKeySequence("ctrl+o"),this,&MainWindow::openExplorer);
 
-	QAction *zoomOut = new QAction(this);
-	zoomOut->setShortcut(QKeySequence::ZoomOut);
-	connect(zoomOut, &QAction::triggered, [=](){
+	addShortcut(QKeySequence::ZoomOut,this,[=](){
 		qDebug() << "decreasing text size";
 		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int fontSize = settings.value("fontSize",14).toInt()-2;
@@ -208,13 +140,11 @@ void MainWindow::setShortcuts()
 		temp.setPointSize(fontSize);
 		ui->treeView->setFont(temp);
 		ui->navBar->setFont(temp);
+		ui->help->setFont(temp);
 		emit setFontSize(fontSize);
 	});
-	this->addAction(zoomOut);
 
-	QAction *zoomIn = new QAction(this);
-	zoomIn->setShortcut(QKeySequence::ZoomIn);
-	connect(zoomIn, &QAction::triggered, [=](){
+	addShortcut(QKeySequence::ZoomIn,this,[=](){
 		qDebug() << "increasing text size";
 		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int fontSize = settings.value("fontSize",14).toInt()+2;
@@ -222,13 +152,12 @@ void MainWindow::setShortcuts()
 		QFont temp = ui->treeView->font();
 		temp.setPointSize(fontSize);
 		ui->treeView->setFont(temp);
+		ui->navBar->setFont(temp);
+		ui->help->setFont(temp);
 		emit setFontSize(fontSize);
 	});
-	this->addAction(zoomIn);
 
-	QAction *scaleImagesDown = new QAction(this);
-	scaleImagesDown->setShortcut(QKeySequence("Ctrl+9"));
-	connect(scaleImagesDown, &QAction::triggered, [=](){
+	addShortcut(QKeySequence("ctrl+9"),this,[=](){
 		qDebug() << "decreasing image size";
 		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int imageSize = settings.value("imageSize",250).toInt()-25;
@@ -236,18 +165,14 @@ void MainWindow::setShortcuts()
 		settings.setValue("imageSize",imageSize);
 		emit setImageSize(imageSize);
 	});
-	this->addAction(scaleImagesDown);
 
-	QAction *scaleImagesUp = new QAction(this);
-	scaleImagesUp->setShortcut(QKeySequence("Ctrl+0"));
-	connect(scaleImagesUp, &QAction::triggered, [=](){
+	addShortcut(QKeySequence("ctrl+0"),this,[=](){
 		qDebug() << "increasing image size";
 		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int imageSize = settings.value("imageSize",250).toInt()+25;
 		settings.setValue("imageSize",imageSize);
 		emit setImageSize(imageSize);
 	});
-	this->addAction(scaleImagesUp);
 
 	ui->actionSave->setShortcut(QKeySequence("Ctrl+s"));
 	ui->actionSave->setShortcutContext(Qt::ApplicationShortcut);
@@ -280,25 +205,13 @@ void MainWindow::setShortcuts()
 	ui->actionExit->setShortcutContext(Qt::ApplicationShortcut);
 	connect(ui->actionExit,&QAction::triggered,this,&QApplication::quit);
 
-	QAction *sizeUp = new QAction(this);
-	sizeUp->setShortcut(QKeySequence("Ctrl+8"));
-	connect(sizeUp,&QAction::triggered,[=]{
-		qDebug() << QString::number(qgetenv("QT_SCALE_FACTOR").toInt()+1).toStdString().c_str();
-		qputenv("QT_SCALE_FACTOR",QString::number(qgetenv("QT_SCALE_FACTOR").toInt()+1).toStdString().c_str());
-	});
-	sizeUp->setShortcutContext(Qt::ApplicationShortcut);
-	this->addAction(sizeUp);
-
-	ui->actionReloadFilters->setShortcut(QKeySequence("F7"));
+	ui->actionReloadFilters->setShortcut(Qt::Key_F7);
 	ui->actionReloadFilters->setShortcutContext(Qt::ApplicationShortcut);
 	connect(ui->actionReloadFilters,&QAction::triggered,[=](){
 		emit reloadFilters();
 	});
 
-	QAction *focusSearch = new QAction(this);
-	focusSearch->setShortcut(QKeySequence("Ctrl+f"));
-	focusSearch->setShortcutContext(Qt::ApplicationShortcut);
-	connect(focusSearch,&QAction::triggered,[=]{
+	addShortcut(QKeySequence("ctrl+f"),this,[=]{
 		TreeItem *item = model->getItem(selectionModel->currentIndex());
 		if(!item) return;
 		if(item->type == TreeItemType::thread){
@@ -310,39 +223,11 @@ void MainWindow::setShortcuts()
 			tab->focusIt();
 		}
 	});
-	this->addAction(focusSearch);
 
-	QAction *focusTree = new QAction(this);
-	focusTree->setShortcut(Qt::Key_F3);
-	focusTree->setShortcutContext(Qt::ApplicationShortcut);
-	connect(focusTree,&QAction::triggered,this,&MainWindow::focusTree);
-	this->addAction(focusTree);
-
-	QAction *focusContent = new QAction(this);
-	focusContent->setShortcut(Qt::Key_F4);
-	focusContent->setShortcutContext(Qt::ApplicationShortcut);
-	connect(focusContent,&QAction::triggered,[=]{
-		if(QWidget *temp = currentWidget()) temp->setFocus();
-	});
-	this->addAction(focusContent);
-
-	QAction *focusNavBar = new QAction(this);
-	focusNavBar->setShortcut(Qt::Key_F6);
-	focusNavBar->setShortcutContext(Qt::ApplicationShortcut);
-	connect(focusNavBar, &QAction::triggered, this, &MainWindow::focusBar);
-	this->addAction(focusNavBar);
-
-	QAction *closeChildTabs = new QAction(this);
-	closeChildTabs->setShortcut(QKeySequence("ctrl+k"));
-	closeChildTabs->setShortcutContext(Qt::ApplicationShortcut);
-	connect(closeChildTabs,&QAction::triggered,this,&MainWindow::removeChildTabs);
-	this->addAction(closeChildTabs);
+	addShortcut(QKeySequence("ctrl+k"),this,&MainWindow::removeChildTabs);
 
 	//TODO clean-up and fix focus back to mainwindow
-	QAction *toggleNotifications = new QAction(this);
-	toggleNotifications->setShortcut(Qt::Key_F9);
-	toggleNotifications->setShortcutContext(Qt::ApplicationShortcut);
-	connect(toggleNotifications,&QAction::triggered,[=]{
+	addShortcut(Qt::Key_F9,this,[=]{
 		if(nv->isVisible()){
 			nv->hide();
 		}
@@ -351,21 +236,30 @@ void MainWindow::setShortcuts()
 			nv->show();
 		}
 	});
-	this->addAction(toggleNotifications);
 
-	QAction *hideNavBar = new QAction(this);
-	hideNavBar->setShortcut(Qt::Key_Escape);
-	hideNavBar->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-	connect(hideNavBar,&QAction::triggered,ui->navBar,&QLineEdit::hide,Qt::DirectConnection);
-	this->addAction(hideNavBar);
-
-	QAction *showHelp = new QAction(this);
-	showHelp->setShortcut(Qt::Key_F1);
-	showHelp->setShortcutContext(Qt::ApplicationShortcut);
-	connect(showHelp,&QAction::triggered,[=]{
-		ui->content->setCurrentIndex(0);
+	addShortcut(Qt::Key_Escape,ui->navBar,&QLineEdit::hide,
+				Qt::DirectConnection,Qt::WidgetWithChildrenShortcut);
+	addShortcut(Qt::Key_F1,this,&MainWindow::showHelp);
+	addShortcut(Qt::Key_F3,this,&MainWindow::focusTree);
+	addShortcut(Qt::Key_F4,this,[=]{
+		if(QWidget *temp = currentWidget()) temp->setFocus();
 	});
-	this->addAction(showHelp);
+	addShortcut(Qt::Key_F6,this,&MainWindow::focusBar);
+}
+
+void MainWindow::showHelp(){
+	ui->content->setCurrentIndex(0);
+	setWindowTitle("qtchan - help");
+}
+
+template<typename T, typename F>
+void MainWindow::addShortcut(QKeySequence key,const T connectTo, F func,
+							 Qt::ConnectionType type, Qt::ShortcutContext context){
+	QAction *newAction = new QAction(this);
+	newAction->setShortcut(key);
+	newAction->setShortcutContext(context);
+	connect(newAction,&QAction::triggered,connectTo,func,type);
+	this->addAction(newAction);
 }
 
 MainWindow::~MainWindow()
@@ -433,47 +327,31 @@ void MainWindow::openExplorer(){
 	QDesktopServices::openUrl(QUrl::fromLocalFile(url));
 }
 
-//for next/prev tab just send up and down key and loop to beginning/end if no change in selection?
 void MainWindow::nextTab()
 {
-	/*QKeyEvent event(QEvent::KeyPress,Qt::Key_Down,0);
-	QApplication::sendEvent(ui->treeView, &event);*/
 	QModelIndex qmi = ui->treeView->currentIndex();
-	if(!model->rowCount(qmi.parent())) return;
-	if(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)) {
-		selectionModel->setCurrentIndex(model->index(0,0,qmi),QItemSelectionModel::ClearAndSelect);
-		return;
+	QKeyEvent event(QEvent::KeyPress,Qt::Key_Down,0);
+	QApplication::sendEvent(ui->treeView, &event);
+	if(qmi == ui->treeView->currentIndex()){
+		qmi = model->index(0,0);
+		selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
+		ui->treeView->setCurrentIndex(qmi);
 	}
-	while(qmi.row() == model->rowCount(qmi.parent())-1) { //is last child and no children
-		qmi = qmi.parent();
-	}
-	if(qmi.row()+1 < model->rowCount(qmi.parent())) {
-		selectionModel->setCurrentIndex(model->index(qmi.row()+1,0,qmi.parent()),QItemSelectionModel::ClearAndSelect);
-		return;
-	}
-	selectionModel->setCurrentIndex(model->index(0,0),QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::prevTab()
 {
 	QModelIndex qmi = ui->treeView->currentIndex();
-	if(!model->rowCount(qmi.parent())) return;
-	if(qmi.row()-1 >= 0) {
-		qmi = qmi.sibling(qmi.row()-1,0);
-		while(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)) {
-			qmi = qmi.child(model->rowCount(qmi)-1,0);
-		}
-		selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
-		return;
-	}
-	qmi = qmi.parent();
-	if(qmi.row() == -1) { //we're at the very first row so select last row
+	QKeyEvent event(QEvent::KeyPress,Qt::Key_Up,0);
+	QApplication::sendEvent(ui->treeView, &event);
+	if(qmi == ui->treeView->currentIndex()){
 		qmi = model->index(model->rowCount()-1,0);
 		while(model->hasChildren(qmi) && ui->treeView->isExpanded(qmi)) {
 			qmi = qmi.child(model->rowCount(qmi)-1,0);
 		}
+		selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
+		ui->treeView->setCurrentIndex(qmi);
 	}
-	selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::prevParent(){
@@ -485,12 +363,14 @@ void MainWindow::prevParent(){
 			qmi = qmi.parent();
 		}
 		selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
+		ui->treeView->setCurrentIndex(qmi);
 		return;
 	}
 	int row = qmi.row()-1;
 	if(row == -1) row = rowCount-1;
 	qmi = qmi.sibling(row,0);
 	selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
+	ui->treeView->setCurrentIndex(qmi);
 
 }
 
@@ -505,6 +385,7 @@ void MainWindow::nextParent(){
 	if(row == rowCount) row = 0;
 	qmi = qmi.sibling(row,0);
 	selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
+	ui->treeView->setCurrentIndex(qmi);
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -553,6 +434,7 @@ TreeItem *MainWindow::loadFromSearch(QString query, QString display, TreeItem *c
 	Tab tab = {Tab::TabType::Board,bt,tnNew,query,display};
 	tabs.insert(bt,tab);
 	model->addTab(tnNew,tnParent,select);
+	ui->treeView->setExpanded(model->getIndex(tnNew).parent(),true);
 	return tnNew;
 }
 
@@ -577,6 +459,7 @@ TreeItem *MainWindow::onNewThread(QWidget *parent, Chan *api, QString board, QSt
 	tabs.insert(tt,tab);
 	connect(tt,&ThreadTab::unseen,this,&MainWindow::updateSeen);
 	model->addTab(tnNew,childOf,false);
+	ui->treeView->setExpanded(model->getIndex(childOf),true);
 	return tnNew;
 }
 
