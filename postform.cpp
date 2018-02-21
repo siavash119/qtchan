@@ -252,9 +252,11 @@ void PostForm::postFinished()
 		QRegularExpressionMatch match = re.match(temp);
 		if(thread == ""){
 			if(match.hasMatch()){
-				you.addYou(board,match.captured("threadNum"));
+				QString captured(match.captured("threadNum"));
+				you.addYou(board,captured);
 				qDebug() << "post successful; loading thread:" << match.captured("threadNum");
-				emit loadThread(match.captured("threadNum"));
+				emit loadThread(captured);
+				postExtraFlags(captured);
 			}
 			else{
 				qDebug() << "post succesful; but some other error";
@@ -263,7 +265,9 @@ void PostForm::postFinished()
 		}
 		else{
 			if(match.hasMatch()){
-				you.addYou(board,match.captured("threadNum"));
+				QString captured(match.captured("threadNum"));
+				you.addYou(board,captured);
+				postExtraFlags(captured);
 			}
 		}
 	}
@@ -280,6 +284,32 @@ void PostForm::postFinished()
 	captcha.loaded = false;
 	this->installEventFilter(this);
 	submitConnection = connect(ui->submit,&QPushButton::clicked,this,&PostForm::postIt);
+}
+
+void PostForm::postExtraFlags(const QString &postNum){
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	if(!settings.value("extraFlags/enable",false).toBool()
+			|| (board.compare("int") != 0 && board.compare("pol") != 0
+			&& board.compare("sp") && board.compare("bant") != 0)) return;
+	QString region = settings.value("extraFlags/region",QString()).toString();
+	if(region.isEmpty()) return;
+	QUrlQuery postData;
+	postData.addQueryItem("board",board);
+	postData.addQueryItem("post_nr",postNum);
+	postData.addQueryItem("regions",region);
+	QNetworkRequest request(QUrl("https://flagtism.drunkensailor.org/int/post_flag_api2.php"));
+	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+	QNetworkReply *reply = nc.postManager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+	connect(reply,&QNetworkReply::finished,[=]{
+		reply->deleteLater();
+		if(!reply) return;
+		if(reply->error()){
+			qDebug().noquote() << "extraFlags: error posting flag regions:" << reply->errorString();
+		}
+		else{
+			qDebug().noquote().nospace() << "extraFlags: postNum " << postNum << ", region: " << region << " set";
+		}
+	});
 }
 
 void PostForm::addOverlay()

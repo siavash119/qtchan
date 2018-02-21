@@ -60,6 +60,7 @@ private:
 	Chan *api;
 	QString captchaCode;
 	QTimer *captchaTimer;
+	void postExtraFlags(const QString &postNum);
 
 private slots:
 	void postFinished();

@@ -52,7 +52,6 @@ public:
 	QMap<double,QString> replies;
 	void setReplies();
 	void setRepliesString(const QString &repliesString);
-	void setInfoString();
 	ThreadForm *clone(int replyLevel = 0);
 	QList<QPointer<ThreadForm>> clones;
 	//TODO check settings -> filter
@@ -62,6 +61,8 @@ public:
 	//QFutureWatcher<QImage> watcher;
 	QString repliesString;
 	QString infoString();
+	QString getInfoString();
+	void setInfoString();
 	void addReplyLink(QString &reply, bool isYou = false);
 	int replyLevel;
 	bool hasImage = true;
@@ -70,6 +71,9 @@ public:
 	QString countryString;
 	void getFlag();
 	void getFile(bool andOpen = false);
+	QStringList regionList;
+	QString regionString;
+	void setRegion(const QString &region);
 
 //TODO take care of file downloading in netcontroller
 private:
@@ -93,7 +97,8 @@ private:
 	bool loadIt = false;
 	void downloadFile(const QString &fileUrl,const QString &filePath,QNetworkAccessManager *manager, QString message = QString());
 	QHash<QString,QNetworkReply*> networkReplies;
-
+	int regionsGot = 0;
+	QString flagString(const QString &path, const QString &name);
 
 signals:
 	void loadThreadTab(ThreadForm*, QJsonArray&);

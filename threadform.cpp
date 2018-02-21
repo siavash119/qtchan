@@ -77,10 +77,14 @@ void ThreadForm::setText(QString text)
 QString ThreadForm::infoString(){
 	return	"<span style=\"color: rgb(152, 125, 62); font-weight: bold;\">" % Filter::htmlParse(post.sub) % "</span> " +
 			"<span style=\"color: rgb(163, 68, 67);\">" % post.name % "</span> " %
-			countryString %
+			countryString % regionString %
 			"<span>" % post.realNow % "</span> " %
 			"<a href=\"#op" % post.no % "\" style=\"color:#897399\">No." % post.no % "</a> " %
 			repliesString;
+}
+
+QString ThreadForm::getInfoString(){
+	return ui->info->text();
 }
 
 void ThreadForm::load(QJsonObject &p)
@@ -135,7 +139,14 @@ void ThreadForm::getFlag(){
 		flagURL = "https://s.4cdn.org/image/country/troll/" % post.troll_country.toLower() % ".gif";
 		flagPath = "flags/troll/"+countryCode+".gif";
 	}
+	countryString = flagString(flagPath,post.country_name);
+	setInfoString();
 	downloadFile(flagURL,flagPath,nc.thumbManager);
+}
+
+QString ThreadForm::flagString(const QString &path, const QString &name){
+	return "<img src=\"" % path % "\" width=\"32\" height=\"20\">"
+	% " <span style=\"color:lightblue\">" % name % "</span> ";
 }
 
 void ThreadForm::getFile(bool andOpen){
@@ -196,15 +207,25 @@ void ThreadForm::downloadFile(const QString &fileUrl,
 
 void ThreadForm::downloadedSlot(const QString &path, const QString &message){
 	if(path.compare(flagPath) == 0){
-		countryString = "<img src=\"" % flagPath % "\" width=\"32\" height=\"20\">"
-						% " <span style=\"color:lightblue\">" % post.country_name % "</span> ";
-		ui->info->setText(infoString());
+		ui->info->update();
 		QListIterator<QPointer<ThreadForm>> i(rootTF->clones);
 		QPointer<ThreadForm> cloned;
 		while(i.hasNext()) {
 			cloned = i.next();
 			if(!cloned) continue;
 			cloned->countryString = this->countryString;
+			cloned->setInfoString();
+		}
+	}
+	else if(path.startsWith("flags/flegs/")){
+		if(++regionsGot != regionList.size()) return;
+		ui->info->update();
+		QListIterator<QPointer<ThreadForm>> i(rootTF->clones);
+		QPointer<ThreadForm> cloned;
+		while(i.hasNext()) {
+			cloned = i.next();
+			if(!cloned) continue;
+			cloned->regionString = this->regionString;
 			cloned->setInfoString();
 		}
 	}
@@ -348,6 +369,29 @@ void ThreadForm::setImageSize(int imageSize){
 			next->setImageSize(imageSize);
 		}
 	}
+}
+
+void ThreadForm::setRegion(const QString &region){
+	regionList = region.split("||");
+	if(regionList.isEmpty()) return;
+	regionString = "<span style=\"color:lightblue\">" % region % "</span> ";
+	ui->info->setText(infoString());
+	QString flegsUrl("https://raw.githubusercontent.com/flaghunters/Extra-Flags-for-int-/master/flags/");
+	QString flegUrl(flegsUrl % post.country_name);
+	QString flegPath("flags/flegs/" % post.country_name);
+	QString temp(regionList.takeLast());
+	QDir().mkpath(flegPath % '/' % regionList.join('/'));
+	regionList.append(temp);
+	int i = 0;
+	regionString.clear();
+	foreach(QString reg, regionList){
+		flegPath += '/' % reg;
+		flegUrl += '/' % reg;
+		downloadFile(QUrl(flegUrl % ".png").toString(QUrl::FullyEncoded),flegPath % ".png",nc.fileManager);
+		regionString += flagString(flegPath % ".png",reg);
+		i++;
+	}
+	ui->info->setText(infoString());
 }
 
 void ThreadForm::quoteClicked(const QString &link)

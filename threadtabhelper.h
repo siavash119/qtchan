@@ -29,6 +29,7 @@ public:
 	void startUp(Chan *api, QString &board, QString &thread, QWidget *parent, bool isFromSession);
 	static void writeJson(QString &board, QString &thread, QByteArray &rep);
 	Chan *api;
+	void getExtraFlags();
 
 private:
 	QString threadUrl;
@@ -39,6 +40,7 @@ private:
 	QTimer *updateTimer;
 	QMetaObject::Connection connectionUpdate;
 	bool isFromSession;
+	QSet<QString> gottenFlags;
 
 public slots:
 	void loadPosts();

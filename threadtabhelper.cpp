@@ -71,6 +71,45 @@ void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep
 	jsonFile.close();
 }
 
+void ThreadTabHelper::getExtraFlags(){
+	if(board.compare("int") != 0 && board.compare("pol") != 0
+			&& board.compare("sp") && board.compare("bant") != 0) return;
+	QStringList postNums;
+	foreach(QString no, tfMap.keys()){
+		if(gottenFlags.contains(no)) continue;
+		postNums.append(no);
+	}
+	QString data = "board=" % board % "&post_nrs=" % postNums.join("%2C");
+	QNetworkRequest request(QUrl("https://flagtism.drunkensailor.org/int/get_flags_api2.php"));
+	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+	QNetworkReply *reply = nc.fileManager->post(request,data.toUtf8());
+	connect(reply,&QNetworkReply::finished,[=]{
+		if(!reply) return;
+		if(reply->error()){
+			qDebug() << "checking flags errror:" << reply->errorString();
+			return;
+		}
+		QByteArray answer = reply->readAll();
+		reply->deleteLater();
+		if(answer.isEmpty()) return;
+		QJsonArray extraFlags = QJsonDocument::fromJson(answer).array();
+		int length = extraFlags.size();
+		if(!length) return;
+		qDebug() << "loading" << length << "extra flag posts";
+		QJsonObject ef;
+		for(int i=0;i<length;i++){
+			ef = extraFlags.at(i).toObject();
+			QString post_nr = ef.value("post_nr").toString();
+			gottenFlags.insert(post_nr);
+			QString region = ef.value("region").toString();
+			if(tfMap.contains(post_nr)){
+				ThreadForm *cur = tfMap.value(post_nr);
+				cur->setRegion(region);
+			}
+		}
+	});
+}
+
 void ThreadTabHelper::loadPosts() {
 	if(!reply) return;
 	gettingReply = false;
@@ -169,6 +208,7 @@ void ThreadTabHelper::loadPosts() {
 		//if(i % 10 == 0)
 		QCoreApplication::processEvents();
 	}
+	if(settings.value("extraFlags/enable",false).toBool() == true) getExtraFlags();
 	//emit scrollIt();
 }
 
