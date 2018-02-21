@@ -5,9 +5,7 @@
 #include "chans.h"
 #include <QNetworkReply>
 #include <QtConcurrent/QtConcurrent>
-#include <QFutureWatcher>
 #include <QImage>
-#include <QMetaObject>
 #include <QSettings>
 
 class ThreadTabHelper : public QObject
@@ -38,8 +36,7 @@ private:
 	QNetworkRequest request;
 	QWidget *parent;
 	QMetaObject::Connection connectionPost;
-	QPointer<QTimer> updateTimer;
-	QThread *updateThread;
+	QTimer *updateTimer;
 	QMetaObject::Connection connectionUpdate;
 	bool isFromSession;
 

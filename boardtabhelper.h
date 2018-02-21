@@ -30,7 +30,6 @@ private:
 	QNetworkRequest request;
 	QWidget *parent;
 	QMetaObject::Connection connectionPost;
-	QThread *updateThread;
 	QMetaObject::Connection connectionUpdate;
 	QJsonArray filterThreads(QByteArray &rep);
 

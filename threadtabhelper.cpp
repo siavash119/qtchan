@@ -26,7 +26,7 @@ void ThreadTabHelper::startUp(Chan *api, QString &board, QString &thread, QWidge
 	if(api->requiresUserAgent()) request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
 	request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
 	getPosts();
-	updateTimer = new QTimer();
+	updateTimer = new QTimer(parent);
 	updateTimer->setInterval(60000);
 	updateTimer->start();
 	if(settings.value("autoUpdate").toBool()) {
@@ -39,7 +39,6 @@ ThreadTabHelper::~ThreadTabHelper() {
 	abort = true;
 	updateTimer->stop();
 	disconnect(connectionUpdate);
-	if(updateTimer) delete updateTimer;
 	if(gettingReply) {
 		reply->abort();
 		disconnect(reply);
@@ -122,8 +121,9 @@ void ThreadTabHelper::loadPosts() {
 		p = posts.at(i).toObject();
 		ThreadForm *tf = new ThreadForm(api,board,thread,PostType::Reply,true,loadFile,parent);
 		tf->load(p);
+		//TODO check post number without making the thread form?
 		if(tfMap.contains(tf->post.no)){
-			delete tf;
+			tf->deleteLater();
 			i++;
 			continue;
 		}

@@ -117,8 +117,7 @@ void ThreadForm::load(QJsonObject &p)
 		connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
 	}
 	else{
-		delete ui->pictureLayout;
-		ui->contentLayout->layout()->takeAt(0);
+		ui->pictureLayout->deleteLater();
 		this->hasImage = false;
 	}
 }
@@ -415,9 +414,7 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 		}
 	} else {
 		tfs->ui->pictureLayout->deleteLater();
-		tfs->ui->contentLayout->layout()->takeAt(0);
 		tfs->hasImage = false;
-		//tfs->ui->tim->deleteLater();
 	}
 	tfs->countryString = countryString;
 	if(repliesString.length()) {
@@ -547,8 +544,8 @@ void ThreadForm::on_com_linkHovered(const QString &link)
 
 void ThreadForm::deleteHideLayout()
 {
-	delete this->ui->hideLayout;
-	delete this->ui->quoteWidget;
+	ui->hideLayout->deleteLater();
+	ui->quoteWidget->deleteLater();
 	hideButtonShown = false;
 }
 

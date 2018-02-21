@@ -214,33 +214,17 @@
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="contentLayout" stretch="0,0,0">
+      <layout class="QHBoxLayout" name="contentLayout" stretch="0,0">
        <property name="spacing">
         <number>0</number>
        </property>
-       <item>
-        <spacer name="picSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>8</width>
-           <height>0</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
        <item>
         <layout class="QVBoxLayout" name="pictureLayout">
          <property name="spacing">
           <number>0</number>
          </property>
          <property name="leftMargin">
-          <number>5</number>
+          <number>13</number>
          </property>
          <property name="topMargin">
           <number>6</number>
