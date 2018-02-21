@@ -301,6 +301,7 @@ QModelIndex TreeModel::loadSessionFromFile(QString sessionFile)
 		if(line.isEmpty() || line.startsWith('#')) continue;
 		if(line.startsWith('!')){
 			hasSelection = true;
+			line = line.mid(1);
 			break;
 		}
 		position = 0;
