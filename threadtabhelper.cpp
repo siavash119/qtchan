@@ -76,6 +76,7 @@ void ThreadTabHelper::getExtraFlags(){
 			&& board.compare("sp") && board.compare("bant") != 0) return;
 	QStringList postNums;
 	foreach(QString no, tfMap.keys()){
+		if(abort) return;
 		if(gottenFlags.contains(no)) continue;
 		postNums.append(no);
 	}
@@ -102,7 +103,7 @@ void ThreadTabHelper::getExtraFlags(){
 			QString post_nr = ef.value("post_nr").toString();
 			gottenFlags.insert(post_nr);
 			QString region = ef.value("region").toString();
-			if(tfMap.contains(post_nr)){
+			if(!abort && tfMap.contains(post_nr)){
 				ThreadForm *cur = tfMap.value(post_nr);
 				cur->setRegion(region);
 			}
