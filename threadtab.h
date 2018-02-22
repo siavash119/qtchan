@@ -54,6 +54,7 @@ public:
 	QList<ThreadForm*> unseenList;
 	int formsTotal = 0;
 	int formsUnseen = 0;
+	ThreadForm* tfAtTop();
 
 public slots:
 	//void addStretch();

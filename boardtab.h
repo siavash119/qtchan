@@ -32,12 +32,14 @@ public:
 	QString boardUrl;
 	QNetworkReply *reply;
 	QMap<QString,ThreadForm*> tfMap;
+	QList<QPair<QString,ThreadForm*>> tfPairs;
 	PostForm myPostForm;
 	void openPostForm();
 
 	void setShortcuts();
 	void getPosts();
 	void focusIt();
+	ThreadForm* tfAtTop();
 
 public slots:
 	void findText(const QString text);

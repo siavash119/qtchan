@@ -104,7 +104,19 @@ void BoardTab::setShortcuts()
 	connect(scrollUp, &QAction::triggered,[=]{
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
-		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() - vimNumber*150);
+		QScrollBar *bar = ui->scrollArea->verticalScrollBar();
+		if(ThreadForm *tf = tfAtTop()){
+			ThreadForm *toTf = Q_NULLPTR;
+			QListIterator<QPair<QString,ThreadForm*>> i(tfPairs);
+			while(i.hasNext()){
+				if(i.next().second == tf) break;
+			}
+			if(i.hasPrevious()) i.previous();
+			while(i.hasPrevious() && vimNumber--){
+				toTf = i.previous().second;
+			}
+			if(toTf) bar->setValue(toTf->pos().y());
+		}
 		vimCommand = "";
 	});
 	this->addAction(scrollUp);
@@ -114,7 +126,18 @@ void BoardTab::setShortcuts()
 	connect(scrollDown, &QAction::triggered,[=]{
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
-		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() + vimNumber*150);
+		QScrollBar *bar = ui->scrollArea->verticalScrollBar();
+		if(ThreadForm *tf = tfAtTop()){
+			ThreadForm *toTf = Q_NULLPTR;
+			QListIterator<QPair<QString,ThreadForm*>> i(tfPairs);
+			while(i.hasNext()){
+				if(i.next().second == tf) break;
+			}
+			while(i.hasNext() && vimNumber--){
+				toTf = i.next().second;
+			}
+			if(toTf) bar->setValue(toTf->pos().y());
+		}
 		vimCommand = "";
 	});
 	this->addAction(scrollDown);
@@ -211,6 +234,22 @@ void BoardTab::onNewThread(ThreadForm *tf)
 	}
 	ui->threads->addWidget(tf);
 	tfMap.insert(tf->post.no,tf);
+	tfPairs.append(QPair<QString,ThreadForm*>(tf->post.no,tf));
+}
+
+ThreadForm* BoardTab::tfAtTop(){
+	QWidget *selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value());
+	//try slight offset if selected a spaced/null region
+	if(!selected || selected->objectName() == "scrollAreaWidgetContents"){
+		selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value()+10);
+	}
+	while(selected && selected->parent()->objectName() != "scrollAreaWidgetContents") {
+		selected = qobject_cast<QWidget*>(selected->parent());
+	}
+	if(selected && selected->objectName() == "ThreadForm"){
+		return static_cast<ThreadForm*>(selected);
+	}
+	else return Q_NULLPTR;
 }
 
 void BoardTab::on_pushButton_clicked()
@@ -231,4 +270,5 @@ void BoardTab::focusIt()
 
 void BoardTab::clearMap(){
 	tfMap.clear();
+	tfPairs.clear();
 }

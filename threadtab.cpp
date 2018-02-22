@@ -160,13 +160,7 @@ void ThreadTab::setShortcuts()
 	QAction *selectPost = new QAction(this);
 	selectPost->setShortcut(Qt::Key_O);
 	connect(selectPost, &QAction::triggered,[=]{
-		QWidget *selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value());
-		while(selected && selected->parent()->objectName() != "scrollAreaWidgetContents") {
-			selected = qobject_cast<QWidget*>(selected->parent());
-		}
-		if(selected && selected->objectName() == "ThreadForm"){
-			static_cast<ThreadForm*>(selected)->imageClicked();
-		}
+		if(ThreadForm *tf = tfAtTop()) tf->imageClicked();
 	});
 	this->addAction(selectPost);
 
@@ -175,7 +169,15 @@ void ThreadTab::setShortcuts()
 	connect(scrollUp, &QAction::triggered,[=]{
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
-		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() - vimNumber*150);
+		QScrollBar *bar = ui->scrollArea->verticalScrollBar();
+		QMap<QString,ThreadForm*>::iterator i;
+		if(ThreadForm *tf = tfAtTop()){
+			i = tfMap.find(tf->post.no);
+			while(vimNumber-- && i != tfMap.begin()){
+				i--;
+			};
+			bar->setValue(i.value()->pos().y());
+		}
 		vimCommand = "";
 	});
 	this->addAction(scrollUp);
@@ -185,7 +187,16 @@ void ThreadTab::setShortcuts()
 	connect(scrollDown, &QAction::triggered,[=]{
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
-		ui->scrollArea->verticalScrollBar()->setValue(ui->scrollArea->verticalScrollBar()->value() + vimNumber*150);
+		QScrollBar *bar = ui->scrollArea->verticalScrollBar();
+		QMap<QString,ThreadForm*>::iterator i;
+		if(ThreadForm *tf = tfAtTop()){
+			i = tfMap.find(tf->post.no);
+			while(vimNumber-- && i+1 != tfMap.end()){
+				if(i.value()->isHidden()) vimNumber++;
+				i++;
+			};
+			bar->setValue(i.value()->pos().y());
+		}
 		vimCommand = "";
 	});
 	this->addAction(scrollDown);
@@ -219,6 +230,21 @@ void ThreadTab::updateVim(){
 	 QAction* action = qobject_cast<QAction*>(sender());
 	 QKeySequence seq = action->shortcut();
 	 vimCommand += seq.toString();
+}
+
+ThreadForm* ThreadTab::tfAtTop(){
+	QWidget *selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value());
+	//try slight offset if selected a spaced/null region
+	if(!selected || selected->objectName() == "scrollAreaWidgetContents"){
+		selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value()+10);
+	}
+	while(selected && selected->parent()->objectName() != "scrollAreaWidgetContents") {
+		selected = qobject_cast<QWidget*>(selected->parent());
+	}
+	if(selected && selected->objectName() == "ThreadForm"){
+		return static_cast<ThreadForm*>(selected);
+	}
+	else return Q_NULLPTR;
 }
 
 ThreadTab::~ThreadTab()
