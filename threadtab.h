@@ -37,7 +37,7 @@ public:
 	QString threadUrl;
 	QMap<QString,ThreadForm*> tfMap;
 	bool updated = false;
-	void findText(const QString text);
+	void findText(const QString &text);
 	void loadAllImages();
 	ThreadForm *findPost(QString postNum);
 	int getMinWidth();

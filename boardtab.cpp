@@ -157,28 +157,29 @@ void BoardTab::openPostForm()
 	myPostForm.raise();
 }
 
+//TODO, just search the whole JSON and find posts
 void BoardTab::findText(const QString text)
 {
-	bool pass = false;
+	qDebug().noquote() << "searching " + text;
 	if(text.isEmpty()){
 		ui->searchWidget->hide();
-		pass = true;
+		QMapIterator<QString,ThreadForm*> mapI(tfMap);
+		while (mapI.hasNext()) {
+			mapI.next();
+			mapI.value()->show();
+		}
+		return;
 	}
-	QRegularExpression re(text,QRegularExpression::CaseInsensitiveOption);
+	QString temp(text);
+	QRegularExpression re(temp.replace("\n",""),QRegularExpression::CaseInsensitiveOption);
 	QRegularExpressionMatch match;
 	ThreadForm *tf;
-	qDebug().noquote() << "searching " + text;
 	QMapIterator<QString,ThreadForm*> mapI(tfMap);
 	while (mapI.hasNext()) {
 		mapI.next();
 		tf = mapI.value();
-		if(pass){
-			tf->show();
-			continue;
-		};
-		QString toMatch(tf->post.sub + " " + tf->post.com);
-		toMatch.replace("<br>"," ");
-		toMatch.remove(QRegExp("<[^>]*>"));
+		QString toMatch(tf->matchThis());
+		toMatch = Filter::toStrippedHtml(toMatch);
 		match = re.match(toMatch);
 		if(match.hasMatch()){
 			tf->show();

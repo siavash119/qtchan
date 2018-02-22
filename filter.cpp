@@ -116,9 +116,17 @@ QString Filter::htmlParse(QString &html){
 
 QString Filter::titleParse(QString &title){
 	QRegularExpression htmlTag;
-	htmlTag.setPattern("<span .*>");
+	htmlTag.setPattern("</?span.*?>");
 	return title.replace(htmlTag,"").replace("<br>"," ").replace("&amp;","&")
 		.replace("&gt;",">").replace("&lt;","<")
 		.replace("&quot;","\"").replace("&#039;","'")
 		.replace("<wb>"," ").replace("<wbr>"," ");
-	}
+}
+
+QString Filter::toStrippedHtml(QString &text){
+	QRegularExpression htmlTag;
+	htmlTag.setPattern("</?(span|img|a|br|wb|wbr).*?>");
+	return text.replace(htmlTag,"").replace("&amp;","&")
+		.replace("&gt;",">").replace("&lt;","<")
+		.replace("&quot;","\"").replace("&#039;","'");
+}

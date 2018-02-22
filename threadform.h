@@ -74,6 +74,9 @@ public:
 	QStringList regionList;
 	QString regionString;
 	void setRegion(const QString &region);
+	QString fileInfoString;
+	QString tfInfoString;
+	QString matchThis();
 
 //TODO take care of file downloading in netcontroller
 private:

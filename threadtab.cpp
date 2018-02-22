@@ -324,21 +324,32 @@ ThreadForm *ThreadTab::findPost(QString postNum)
 	return tfMap.value(postNum);
 }
 
-void ThreadTab::findText(const QString text)
+//TODO, just search the whole JSON and find posts
+void ThreadTab::findText(const QString &text)
 {
-	if(text == "") ui->searchWidget->hide();
-	QRegularExpression re(text,QRegularExpression::CaseInsensitiveOption);
+	qDebug().noquote() << "searching " + text;
+	if(text.isEmpty()){
+		ui->searchWidget->hide();
+		QMapIterator<QString,ThreadForm*> mapI(tfMap);
+		while (mapI.hasNext()) {
+			mapI.next();
+			mapI.value()->show();
+		}
+		return;
+	}
+	QString temp(text);
+	QRegularExpression re(temp.replace("\n",""),QRegularExpression::CaseInsensitiveOption);
 	QRegularExpressionMatch match;
 	ThreadForm *tf;
-	bool pass = false;
-	if (text == "") pass = true;
-	qDebug().noquote() << "searching " + text;
 	QMapIterator<QString,ThreadForm*> mapI(tfMap);
 	while (mapI.hasNext()) {
 		mapI.next();
 		tf = mapI.value();
-		if(pass) { tf->show(); continue;};
-		match = re.match(tf->post.sub % tf->post.com % tf->getInfoString());
+		QString toMatch(tf->matchThis());
+		toMatch = Filter::toStrippedHtml(toMatch);
+		match = re.match(toMatch);
+		//can keep applying filters over and over again
+		//good or bad?
 		if(!match.hasMatch()) {
 			tf->hide();
 		}

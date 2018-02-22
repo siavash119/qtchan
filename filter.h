@@ -28,6 +28,7 @@ public:
 	static QString replaceYouStrings(QRegularExpressionMatchIterator i, QString &string);
 	static QString htmlParse(QString &html);
 	static QString titleParse(QString &title);
+	static QString toStrippedHtml(QString &text);
 
 private:
 	QRegularExpressionMatch quotelinkMatch;

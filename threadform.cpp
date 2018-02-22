@@ -75,18 +75,18 @@ void ThreadForm::setText(QString text)
 }
 
 QString ThreadForm::infoString(){
-	return	"<span style=\"color: rgb(152, 125, 62); font-weight: bold;\">" % Filter::htmlParse(post.sub) % "</span> " +
+	tfInfoString = "<span style=\"color: rgb(152, 125, 62); font-weight: bold;\">" % Filter::htmlParse(post.sub) % "</span> " +
 			"<span style=\"color: rgb(163, 68, 67);\">" % post.name % "</span> " %
 			countryString % regionString %
 			"<span>" % post.realNow % "</span> " %
 			"<a href=\"#op" % post.no % "\" style=\"color:#897399\">No." % post.no % "</a> " %
 			repliesString;
+	return tfInfoString;
 }
 
-QString ThreadForm::getInfoString(){
-	return ui->info->text();
+QString ThreadForm::matchThis(){
+	return post.sub % post.com % tfInfoString % fileInfoString;
 }
-
 void ThreadForm::load(QJsonObject &p)
 {
 	//set post number
@@ -107,12 +107,12 @@ void ThreadForm::load(QJsonObject &p)
 		file = new QFile(filePath,this);
 		//TODO fsize in human readable format
 		ui->fileInfo->show();
-		QString infoText = post.filename % post.ext
+		fileInfoString = post.filename % post.ext
 				% " (" % QString("%1").arg(post.w)
 				% "x" % QString("%1").arg(post.h)
 				% ", " % QString("%1").arg(post.fsize/1024,0,'f',0)
 				% " KB)";
-		ui->fileInfo->setText(infoText);
+		ui->fileInfo->setText(fileInfoString);
 		thumbURL = this->board % "/" % post.tim % "s.jpg";
 		thumbPath = pathBase%"thumbs/"%post.no%"-"%post.filename%"s.jpg";
 		thumb = new QFile(thumbPath,this);
@@ -487,7 +487,7 @@ void ThreadForm::removeClone(QPointer<ThreadForm> tf)
 	if(tf) clones.removeOne(tf);
 }
 void ThreadForm::addReplyLink(QString &reply, bool isYou){
-	QString temp =" <a href=\"#p" % reply % "\" style=\"color:#897399\">>>" % reply % ((isYou) ? " (You)</a>" : "</a>");
+	QString temp =" <a href=\"#p" % reply % "\" style=\"color:#897399\">&gt;&gt;" % reply % ((isYou) ? " (You)</a>" : "</a>");
 	repliesString += temp;
 	ui->info->setText(infoString());
 	//update clones
