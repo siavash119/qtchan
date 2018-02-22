@@ -94,8 +94,12 @@ QString Filter::replaceQuoteStrings(QString &string){
 }
 
 QString Filter::replaceYouStrings(QRegularExpressionMatchIterator i, QString &string){
+	QList<QRegularExpressionMatch> matches;
 	while (i.hasNext()) {
-		QRegularExpressionMatch match = i.next();
+		matches.append(i.next());
+	}
+	for(int i=matches.size()-1; i>=0; i--){
+		QRegularExpressionMatch match = matches.at(i);
 		if(match.capturedEnd()){
 			string.insert(match.capturedEnd()," (You)");
 		}

@@ -41,10 +41,10 @@ void Post::load(QJsonObject &p, QString &board)
 	//TODO regexp on all posts or do the whole json at once?
 	//com = p.value("com").toString();
 	com = p.value("com").toString();
-	com = Filter::replaceQuoteStrings(com);
 	QRegularExpressionMatchIterator i = you.findYou(board,com);
 	if(i.hasNext()) hasYou = true;
 	com = Filter::replaceYouStrings(i,com);
+	com = Filter::replaceQuoteStrings(com);
 	double temp = p.value("tim").toDouble();
 	if(temp != 0.0) {
 		tim = QString::number(temp,'d',0);
