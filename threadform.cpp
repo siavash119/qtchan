@@ -388,9 +388,11 @@ void ThreadForm::setRegion(const QString &region){
 		flegPath += '/' % reg;
 		flegUrl += '/' % reg;
 		downloadFile(QUrl(flegUrl % ".png").toString(QUrl::FullyEncoded),flegPath % ".png",nc.fileManager);
-		regionString += flagString(flegPath % ".png",reg);
+		//regionString += flagString(flegPath % ".png",reg);
+		regionString += "<a href=\"" % reg % "\" style=\"color:lightblue;text-decoration:none\" text><img src=\"" % flegPath % ".png\" width=\"32\" height=\"20\"> " % reg % "</a> ";
 		i++;
 	}
+	qDebug() << regionString;
 	ui->info->setText(infoString());
 }
 
@@ -461,6 +463,7 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 		tfs->hasImage = false;
 	}
 	tfs->countryString = countryString;
+	tfs->regionString = regionString;
 	if(repliesString.length()) {
 		tfs->setRepliesString(repliesString);
 	}
