@@ -55,6 +55,7 @@ public:
 	int formsTotal = 0;
 	int formsUnseen = 0;
 	ThreadForm* tfAtTop();
+	ThreadForm* tfAtBottom();
 
 public slots:
 	//void addStretch();

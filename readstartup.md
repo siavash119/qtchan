@@ -6,7 +6,8 @@
 <li>g for first page, /g/ for catalog, g/search to get catalog and search</li>
 <li>o opens thread/image at top of view (expand the tree if you don't see the new tab in the treeview)</li>
 <li>F3 focuses the tree, F4 focuses the content</li>
-<li>#j and #k scroll (e.g. 5j, k)</li>
+<li>#j and #k scroll by post(e.g. 5j, k)</li>
+<li>#h and #l scroll by replies to (You)</li>
 <li>#G puts scrollbar at percent (e.g. G for bottom, 0G for top, 50G for 50%)</li>
 <li>ctrl+w (ctrl+f4 on windows) or delete to close tab</li>
 <li>ctrl+p opens settings-ctrl+tab ctrl+shift+tab, ctrl+1-4 to switch tabs</li>

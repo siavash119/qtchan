@@ -164,19 +164,23 @@ void ThreadTab::setShortcuts()
 	});
 	this->addAction(selectPost);
 
+	//NOTE: for scrollUp and scrollDown, prevYou, nextYou
+	//you can swap tfAtTop/tfAtBottom to your scroll preference
 	QAction *scrollUp = new QAction(this);
 	scrollUp->setShortcut(Qt::Key_K);
 	connect(scrollUp, &QAction::triggered,[=]{
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
-		QScrollBar *bar = ui->scrollArea->verticalScrollBar();
-		QMap<QString,ThreadForm*>::iterator i;
+		QMapIterator<QString,ThreadForm*> i(tfMap);
 		if(ThreadForm *tf = tfAtTop()){
-			i = tfMap.find(tf->post.no);
-			while(vimNumber-- && i != tfMap.begin()){
-				i--;
-			};
-			bar->setValue(i.value()->pos().y());
+			if(i.findNext(tf)){
+				if(i.hasPrevious()) i.previous();
+				while(vimNumber-- && i.hasPrevious()){
+					i.previous();
+					if(i.value()->isHidden())vimNumber++;
+				};
+				ui->scrollArea->verticalScrollBar()->setValue(i.value()->pos().y());
+			}
 		}
 		vimCommand = "";
 	});
@@ -187,19 +191,70 @@ void ThreadTab::setShortcuts()
 	connect(scrollDown, &QAction::triggered,[=]{
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
-		QScrollBar *bar = ui->scrollArea->verticalScrollBar();
-		QMap<QString,ThreadForm*>::iterator i;
-		if(ThreadForm *tf = tfAtTop()){
-			i = tfMap.find(tf->post.no);
-			while(vimNumber-- && i+1 != tfMap.end()){
-				if(i.value()->isHidden()) vimNumber++;
-				i++;
-			};
-			bar->setValue(i.value()->pos().y());
+		QMapIterator<QString,ThreadForm*> i(tfMap);
+		if(ThreadForm *tf = tfAtBottom()){
+			if(i.findNext(tf)){
+				while(vimNumber-- && i.hasNext()){
+					i.next();
+					if(i.value()->isHidden()) vimNumber++;
+				}
+				ui->scrollArea->verticalScrollBar()->setValue(
+							i.value()->pos().y()+i.value()->height()-ui->scrollArea->height());
+			}
 		}
 		vimCommand = "";
 	});
 	this->addAction(scrollDown);
+
+	QAction *prevYou = new QAction(this);
+	prevYou->setShortcut(Qt::Key_H);
+	connect(prevYou,&QAction::triggered,[=]{
+		int vimNumber = 1;
+		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
+		QMapIterator<QString,ThreadForm*> i(tfMap);
+		if(ThreadForm *tf = tfAtTop()){
+			if(i.findNext(tf)){
+				if(i.hasPrevious()) i.previous();
+				ThreadForm *found = Q_NULLPTR;
+				while(vimNumber && i.hasPrevious()){
+					i.previous();
+					if(i.value()->post.hasYou && !i.value()->isHidden()){
+						found = i.value();
+						vimNumber--;
+					}
+				}
+				if(found) ui->scrollArea->verticalScrollBar()->setValue(found->pos().y());
+			}
+		}
+		vimCommand = "";
+	});
+	this->addAction(prevYou);
+
+
+	QAction *nextYou = new QAction(this);
+	nextYou->setShortcut(Qt::Key_L);
+	connect(nextYou,&QAction::triggered,[=]{
+		int vimNumber = 1;
+		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
+		QMapIterator<QString,ThreadForm*> i(tfMap);
+		if(ThreadForm *tf = tfAtBottom()){
+			if(i.findNext(tf)){
+				ThreadForm *found = Q_NULLPTR;
+				while(vimNumber && i.hasNext()){
+					i.next();
+					if(i.value()->post.hasYou && !i.value()->isHidden()){
+						found = i.value();
+						vimNumber--;
+					}
+				}
+				if(found) ui->scrollArea->verticalScrollBar()->setValue(
+							found->pos().y()+found->height()-ui->scrollArea->height());
+			}
+		}
+		vimCommand = "";
+	});
+	this->addAction(nextYou);
+
 
 	QAction *scrollPercent = new QAction(this);
 	scrollPercent->setShortcut(QKeySequence("Shift+G"));
@@ -242,6 +297,22 @@ ThreadForm* ThreadTab::tfAtTop(){
 		selected = qobject_cast<QWidget*>(selected->parent());
 	}
 	if(selected && selected->objectName() == "ThreadForm"){
+		return static_cast<ThreadForm*>(selected);
+	}
+	else return Q_NULLPTR;
+}
+
+ThreadForm* ThreadTab::tfAtBottom(){
+	QWidget *selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value()+ui->scrollArea->height());
+	//try slight offset if selected a spaced/null region
+	if(!selected || selected->objectName() == "scrollAreaWidgetContents"){
+		selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value()+ui->scrollArea->height()-10);
+	}
+	while(selected && selected->parent()->objectName() != "scrollAreaWidgetContents") {
+		selected = qobject_cast<QWidget*>(selected->parent());
+	}
+	if(selected && selected->objectName() == "ThreadForm"){
+		qDebug() << static_cast<ThreadForm*>(selected)->post.no;
 		return static_cast<ThreadForm*>(selected);
 	}
 	else return Q_NULLPTR;
@@ -297,8 +368,7 @@ void ThreadTab::updateWidth()
 
 void ThreadTab::onNewTF(ThreadForm *tf)
 {
-	QString temp = tf->post.com % tf->post.sub % tf->post.name;
-	if(filter.filterMatched(temp)){
+	if(filter.filterMatched(tf->matchThis())){
 		tf->hidden=true;
 		tf->hide();
 		info.hidden++;
@@ -353,8 +423,8 @@ ThreadForm *ThreadTab::findPost(QString postNum)
 //TODO, just search the whole JSON and find posts
 void ThreadTab::findText(const QString &text)
 {
-	qDebug().noquote() << "searching " + text;
 	if(text.isEmpty()){
+		qDebug().noquote() << "clearing search";
 		ui->searchWidget->hide();
 		QMapIterator<QString,ThreadForm*> mapI(tfMap);
 		while (mapI.hasNext()) {
@@ -363,8 +433,10 @@ void ThreadTab::findText(const QString &text)
 		}
 		return;
 	}
+	qDebug().noquote() << "searching " + text;
 	QString temp(text);
 	QRegularExpression re(temp.replace("\n",""),QRegularExpression::CaseInsensitiveOption);
+	qDebug() << re;
 	QRegularExpressionMatch match;
 	ThreadForm *tf;
 	QMapIterator<QString,ThreadForm*> mapI(tfMap);
@@ -373,6 +445,7 @@ void ThreadTab::findText(const QString &text)
 		tf = mapI.value();
 		QString toMatch(tf->matchThis());
 		toMatch = Filter::toStrippedHtml(toMatch);
+		qDebug() << toMatch;
 		match = re.match(toMatch);
 		//can keep applying filters over and over again
 		//good or bad?

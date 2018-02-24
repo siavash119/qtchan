@@ -124,9 +124,9 @@ QString Filter::titleParse(QString &title){
 }
 
 QString Filter::toStrippedHtml(QString &text){
-	QRegularExpression htmlTag;
-	htmlTag.setPattern("</?(span|img|a|br|wb|wbr).*?>");
-	return text.replace(htmlTag,"").replace("&amp;","&")
+	QRegularExpression imgTag("<img.*?>");
+	QRegularExpression htmlTag("<[^>]*>");
+	return text.replace(QRegularExpression("<img.*?>")," ").replace(htmlTag,"").replace("&amp;","&")
 		.replace("&gt;",">").replace("&lt;","<")
 		.replace("&quot;","\"").replace("&#039;","'");
 }
