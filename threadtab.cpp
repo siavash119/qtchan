@@ -356,16 +356,6 @@ void ThreadTab::gallery()
 	ui->threads->insertItem(-1,&space);
 }*/
 
-int ThreadTab::getMinWidth()
-{
-	return ui->scrollArea->minimumWidth();
-}
-
-void ThreadTab::updateWidth()
-{
-	ui->scrollArea->setMinimumWidth(this->sizeHint().width());
-}
-
 void ThreadTab::onNewTF(ThreadForm *tf)
 {
 	if(filter.filterMatched(tf->matchThis())){

@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
 		ui->help->setText(QString(dump));
 	}
 	QList<int> sizes;
-	sizes << 175 << 250;
+	sizes << 150 << this->width()-150;
 	ui->splitter->setSizes(sizes);
 
 	selectionModel = ui->treeView->selectionModel();

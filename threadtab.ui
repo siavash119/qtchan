@@ -16,12 +16,6 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="minimumSize">
-   <size>
-    <width>0</width>
-    <height>0</height>
-   </size>
-  </property>
   <property name="font">
    <font>
     <pointsize>12</pointsize>
@@ -89,12 +83,6 @@
    </item>
    <item>
     <widget class="QScrollArea" name="scrollArea">
-     <property name="minimumSize">
-      <size>
-       <width>758</width>
-       <height>600</height>
-      </size>
-     </property>
      <property name="autoFillBackground">
       <bool>false</bool>
      </property>

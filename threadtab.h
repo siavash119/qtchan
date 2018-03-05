@@ -40,8 +40,6 @@ public:
 	void findText(const QString &text);
 	void loadAllImages();
 	ThreadForm *findPost(QString postNum);
-	int getMinWidth();
-	void setMinWidth(int minw);
 	bool floatIt;
 	QPointer<ThreadForm> floating;
 	PostForm myPostForm;
@@ -60,7 +58,6 @@ public:
 public slots:
 	//void addStretch();
 	void focusIt();
-	void updateWidth();
 	void quoteIt(QString text);
 	void floatReply(const QString &link, int replyLevel = 0);
 	void deleteFloat();
