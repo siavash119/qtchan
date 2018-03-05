@@ -55,6 +55,7 @@ void ThreadForm::appendQuote()
 
 ThreadForm::~ThreadForm()
 {
+	inserted.clear();
 	foreach(QNetworkReply *reply, networkReplies){
 		reply->abort();
 		reply->deleteLater();
@@ -399,8 +400,14 @@ void ThreadForm::quoteClicked(const QString &link)
 {
 	qDebug().noquote() << link;
 	if(link.startsWith("#p") && this->type == PostType::Reply) {
-		ThreadForm *tf = static_cast<ThreadTab*>(tab)->findPost(link.mid(2));
-		if(tf != nullptr && !tf->hidden) this->insert(tf);
+		QString postNo = link.mid(2);
+		if(inserted.contains(postNo)){
+			inserted.value(postNo)->deleteLater();
+		}
+		else{
+			ThreadForm *tf = static_cast<ThreadTab*>(tab)->findPost(postNo);
+			if(tf != nullptr && !tf->hidden) this->insert(tf);
+		}
 	}
 	else if(link.startsWith("#op")){
 		if(this->type == PostType::Reply) static_cast<ThreadTab*>(tab)->quoteIt(">>"+post.no);
@@ -414,13 +421,20 @@ void ThreadForm::quoteClicked(const QString &link)
 void ThreadForm::insert(ThreadForm *tf)
 {
 	ThreadForm *newtf = tf->clone(replyLevel);
+	inserted.insert(tf->post.no,newtf);
+	QMetaObject::Connection removeOnDestroy = connect(newtf,&ThreadForm::destroyed,this,&ThreadForm::removeFromInserted);
+	insertedConnections.insert(tf->post.no,removeOnDestroy);
 	if(ui->quoteWidget->isHidden())ui->quoteWidget->show();
 	ui->quotes->addWidget(newtf);
-	newtf->show();
-	//newtf->setMinimumWidth(newtf->sizeHint().width());
-	//this->setMinimumWidth(this->sizeHint().width());
-	//((ThreadTab*)tab)->updateWidth();
-	//this->update();
+}
+
+void ThreadForm::removeFromInserted(){
+	ThreadForm *tf = static_cast<ThreadForm*>(sender());
+	QString postNo = tf->post.no;
+	if(!postNo.isEmpty() && inserted.contains(postNo)){
+		inserted.remove(postNo);
+		insertedConnections.remove(postNo);
+	}
 }
 
 void ThreadForm::addReply(ThreadForm *tf){

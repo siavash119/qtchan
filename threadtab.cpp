@@ -192,14 +192,14 @@ void ThreadTab::setShortcuts()
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
 		QMapIterator<QString,ThreadForm*> i(tfMap);
-		if(ThreadForm *tf = tfAtBottom()){
+		if(ThreadForm *tf = tfAtTop()){
 			if(i.findNext(tf)){
 				while(vimNumber-- && i.hasNext()){
 					i.next();
 					if(i.value()->isHidden()) vimNumber++;
 				}
 				ui->scrollArea->verticalScrollBar()->setValue(
-							i.value()->pos().y()+i.value()->height()-ui->scrollArea->height());
+							i.value()->pos().y());
 			}
 		}
 		vimCommand = "";
@@ -237,7 +237,7 @@ void ThreadTab::setShortcuts()
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
 		QMapIterator<QString,ThreadForm*> i(tfMap);
-		if(ThreadForm *tf = tfAtBottom()){
+		if(ThreadForm *tf = tfAtTop()){
 			if(i.findNext(tf)){
 				ThreadForm *found = Q_NULLPTR;
 				while(vimNumber && i.hasNext()){
@@ -248,7 +248,7 @@ void ThreadTab::setShortcuts()
 					}
 				}
 				if(found) ui->scrollArea->verticalScrollBar()->setValue(
-							found->pos().y()+found->height()-ui->scrollArea->height());
+							found->pos().y());
 			}
 		}
 		vimCommand = "";

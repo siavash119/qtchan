@@ -102,6 +102,9 @@ private:
 	QHash<QString,QNetworkReply*> networkReplies;
 	int regionsGot = 0;
 	QString flagString(const QString &path, const QString &name);
+	QMap<QString,ThreadForm*> inserted;
+	QMap<QString,QMetaObject::Connection> insertedConnections;
+	void removeFromInserted();
 
 signals:
 	void loadThreadTab(ThreadForm*, QJsonArray&);
