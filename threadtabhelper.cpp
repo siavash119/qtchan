@@ -72,8 +72,8 @@ void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep
 }
 
 void ThreadTabHelper::getExtraFlags(){
-	if(board.compare("int") != 0 && board.compare("pol") != 0
-			&& board.compare("sp") && board.compare("bant") != 0) return;
+	if(abort || (board.compare("int") != 0 && board.compare("pol") != 0
+			&& board.compare("sp") && board.compare("bant") != 0)) return;
 	qDebug().noquote().nospace() << "loading extra flags for " << board << '/' << thread;
 	QStringList postNums;
 	foreach(QString no, tfMap.keys()){
@@ -158,9 +158,11 @@ void ThreadTabHelper::loadPosts() {
 	int i = tfMap.size();
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	bool loadFile = settings.value("autoExpand",false).toBool() || this->expandAll;
-	while(!abort && i<length) {
+	while(i<length) {
 		p = posts.at(i).toObject();
-		ThreadForm *tf = new ThreadForm(api,board,thread,PostType::Reply,true,loadFile,parent);
+		ThreadForm *tf;
+		if(!abort) tf = new ThreadForm(api,board,thread,PostType::Reply,true,loadFile,parent);
+		else break;
 		tf->load(p);
 		//TODO check post number without making the thread form?
 		if(tfMap.contains(tf->post.no)){
@@ -206,9 +208,6 @@ void ThreadTabHelper::loadPosts() {
 			nv->addNotification(cloned);
 		}
 		i++;
-		//TODO change update view processing?
-		//if(i % 10 == 0)
-		QCoreApplication::processEvents();
 	}
 	if(settings.value("extraFlags/enable",false).toBool() == true) getExtraFlags();
 	//emit scrollIt();

@@ -108,7 +108,7 @@ void BoardTabHelper::loadPosts() {
 	QJsonArray t;
 	QJsonObject p;
 	int i = 0;
-	while(!abort && i < length){
+	while(i<length){
 		if(type==BoardType::Index){
 			t = threads.at(i).toObject().value("posts").toArray();
 			p = t.at(0).toObject();
@@ -122,7 +122,9 @@ void BoardTabHelper::loadPosts() {
 			i++;
 			continue;
 		}
-		ThreadForm *tf = new ThreadForm(api,board,threadNum,Thread,true,loadFile,parent,0);
+		ThreadForm *tf;
+		if(!abort) tf = new ThreadForm(api,board,threadNum,Thread,true,loadFile,parent,0);
+		else break;
 		tf->load(p);
 		tfMap.insert(tf->post.no,tf);
 		emit newThread(tf);
@@ -135,9 +137,6 @@ void BoardTabHelper::loadPosts() {
 			}
 		}
 		i++;
-		//TODO change update view processing?
-		//if(i % 10 == 0)
-		QCoreApplication::processEvents();
 	}
 }
 

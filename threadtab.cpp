@@ -31,11 +31,9 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	info.move(this->width()-info.width()-20,this->height()-info.height()-20);
 	info.show();
 	helper.moveToThread(&workerThread);
-	connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF,UniqueDirect);
-	connect(&helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle,UniqueDirect);
-	connect(&helper,&ThreadTabHelper::tabTitle,[=](QString tabTitle){
-		tn->setData(0,tabTitle);
-	});
+	connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF,Qt::QueuedConnection);
+	connect(&helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle,Qt::QueuedConnection);
+	connect(&helper,&ThreadTabHelper::tabTitle,this,&ThreadTab::setTabTitle,Qt::QueuedConnection);
 	myPostForm.setParent(this,Qt::Tool
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);
@@ -48,7 +46,7 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	ui->pushButton->setFont(temp);
 	this->setShortcuts();
 	this->installEventFilter(this);
-	connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,UniqueDirect);
+	connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,Qt::QueuedConnection);
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 	//connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
 	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize,UniqueDirect);
@@ -82,6 +80,10 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	});
 
 	//connect(&helper,&ThreadTabHelper::refresh,[=](ThreadForm *tf) {onRefresh(tf);});
+}
+
+void ThreadTab::setTabTitle(QString tabTitle){
+	tn->setData(0,tabTitle);
 }
 
 void ThreadTab::setFontSize(int fontSize){
@@ -376,6 +378,7 @@ void ThreadTab::onNewTF(ThreadForm *tf)
 	if(!tf->post.tim.isEmpty()) info.files++;
 	info.unseen++;
 	info.updateFields();
+	QCoreApplication::processEvents();
 }
 
 void ThreadTab::removeTF(ThreadForm *tf)

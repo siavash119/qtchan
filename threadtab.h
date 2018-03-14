@@ -86,6 +86,8 @@ private slots:
 	void on_lineEdit_returnPressed();
 	void removeTF(ThreadForm *tf);
 	void updateVim();
+	void setTabTitle(QString tabTitle);
+
 
 signals:
 	void autoUpdate(bool update);

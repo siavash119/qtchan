@@ -19,9 +19,9 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	else boardUrl = api->catalogURL(board);
 	helper.startUp(api,board, type, search, this);
 	helper.moveToThread(&workerThread);
-	connect(&helper,&BoardTabHelper::newThread,this,&BoardTab::onNewThread,UniqueDirect);
-	connect(&helper,&BoardTabHelper::newTF,this,&BoardTab::onNewTF,UniqueDirect);
-	connect(&helper,&BoardTabHelper::clearMap,this,&BoardTab::clearMap,UniqueDirect);
+	connect(&helper,&BoardTabHelper::newThread,this,&BoardTab::onNewThread,Qt::QueuedConnection);
+	connect(&helper,&BoardTabHelper::newTF,this,&BoardTab::onNewTF,Qt::QueuedConnection);
+	connect(&helper,&BoardTabHelper::clearMap,this,&BoardTab::clearMap,Qt::QueuedConnection);
 
 	myPostForm.setParent(this,Qt::Tool
 						 | Qt::WindowMaximizeButtonHint
@@ -83,7 +83,7 @@ void BoardTab::setShortcuts()
 
 	QAction *postForm = new QAction(this);
 	postForm->setShortcut(Qt::Key_Q);
-	connect(postForm, &QAction::triggered, this, &BoardTab::openPostForm, UniqueDirect);
+	connect(postForm, &QAction::triggered, this, &BoardTab::openPostForm);
 	this->addAction(postForm);
 
 	QAction *selectPost = new QAction(this);
@@ -223,6 +223,7 @@ void BoardTab::onNewTF(ThreadForm *tf, ThreadForm *thread)
 {
 	connect(thread,&ThreadForm::removeMe,tf,&ThreadForm::deleteLater,Qt::DirectConnection);
 	thread->addReply(tf);
+	QCoreApplication::processEvents();
 }
 
 void BoardTab::onNewThread(ThreadForm *tf)
