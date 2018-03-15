@@ -477,6 +477,7 @@ void MainWindow::onSelectionChanged()
 		if(tab){
 			ui->content->setCurrentWidget(tab);
 			setWindowTitle(tab->windowTitle());
+			currentTab = tab;
 		}
 	}
 	else setWindowTitle("qtchan");

@@ -223,7 +223,7 @@ void BoardTab::onNewTF(ThreadForm *tf, ThreadForm *thread)
 {
 	connect(thread,&ThreadForm::removeMe,tf,&ThreadForm::deleteLater,Qt::DirectConnection);
 	thread->addReply(tf);
-	QCoreApplication::processEvents();
+	if(this == mw->currentTab) QCoreApplication::processEvents();
 }
 
 void BoardTab::onNewThread(ThreadForm *tf)
@@ -236,6 +236,7 @@ void BoardTab::onNewThread(ThreadForm *tf)
 	ui->threads->addWidget(tf);
 	tfMap.insert(tf->post.no,tf);
 	tfPairs.append(QPair<QString,ThreadForm*>(tf->post.no,tf));
+	if(this == mw->currentTab) QCoreApplication::processEvents();
 }
 
 ThreadForm* BoardTab::tfAtTop(){

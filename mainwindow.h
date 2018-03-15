@@ -36,6 +36,7 @@ public:
 	TreeModel *model = new TreeModel(this);
 	QItemSelectionModel *selectionModel;
 	QMap<QWidget*,Tab> tabs;
+	QWidget *currentTab;
 	~MainWindow();
 
 	void addTab(TreeItem *child, TreeItem *parent = Q_NULLPTR, bool select = false);

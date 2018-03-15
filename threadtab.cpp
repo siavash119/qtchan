@@ -378,7 +378,7 @@ void ThreadTab::onNewTF(ThreadForm *tf)
 	if(!tf->post.tim.isEmpty()) info.files++;
 	info.unseen++;
 	info.updateFields();
-	QCoreApplication::processEvents();
+	if(this == mw->currentTab) QCoreApplication::processEvents();
 }
 
 void ThreadTab::removeTF(ThreadForm *tf)
