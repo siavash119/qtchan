@@ -85,31 +85,33 @@ void ThreadTabHelper::getExtraFlags(){
 	QNetworkRequest request(QUrl("https://flagtism.drunkensailor.org/int/get_flags_api2.php"));
 	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 	QNetworkReply *reply = nc.fileManager->post(request,data.toUtf8());
-	connect(reply,&QNetworkReply::finished,[=]{
-		if(!reply) return;
-		if(reply->error()){
-			qDebug() << "checking flags errror:" << reply->errorString();
-			return;
+	connect(reply,&QNetworkReply::finished,this,&ThreadTabHelper::loadExtraFlags);
+}
+
+void ThreadTabHelper::loadExtraFlags(){
+	if(abort || !reply) return;
+	if(reply->error()){
+		qDebug() << "checking flags errror:" << reply->errorString();
+		return;
+	}
+	QByteArray answer = reply->readAll();
+	reply->deleteLater();
+	if(answer.isEmpty()) return;
+	QJsonArray extraFlags = QJsonDocument::fromJson(answer).array();
+	int length = extraFlags.size();
+	if(!length) return;
+	qDebug() << "loading" << length << "extra flag posts";
+	QJsonObject ef;
+	for(int i=0;i<length;i++){
+		ef = extraFlags.at(i).toObject();
+		QString post_nr = ef.value("post_nr").toString();
+		gottenFlags.insert(post_nr);
+		QString region = ef.value("region").toString();
+		if(!abort && tfMap.contains(post_nr)){
+			ThreadForm *cur = tfMap.value(post_nr);
+			cur->setRegion(region);
 		}
-		QByteArray answer = reply->readAll();
-		reply->deleteLater();
-		if(answer.isEmpty()) return;
-		QJsonArray extraFlags = QJsonDocument::fromJson(answer).array();
-		int length = extraFlags.size();
-		if(!length) return;
-		qDebug() << "loading" << length << "extra flag posts";
-		QJsonObject ef;
-		for(int i=0;i<length;i++){
-			ef = extraFlags.at(i).toObject();
-			QString post_nr = ef.value("post_nr").toString();
-			gottenFlags.insert(post_nr);
-			QString region = ef.value("region").toString();
-			if(!abort && tfMap.contains(post_nr)){
-				ThreadForm *cur = tfMap.value(post_nr);
-				cur->setRegion(region);
-			}
-		}
-	});
+	}
 }
 
 void ThreadTabHelper::loadPosts() {

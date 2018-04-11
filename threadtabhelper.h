@@ -48,6 +48,9 @@ public slots:
 	void loadAllImages();
 	void setAutoUpdate(bool update);
 
+private slots:
+	void loadExtraFlags();
+
 signals:
 	void postsLoaded(QJsonArray &posts);
 	void newTF(ThreadForm *tf);

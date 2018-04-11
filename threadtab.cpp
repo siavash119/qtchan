@@ -326,6 +326,7 @@ ThreadTab::~ThreadTab()
 	helper.abort = true;
 	workerThread.quit();
 	workerThread.wait();
+	workerThread.terminate();
 	/*disconnect(&helper);
 	disconnect(&workerThread);*/
 	disconnect(connectionAutoUpdate);
