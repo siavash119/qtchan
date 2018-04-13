@@ -64,14 +64,15 @@ you can make a filter file and it'll regexp remove posts for you. I'll post an e
 
 ## how to solve captcha
 1. in the post form, focus the bottom lineEdit. It will load the challenge image
-2. it's a grid:
-* 0 1 2
-* 3 4 5
-* 6 7 8
+2. it's a grid following the numpad:
+* 7 8 9
+* 4 5 6
+* 1 2 3
 3. type in the numbers and hit enter (e.g. 034)
 4. if it says "Verified.", you're good to post.
 * Your code will expire in 2 minutes. If you want to load a new captcha, hit enter in the lineEdit or click the image.
 
+Note: the numbers in this image follow a previous captcha number grid, the correct answer would be 893 in any order.
 ![qtchan captcha](https://i.abcdn.co/qtchan_captcha.png)
 
 ## Using 4chan pass to post
