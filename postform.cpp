@@ -367,9 +367,6 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
 			postIt();
 			return true;
 		}
-		if(key == Qt::Key_Escape){
-			cancelPost();
-		}
 		return QObject::eventFilter(obj, event);
 	} else if(event->type() == QEvent::DragEnter) {
 		static_cast<QDragEnterEvent*>(event)->acceptProposedAction();
