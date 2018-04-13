@@ -8,6 +8,23 @@
 
 Captcha::Captcha()
 {
+	ec['7']='0';
+	ec['8']='1';
+	ec['9']='2';
+	ec['4']='3';
+	ec['5']='4';
+	ec['6']='5';
+	ec['1']='6';
+	ec['2']='7';
+	ec['3']='8';
+}
+
+QString Captcha::easyCaptcha(QString answer){
+	int len = answer.length();
+	for(int i=0;i<len;i++){
+		answer.replace(i,1,ec.value(answer.at(i)));
+	}
+	return answer;
 }
 
 //TODO use the CaptchaLinks object from api instead of locally defined variables
@@ -48,6 +65,7 @@ Captcha::~Captcha(){
 
 void Captcha::getCaptcha(){
 	loading = true;
+	emit questionInfo(loadingString);
 	replyChallenge = NULL;
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	if(settings.value("antiCaptcha/enable",false).toBool() == true){
@@ -134,6 +152,7 @@ void Captcha::antiFinished(){
 
 void Captcha::loadCaptcha(){
 	qDebug() << "got captcha";
+	loading = false;
 	if(!replyChallenge){
 		emit fail();
 		return;

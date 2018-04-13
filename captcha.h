@@ -24,7 +24,10 @@ public:
 	bool loading = false;
 	void getCaptcha();
 	void getImage(QString challenge);
+	QString easyCaptcha(QString answer);
 private:
+	QString loadingString = "Loading Captcha...";
+	QMap<QChar,QChar> ec;
 	QString siteKey;
 	QString server;
 	QString lang;
