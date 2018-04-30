@@ -35,6 +35,8 @@ private:
 	QString threadUrl;
 	QPointer<QNetworkReply> reply;
 	QNetworkRequest request;
+	QNetworkRequest requestFlags;
+	QPointer<QNetworkReply> replyFlags;
 	QWidget *parent;
 	QMetaObject::Connection connectionPost;
 	QTimer *updateTimer;

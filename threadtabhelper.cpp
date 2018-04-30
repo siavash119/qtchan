@@ -72,8 +72,7 @@ void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep
 }
 
 void ThreadTabHelper::getExtraFlags(){
-	if(abort || (board.compare("int") != 0 && board.compare("pol") != 0
-			&& board.compare("sp") && board.compare("bant") != 0)) return;
+	if(abort || !(QString("int|pol|sp|bant").contains(board))) return;
 	qDebug().noquote().nospace() << "loading extra flags for " << board << '/' << thread;
 	QStringList postNums;
 	foreach(QString no, tfMap.keys()){
@@ -82,20 +81,20 @@ void ThreadTabHelper::getExtraFlags(){
 		postNums.append(no);
 	}
 	QString data = "board=" % board % "&post_nrs=" % postNums.join("%2C");
-	QNetworkRequest request(QUrl("https://flagtism.drunkensailor.org/int/get_flags_api2.php"));
-	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-	QNetworkReply *reply = nc.fileManager->post(request,data.toUtf8());
-	connect(reply,&QNetworkReply::finished,this,&ThreadTabHelper::loadExtraFlags);
+	requestFlags.setUrl(QUrl("https://flagtism.drunkensailor.org/int/get_flags_api2.php"));
+	requestFlags.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+	replyFlags = nc.fileManager->post(requestFlags,data.toUtf8());
+	connect(replyFlags,&QNetworkReply::finished,this,&ThreadTabHelper::loadExtraFlags,UniqueDirect);
 }
 
 void ThreadTabHelper::loadExtraFlags(){
-	if(abort || !reply) return;
-	if(reply->error()){
-		qDebug() << "checking flags errror:" << reply->errorString();
+	if(abort || !replyFlags) return;
+	if(replyFlags->error()){
+		qDebug() << "checking flags errror:" << replyFlags->errorString();
 		return;
 	}
-	QByteArray answer = reply->readAll();
-	reply->deleteLater();
+	QByteArray answer = replyFlags->readAll();
+	replyFlags->deleteLater();
 	if(answer.isEmpty()) return;
 	QJsonArray extraFlags = QJsonDocument::fromJson(answer).array();
 	int length = extraFlags.size();
@@ -211,7 +210,7 @@ void ThreadTabHelper::loadPosts() {
 		}
 		i++;
 	}
-	if(settings.value("extraFlags/enable",false).toBool() == true) getExtraFlags();
+	if(settings.value("extraFlags/enable",false).toBool()) getExtraFlags();
 	//emit scrollIt();
 }
 
