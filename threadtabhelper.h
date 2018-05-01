@@ -45,12 +45,13 @@ private:
 	QSet<QString> gottenFlags;
 
 public slots:
-	void loadPosts();
+	void loadPosts(QByteArray &posts, bool writeIt = true);
 	void getPosts();
 	void loadAllImages();
 	void setAutoUpdate(bool update);
 
 private slots:
+	void getPostsFinished();
 	void loadExtraFlags();
 
 signals:

@@ -22,10 +22,8 @@ void ThreadTabHelper::startUp(Chan *api, QString &board, QString &thread, QWidge
 	this->expandAll = settings.value("autoExpand",false).toBool();
 	QDir().mkpath(board+"/"+thread+"/thumbs");
 	qDebug() << threadUrl;
-	request = QNetworkRequest(QUrl(threadUrl));
-	if(api->requiresUserAgent()) request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
-	request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
-	getPosts();
+
+	//update timer
 	updateTimer = new QTimer(parent);
 	updateTimer->setInterval(60000);
 	updateTimer->start();
@@ -33,6 +31,19 @@ void ThreadTabHelper::startUp(Chan *api, QString &board, QString &thread, QWidge
 		connectionUpdate = connect(updateTimer, &QTimer::timeout,
 								   this,&ThreadTabHelper::getPosts,UniqueDirect);
 	}
+
+	//self-archive check
+	QFile jsonFile(board+"/"+thread+"/"+thread+".json");
+	if(jsonFile.exists() && jsonFile.open(QIODevice::ReadOnly)){
+		QByteArray archive = jsonFile.readAll();
+		loadPosts(archive,false);
+	}
+
+	//get posts
+	request = QNetworkRequest(QUrl(threadUrl));
+	if(api->requiresUserAgent()) request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
+	request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
+	getPosts();
 }
 
 ThreadTabHelper::~ThreadTabHelper() {
@@ -60,14 +71,13 @@ void ThreadTabHelper::getPosts() {
 	reply = nc.jsonManager->get(request);
 	gettingReply = true;
 	connectionPost = connect(reply, &QNetworkReply::finished,
-							 this,&ThreadTabHelper::loadPosts, UniqueDirect);
+							 this,&ThreadTabHelper::getPostsFinished, UniqueDirect);
 }
 
 void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep) {
 	QFile jsonFile(board+"/"+thread+"/"+thread+".json");
 	jsonFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
-	QDataStream out(&jsonFile);
-	out << rep;
+	jsonFile.write(rep);
 	jsonFile.close();
 }
 
@@ -113,8 +123,8 @@ void ThreadTabHelper::loadExtraFlags(){
 	}
 }
 
-void ThreadTabHelper::loadPosts() {
-	if(!reply) return;
+void ThreadTabHelper::getPostsFinished() {
+	if(abort || !reply) return;
 	gettingReply = false;
 	if(reply->error()) {
 		qDebug().noquote() << "loading post error:" << reply->errorString();
@@ -127,14 +137,15 @@ void ThreadTabHelper::loadPosts() {
 		else if(reply->error() == QNetworkReply::UnknownNetworkError){
 			nc.refreshManagers();
 		}
-		reply->deleteLater();
 		return;
 	}
-	//write to file and make json array
 	QByteArray rep = reply->readAll();
 	reply->deleteLater();
-	if(rep.isEmpty()) return;
-	QJsonArray posts = QJsonDocument::fromJson(rep).object().value("posts").toArray();
+	loadPosts(rep);
+}
+
+void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
+	QJsonArray posts = QJsonDocument::fromJson(postData).object().value("posts").toArray();
 	int length = posts.size();
 	qDebug().noquote() << QString("length of ").append(threadUrl).append(" is ").append(QString::number(length));
 	//check OP if archived or closed
@@ -144,17 +155,18 @@ void ThreadTabHelper::loadPosts() {
 		Post OP(p,board);
 		if(OP.archived) {
 			qDebug().nospace() << "Stopping timer for " << threadUrl <<". Reason: Archived";
-			updateTimer->stop();
+			if(updateTimer->isActive()) updateTimer->stop();
 			emit threadStatus("archived",OP.archived_on);
 		}
 		else if(OP.closed) {
 			qDebug().nospace() << "Stopping timer for " << threadUrl <<". Reason: Closed";
-			updateTimer->stop();
+			if(updateTimer->isActive()) updateTimer->stop();
 			emit threadStatus("closed");
 		}
 	}
 	else return;
-	QtConcurrent::run(&ThreadTabHelper::writeJson,board, thread, rep);
+	//write to file
+	if(writeIt) QtConcurrent::run(&ThreadTabHelper::writeJson, board, thread, postData);
 	//load new posts
 	int i = tfMap.size();
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");

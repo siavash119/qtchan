@@ -24,7 +24,6 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	ui->setupUi(this);
 	this->setWindowTitle("/"+board+"/"+thread);
 	ui->searchWidget->hide();
-	helper.startUp(api,board,thread, this, isFromSession);
 	//this->ui->verticalLayout->insertWidget(0,&info);
 	//info.setParent(this,Qt::Tool | Qt::FramelessWindowHint);
 	info.setParent(this);
@@ -78,7 +77,7 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 		newImage = QtConcurrent::run(&ThreadTab::checkIfVisible, unseenList);
 		watcher.setFuture(newImage);
 	});
-
+	helper.startUp(api, board, thread, this, isFromSession);
 	//connect(&helper,&ThreadTabHelper::refresh,[=](ThreadForm *tf) {onRefresh(tf);});
 }
 
