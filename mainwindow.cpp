@@ -265,6 +265,7 @@ void MainWindow::addShortcut(QKeySequence key,const T connectTo, F func,
 MainWindow::~MainWindow()
 {
 	disconnect(selectionConnection);
+	disconnect(model,&TreeModel::removingTab,this,&MainWindow::onRemoveTab);
 	saveSession();
 	you.saveYou();
 	delete ui;
