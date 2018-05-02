@@ -93,6 +93,8 @@ signals:
 	void autoUpdate(bool update);
 	void unseen(int totalUnseen);
 	void formSeen();
+	void startHelper(Chan *api, QString &board, QString &thread, QWidget *parent, bool isFromSession = false);
+
 };
 
 Q_DECLARE_METATYPE(ThreadTab*)

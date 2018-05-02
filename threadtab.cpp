@@ -77,7 +77,11 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 		newImage = QtConcurrent::run(&ThreadTab::checkIfVisible, unseenList);
 		watcher.setFuture(newImage);
 	});
-	helper.startUp(api, board, thread, this, isFromSession);
+	//use QMetaObject::invokeMethod instead?
+	connect(this,&ThreadTab::startHelper,&helper,&ThreadTabHelper::startUp,Qt::DirectConnection);
+	emit startHelper(api,board,thread,this,isFromSession);
+	//helper.startUp(api, board, thread, this, isFromSession);
+
 	//connect(&helper,&ThreadTabHelper::refresh,[=](ThreadForm *tf) {onRefresh(tf);});
 }
 
