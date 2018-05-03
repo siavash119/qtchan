@@ -67,8 +67,7 @@ void BoardTabHelper::getPosts() {
 void BoardTabHelper::writeJson(QString &board, QByteArray &rep) {
 	QFile jsonFile(board+"/index.json");
 	jsonFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
-	QDataStream out(&jsonFile);
-	out << rep;
+	jsonFile.write(rep);
 	jsonFile.close();
 }
 
@@ -99,7 +98,7 @@ void BoardTabHelper::loadPosts() {
 	QJsonArray threads = filterThreads(rep);
 	int length = threads.size();
 	qDebug().noquote() << "length of" << boardUrl << "is" << QString::number(length);
-	QtConcurrent::run(&BoardTabHelper::writeJson,board, rep);
+	QtConcurrent::run(&BoardTabHelper::writeJson,board,rep);
 	//load new posts
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	bool loadFile = settings.value("autoExpand",false).toBool() || this->expandAll;
