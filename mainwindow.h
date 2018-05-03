@@ -8,6 +8,7 @@
 #include "netcontroller.h"
 #include "chans.h"
 #include "you.h"
+#include "archivetab.h"
 #include <QUrl>
 #include <QMap>
 #include <QItemSelectionModel>
@@ -37,6 +38,7 @@ public:
 	QItemSelectionModel *selectionModel;
 	QMap<QWidget*,Tab> tabs;
 	QWidget *currentTab;
+	ArchiveTab aTab;
 	~MainWindow();
 
 	void addTab(TreeItem *child, TreeItem *parent = Q_NULLPTR, bool select = false);

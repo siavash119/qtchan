@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     you.cpp \
     notificationtray.cpp \
     treeview.cpp \
-    notificationview.cpp
+    notificationview.cpp \
+    archivetab.cpp
 
 HEADERS += mainwindow.h \
     threadform.h \
@@ -56,7 +57,8 @@ HEADERS += mainwindow.h \
     you.h \
     notificationtray.h \
     treeview.h \
-    notificationview.h
+    notificationview.h \
+    archivetab.h
 
 FORMS   += mainwindow.ui \
     threadform.ui \
@@ -65,7 +67,8 @@ FORMS   += mainwindow.ui \
     postform.ui \
     settings.ui \
     threadinfo.ui \
-    notificationview.ui
+    notificationview.ui \
+    archivetab.ui
 
 RC_ICONS = icons/icon.ico
 

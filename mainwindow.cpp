@@ -66,6 +66,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(model,&TreeModel::selectTab,ui->treeView,&TreeView::selectTab,Qt::DirectConnection);
 	connect(model,&TreeModel::loadFromSearch,this,&MainWindow::loadFromSearch);
 	connect(model,&TreeModel::removingTab,this,&MainWindow::onRemoveTab);
+	connect(&aTab,&ArchiveTab::loadThread,[=](QString threadString){
+		loadFromSearch(threadString,QString(),Q_NULLPTR,true);
+	});
 	this->setShortcuts();
 }
 
@@ -245,6 +248,8 @@ void MainWindow::setShortcuts()
 		if(QWidget *temp = currentWidget()) temp->setFocus();
 	});
 	addShortcut(Qt::Key_F6,this,&MainWindow::focusBar);
+	addShortcut(Qt::Key_F8,&aTab,&ArchiveTab::show);
+
 }
 
 void MainWindow::showHelp(){

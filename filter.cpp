@@ -120,7 +120,7 @@ QString Filter::titleParse(QString &title){
 	return title.replace(htmlTag,"").replace("<br>"," ").replace("&amp;","&")
 		.replace("&gt;",">").replace("&lt;","<")
 		.replace("&quot;","\"").replace("&#039;","'")
-		.replace("<wb>"," ").replace("<wbr>"," ");
+		.replace("<wb>","").replace("<wbr>","");
 }
 
 QString Filter::toStrippedHtml(QString &text){
