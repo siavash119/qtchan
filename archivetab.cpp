@@ -40,6 +40,9 @@ void ArchiveTab::fillBoards(){
 	entries.removeOne("flags");
 	for(int i=entries.size()-1;i>=0;i--){
 		QString board = entries.at(i);
+		if(!QDir(board).entryList().contains("index.json")){
+			continue;
+		}
 		QPushButton *button = new QPushButton(this);
 		button->setText(board);
 		connect(button,&QPushButton::clicked,this,&ArchiveTab::boardClicked);
