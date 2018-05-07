@@ -62,12 +62,14 @@ void Filter::loadFilterFile2(){
 			if(!line.isEmpty() && line.at(0)=='!'){
 				QString key = line.mid(1);
 				QSet<QRegularExpression> set = filters2.value(key);
-				QString exp = in.readLine();
-				while(!exp.isEmpty() && exp.at(0) != '!' && !in.atEnd()){
-					if(exp.isEmpty() || exp.at(0)=='#') continue;
+				while(!in.atEnd()){
+					QString exp = in.readLine();
+					if(exp.isEmpty() || exp.at(0)=='#'){
+						continue;
+					}
+					else if(exp.at(0) == '!') break;
 					exp = exp.replace("\\\\","\\\\\\\\");
 					set.insert(QRegularExpression(exp,QRegularExpression::CaseInsensitiveOption));
-					exp = in.readLine();
 				}
 				filters2.insert(key,set);
 			}
@@ -118,7 +120,7 @@ bool Filter::filterMatched2(Post *p){
 		QSet<QRegularExpression> set = i.value();
 		QString *temp = p->get(key);
 		foreach(QRegularExpression exp, set){
-			if(temp != Q_NULLPTR && !temp->isEmpty() && exp.match(*temp).hasMatch()){
+			if(temp != Q_NULLPTR && !temp->isEmpty() && temp->contains(exp)){
 				return true;
 			}
 		}
