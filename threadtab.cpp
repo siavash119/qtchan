@@ -50,9 +50,6 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	//connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
 	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize,UniqueDirect);
 	connect(mw,&MainWindow::setImageSize,this,&ThreadTab::setImageSize,UniqueDirect);
-	connect(mw,&MainWindow::reloadFilters,[=](){
-		filter = Filter();
-	});
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
 	connect(&watcher,&QFutureWatcherBase::finished,[=]()
@@ -83,6 +80,9 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	//helper.startUp(api, board, thread, this, isFromSession);
 
 	//connect(&helper,&ThreadTabHelper::refresh,[=](ThreadForm *tf) {onRefresh(tf);});
+	connect(mw,&MainWindow::reloadFilters,&helper,&ThreadTabHelper::reloadFilters,Qt::DirectConnection);
+	connect(&helper,&ThreadTabHelper::removeTF,this,&ThreadTab::removeTF);
+	connect(&helper,&ThreadTabHelper::showTF,this,&ThreadTab::showTF);
 }
 
 void ThreadTab::setTabTitle(QString tabTitle){
@@ -364,8 +364,9 @@ void ThreadTab::gallery()
 
 void ThreadTab::onNewTF(ThreadForm *tf)
 {
-	if(filter.filterMatched(tf->matchThis())){
-		tf->hidden=true;
+	//TODO put filtering in another thread
+	if(tf->hidden){
+		qDebug().noquote().nospace() << tf->post.no << " filtered from " << this->windowTitle() << "!";
 		tf->hide();
 		info.hidden++;
 	}
@@ -387,10 +388,20 @@ void ThreadTab::onNewTF(ThreadForm *tf)
 
 void ThreadTab::removeTF(ThreadForm *tf)
 {
+	tf->hide();
 	//tfMap.remove(tf->post.no);
 	if(!tf->seen) {
 		formsUnseen--;
 		unseenList.removeOne(tf);
+	}
+	info.updateFields();
+}
+
+void ThreadTab::showTF(ThreadForm *tf){
+	tf->show();
+	if(!tf->seen){
+		formsUnseen++;
+		unseenList.append(tf);
 	}
 	info.updateFields();
 }

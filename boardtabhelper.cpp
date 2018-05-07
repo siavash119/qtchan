@@ -126,6 +126,10 @@ void BoardTabHelper::loadPosts() {
 		else break;
 		tf->load(p);
 		tfMap.insert(tf->post.no,tf);
+		//if(filter.filterMatched(tf->matchThis()) || filter.filterMatched2(&(tf->post))){
+		if(filter.filterMatched2(&(tf->post))){
+			tf->hidden=true;
+		}
 		emit newThread(tf);
 		if(type==BoardType::Index && showIndexReplies){
 			for(int j=1;j<t.size();j++){
@@ -136,6 +140,19 @@ void BoardTabHelper::loadPosts() {
 			}
 		}
 		i++;
+	}
+}
+
+void BoardTabHelper::reloadFilters(){
+	foreach(ThreadForm* tf,tfMap){
+		if(filter.filterMatched2(&(tf->post))){
+			tf->hidden=true;
+			emit removeTF(tf);
+		}
+		else{
+			tf->hidden=false;
+			emit showTF(tf);
+		}
 	}
 }
 

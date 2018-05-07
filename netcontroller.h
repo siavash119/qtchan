@@ -18,7 +18,6 @@ public:
 	QNetworkProxy proxy;
 	QNetworkDiskCache *diskCache;
 	explicit netController(QObject *parent = Q_NULLPTR);
-	Filter filter;
 	void loadCookies(QString passFile);
 	void loadCookiesIntoAllManagers(QString domain, QString name, QString value);
 	void removeCookies();

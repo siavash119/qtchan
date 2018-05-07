@@ -211,6 +211,7 @@ void MainWindow::setShortcuts()
 	ui->actionReloadFilters->setShortcut(Qt::Key_F7);
 	ui->actionReloadFilters->setShortcutContext(Qt::ApplicationShortcut);
 	connect(ui->actionReloadFilters,&QAction::triggered,[=](){
+		filter.loadFilterFile2();
 		emit reloadFilters();
 	});
 

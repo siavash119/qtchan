@@ -17,7 +17,6 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	this->setWindowTitle("/"+board+"/"+search);
 	if(type == BoardType::Index) boardUrl = api->boardURL(board);
 	else boardUrl = api->catalogURL(board);
-	helper.startUp(api,board, type, search, this);
 	helper.moveToThread(&workerThread);
 	connect(&helper,&BoardTabHelper::newThread,this,&BoardTab::onNewThread,Qt::QueuedConnection);
 	connect(&helper,&BoardTabHelper::newTF,this,&BoardTab::onNewTF,Qt::QueuedConnection);
@@ -41,10 +40,11 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,UniqueDirect);
 	connect(mw,&MainWindow::setImageSize,this,&BoardTab::setImageSize,UniqueDirect);
-	connect(mw,&MainWindow::reloadFilters,[=](){
-		filter = Filter();
-	});
-
+	connect(this,&BoardTab::startHelper,&helper,&BoardTabHelper::startUp,Qt::DirectConnection);
+	connect(mw,&MainWindow::reloadFilters,&helper,&BoardTabHelper::reloadFilters,Qt::DirectConnection);
+	connect(&helper,&BoardTabHelper::removeTF,this,&BoardTab::removeTF);
+	connect(&helper,&BoardTabHelper::showTF,this,&BoardTab::showTF);
+	emit startHelper(api,board,type,search,this);
 }
 
 void BoardTab::setFontSize(int fontSize){
@@ -57,6 +57,14 @@ void BoardTab::setFontSize(int fontSize){
 	foreach(ThreadForm *tf, tfMap){
 		tf->setFontSize(fontSize);
 	}
+}
+
+void BoardTab::removeTF(ThreadForm *tf){
+	tf->hide();
+}
+
+void BoardTab::showTF(ThreadForm *tf){
+	tf->show();
 }
 
 void BoardTab::setImageSize(int imageSize){
@@ -108,13 +116,14 @@ void BoardTab::setShortcuts()
 		QScrollBar *bar = ui->scrollArea->verticalScrollBar();
 		if(ThreadForm *tf = tfAtTop()){
 			ThreadForm *toTf = Q_NULLPTR;
-			QListIterator<QPair<QString,ThreadForm*>> i(tfPairs);
+			QListIterator<QObject*> i(ui->scrollAreaWidgetContents->children());
 			while(i.hasNext()){
-				if(i.next().second == tf) break;
+				if(i.next() == tf) break;
 			}
 			if(i.hasPrevious()) i.previous();
 			while(i.hasPrevious() && vimNumber--){
-				toTf = i.previous().second;
+				toTf = qobject_cast<ThreadForm*>(i.previous());
+				if(toTf->hidden) vimNumber++;
 			}
 			if(toTf) bar->setValue(toTf->pos().y());
 		}
@@ -130,14 +139,15 @@ void BoardTab::setShortcuts()
 		QScrollBar *bar = ui->scrollArea->verticalScrollBar();
 		if(ThreadForm *tf = tfAtTop()){
 			ThreadForm *toTf = Q_NULLPTR;
-			QListIterator<QPair<QString,ThreadForm*>> i(tfPairs);
+			QListIterator<QObject*> i(ui->scrollAreaWidgetContents->children());
 			while(i.hasNext()){
-				if(i.next().second == tf) break;
+				if(i.next() == tf) break;
 			}
 			while(i.hasNext() && vimNumber--){
-				toTf = i.next().second;
+				toTf = qobject_cast<ThreadForm*>(i.next());
+				if(toTf->hidden) vimNumber++;
 			}
-			if(toTf) bar->setValue(toTf->pos().y());
+			if(toTf) bar->setValue(((QWidget*)(toTf))->pos().y());
 		}
 		vimCommand = "";
 	});
@@ -229,14 +239,12 @@ void BoardTab::onNewTF(ThreadForm *tf, ThreadForm *thread)
 
 void BoardTab::onNewThread(ThreadForm *tf)
 {
-	QString temp = tf->post.com % tf->post.sub % tf->post.name;
-	if(filter.filterMatched(temp)){
-		tf->hidden=true;
-		//tf->hide();
+	if(tf->hidden){
+		qDebug().noquote().nospace() << tf->post.no << " filtered from /" << board << "/!";
+		tf->hide();
 	}
 	ui->threads->addWidget(tf);
 	tfMap.insert(tf->post.no,tf);
-	tfPairs.append(QPair<QString,ThreadForm*>(tf->post.no,tf));
 	if(this == mw->currentTab) QCoreApplication::processEvents();
 }
 
@@ -273,5 +281,4 @@ void BoardTab::focusIt()
 
 void BoardTab::clearMap(){
 	tfMap.clear();
-	tfPairs.clear();
 }

@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     notificationtray.cpp \
     treeview.cpp \
     notificationview.cpp \
-    archivetab.cpp
+    archivetab.cpp \
+    threadformcontext.cpp
 
 HEADERS += mainwindow.h \
     threadform.h \
@@ -58,7 +59,8 @@ HEADERS += mainwindow.h \
     notificationtray.h \
     treeview.h \
     notificationview.h \
-    archivetab.h
+    archivetab.h \
+    threadformcontext.h
 
 FORMS   += mainwindow.ui \
     threadform.ui \

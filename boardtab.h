@@ -32,7 +32,6 @@ public:
 	QString boardUrl;
 	QNetworkReply *reply;
 	QMap<QString,ThreadForm*> tfMap;
-	QList<QPair<QString,ThreadForm*>> tfPairs;
 	PostForm myPostForm;
 	void openPostForm();
 
@@ -49,16 +48,19 @@ public slots:
 	void clearMap();
 	void setFontSize(int fontSize);
 	void setImageSize(int imageSize);
+	void removeTF(ThreadForm *tf);
+	void showTF(ThreadForm *tf);
 
 private:
 	Ui::BoardTab *ui;
-	Filter filter;
 	QString vimCommand;
 
 private slots:
 	void on_pushButton_clicked();
 	void on_lineEdit_returnPressed();
 	void updateVim();
+signals:
+	void startHelper(Chan *api, QString &board, BoardType type, QString search, QWidget *parent);
 };
 
 Q_DECLARE_METATYPE(BoardTab*)

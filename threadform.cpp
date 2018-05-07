@@ -1,5 +1,6 @@
 #include "threadform.h"
 #include "ui_threadform.h"
+#include "threadformcontext.h"
 #include "filter.h"
 #include "threadtab.h"
 #include "mainwindow.h"
@@ -14,6 +15,7 @@
 #include <QStringList>
 #include <QListIterator>
 #include <QPainter>
+#include <QMenu>
 
 //TODO get rid of #include threadtab.h and mainwindow.h by using signals/slots
 //TODO Possibly decouple the file and thumb getters to another class class
@@ -80,7 +82,8 @@ QString ThreadForm::infoString(){
 			"<span style=\"color: rgb(163, 68, 67);\">" % post.name % "</span> " %
 			countryString % regionString %
 			"<span>" % post.realNow % "</span> " %
-			"<a href=\"#op" % post.no % "\" style=\"color:#897399\">No." % post.no % "</a> " %
+			"<a href=\"#op" % post.no % "\" style=\"color:#bbbbbb; text-decoration: none\">No." % post.no % "</a> " %
+			"<a href=\"#f" % post.no % "\" style=\"color:#897399; text-decoration: none\"></a> " %
 			repliesString;
 	return tfInfoString;
 }
@@ -308,12 +311,13 @@ void ThreadForm::imageClicked()
 
 void ThreadForm::hideClicked()
 {
-	this->hide();
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QStringList idFilters = settings.value("filters/" % board % "/id").toStringList();
 	idFilters.append(threadNum);
 	settings.setValue("filters/" % board % "/id",idFilters);
 	qDebug().noquote() << "hide Clicked so" << threadNum << "filtered!";
+	this->hidden = true;
+	emit removeMe(this);
 	if(this->type == Reply){
 		QListIterator<QPointer<ThreadForm>> i(clones);
 		while(i.hasNext()) {
@@ -331,9 +335,6 @@ void ThreadForm::hideClicked()
 			}
 		}
 	}
-	this->hidden = true;
-	this->close();
-	emit removeMe(this);
 }
 
 void ThreadForm::openImage()
@@ -413,9 +414,27 @@ void ThreadForm::quoteClicked(const QString &link)
 		if(this->type == PostType::Reply) static_cast<ThreadTab*>(tab)->quoteIt(">>"+post.no);
 		else imageClicked();
 	}
+	else if(link.startsWith("#f")){
+		postMenu();
+	}
 	else if(!link.isEmpty() && link.at(0)=='/') {
 		mw->loadFromSearch(link,QString(),Q_NULLPTR,false);
 	}
+}
+
+void ThreadForm::postMenu(){
+
+	/*QMenu *postM = new QMenu;
+	postM->setStyleSheet("background-color: #222222; color:#bbbbbb; border: 1px solid white");
+	QAction* actionPostNum = postM->addAction(postNum);
+	QMenu *filterMenu = postM->addMenu("Filter");
+	connect(actionPostNum,&QAction::triggered,[=](){
+		qDebug() << actionPostNum->text() << "triggered";
+	});
+	postM->setAttribute(Qt::WA_DeleteOnClose);
+	postM->popup(QCursor::pos());*/
+	ThreadFormContext *tfc = new ThreadFormContext(&post);
+	connect(tfc,&ThreadFormContext::filtersChanged,mw,&MainWindow::reloadFilters,Qt::DirectConnection);
 }
 
 void ThreadForm::insert(ThreadForm *tf)

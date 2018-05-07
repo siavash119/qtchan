@@ -1,6 +1,7 @@
 #include "threadtabhelper.h"
 #include "netcontroller.h"
 #include "you.h"
+#include "filter.h"
 #include "notificationview.h"
 #include <QJsonArray>
 
@@ -187,6 +188,11 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 		if(you.hasYou(board,tf->post.no)){
 			tf->post.isYou = true;
 		}
+		//Use another thread?
+		//if(filter.filterMatched(tf->matchThis()) || filter.filterMatched2(&(tf->post))){
+		if(filter.filterMatched2(&(tf->post))){
+			tf->hidden=true;
+		}
 		emit newTF(tf);
 		//Update windowTitle with OP info
 		if(i==0) {
@@ -224,6 +230,19 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 	}
 	if(settings.value("extraFlags/enable",false).toBool()) getExtraFlags();
 	//emit scrollIt();
+}
+
+void ThreadTabHelper::reloadFilters(){
+	foreach(ThreadForm* tf,tfMap){
+		if(filter.filterMatched2(&(tf->post))){
+			tf->hidden=true;
+			emit removeTF(tf);
+		}
+		else{
+			tf->hidden=false;
+			emit showTF(tf);
+		}
+	}
 }
 
 void ThreadTabHelper::loadAllImages() {

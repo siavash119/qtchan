@@ -69,6 +69,7 @@ public:
 	//custom strings
 
 	QString board;
+	QString size_img;
 	/*QString fileURL;
 	QString filePath;
 	QString thumbURL;
@@ -76,6 +77,8 @@ public:
 	*/
 	bool isYou = false;
 	bool hasYou = false;
+	QString* get(QString key);
+
 };
 
 #endif // POST_H

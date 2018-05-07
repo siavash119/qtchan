@@ -1,11 +1,13 @@
 #include "filter.h"
+#include "post.h"
 #include "you.h"
 #include <QStandardPaths>
 #include <QDebug>
 
 Filter::Filter()
 {
-	filters = loadFilterFile();
+	loadFilterFile();
+	loadFilterFile2();
 }
 
 /*void Filter::htmlParse(QString search) {
@@ -29,8 +31,7 @@ QSet<QString> Filter::findQuotes(QString post)
 
 //TODO allow change filter file location setting
 //TODO listen for file changes and reload filter
-QSet<QRegularExpression> Filter::loadFilterFile(){
-	QSet<QRegularExpression> set;
+void Filter::loadFilterFile(){
 	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + "filters.conf";
 	QFile inputFile(filterFile);
 	if (inputFile.open(QIODevice::ReadOnly))
@@ -40,12 +41,89 @@ QSet<QRegularExpression> Filter::loadFilterFile(){
 		{
 			QString line = in.readLine();
 			//replace \ with \\ for c++ regexp
-			if(line.at(0)=='#') continue;
+			if(line.isEmpty() || line.at(0)=='#') continue;
 			line = line.replace("\\\\","\\\\\\\\");
-			set.insert(QRegularExpression(line));
+			filters.insert(QRegularExpression(line));
+		}
+		inputFile.close();
+	}
+}
+
+void Filter::loadFilterFile2(){
+	filters2.clear();
+	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + "filters2.conf";
+	QFile inputFile(filterFile);
+	if (inputFile.open(QIODevice::ReadOnly))
+	{
+		QTextStream in(&inputFile);
+		while (!in.atEnd())
+		{
+			QString line = in.readLine();
+			if(!line.isEmpty() && line.at(0)=='!'){
+				QString key = line.mid(1);
+				QSet<QRegularExpression> set = filters2.value(key);
+				QString exp = in.readLine();
+				while(!exp.isEmpty() && exp.at(0) != '!' && !in.atEnd()){
+					if(exp.isEmpty() || exp.at(0)=='#') continue;
+					exp = exp.replace("\\\\","\\\\\\\\");
+					set.insert(QRegularExpression(exp,QRegularExpression::CaseInsensitiveOption));
+					exp = in.readLine();
+				}
+				filters2.insert(key,set);
+			}
+		}
+		inputFile.close();
+	}
+	qDebug() << "########" << endl << "FILTERS" << endl << filters2 << endl << "#########";
+}
+
+void Filter::addFilter2(QString key, QString newFilter){
+	QSet<QRegularExpression> set = filters2.value(key);
+	set.insert(QRegularExpression(newFilter,QRegularExpression::CaseInsensitiveOption));
+	filters2.insert(key,set);
+	writeFilterFile2();
+}
+
+void Filter::writeFilterFile2(){
+	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + "filters2.conf";
+	QFile file(filterFile);
+	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
+		QTextStream out(&file);
+		foreach(QString key, filters2.keys()){
+			out << '!' << key;
+			foreach(QRegularExpression exp, filters2.value(key)){
+				out << endl << exp.pattern();
+			}
+			out << endl << '!' << endl << endl;
 		}
 	}
-	return set;
+}
+
+void Filter::addFilter(QString &newFilter){
+	filters.insert(QRegularExpression(newFilter));
+	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + "filters.conf";
+	QFile file(filterFile);
+	if(file.open(QIODevice::WriteOnly | QIODevice::Append)){
+		newFilter.prepend("\n");
+		file.write(newFilter.toUtf8());
+		file.close();
+	}
+}
+
+bool Filter::filterMatched2(Post *p){
+	QHashIterator<QString, QSet<QRegularExpression>> i(filters2);
+	while (i.hasNext()) {
+		i.next();
+		QString key = i.key();
+		QSet<QRegularExpression> set = i.value();
+		QString *temp = p->get(key);
+		foreach(QRegularExpression exp, set){
+			if(temp != Q_NULLPTR && !temp->isEmpty() && exp.match(*temp).hasMatch()){
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 bool Filter::filterMatched(QString post){
@@ -53,6 +131,7 @@ bool Filter::filterMatched(QString post){
 	while (i.hasNext()){
 		QRegularExpression temp = i.next();
 		if(temp.match(post).hasMatch()){
+			qDebug() << temp.pattern() << "matched with" << endl << post;
 			return true;
 		}
 	}
@@ -124,9 +203,11 @@ QString Filter::titleParse(QString &title){
 }
 
 QString Filter::toStrippedHtml(QString &text){
-	QRegularExpression imgTag("<img.*?>");
+	//QRegularExpression imgTag("<img.*?>");
 	QRegularExpression htmlTag("<[^>]*>");
 	return text.replace(QRegularExpression("<img.*?>")," ").replace(htmlTag,"").replace("&amp;","&")
 		.replace("&gt;",">").replace("&lt;","<")
 		.replace("&quot;","\"").replace("&#039;","'");
 }
+
+Filter filter;

@@ -49,6 +49,7 @@ public slots:
 	void getPosts();
 	void loadAllImages();
 	void setAutoUpdate(bool update);
+	void reloadFilters();
 
 private slots:
 	void getPostsFinished();
@@ -63,6 +64,8 @@ signals:
 	//void addStretch();
 	void threadStatus(QString status, QString value = "0");
 	void refresh(QPointer<ThreadForm> tf);
+	void removeTF(ThreadForm *tf);
+	void showTF(ThreadForm *tf);
 	//void scrollIt();
 };
 

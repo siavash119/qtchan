@@ -11,6 +11,8 @@
 #include <QFile>
 #include <QTextStream>
 
+class Post;
+
 class Filter
 {
 public:
@@ -20,6 +22,7 @@ public:
 	static QSet<QString> findQuotes(QString post);
 	bool filterMatched(QString post);
 	QSet<QRegularExpression> filters;
+	QHash<QString,QSet<QRegularExpression>> filters2;
 	static QRegularExpression quoteRegExp;
 	static QRegularExpression quotelinkRegExp;
 	static QString colorString;
@@ -29,11 +32,18 @@ public:
 	static QString htmlParse(QString &html);
 	static QString titleParse(QString &title);
 	static QString toStrippedHtml(QString &text);
+	void addFilter(QString &newFilter);
+	void addFilter2(QString key, QString newFilter);
+	bool filterMatched2(Post *p);
+	void loadFilterFile2();
 
 private:
 	QRegularExpressionMatch quotelinkMatch;
 	QRegularExpressionMatchIterator quotelinkMatches;
-	QSet<QRegularExpression> loadFilterFile();
+	void loadFilterFile();
+	void writeFilterFile2();
 };
+
+extern Filter filter;
 
 #endif // FILTER_H

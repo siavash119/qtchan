@@ -38,6 +38,7 @@ public slots:
 	void getPosts();
 	void loadAllImages();
 	void setAutoUpdate(bool update);
+	void reloadFilters();
 
 signals:
 	void postsLoaded(QJsonArray &posts);
@@ -49,6 +50,8 @@ signals:
 	void boardStatus(QString status, QString value = "0");
 	void refresh(QPointer<ThreadForm> tf);
 	void clearMap();
+	void removeTF(ThreadForm *tf);
+	void showTF(ThreadForm *tf);
 	//void scrollIt();
 };
 

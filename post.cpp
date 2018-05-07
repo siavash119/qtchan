@@ -12,6 +12,7 @@ Post::Post(QJsonObject &p, QString &board)
 }
 
 //toBool doesn't work for QJsonValue(double,1)?
+//Should I just use a qHash?
 void Post::load(QJsonObject &p, QString &board)
 {
 	this->board = board;
@@ -32,6 +33,7 @@ void Post::load(QJsonObject &p, QString &board)
 	timestamp.setTime_t(time);
 	realNow = timestamp.toString(Qt::SystemLocaleShortDate);
 	name = p.value("name").toString();
+	trip = p.value("trip").toString();
 	id = p.value("id").toString();
 	capcode = p.value("id").toString();
 	country = p.value("country").toString();
@@ -54,12 +56,25 @@ void Post::load(QJsonObject &p, QString &board)
 		md5 = p.value("md5").toString();
 		w = p.value("w").toInt();
 		h = p.value("h").toInt();
+		size_img = QString(w + "x" + h);
 		tn_w = p.value("tn_w").toInt();
 		tn_h = p.value("tn_h").toInt();
 		filedeleted = (p.value("filedeleted").toInt() == 1) ? true : false;
 		spoiler = (p.value("spoiler").toInt() == 1) ? true : false;
 		custom_spoiler = (p.value("custom_spoiler").toInt() == 1) ? true : false;
 	}
+}
+
+QString* Post::get(QString key){
+	if(key == "no") return &no;
+	else if(key == "name") return &name;
+	else if(key == "sub") return &sub;
+	else if(key == "com") return &com;
+	else if(key == "trip") return &trip;
+	else if(key == "md5") return &md5;
+	else if(key == "size") return &size_img;
+	else if(key == "filename") return &filename;
+	else return Q_NULLPTR;
 }
 
 Post::~Post() {

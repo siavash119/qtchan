@@ -105,6 +105,7 @@ private:
 	QMap<QString,ThreadForm*> inserted;
 	QMap<QString,QMetaObject::Connection> insertedConnections;
 	void removeFromInserted();
+	void postMenu();
 
 signals:
 	void loadThreadTab(ThreadForm*, QJsonArray&);

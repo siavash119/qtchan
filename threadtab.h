@@ -76,7 +76,6 @@ private:
 	void setShortcuts();
 	QFuture<QList<ThreadForm*>> newImage;
 	QFutureWatcher<QList<ThreadForm*>> watcher;
-	Filter filter;
 	QString vimCommand;
 
 private slots:
@@ -85,6 +84,7 @@ private slots:
 	void on_pushButton_clicked();
 	void on_lineEdit_returnPressed();
 	void removeTF(ThreadForm *tf);
+	void showTF(ThreadForm *tf);
 	void updateVim();
 	void setTabTitle(QString tabTitle);
 
