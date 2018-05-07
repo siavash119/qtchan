@@ -122,8 +122,11 @@ void BoardTab::setShortcuts()
 			}
 			if(i.hasPrevious()) i.previous();
 			while(i.hasPrevious() && vimNumber--){
-				toTf = qobject_cast<ThreadForm*>(i.previous());
-				if(toTf->hidden) vimNumber++;
+				QObject *temp = i.previous();
+				if(temp->objectName() == "ThreadForm"){
+					toTf = qobject_cast<ThreadForm*>(temp);
+					if(toTf->hidden) vimNumber++;
+				}
 			}
 			if(toTf) bar->setValue(toTf->pos().y());
 		}
@@ -144,8 +147,12 @@ void BoardTab::setShortcuts()
 				if(i.next() == tf) break;
 			}
 			while(i.hasNext() && vimNumber--){
-				toTf = qobject_cast<ThreadForm*>(i.next());
-				if(toTf->hidden) vimNumber++;
+				QObject *temp = i.next();
+				if(temp->objectName() == "ThreadForm"){
+					toTf = qobject_cast<ThreadForm*>(temp);
+					if(toTf->hidden) vimNumber++;
+				}
+
 			}
 			if(toTf) bar->setValue(((QWidget*)(toTf))->pos().y());
 		}
