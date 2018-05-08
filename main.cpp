@@ -1,10 +1,15 @@
 #include "mainwindow.h"
 #include "notificationtray.h"
+#include "netcontroller.h"
+#include "chans.h"
 #include <QApplication>
 #include <QSettings>
 
 MainWindow *mw;
 NotificationView *nv;
+netController nc;
+Chan *fourChanAPI = new FourChan();
+Chan *eightChanAPI = new EightChan();
 
 int main(int argc, char *argv[])
 {
