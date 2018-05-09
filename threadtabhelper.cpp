@@ -1,7 +1,6 @@
 #include "threadtabhelper.h"
 #include "netcontroller.h"
 #include "you.h"
-#include "filter.h"
 #include "notificationview.h"
 #include <QJsonArray>
 
@@ -32,6 +31,8 @@ void ThreadTabHelper::startUp(Chan *api, QString &board, QString &thread, QWidge
 		connectionUpdate = connect(updateTimer, &QTimer::timeout,
 								   this,&ThreadTabHelper::getPosts,UniqueDirect);
 	}
+
+	filterMe.filterMatchedPerTab(board,"thread");
 
 	//self-archive check
 	QFile jsonFile(board+"/"+thread+"/"+thread+".json");
@@ -190,7 +191,7 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 		}
 		//Use another thread?
 		//if(filter.filterMatched(tf->matchThis()) || filter.filterMatched2(&(tf->post))){
-		if(filter.filterMatched2(&(tf->post))){
+		if(filterMe.filterMatched2(&(tf->post))){
 			tf->hidden=true;
 		}
 		emit newTF(tf);
@@ -233,8 +234,9 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 }
 
 void ThreadTabHelper::reloadFilters(){
+	filterMe.filters2 = filter.filterMatchedPerTab(this->board,"thread");
 	foreach(ThreadForm* tf,tfMap){
-		if(filter.filterMatched2(&(tf->post))){
+		if(filterMe.filterMatched2(&(tf->post))){
 			tf->hidden=true;
 			emit removeTF(tf);
 		}

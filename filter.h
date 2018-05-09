@@ -22,7 +22,7 @@ public:
 	static QSet<QString> findQuotes(QString post);
 	bool filterMatched(QString post);
 	QSet<QRegularExpression> filters;
-	QHash<QString,QSet<QRegularExpression>> filters2;
+	QHash<QString,QHash<QRegularExpression,QString>> filters2;
 	static QRegularExpression quoteRegExp;
 	static QRegularExpression quotelinkRegExp;
 	static QString colorString;
@@ -36,12 +36,15 @@ public:
 	void addFilter2(QString key, QString newFilter);
 	bool filterMatched2(Post *p);
 	void loadFilterFile2();
+	QHash<QString,QHash<QRegularExpression,QString>> filterMatchedPerTab(QString board, QString tabType);
+	bool useFilterPerTab(QString &options, QString board, QString tabType);
 
 private:
 	QRegularExpressionMatch quotelinkMatch;
 	QRegularExpressionMatchIterator quotelinkMatches;
 	void loadFilterFile();
 	void writeFilterFile2();
+	bool useFilter(QString &options, Post *p);
 };
 
 extern Filter filter;

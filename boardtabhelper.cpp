@@ -28,6 +28,7 @@ void BoardTabHelper::startUp(Chan *api, QString &board, BoardType type, QString 
 	}
 	request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
 	getPosts();
+	filterMe.filterMatchedPerTab(board,"board");
 	/*updateTimer = new QTimer();
 	updateTimer->setInterval(60000);
 	updateTimer->start();
@@ -127,7 +128,7 @@ void BoardTabHelper::loadPosts() {
 		tf->load(p);
 		tfMap.insert(tf->post.no,tf);
 		//if(filter.filterMatched(tf->matchThis()) || filter.filterMatched2(&(tf->post))){
-		if(filter.filterMatched2(&(tf->post))){
+		if(filterMe.filterMatched2(&(tf->post))){
 			tf->hidden=true;
 		}
 		emit newThread(tf);
@@ -144,8 +145,9 @@ void BoardTabHelper::loadPosts() {
 }
 
 void BoardTabHelper::reloadFilters(){
+	filterMe.filters2 = filter.filterMatchedPerTab(this->board,"board");
 	foreach(ThreadForm* tf,tfMap){
-		if(filter.filterMatched2(&(tf->post))){
+		if(filterMe.filterMatched2(&(tf->post))){
 			tf->hidden=true;
 			emit removeTF(tf);
 		}

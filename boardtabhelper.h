@@ -2,6 +2,7 @@
 #define BOARDTABHELPER_H
 
 #include "chans.h"
+#include "filter.h"
 #include "threadform.h"
 
 enum BoardType{Index,Catalog};
@@ -11,6 +12,7 @@ class BoardTabHelper : public QObject
 	Q_OBJECT
 	bool gettingReply = false;
 	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
+	Filter filterMe = filter;
 public:
 	BoardTabHelper();
 	~BoardTabHelper();

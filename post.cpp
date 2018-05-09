@@ -74,6 +74,7 @@ QString* Post::get(QString key){
 	else if(key == "md5") return &md5;
 	else if(key == "size") return &size_img;
 	else if(key == "filename") return &filename;
+	else if(key == "country_name") return &country_name;
 	else return Q_NULLPTR;
 }
 

@@ -61,17 +61,29 @@ void Filter::loadFilterFile2(){
 			QString line = in.readLine();
 			if(!line.isEmpty() && line.at(0)=='!'){
 				QString key = line.mid(1);
-				QSet<QRegularExpression> set = filters2.value(key);
+				QHash<QRegularExpression,QString> hash = filters2.value(key);
 				while(!in.atEnd()){
-					QString exp = in.readLine();
-					if(exp.isEmpty() || exp.at(0)=='#'){
+					line = in.readLine();
+					if(line.isEmpty() || line.at(0)=='#'){
 						continue;
 					}
-					else if(exp.at(0) == '!') break;
-					exp = exp.replace("\\\\","\\\\\\\\");
-					set.insert(QRegularExpression(exp,QRegularExpression::CaseInsensitiveOption));
+					else if(line.at(0) == '!') break;
+					line = line.replace("\\\\","\\\\\\\\");
+					int ind = line.lastIndexOf('$');
+					QRegularExpression exp;
+					QString options;
+					if(ind != -1){
+						exp.setPattern(line.mid(0,ind));
+						if(line.length() > ind+1)
+							options = line.mid(ind+1);
+					}
+					else{
+						exp.setPattern(line);
+					}
+					exp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+					hash.insert(exp,options);
 				}
-				filters2.insert(key,set);
+				filters2.insert(key,hash);
 			}
 		}
 		inputFile.close();
@@ -80,9 +92,9 @@ void Filter::loadFilterFile2(){
 }
 
 void Filter::addFilter2(QString key, QString newFilter){
-	QSet<QRegularExpression> set = filters2.value(key);
-	set.insert(QRegularExpression(newFilter,QRegularExpression::CaseInsensitiveOption));
-	filters2.insert(key,set);
+	QHash<QRegularExpression,QString> hash = filters2.value(key);
+	hash.insert(QRegularExpression(newFilter,QRegularExpression::CaseInsensitiveOption),QString());
+	filters2.insert(key,hash);
 	writeFilterFile2();
 }
 
@@ -91,41 +103,144 @@ void Filter::writeFilterFile2(){
 	QFile file(filterFile);
 	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
 		QTextStream out(&file);
-		foreach(QString key, filters2.keys()){
-			out << '!' << key;
-			foreach(QRegularExpression exp, filters2.value(key)){
-				out << endl << exp.pattern();
+		QHashIterator<QString, QHash<QRegularExpression,QString>> i(filters2);
+		while(i.hasNext()){
+			i.next();
+			out << '!' << i.key();
+			QHashIterator<QRegularExpression,QString> j(i.value());
+			while(j.hasNext()){
+				j.next();
+				out << endl << j.key().pattern() << j.value();
 			}
 			out << endl << '!' << endl << endl;
 		}
 	}
 }
 
-void Filter::addFilter(QString &newFilter){
-	filters.insert(QRegularExpression(newFilter));
-	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + "filters.conf";
-	QFile file(filterFile);
-	if(file.open(QIODevice::WriteOnly | QIODevice::Append)){
-		newFilter.prepend("\n");
-		file.write(newFilter.toUtf8());
-		file.close();
-	}
-}
-
 bool Filter::filterMatched2(Post *p){
-	QHashIterator<QString, QSet<QRegularExpression>> i(filters2);
+	QHashIterator<QString, QHash<QRegularExpression,QString>> i(filters2);
 	while (i.hasNext()) {
 		i.next();
 		QString key = i.key();
-		QSet<QRegularExpression> set = i.value();
 		QString *temp = p->get(key);
-		foreach(QRegularExpression exp, set){
-			if(temp != Q_NULLPTR && !temp->isEmpty() && temp->contains(exp)){
+		QHashIterator<QRegularExpression,QString> j(i.value());
+		while(j.hasNext()){
+			j.next();
+			QRegularExpression exp = j.key();
+			//QString options = j.value();
+			//&& useFilter(options,p)
+			if(temp != Q_NULLPTR && temp->contains(exp))
 				return true;
-			}
 		}
 	}
 	return false;
+}
+
+bool Filter::useFilter(QString &options, Post *p){
+	if(options.isEmpty()) return true;
+	QStringList optionsList = options.split(';');
+	QVector<bool> useIt(optionsList.size(),false);
+	int i = 0;
+	foreach(QString option,optionsList){
+		if(option.isEmpty()) return true;
+		QStringList kvPairs = option.split(':');
+		if(kvPairs.size() != 2){
+			useIt.data()[i++] = true;
+			continue;
+		}
+		QString key = kvPairs.at(0);
+		QString values = kvPairs.at(1);
+		QStringList valuesList = values.split(',');
+		foreach(QString value, valuesList){
+			if(key == "boards"){
+				if(value == p->board){
+					useIt.data()[i] = true;
+					break;
+				}
+			}
+			else if(key == "op" && p->resto == 0){
+				if(value == "only" || value == "yes"){
+					useIt.data()[i] = true;
+					break;
+				}
+				else{
+					return false;
+				}
+			}
+			else if(key == "exclude"){
+				if(value == p->board) return false;
+			}
+		}
+		i++;
+	}
+	foreach(bool temp, useIt){
+		if(!temp) return false;
+	}
+	return true;
+}
+
+QHash<QString,QHash<QRegularExpression,QString>> Filter::filterMatchedPerTab(QString board, QString tabType){
+	QHashIterator<QString, QHash<QRegularExpression,QString>> i(filters2);
+	while (i.hasNext()) {
+		i.next();
+		QHash<QRegularExpression,QString> temp = i.value();
+		QHashIterator<QRegularExpression,QString> j(temp);
+		while(j.hasNext()){
+			j.next();
+			QString options = j.value();
+			//TODO build useFilters per tab instead of checking per post
+			if(!useFilterPerTab(options,board,tabType)) {
+				temp.remove(j.key());
+			}
+		}
+		filters2.insert(i.key(),temp);
+	}
+	return filters2;
+}
+
+bool Filter::useFilterPerTab(QString &options, QString board, QString tabType){
+	if(options.isEmpty()) return true;
+	QStringList optionsList = options.split(';');
+	QVector<bool> useIt(optionsList.size(),false);
+	int i = 0;
+	foreach(QString option,optionsList){
+		if(option.isEmpty()) return true;
+		QStringList kvPairs = option.split(':');
+		if(kvPairs.size() != 2){
+			useIt.data()[i++] = true;
+			continue;
+		}
+		QString key = kvPairs.at(0);
+		QString values = kvPairs.at(1);
+		QStringList valuesList = values.split(',');
+		foreach(QString value, valuesList){
+			if(key == "boards"){
+				if(value == board){
+					useIt.data()[i] = true;
+					break;
+				}
+			}
+			else if(key == "op"){
+				if(tabType == "board" && (value == "only" || value == "yes")){
+					useIt.data()[i] = true;
+					break;
+				}
+				else if(tabType == "thread" && value == "no"){
+					useIt.data()[i] = true;
+					break;
+				}
+				else return false;
+			}
+			else if(key == "exclude"){
+				if(value == board) return false;
+			}
+		}
+		i++;
+	}
+	foreach(bool temp, useIt){
+		if(!temp) return false;
+	}
+	return true;
 }
 
 bool Filter::filterMatched(QString post){
@@ -138,6 +253,17 @@ bool Filter::filterMatched(QString post){
 		}
 	}
 	return false;
+}
+
+void Filter::addFilter(QString &newFilter){
+	filters.insert(QRegularExpression(newFilter));
+	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + "filters.conf";
+	QFile file(filterFile);
+	if(file.open(QIODevice::WriteOnly | QIODevice::Append)){
+		newFilter.prepend("\n");
+		file.write(newFilter.toUtf8());
+		file.close();
+	}
 }
 
 /*

@@ -3,6 +3,7 @@
 
 #include "threadform.h"
 #include "chans.h"
+#include "filter.h"
 #include <QNetworkReply>
 #include <QtConcurrent/QtConcurrent>
 #include <QImage>
@@ -17,6 +18,7 @@ class ThreadTabHelper : public QObject
 	QString quoteString = "class=\\\"quote\\\" style=\\\"color:#897399\\\"";
 	QRegExp quotesRegExp;
 	QRegExp quotelinksRegExp;
+	Filter filterMe = filter;
 public:
 	ThreadTabHelper();
 	~ThreadTabHelper();
