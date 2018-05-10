@@ -61,8 +61,7 @@ void BoardTabHelper::getPosts() {
 	qDebug() << "getting posts for" << boardUrl;
 	reply = nc.jsonManager->get(request);
 	gettingReply = true;
-	connectionPost = connect(reply, &QNetworkReply::finished,
-							 this,&BoardTabHelper::loadPosts, UniqueDirect);
+	connectionPost = connect(reply,SIGNAL(finished()),this,SLOT(loadPosts()),UniqueDirect);
 }
 
 void BoardTabHelper::writeJson(QString &board, QByteArray &rep) {

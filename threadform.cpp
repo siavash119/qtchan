@@ -212,7 +212,7 @@ void ThreadForm::downloadFile(const QString &fileUrl,
 void ThreadForm::downloadedSlot(const QString &path, const QString &message){
 	if(path.compare(flagPath) == 0){
 		ui->info->update();
-		QListIterator<QPointer<ThreadForm>> i(rootTF->clones);
+		QListIterator< QPointer<ThreadForm> > i(rootTF->clones);
 		QPointer<ThreadForm> cloned;
 		while(i.hasNext()) {
 			cloned = i.next();
@@ -224,7 +224,7 @@ void ThreadForm::downloadedSlot(const QString &path, const QString &message){
 	else if(path.startsWith("flags/flegs/")){
 		if(++regionsGot != regionList.size()) return;
 		ui->info->update();
-		QListIterator<QPointer<ThreadForm>> i(rootTF->clones);
+		QListIterator< QPointer<ThreadForm> > i(rootTF->clones);
 		QPointer<ThreadForm> cloned;
 		while(i.hasNext()) {
 			cloned = i.next();
@@ -238,7 +238,7 @@ void ThreadForm::downloadedSlot(const QString &path, const QString &message){
 		finished = true;
 		if(post.ext.compare(".jpg") == 0 || post.ext.compare(".png") == 0) {
 			loadImage(filePath);
-			QListIterator<QPointer<ThreadForm>> i(rootTF->clones);
+			QListIterator< QPointer<ThreadForm> > i(rootTF->clones);
 			QPointer<ThreadForm> cloned;
 			while(i.hasNext()) {
 				cloned = i.next();
@@ -319,7 +319,7 @@ void ThreadForm::hideClicked()
 	this->hidden = true;
 	emit removeMe(this);
 	if(this->type == Reply){
-		QListIterator<QPointer<ThreadForm>> i(clones);
+		QListIterator< QPointer<ThreadForm> > i(clones);
 		while(i.hasNext()) {
 			i.next()->deleteLater();
 		}
@@ -351,7 +351,7 @@ void ThreadForm::setFontSize(int fontSize){
 	temp.setPointSize(fontSize);
 	this->ui->com->setFont(temp);
 	if(root && clones.size()){
-		QListIterator<QPointer<ThreadForm>> i(clones);
+		QListIterator< QPointer<ThreadForm> > i(clones);
 		while(i.hasNext()) {
 			QPointer<ThreadForm> next = i.next();
 			if(!next) continue;
@@ -364,7 +364,7 @@ void ThreadForm::setImageSize(int imageSize){
 	if(file && file->exists()) loadImage(filePath);
 	else if(thumb && thumb->exists()) loadImage(thumbPath);
 	if(root && clones.size()){
-		QListIterator<QPointer<ThreadForm>> i(clones);
+		QListIterator< QPointer<ThreadForm> > i(clones);
 		while(i.hasNext()) {
 			QPointer<ThreadForm> next = i.next();
 			if(!next) continue;
@@ -523,7 +523,7 @@ void ThreadForm::addReplyLink(QString &reply, bool isYou){
 	repliesString += temp;
 	ui->info->setText(infoString());
 	//update clones
-	QListIterator<QPointer<ThreadForm>> i(clones);
+	QListIterator< QPointer<ThreadForm> > i(clones);
 	while(i.hasNext()) {
 		QPointer<ThreadForm> next = i.next();
 		if(!next) continue;
@@ -543,7 +543,7 @@ void ThreadForm::setReplies()
 		repliesString = repliesString.mid(1);
 		ui->info->setText(infoString());
 		//update clones
-		QListIterator<QPointer<ThreadForm>> i(clones);
+		QListIterator< QPointer<ThreadForm> > i(clones);
 		while(i.hasNext()) {
 			QPointer<ThreadForm> next = i.next();
 			if(!next) continue;

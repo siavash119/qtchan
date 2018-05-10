@@ -103,7 +103,7 @@ void Filter::writeFilterFile2(){
 	QFile file(filterFile);
 	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
 		QTextStream out(&file);
-		QHashIterator<QString, QHash<QRegularExpression,QString>> i(filters2);
+		QHashIterator< QString, QHash<QRegularExpression,QString> > i(filters2);
 		while(i.hasNext()){
 			i.next();
 			out << '!' << i.key();
@@ -118,7 +118,7 @@ void Filter::writeFilterFile2(){
 }
 
 bool Filter::filterMatched2(Post *p){
-	QHashIterator<QString, QHash<QRegularExpression,QString>> i(filters2);
+	QHashIterator< QString, QHash<QRegularExpression,QString> > i(filters2);
 	while (i.hasNext()) {
 		i.next();
 		QString key = i.key();
@@ -179,8 +179,8 @@ bool Filter::useFilter(QString &options, Post *p){
 	return true;
 }
 
-QHash<QString,QHash<QRegularExpression,QString>> Filter::filterMatchedPerTab(QString board, QString tabType){
-	QHashIterator<QString, QHash<QRegularExpression,QString>> i(filters2);
+QHash< QString,QHash<QRegularExpression,QString> > Filter::filterMatchedPerTab(QString board, QString tabType){
+	QHashIterator< QString, QHash<QRegularExpression,QString> > i(filters2);
 	while (i.hasNext()) {
 		i.next();
 		QHash<QRegularExpression,QString> temp = i.value();

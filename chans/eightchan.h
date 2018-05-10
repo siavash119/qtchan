@@ -26,7 +26,8 @@ public:
 	inline QString postURL(QString &board){return QString("https://sys.8ch.net/" % board % "/post");}
 	inline bool usesCaptcha(){return false;}
 	inline QString captchaURL(){return "";}
-	inline CaptchaLinks captchaLinks(){return CaptchaLinks{};}
+	//g++ bug warns {0} uninitialized
+	inline CaptchaLinks captchaLinks(){return CaptchaLinks{QString(),QString(),QString(),QString(),QString(),QString()};}
 	inline bool requiresCookies(){return true;}
 	inline void setCookies(){
 		qDebug() << "setting cookies for 8ch";

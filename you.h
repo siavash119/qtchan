@@ -21,7 +21,7 @@ public:
 	void saveYou(QString fileName = "you");
 
 private:
-	QHash<QString,QSet<QString>> yourPosts;
+	QHash< QString,QSet<QString> > yourPosts;
 };
 
 extern You you;

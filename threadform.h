@@ -53,7 +53,7 @@ public:
 	void setReplies();
 	void setRepliesString(const QString &repliesString);
 	ThreadForm *clone(int replyLevel = 0);
-	QList<QPointer<ThreadForm>> clones;
+	QList< QPointer<ThreadForm> > clones;
 	//TODO check settings -> filter
 	bool hidden = false;
 	bool seen = false;

@@ -28,8 +28,7 @@ void ThreadTabHelper::startUp(Chan *api, QString &board, QString &thread, QWidge
 	updateTimer->setInterval(60000);
 	updateTimer->start();
 	if(settings.value("autoUpdate").toBool()) {
-		connectionUpdate = connect(updateTimer, &QTimer::timeout,
-								   this,&ThreadTabHelper::getPosts,UniqueDirect);
+		connectionUpdate = connect(updateTimer,SIGNAL(timeout()),this,SLOT(getPosts()),UniqueDirect);
 	}
 
 	filterMe.filterMatchedPerTab(board,"thread");
@@ -61,8 +60,7 @@ ThreadTabHelper::~ThreadTabHelper() {
 
 void ThreadTabHelper::setAutoUpdate(bool update) {
 	if(update) {
-		connectionUpdate = connect(updateTimer, &QTimer::timeout,
-								   this,&ThreadTabHelper::getPosts,UniqueDirect);
+		connectionUpdate = connect(updateTimer, SIGNAL(timeout()),this,SLOT(getPosts()),UniqueDirect);
 	}
 }
 
@@ -72,8 +70,7 @@ void ThreadTabHelper::getPosts() {
 	qDebug() << "getting posts for" << threadUrl;
 	reply = nc.jsonManager->get(request);
 	gettingReply = true;
-	connectionPost = connect(reply, &QNetworkReply::finished,
-							 this,&ThreadTabHelper::getPostsFinished, UniqueDirect);
+	connectionPost = connect(reply,SIGNAL(finished()),this,SLOT(getPostsFinished()),UniqueDirect);
 }
 
 void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep) {
@@ -96,7 +93,7 @@ void ThreadTabHelper::getExtraFlags(){
 	requestFlags.setUrl(QUrl("https://flagtism.drunkensailor.org/int/get_flags_api2.php"));
 	requestFlags.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 	replyFlags = nc.fileManager->post(requestFlags,data.toUtf8());
-	connect(replyFlags,&QNetworkReply::finished,this,&ThreadTabHelper::loadExtraFlags,UniqueDirect);
+	connect(replyFlags,SIGNAL(finished()),this,SLOT(loadExtraFlags()),UniqueDirect);
 }
 
 void ThreadTabHelper::loadExtraFlags(){

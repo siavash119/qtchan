@@ -74,8 +74,8 @@ private:
 	QMetaObject::Connection connectionAutoUpdate;
 	QMetaObject::Connection connectionVisibleChecker;
 	void setShortcuts();
-	QFuture<QList<ThreadForm*>> newImage;
-	QFutureWatcher<QList<ThreadForm*>> watcher;
+	QFuture< QList<ThreadForm*> > newImage;
+	QFutureWatcher< QList<ThreadForm*> > watcher;
 	QString vimCommand;
 
 private slots:
