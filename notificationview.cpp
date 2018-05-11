@@ -8,6 +8,8 @@ NotificationView::NotificationView(QWidget *parent) :
 {
 	this->setWindowFlags(Qt::ToolTip);
 	ui->setupUi(this);
+	this->setMaximumHeight(QApplication::desktop()->availableGeometry().height()-64);
+	reAdjust();
 }
 
 NotificationView::~NotificationView()
@@ -20,14 +22,24 @@ NotificationView::~NotificationView()
 
 void NotificationView::addNotification(QWidget *note){
 	ui->posts->insertWidget(0,note);
-	note->setParent(this);
 	reAdjust();
 	allConnections << connect(note,&QWidget::destroyed,this,&NotificationView::reAdjust);
 }
 
+//TODO should be an easier way to do this
 void NotificationView::reAdjust(){
-	adjustSize();
-	move(toMove());
+	QRect rec = QApplication::desktop()->availableGeometry(this);
+	int contentHint = ui->content->sizeHint().height();
+	int scrollHint = ui->scrollArea->sizeHint().height();
+	int recHint = rec.height()-64;
+	int hint = ((contentHint < scrollHint) ? scrollHint : contentHint) + ui->buttons->sizeHint().height();
+	int height = (hint < recHint) ? hint : recHint;
+	height = (height < sizeHint().height()) ? sizeHint().height() : height;
+	setGeometry(
+				rec.width()-680-32,
+				rec.height()-height-32,
+				680,
+				height);
 }
 
 QPoint NotificationView::toMove(){

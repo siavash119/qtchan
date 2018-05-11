@@ -236,7 +236,7 @@ void MainWindow::setShortcuts()
 			nv->hide();
 		}
 		else{
-			nv->move(nv->toMove());
+			nv->reAdjust();
 			nv->show();
 		}
 	});

@@ -221,7 +221,6 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 		}
 		if(tf->post.hasYou){
 			ThreadForm *cloned = tf->clone(0);
-			cloned->setMinimumSize(640,250);
 			nv->addNotification(cloned);
 		}
 		i++;

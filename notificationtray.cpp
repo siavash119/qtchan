@@ -17,7 +17,7 @@ void NotificationTray::activate(QSystemTrayIcon::ActivationReason reason){
 	if(reason == QSystemTrayIcon::ActivationReason::Trigger || reason == QSystemTrayIcon::ActivationReason::DoubleClick){
 		if(nv->isVisible()) nv->hide();
 		else{
-			nv->move(nv->toMove());
+			nv->reAdjust();
 			nv->show();
 		}
 	}
