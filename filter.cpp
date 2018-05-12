@@ -6,7 +6,7 @@
 
 Filter::Filter()
 {
-	loadFilterFile();
+	//loadFilterFile();
 	loadFilterFile2();
 }
 
@@ -51,7 +51,7 @@ void Filter::loadFilterFile(){
 
 void Filter::loadFilterFile2(){
 	filters2.clear();
-	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + "filters2.conf";
+	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + "filters.conf";
 	QFile inputFile(filterFile);
 	if (inputFile.open(QIODevice::ReadOnly))
 	{
@@ -99,7 +99,7 @@ void Filter::addFilter2(QString key, QString newFilter){
 }
 
 void Filter::writeFilterFile2(){
-	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + "filters2.conf";
+	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + "filters.conf";
 	QFile file(filterFile);
 	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
 		QTextStream out(&file);
