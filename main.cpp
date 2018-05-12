@@ -1,5 +1,6 @@
 #include "mainwindow.h"
-#include "notificationtray.h"
+#include "notificationview.h"
+//#include "notificationtray.h"
 #include "netcontroller.h"
 #include "chans.h"
 #include <QApplication>
@@ -30,9 +31,9 @@ int main(int argc, char *argv[])
 	w.show();
 	NotificationView view;
 	nv = &view;
-	NotificationTray t;
+	/*NotificationTray t;
 	t.setIcon(QIcon(":/icons/icon_22x22.png"));
-	t.show();
+	t.show();*/
 	w.loadSession();
 	return a.exec();
 }
