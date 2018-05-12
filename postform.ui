@@ -95,7 +95,7 @@
         <x>0</x>
         <y>0</y>
         <width>638</width>
-        <height>319</height>
+        <height>361</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -278,6 +278,16 @@
    <header>clickablelabel.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>com</tabstop>
+  <tabstop>response</tabstop>
+  <tabstop>submit</tabstop>
+  <tabstop>browse</tabstop>
+  <tabstop>cancel</tabstop>
+  <tabstop>name</tabstop>
+  <tabstop>email</tabstop>
+  <tabstop>subject</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
