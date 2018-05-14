@@ -17,6 +17,8 @@ Captcha::Captcha()
 	ec['1']='6';
 	ec['2']='7';
 	ec['3']='8';
+
+	//connect(timer,&QTimer::timeout,this,&Captcha::timeOut);
 }
 
 QString Captcha::easyCaptcha(QString answer){
@@ -177,6 +179,8 @@ void Captcha::loadCaptcha(){
 	challengeQuestion = replyString.mid(start+8,end-start-8);
 	emit questionInfo(challengeQuestion);
 	getImage(challenge);
+	//if(timer.isActive())timer.stop();
+	//timer.start(120000);
 }
 
 void Captcha::getImage(QString challenge){

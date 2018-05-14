@@ -57,6 +57,7 @@ void PostForm::loadCaptchaQuestion(QString &challenge){
 	ui->question->show();
 	qDebug() << "setting captcha info/question:" << challenge;
 	ui->question->setText(challenge);
+	ui->response->show();
 }
 
 void PostForm::loadCaptchaImage(QString &challenege, QPixmap &challengeImage){
@@ -65,6 +66,8 @@ void PostForm::loadCaptchaImage(QString &challenege, QPixmap &challengeImage){
 	ui->challenge->show();
 	qDebug() << "setting captcha image";
 	ui->challenge->setPixmap(challengeImage);
+	if(captchaTimer && captchaTimer->isActive()) captchaTimer->stop();
+	captchaTimer->start(120000);
 }
 
 void PostForm::load(Chan *api, QString &board, QString thread)
@@ -133,7 +136,7 @@ void PostForm::verifyCaptcha(){
 			QByteArray reply = captchaReply->readAll();
 			ui->response->clear();
 			if(reply.contains("fbc-success")){
-				QString matchText = ".select()\">";
+				QString matchText = "readonly>";
 				int start = reply.indexOf(matchText);
 				int end = reply.indexOf("</textarea>",start+matchText.length());
 				captchaCode = reply.mid(start+matchText.length(),end-start-matchText.length());
@@ -141,7 +144,8 @@ void PostForm::verifyCaptcha(){
 				ui->question->setText("Verified");
 				ui->challenge->hide();
 				ui->response->hide();
-				captchaTimer->start(12000);
+				if(captchaTimer && captchaTimer->isActive()) captchaTimer->stop();
+				captchaTimer->start(120000);
 			}
 			else{
 				ui->question->setText("Success but need more: try again");
@@ -230,21 +234,14 @@ void PostForm::postFinished()
 		overlay->displayText = "4chan error?";
 	}
 	else{
-		QTextEdit *reply = new QTextEdit();
-		reply->setAttribute(Qt::WA_DeleteOnClose);
-		connect(reply,&QTextEdit::destroyed,[=]{
-			qDebug() << "response window destroyed";
-		});
-		reply->setWindowTitle("post to /"+board+"/"+thread+" response");
-		reply->setMinimumSize(800,600);
-		QByteArray temp = postReply->readAll();
-		reply->setHtml(temp);
-		reply->setGeometry(0,0,this->width(),this->height());
-		qDebug().noquote() << temp;
-		qDebug() << "showing reply";
-		QString replyString(reply->toPlainText());
+		QByteArray replyArray(postReply->readAll());
+		QTextEdit *replyTextEdit = new QTextEdit();
+		replyTextEdit->setHtml(replyArray);
+		QString replyString = replyTextEdit->toPlainText();
+		qDebug() << replyString;
 		if(replyString.contains(QRegularExpression("uploaded.$|Post successful!$")))
 		{
+			delete replyTextEdit;
 			overlay->displayText = replyString;
 			ui->com->clear();
 			setFilenameText(empty);
@@ -252,7 +249,7 @@ void PostForm::postFinished()
 			ui->cancel->hide();
 			QTimer::singleShot(1000, this, &PostForm::close);
 			QRegularExpression re("<!-- thread:(?<replyThreadNum>\\d+),no:(?<threadNum>\\d+)");
-			QRegularExpressionMatch match = re.match(temp);
+			QRegularExpressionMatch match = re.match(replyString);
 			if(thread == ""){
 				if(match.hasMatch()){
 					QString captured(match.captured("threadNum"));
@@ -275,7 +272,16 @@ void PostForm::postFinished()
 			}
 		}
 		else{
-			reply->show();
+			qDebug() << "showing reply";
+			replyTextEdit->setAttribute(Qt::WA_DeleteOnClose);
+			connect(replyTextEdit,&QTextEdit::destroyed,[=]{
+				qDebug() << "response window destroyed";
+			});
+			replyTextEdit->setWindowTitle("post to /"+board+"/"+thread+" response");
+			replyTextEdit->setMinimumSize(800,600);
+			replyTextEdit->setGeometry(0,0,this->width(),this->height());
+			qDebug().noquote() << replyArray;
+			replyTextEdit->show();
 		}
 	}
 	postReply->deleteLater();
