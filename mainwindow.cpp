@@ -234,6 +234,7 @@ void MainWindow::setShortcuts()
 	addShortcut(Qt::Key_F9,this,[=]{
 		if(nv->isVisible()){
 			nv->hide();
+			activateWindow();
 		}
 		else{
 			nv->reAdjust();
