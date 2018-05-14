@@ -81,7 +81,7 @@ void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep
 }
 
 void ThreadTabHelper::getExtraFlags(){
-	if(abort || !(QString("int|pol|sp|bant").contains(board))) return;
+	if(abort || !(board == "int" || board == "pol" || board == "sp" || board == "int")) return;
 	qDebug().noquote().nospace() << "loading extra flags for " << board << '/' << thread;
 	QStringList postNums;
 	foreach(QString no, tfMap.keys()){

@@ -308,8 +308,7 @@ void PostForm::postFinished()
 void PostForm::postExtraFlags(const QString &postNum){
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	if(!settings.value("extraFlags/enable",false).toBool()
-		|| !(QString("int|pol|sp|bant").contains(board)))
-			return;
+		|| !(board == "int" || board == "pol" || board == "sp" || board == "int")) return;
 	QString region = settings.value("extraFlags/region",QString()).toString();
 	if(region.isEmpty()) return;
 	QUrlQuery postData;
