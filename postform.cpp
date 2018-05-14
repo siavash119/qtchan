@@ -92,6 +92,10 @@ void PostForm::usePass(bool use4chanPass){
 
 PostForm::~PostForm()
 {
+	if(captchaTimer && captchaTimer->isActive()) captchaTimer->stop();
+	disconnect(postConnection);
+	disconnect(flagsConnection);
+	disconnect(captchaConnection);
 	delete ui;
 }
 
@@ -125,7 +129,7 @@ void PostForm::verifyCaptcha(){
 	request.setRawHeader(QByteArray("Referer"),api->captchaLinks().challengeURL.toUtf8());
 	captchaReply = nc.captchaManager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
 	//possible segfault if threadtab/boardtab closes while waiting
-	connect(captchaReply,&QNetworkReply::finished,[=]{
+	captchaConnection = connect(captchaReply,&QNetworkReply::finished,[=]{
 		captchaReply->deleteLater();
 		if(captchaReply->error()){
 			ui->question->setText("Error: try again");
@@ -223,7 +227,7 @@ void PostForm::postIt()
 	QUrl url = QUrl(api->postURL(board));
 	QNetworkRequest request(url);
 	postReply = nc.postManager->post(request, multiPart);
-	connect(postReply, &QNetworkReply::finished, this, &PostForm::postFinished);
+	postConnection = connect(postReply, &QNetworkReply::finished, this, &PostForm::postFinished);
 	multiPart->setParent(postReply); // delete the multiPart with the reply
 	isPosting=true;
 }
@@ -315,7 +319,7 @@ void PostForm::postExtraFlags(const QString &postNum){
 	QNetworkRequest request(QUrl("https://flagtism.drunkensailor.org/int/post_flag_api2.php"));
 	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 	QNetworkReply *reply = nc.postManager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
-	connect(reply,&QNetworkReply::finished,[=]{
+	flagsConnection = connect(reply,&QNetworkReply::finished,[=]{
 		reply->deleteLater();
 		if(!reply) return;
 		if(reply->error()){

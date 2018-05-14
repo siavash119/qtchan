@@ -27,10 +27,6 @@ public:
 	QString board;
 	QString thread;
 	QString filename;
-	QNetworkReply *postReply;
-	QNetworkReply *captchaReply;
-	QFileDialog *dialog;
-	QMetaObject::Connection submitConnection;
 	void fileChecker(const QMimeData *mimedata);
 	void addOverlay();
 	void removeOverlay();
@@ -52,6 +48,7 @@ public slots:
 private:
 	Ui::PostForm *ui;
 	bool isPosting;
+	QFileDialog *dialog;
 	void cancelPost();
 	Overlay *overlay;
 	QWidget *focused;
@@ -61,6 +58,12 @@ private:
 	QString captchaCode;
 	QTimer *captchaTimer;
 	void postExtraFlags(const QString &postNum);
+	QNetworkReply *postReply;
+	QNetworkReply *captchaReply;
+	QMetaObject::Connection postConnection;
+	QMetaObject::Connection submitConnection;
+	QMetaObject::Connection flagsConnection;
+	QMetaObject::Connection captchaConnection;
 
 private slots:
 	void postFinished();
@@ -69,7 +72,6 @@ private slots:
 	void on_cancel_clicked();
 	void droppedItem();
 	void setShortcuts();
-
 	void on_response_returnPressed();
 
 protected:
