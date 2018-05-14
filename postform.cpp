@@ -158,6 +158,12 @@ void PostForm::verifyCaptcha(){
 
 void PostForm::postIt()
 {
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	if(api->usesCaptcha() && settings.value("use4chanPass", false).toBool() == false && captchaCode.isEmpty()){
+		captcha.getCaptcha();
+		ui->response->setFocus();
+		return;
+	}
 	this->removeEventFilter(this);
 	addOverlay();
 	disconnect(submitConnection);
@@ -192,7 +198,6 @@ void PostForm::postIt()
 	com.setBody(ui->com->toPlainText().toStdString().c_str());
 	multiPart->append(com);
 
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	if(api->usesCaptcha() && settings.value("use4chanPass", false).toBool() == false){
 		QHttpPart captchaResponse;
 		captchaResponse.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"g-recaptcha-response\""));
@@ -347,6 +352,7 @@ void PostForm::cancelPost(){
 	postReply->abort();
 	isPosting = false;
 	captcha.loaded = false;
+	captcha.loading = false;
 	removeOverlay();
 }
 
@@ -385,7 +391,7 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
 	}
 	if(obj->objectName() == "response"){
 		if(event->type() == QEvent::FocusIn){
-			if(!captcha.loading && !captcha.loaded) captcha.getCaptcha();
+			captcha.getCaptcha();
 		}
 	}
 	return QObject::eventFilter(obj, event);

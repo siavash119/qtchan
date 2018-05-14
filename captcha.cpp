@@ -66,6 +66,7 @@ Captcha::~Captcha(){
 }
 
 void Captcha::getCaptcha(){
+	if(loading || loaded) return;
 	loading = true;
 	emit questionInfo(loadingString);
 	replyChallenge = NULL;
