@@ -31,7 +31,7 @@ void ThreadTabHelper::startUp(Chan *api, QString &board, QString &thread, QWidge
 		connectionUpdate = connect(updateTimer,SIGNAL(timeout()),this,SLOT(getPosts()),UniqueDirect);
 	}
 
-	filterMe.filterMatchedPerTab(board,"thread");
+	filterMe.filters2 = filter.filterMatchedPerTab(board,"thread");
 
 	//self-archive check
 	QFile jsonFile(board+"/"+thread+"/"+thread+".json");

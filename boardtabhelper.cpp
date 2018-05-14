@@ -28,7 +28,7 @@ void BoardTabHelper::startUp(Chan *api, QString &board, BoardType type, QString 
 	}
 	request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
 	getPosts();
-	filterMe.filterMatchedPerTab(board,"board");
+	filterMe.filters2 = filter.filterMatchedPerTab(board,"board");
 	/*updateTimer = new QTimer();
 	updateTimer->setInterval(60000);
 	updateTimer->start();
@@ -62,7 +62,7 @@ void BoardTabHelper::getPosts() {
 	qDebug() << "getting posts for" << boardUrl;
 	reply = nc.jsonManager->get(request);
 	gettingReply = true;
-	connectionPost = connect(reply,SIGNAL(finished()),this,SLOT(loadPosts()),UniqueDirect);
+	connectionPost = connect(reply,SIGNAL(finished()),this,SLOT(loadPosts()),Qt::DirectConnection);
 }
 
 void BoardTabHelper::writeJson(QString &board, QByteArray &rep) {

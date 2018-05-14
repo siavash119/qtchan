@@ -184,7 +184,24 @@ bool Filter::useFilter(QString &options, Post *p){
 	return true;
 }
 
+QString Filter::filterEscape(QString &string){
+	QRegularExpression re("[+?():]");
+	QRegularExpressionMatchIterator i = re.globalMatch(string);
+	QList<QRegularExpressionMatch> matches;
+	while (i.hasNext()) {
+		matches.append(i.next());
+	}
+	for(int j=matches.size()-1; j>=0; j--){
+		QRegularExpressionMatch match = matches.at(j);
+		if(match.capturedStart()){
+			string.insert(match.capturedStart(),"\\");
+		}
+	}
+	return string;
+}
+
 QHash< QString,QHash<QRegularExpression,QString> > Filter::filterMatchedPerTab(QString board, QString tabType){
+	QHash< QString, QHash<QRegularExpression,QString> > newFilter;
 	QHashIterator< QString, QHash<QRegularExpression,QString> > i(filters2);
 	while (i.hasNext()) {
 		i.next();
@@ -198,9 +215,9 @@ QHash< QString,QHash<QRegularExpression,QString> > Filter::filterMatchedPerTab(Q
 				temp.remove(j.key());
 			}
 		}
-		filters2.insert(i.key(),temp);
+		newFilter.insert(i.key(),temp);
 	}
-	return filters2;
+	return newFilter;
 }
 
 bool Filter::useFilterPerTab(QString &options, QString board, QString tabType){

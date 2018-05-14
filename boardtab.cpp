@@ -38,9 +38,10 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	ui->lineEdit->setFont(temp);
 	ui->pushButton->setFont(temp);
 	this->setShortcuts();
-	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
-	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,UniqueDirect);
-	connect(mw,&MainWindow::setImageSize,this,&BoardTab::setImageSize,UniqueDirect);
+	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,Qt::QueuedConnection);
+	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,Qt::QueuedConnection);
+	connect(mw,&MainWindow::setImageSize,this,&BoardTab::setImageSize,Qt::QueuedConnection);
+
 	connect(mw,&MainWindow::reloadFilters,&helper,&BoardTabHelper::reloadFilters,Qt::DirectConnection);
 	connect(this,&BoardTab::startHelper,&helper,&BoardTabHelper::startUp,Qt::DirectConnection);
 	emit startHelper(api,board,type,search,this);
@@ -237,7 +238,7 @@ void BoardTab::addStretch()
 
 void BoardTab::onNewTF(ThreadForm *tf, ThreadForm *thread)
 {
-	connect(tf,&ThreadForm::removeMe,tf,&ThreadForm::deleteLater,Qt::DirectConnection);
+	connect(tf,&ThreadForm::removeMe,tf,&ThreadForm::deleteLater,Qt::QueuedConnection);
 	thread->addReply(tf);
 	if(this == mw->currentTab) QCoreApplication::processEvents();
 }

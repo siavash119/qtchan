@@ -33,6 +33,8 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF,Qt::QueuedConnection);
 	connect(&helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle,Qt::QueuedConnection);
 	connect(&helper,&ThreadTabHelper::tabTitle,this,&ThreadTab::setTabTitle,Qt::QueuedConnection);
+	connect(&helper,&ThreadTabHelper::removeTF,this,&ThreadTab::removeTF,Qt::QueuedConnection);
+	connect(&helper,&ThreadTabHelper::showTF,this,&ThreadTab::showTF,Qt::QueuedConnection);
 	myPostForm.setParent(this,Qt::Tool
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);
@@ -49,9 +51,7 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,Qt::QueuedConnection);
 	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize,Qt::QueuedConnection);
 	connect(mw,&MainWindow::setImageSize,this,&ThreadTab::setImageSize,Qt::QueuedConnection);
-	connect(mw,&MainWindow::reloadFilters,&helper,&ThreadTabHelper::reloadFilters,Qt::QueuedConnection);
-	connect(&helper,&ThreadTabHelper::removeTF,this,&ThreadTab::removeTF,Qt::QueuedConnection);
-	connect(&helper,&ThreadTabHelper::showTF,this,&ThreadTab::showTF,Qt::QueuedConnection);
+	connect(mw,&MainWindow::reloadFilters,&helper,&ThreadTabHelper::reloadFilters,Qt::DirectConnection);
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
 	connect(&watcher,&QFutureWatcherBase::finished,[=]()
@@ -144,13 +144,13 @@ void ThreadTab::setShortcuts()
 
 	QAction *expandAll = new QAction(this);
 	expandAll->setShortcut(Qt::Key_E);
-	connect(expandAll, &QAction::triggered,&helper,&ThreadTabHelper::loadAllImages,UniqueDirect);
+	connect(expandAll, &QAction::triggered,&helper,&ThreadTabHelper::loadAllImages,Qt::QueuedConnection);
 	this->addAction(expandAll);
 
 	QAction *refresh = new QAction(this);
 	refresh->setShortcut(Qt::Key_R);
 	refresh->setShortcutContext(Qt::ApplicationShortcut);
-	connect(refresh, &QAction::triggered,&helper,&ThreadTabHelper::getPosts,UniqueDirect);
+	connect(refresh, &QAction::triggered,&helper,&ThreadTabHelper::getPosts,Qt::QueuedConnection);
 	this->addAction(refresh);
 
 	QAction *focusBar = new QAction(this);

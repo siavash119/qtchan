@@ -32,6 +32,8 @@ public:
 	static QString htmlParse(QString &html);
 	static QString titleParse(QString &title);
 	static QString toStrippedHtml(QString &text);
+	static QString filterEscape(QString &string);
+
 	void addFilter(QString &newFilter);
 	void addFilter2(QString key, QString newFilter, QString options = QString());
 	bool filterMatched2(Post *p);

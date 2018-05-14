@@ -1,6 +1,6 @@
 #include "threadformcontext.h"
 
-ThreadFormContext::ThreadFormContext(Post *p, QWidget* parent) :
+ThreadFormContext::ThreadFormContext(Post *p, QWidget *parent) :
 	p(p)
 {
 	setParent(parent);
@@ -19,7 +19,8 @@ ThreadFormContext::ThreadFormContext(Post *p, QWidget* parent) :
 void ThreadFormContext::addFilter(QMenu *menu, QString name, QString key, QString value){
 	QAction *newFilter = menu->addAction(name % value);
 	connect(newFilter,&QAction::triggered,[=]{
-		filter.addFilter2(key,QRegularExpression::escape(value),"boards:"+p->board);
+		QString exp = value;
+		filter.addFilter2(key,Filter::filterEscape(exp),"boards:"+p->board);
 		emit filtersChanged();
 	});
 }
