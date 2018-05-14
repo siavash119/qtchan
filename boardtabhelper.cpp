@@ -135,7 +135,7 @@ void BoardTabHelper::loadPosts() {
 		if(type==BoardType::Index && showIndexReplies){
 			for(int j=1;j<t.size();j++){
 				p = t.at(j).toObject();
-				ThreadForm *tfChild = new ThreadForm(api,board,threadNum,Thread,false,loadFile,parent,1);
+				ThreadForm *tfChild = new ThreadForm(api,board,threadNum,Thread,true,loadFile,parent,1);
 				tfChild->load(p);
 				emit newTF(tfChild,tf);
 			}
