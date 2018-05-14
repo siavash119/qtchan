@@ -76,6 +76,11 @@
        <string>Posts</string>
       </property>
      </column>
+     <column>
+      <property name="text">
+       <string>Delete</string>
+      </property>
+     </column>
     </widget>
    </item>
   </layout>

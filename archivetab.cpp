@@ -38,7 +38,8 @@ void ArchiveTab::fillBoards(){
 	QStringList entries = QDir().entryList(QStringList(),QDir::AllDirs | QDir::NoDotAndDotDot);
 	entries.removeOne("cache");
 	entries.removeOne("flags");
-	for(int i=entries.size()-1;i>=0;i--){
+	int size = entries.size();
+	for(int i=0;i<size;i++){
 		QString board = entries.at(i);
 		if(!QDir(board).entryList().contains("index.json")){
 			continue;
@@ -46,7 +47,7 @@ void ArchiveTab::fillBoards(){
 		QPushButton *button = new QPushButton(this);
 		button->setText(board);
 		connect(button,&QPushButton::clicked,this,&ArchiveTab::boardClicked);
-		ui->boards->insertWidget(0,button);
+		ui->boards->insertWidget(i,button);
 	}
 }
 
@@ -102,6 +103,10 @@ void ArchiveTab::fillTable(QString board){
 			QTableWidgetItem* numPosts = new QTableWidgetItem;
 			numPosts->setData(Qt::DisplayRole,posts.size());
 			ui->table->setItem(0,3,numPosts);
+			QTableWidgetItem *del = new QTableWidgetItem("X");
+			del->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+			del->setTextColor(QColor(255,0,0));
+			ui->table->setItem(0,4,del);
 		}
 	}
 }
@@ -118,6 +123,12 @@ void ArchiveTab::threadClicked(int row, int column){
 	if(column == 0){
 		QString threadNum = ui->table->item(row,1)->data(Qt::DisplayRole).toString();
 		emit loadThread(this->board+"/"+threadNum);
+	}
+	else if(column == 4){
+		QString threadNum = ui->table->item(row,1)->data(Qt::DisplayRole).toString();
+		QDir dir(this->board+"/"+threadNum);
+		if(dir.exists()) dir.removeRecursively();
+		ui->table->removeRow(row);
 	}
 }
 
