@@ -151,7 +151,7 @@ void BoardTabHelper::reloadFilters(){
 			tf->hidden=true;
 			emit removeTF(tf);
 		}
-		else{
+		else if(tf->isHidden()){
 			tf->hidden=false;
 			emit showTF(tf);
 		}

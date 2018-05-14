@@ -80,7 +80,7 @@ void Filter::loadFilterFile2(){
 					else{
 						exp.setPattern(line);
 					}
-					exp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+					if(key!="md5") exp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
 					hash.insert(exp,options);
 				}
 				filters2.insert(key,hash);
@@ -342,5 +342,3 @@ QString Filter::toStrippedHtml(QString &text){
 		.replace("&gt;",">").replace("&lt;","<")
 		.replace("&quot;","\"").replace("&#039;","'");
 }
-
-Filter filter;

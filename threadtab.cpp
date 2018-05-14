@@ -46,10 +46,12 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	this->setShortcuts();
 	this->installEventFilter(this);
 	connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,Qt::QueuedConnection);
-	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
-	//connect(&helper,&ThreadTabHelper::addStretch,this,&ThreadTab::addStretch,UniqueDirect);
-	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize,UniqueDirect);
-	connect(mw,&MainWindow::setImageSize,this,&ThreadTab::setImageSize,UniqueDirect);
+	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,Qt::QueuedConnection);
+	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize,Qt::QueuedConnection);
+	connect(mw,&MainWindow::setImageSize,this,&ThreadTab::setImageSize,Qt::QueuedConnection);
+	connect(mw,&MainWindow::reloadFilters,&helper,&ThreadTabHelper::reloadFilters,Qt::QueuedConnection);
+	connect(&helper,&ThreadTabHelper::removeTF,this,&ThreadTab::removeTF,Qt::QueuedConnection);
+	connect(&helper,&ThreadTabHelper::showTF,this,&ThreadTab::showTF,Qt::QueuedConnection);
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
 	connect(&watcher,&QFutureWatcherBase::finished,[=]()
@@ -77,12 +79,6 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	//use QMetaObject::invokeMethod instead?
 	connect(this,&ThreadTab::startHelper,&helper,&ThreadTabHelper::startUp,Qt::DirectConnection);
 	emit startHelper(api,board,thread,this,isFromSession);
-	//helper.startUp(api, board, thread, this, isFromSession);
-
-	//connect(&helper,&ThreadTabHelper::refresh,[=](ThreadForm *tf) {onRefresh(tf);});
-	connect(mw,&MainWindow::reloadFilters,&helper,&ThreadTabHelper::reloadFilters,Qt::DirectConnection);
-	connect(&helper,&ThreadTabHelper::removeTF,this,&ThreadTab::removeTF);
-	connect(&helper,&ThreadTabHelper::showTF,this,&ThreadTab::showTF);
 }
 
 void ThreadTab::setTabTitle(QString tabTitle){

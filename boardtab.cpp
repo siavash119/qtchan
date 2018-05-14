@@ -21,7 +21,8 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	connect(&helper,&BoardTabHelper::newThread,this,&BoardTab::onNewThread,Qt::QueuedConnection);
 	connect(&helper,&BoardTabHelper::newTF,this,&BoardTab::onNewTF,Qt::QueuedConnection);
 	connect(&helper,&BoardTabHelper::clearMap,this,&BoardTab::clearMap,Qt::QueuedConnection);
-
+	connect(&helper,&BoardTabHelper::removeTF,this,&BoardTab::removeTF,Qt::QueuedConnection);
+	connect(&helper,&BoardTabHelper::showTF,this,&BoardTab::showTF,Qt::QueuedConnection);
 	myPostForm.setParent(this,Qt::Tool
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);
@@ -40,10 +41,8 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,UniqueDirect);
 	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,UniqueDirect);
 	connect(mw,&MainWindow::setImageSize,this,&BoardTab::setImageSize,UniqueDirect);
-	connect(this,&BoardTab::startHelper,&helper,&BoardTabHelper::startUp,Qt::DirectConnection);
 	connect(mw,&MainWindow::reloadFilters,&helper,&BoardTabHelper::reloadFilters,Qt::DirectConnection);
-	connect(&helper,&BoardTabHelper::removeTF,this,&BoardTab::removeTF);
-	connect(&helper,&BoardTabHelper::showTF,this,&BoardTab::showTF);
+	connect(this,&BoardTab::startHelper,&helper,&BoardTabHelper::startUp,Qt::DirectConnection);
 	emit startHelper(api,board,type,search,this);
 }
 

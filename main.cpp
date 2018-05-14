@@ -1,13 +1,14 @@
-#include "mainwindow.h"
-#include "notificationview.h"
-//#include "notificationtray.h"
+#include "filter.h"
 #include "netcontroller.h"
 #include "chans.h"
-#include <QApplication>
+#include "notificationview.h"
+#include "mainwindow.h"
 #include <QSettings>
+#include <QApplication>
 
 MainWindow *mw;
 NotificationView *nv;
+Filter filter;
 netController nc;
 Chan *fourChanAPI = new FourChan();
 Chan *eightChanAPI = new EightChan();
