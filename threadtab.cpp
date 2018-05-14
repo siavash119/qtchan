@@ -330,8 +330,6 @@ ThreadTab::~ThreadTab()
 	workerThread.quit();
 	workerThread.wait();
 	workerThread.terminate();
-	/*disconnect(&helper);
-	disconnect(&workerThread);*/
 	disconnect(connectionAutoUpdate);
 	delete ui;
 	qDebug().noquote().nospace() << "deleting tab /" << board+"/"+thread;

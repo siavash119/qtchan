@@ -40,6 +40,7 @@ void BoardTabHelper::startUp(Chan *api, QString &board, BoardType type, QString 
 
 BoardTabHelper::~BoardTabHelper() {
 	abort = true;
+	disconnect(connectionPost);
 	if(gettingReply) {
 		reply->abort();
 		disconnect(reply);

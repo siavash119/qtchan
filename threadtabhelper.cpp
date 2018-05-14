@@ -51,6 +51,8 @@ ThreadTabHelper::~ThreadTabHelper() {
 	abort = true;
 	updateTimer->stop();
 	disconnect(connectionUpdate);
+	disconnect(connectionPost);
+	disconnect(flagsConnection);
 	if(gettingReply) {
 		reply->abort();
 		disconnect(reply);
@@ -93,7 +95,7 @@ void ThreadTabHelper::getExtraFlags(){
 	requestFlags.setUrl(QUrl("https://flagtism.drunkensailor.org/int/get_flags_api2.php"));
 	requestFlags.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 	replyFlags = nc.fileManager->post(requestFlags,data.toUtf8());
-	connect(replyFlags,SIGNAL(finished()),this,SLOT(loadExtraFlags()),UniqueDirect);
+	flagsConnection = connect(replyFlags,SIGNAL(finished()),this,SLOT(loadExtraFlags()),UniqueDirect);
 }
 
 void ThreadTabHelper::loadExtraFlags(){

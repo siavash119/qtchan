@@ -40,9 +40,10 @@ private:
 	QNetworkRequest requestFlags;
 	QPointer<QNetworkReply> replyFlags;
 	QWidget *parent;
-	QMetaObject::Connection connectionPost;
 	QTimer *updateTimer;
+	QMetaObject::Connection connectionPost;
 	QMetaObject::Connection connectionUpdate;
+	QMetaObject::Connection flagsConnection;
 	bool isFromSession;
 	QSet<QString> gottenFlags;
 

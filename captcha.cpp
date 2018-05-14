@@ -62,7 +62,10 @@ void Captcha::startUp(Chan *api){
 }
 
 Captcha::~Captcha(){
-
+	disconnect(getConnection);
+	disconnect(antiConnection);
+	disconnect(anti2Connection);
+	disconnect(imageConnection);
 }
 
 void Captcha::getCaptcha(){
@@ -76,12 +79,12 @@ void Captcha::getCaptcha(){
 	}
 	qDebug() << "getting captcha from " + urlChallenge;
 	replyChallenge = nc.captchaManager->get(requestChallenge);
-	QObject::connect(replyChallenge,&QNetworkReply::finished,this,&Captcha::loadCaptcha);
+	getConnection = QObject::connect(replyChallenge,&QNetworkReply::finished,this,&Captcha::loadCaptcha,Qt::UniqueConnection);
 }
 
 void Captcha::antiMake(){
 	replyChallenge = nc.captchaManager->post(requestAntiCaptcha,antiCaptchaInfo.toUtf8());
-	QObject::connect(replyChallenge,&QNetworkReply::finished,this,&Captcha::antiMade);
+	antiConnection = QObject::connect(replyChallenge,&QNetworkReply::finished,this,&Captcha::antiMade,Qt::UniqueConnection);
 }
 
 void Captcha::antiMade(){
@@ -117,7 +120,7 @@ void Captcha::antiFinish(){
 	QTimer::singleShot(10000,[=]{
 		if(!antiGetInfo.isEmpty()){
 			replyImage = nc.captchaManager->post(requestAntiSolution,antiGetInfo.toUtf8());
-			connect(replyImage,&QNetworkReply::finished,this,&Captcha::antiFinished);
+			anti2Connection = connect(replyImage,&QNetworkReply::finished,this,&Captcha::antiFinished,Qt::UniqueConnection);
 		}
 	});
 }
@@ -189,7 +192,7 @@ void Captcha::getImage(QString challenge){
 	if(challenge.isEmpty()) return;
 	QNetworkRequest imageChallenge(QUrl(urlImageBase+challenge+"&k="+siteKey));
 	replyImage = nc.captchaManager->get(imageChallenge);
-	connect(replyImage,&QNetworkReply::finished,this,&Captcha::loadImage);
+	imageConnection = connect(replyImage,&QNetworkReply::finished,this,&Captcha::loadImage,Qt::UniqueConnection);
 }
 
 void Captcha::loadImage(){

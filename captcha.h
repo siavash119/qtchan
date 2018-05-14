@@ -48,6 +48,11 @@ private:
 	QString antiTaskID;
 	void antiFinish();
 	void antiMake();
+	QMetaObject::Connection getConnection;
+	QMetaObject::Connection antiConnection;
+	QMetaObject::Connection anti2Connection;
+	QMetaObject::Connection imageConnection;
+
 private slots:
 	void antiMade();
 	void antiFinished();
