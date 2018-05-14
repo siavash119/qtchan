@@ -45,6 +45,12 @@
    </property>
    <item>
     <widget class="QWidget" name="searchWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0">
       <property name="sizeConstraint">
        <enum>QLayout::SetDefaultConstraint</enum>
@@ -113,7 +119,7 @@
         <x>0</x>
         <y>0</y>
         <width>758</width>
-        <height>322</height>
+        <height>600</height>
        </rect>
       </property>
       <property name="sizePolicy">
