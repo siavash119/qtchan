@@ -451,14 +451,11 @@ void ThreadTab::findText(const QString &text)
 		tf = mapI.value();
 		QString toMatch(tf->matchThis());
 		toMatch = Filter::toStrippedHtml(toMatch);
-		qDebug() << toMatch;
 		match = re.match(toMatch);
-		//can keep applying filters over and over again
-		//good or bad?
-		if(!match.hasMatch()) {
-			tf->hide();
+		if(match.hasMatch()){
+			if(!tf->hidden) tf->show();
 		}
-		else qDebug().noquote().nospace() << "found " << text << " in thread #" << tf->post.no;
+		else tf->hide();
 	}
 }
 

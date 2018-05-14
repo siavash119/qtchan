@@ -91,10 +91,13 @@ void Filter::loadFilterFile2(){
 	qDebug() << "########" << endl << "FILTERS" << endl << filters2 << endl << "#########";
 }
 
-void Filter::addFilter2(QString key, QString newFilter){
+//TODO addFilter2 doesn't rewrite the whole file; just adds one line
+//comments and empty lines are currently NOT preserved
+void Filter::addFilter2(QString key, QString newFilter, QString options){
 	QHash<QRegularExpression,QString> hash = filters2.value(key);
-	hash.insert(QRegularExpression(newFilter,QRegularExpression::CaseInsensitiveOption),QString());
+	hash.insert(QRegularExpression(newFilter,QRegularExpression::CaseInsensitiveOption),options);
 	filters2.insert(key,hash);
+	qDebug() << filters2;
 	writeFilterFile2();
 }
 
@@ -110,10 +113,12 @@ void Filter::writeFilterFile2(){
 			QHashIterator<QRegularExpression,QString> j(i.value());
 			while(j.hasNext()){
 				j.next();
-				out << endl << j.key().pattern() << j.value();
+				out << endl << j.key().pattern();
+				if(!j.value().isEmpty()) out << '$' << j.value();
 			}
 			out << endl << '!' << endl << endl;
 		}
+		file.close();
 	}
 }
 

@@ -458,6 +458,7 @@ void ThreadForm::removeFromInserted(){
 
 void ThreadForm::addReply(ThreadForm *tf){
 	if(ui->quoteWidget->isHidden()) ui->quoteWidget->show();
+	tf->setParent(this);
 	ui->quotes->addWidget(tf);
 }
 

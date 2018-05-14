@@ -33,7 +33,7 @@ public:
 	static QString titleParse(QString &title);
 	static QString toStrippedHtml(QString &text);
 	void addFilter(QString &newFilter);
-	void addFilter2(QString key, QString newFilter);
+	void addFilter2(QString key, QString newFilter, QString options = QString());
 	bool filterMatched2(Post *p);
 	void loadFilterFile2();
 	QHash< QString,QHash<QRegularExpression,QString> > filterMatchedPerTab(QString board, QString tabType);

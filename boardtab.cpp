@@ -223,8 +223,7 @@ void BoardTab::findText(const QString text)
 		toMatch = Filter::toStrippedHtml(toMatch);
 		match = re.match(toMatch);
 		if(match.hasMatch()){
-			tf->show();
-			qDebug().noquote().nospace() << "found " << text << " in thread #" << tf->post.no;
+			if(!tf->hidden) tf->show();
 		}
 		else tf->hide();
 	}
@@ -239,7 +238,7 @@ void BoardTab::addStretch()
 
 void BoardTab::onNewTF(ThreadForm *tf, ThreadForm *thread)
 {
-	connect(thread,&ThreadForm::removeMe,tf,&ThreadForm::deleteLater,Qt::DirectConnection);
+	connect(tf,&ThreadForm::removeMe,tf,&ThreadForm::deleteLater,Qt::DirectConnection);
 	thread->addReply(tf);
 	if(this == mw->currentTab) QCoreApplication::processEvents();
 }
@@ -250,6 +249,10 @@ void BoardTab::onNewThread(ThreadForm *tf)
 		qDebug().noquote().nospace() << tf->post.no << " filtered from /" << board << "/!";
 		tf->hide();
 	}
+	connect(tf,&ThreadForm::removeMe,[=]{
+		filter.addFilter2("no",tf->post.no,"boards:"+board);
+		tf->hide();
+	});
 	ui->threads->addWidget(tf);
 	tfMap.insert(tf->post.no,tf);
 	if(this == mw->currentTab) QCoreApplication::processEvents();
