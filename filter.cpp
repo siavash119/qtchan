@@ -98,7 +98,6 @@ void Filter::addFilter2(QString key, QString newFilter, QString options){
 	filters2.insert(key,hash);
 	qDebug() << filters2;
 	insertFilterIntoFile(key,newFilter,options);
-	//writeFilterFile2();
 }
 
 void Filter::insertFilterIntoFile(QString key, QString exp, QString options){
@@ -122,7 +121,6 @@ void Filter::insertFilterIntoFile(QString key, QString exp, QString options){
 		if(found){
 			file.close();
 			file.remove();
-			//QFile::copy(temp.fileName(),filterFile);
 			qDebug() << temp.copy(filterFile);
 			temp.close();
 		}

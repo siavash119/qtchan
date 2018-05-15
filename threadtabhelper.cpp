@@ -22,7 +22,6 @@ void ThreadTabHelper::startUp(Chan *api, QString &board, QString &thread, QWidge
 	this->expandAll = settings.value("autoExpand",false).toBool();
 	QDir().mkpath(board+"/"+thread+"/thumbs");
 	qDebug() << threadUrl;
-
 	//update timer
 	updateTimer = new QTimer(parent);
 	updateTimer->setInterval(60000);

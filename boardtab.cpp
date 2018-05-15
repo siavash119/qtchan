@@ -23,6 +23,8 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	connect(&helper,&BoardTabHelper::clearMap,this,&BoardTab::clearMap,Qt::QueuedConnection);
 	connect(&helper,&BoardTabHelper::removeTF,this,&BoardTab::removeTF,Qt::QueuedConnection);
 	connect(&helper,&BoardTabHelper::showTF,this,&BoardTab::showTF,Qt::QueuedConnection);
+	connect(mw,&MainWindow::reloadFilters,&helper,&BoardTabHelper::reloadFilters,Qt::DirectConnection);
+	workerThread.start();
 	myPostForm.setParent(this,Qt::Tool
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);
@@ -41,10 +43,7 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,Qt::QueuedConnection);
 	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,Qt::QueuedConnection);
 	connect(mw,&MainWindow::setImageSize,this,&BoardTab::setImageSize,Qt::QueuedConnection);
-
-	connect(mw,&MainWindow::reloadFilters,&helper,&BoardTabHelper::reloadFilters,Qt::DirectConnection);
-	connect(this,&BoardTab::startHelper,&helper,&BoardTabHelper::startUp,Qt::DirectConnection);
-	emit startHelper(api,board,type,search,this);
+	helper.startUp(api,board,type,search,this);
 }
 
 void BoardTab::setFontSize(int fontSize){
@@ -87,7 +86,7 @@ void BoardTab::setShortcuts()
 {
 	QAction *refresh = new QAction(this);
 	refresh->setShortcut(Qt::Key_R);
-	connect(refresh, &QAction::triggered, &helper, &BoardTabHelper::getPosts, UniqueDirect);
+	connect(refresh, &QAction::triggered, &helper, &BoardTabHelper::getPosts, Qt::DirectConnection);
 	this->addAction(refresh);
 
 	QAction *postForm = new QAction(this);

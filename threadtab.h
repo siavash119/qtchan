@@ -40,7 +40,6 @@ public:
 	void findText(const QString &text);
 	void loadAllImages();
 	ThreadForm *findPost(QString postNum);
-	bool floatIt;
 	QPointer<ThreadForm> floating;
 	PostForm myPostForm;
 	QThread workerThread;

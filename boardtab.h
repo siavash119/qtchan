@@ -17,8 +17,6 @@ class BoardTab;
 class BoardTab : public QWidget
 {
 	Q_OBJECT
-	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
-	//QSpacerItem space = QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
 public:
 	explicit BoardTab(Chan *api, QString board, BoardType type = Index, QString search = "", QWidget *parent = 0);
 	~BoardTab();
@@ -33,9 +31,8 @@ public:
 	QNetworkReply *reply;
 	QMap<QString,ThreadForm*> tfMap;
 	PostForm myPostForm;
-	void openPostForm();
 
-	void setShortcuts();
+	void openPostForm();
 	void getPosts();
 	void focusIt();
 	ThreadForm* tfAtTop();
@@ -54,6 +51,7 @@ public slots:
 private:
 	Ui::BoardTab *ui;
 	QString vimCommand;
+	void setShortcuts();
 
 private slots:
 	void on_pushButton_clicked();
