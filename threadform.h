@@ -3,6 +3,7 @@
 
 #include "post.h"
 #include "chans.h"
+#include "threadformstrings.h"
 //#include <QFutureWatcher>
 #include <QWidget>
 #include <QPointer>
@@ -27,19 +28,20 @@ class ThreadForm : public QWidget
 	bool gettingThumb = false;
 	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
 public:
-	explicit ThreadForm(Chan *api, QString board, QString threadNum, PostType type = Reply,
-						bool root = true, bool autoExpand = false, QWidget *parent = 0, int replyLevel = 0);
+	explicit ThreadForm(Chan *api, ThreadFormStrings strings, bool root = true,
+						bool autoExpand = false, QWidget *parent = 0, int replyLevel = 0);
 	~ThreadForm();
 	void setText(QString text);
 	void setImage(QByteArray img);
 	//void getImage(QNetworkAccessManager *manager, QString *img);
 	void load(QJsonObject &p);
+	void load(Post &post);
 	void loadImage(QString path);
 	void openImage();
 	Chan *api;
-	QString board;
-	QString threadNum;
+	ThreadFormStrings strings;
 	PostType type;
+	QString board;
 	bool root;
 	bool autoExpand;
 	Post post;
@@ -48,7 +50,6 @@ public:
 	//void insert(int position, ThreadForm *tf);
 	void insert(ThreadForm *tf);
 	void deleteHideLayout();
-	QSet<QString> quotelinks;
 	QMap<double,QString> replies;
 	void setReplies();
 	void setRepliesString(const QString &repliesString);
@@ -68,29 +69,22 @@ public:
 	bool hasImage = true;
 	QMetaObject::Connection comQuoteConnection;
 	QMetaObject::Connection infoQuoteConnection;
-	QString countryString;
 	void getFlag();
 	void getFile(bool andOpen = false);
 	QStringList regionList;
-	QString regionString;
 	void setRegion(const QString &region);
 	QString fileInfoString;
 	QString tfInfoString;
 	QString matchThis();
+	QString regionString;
 
 //TODO take care of file downloading in netcontroller
 private:
 	QWidget *tab;
 	ThreadForm *rootTF;
 	Ui::ThreadForm *ui;
-	QString fileURL;
-	QString thumbURL;
-	QString pathBase;
-	QString filePath;
 	QPointer<QFile> file;
-	QString thumbPath;
 	QPointer<QFile> thumb;
-	QString flagPath;
 	void getThumb();
 	bool finished = false;
 	bool hideButtonShown = true;
@@ -101,7 +95,6 @@ private:
 	void downloadFile(const QString &fileUrl,const QString &filePath,QNetworkAccessManager *manager, QString message = QString());
 	QHash<QString,QNetworkReply*> networkReplies;
 	int regionsGot = 0;
-	QString flagString(const QString &path, const QString &name);
 	QMap<QString,ThreadForm*> inserted;
 	QMap<QString,QMetaObject::Connection> insertedConnections;
 	void removeFromInserted();

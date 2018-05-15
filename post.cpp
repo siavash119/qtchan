@@ -6,7 +6,7 @@
 Post::Post() {
 }
 
-Post::Post(QJsonObject &p, QString &board)
+Post::Post(QJsonObject p, QString &board)
 {
 	load(p,board);
 }
@@ -45,8 +45,12 @@ void Post::load(QJsonObject &p, QString &board)
 	com = p.value("com").toString();
 	QRegularExpressionMatchIterator i = you.findYou(board,com);
 	if(i.hasNext()) hasYou = true;
+	if(you.hasYou(board,no)){
+		isYou = true;
+	}
 	com = Filter::replaceYouStrings(i,com);
 	com = Filter::replaceQuoteStrings(com);
+	quotelinks = Filter::findQuotes(com);
 	double temp = p.value("tim").toDouble();
 	if(temp != 0.0) {
 		tim = QString::number(temp,'d',0);

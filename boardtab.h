@@ -30,6 +30,7 @@ public:
 	QString boardUrl;
 	QNetworkReply *reply;
 	QMap<QString,ThreadForm*> tfMap;
+	QMap<QString,ThreadForm*> tfReplyMap;
 	PostForm myPostForm;
 
 	void openPostForm();
@@ -39,26 +40,34 @@ public:
 
 public slots:
 	void findText(const QString text);
-	void onNewThread(ThreadForm *tf);
-	void onNewTF(ThreadForm *tf, ThreadForm *thread);
-	//void addStretch();
+	void onNewThread(Post post, ThreadFormStrings strings, bool loadFile = false);
+	void onNewReply(Post post, ThreadFormStrings strings, QString opNum, bool loadFile = false);
+	//void onNewThread(ThreadForm *tf);
+	//void onNewReply(ThreadForm *tf, ThreadForm *thread);
 	void clearMap();
 	void setFontSize(int fontSize);
 	void setImageSize(int imageSize);
 	void removeTF(ThreadForm *tf);
 	void showTF(ThreadForm *tf);
+	void onFilterTest(QString no, bool filtered);
+	void loadAllImages();
 
 private:
 	Ui::BoardTab *ui;
 	QString vimCommand;
 	void setShortcuts();
+	QPointer<QNetworkReply> postsReply;
 
 private slots:
 	void on_pushButton_clicked();
 	void on_lineEdit_returnPressed();
 	void updateVim();
+	void reloadFilters();
+
 signals:
-	void startHelper(Chan *api, QString &board, BoardType type, QString search, QWidget *parent);
+	void startHelper(Chan *api, QString board, BoardType type, QString search, QWidget *parent);
+	void testFilters(Post p);
+
 };
 
 Q_DECLARE_METATYPE(BoardTab*)

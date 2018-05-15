@@ -1,6 +1,7 @@
 #include "threadtab.h"
 #include "ui_threadtab.h"
 #include "netcontroller.h"
+#include "notificationview.h"
 #include "mainwindow.h"
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -9,15 +10,13 @@
 #include <QKeySequence>
 #include <QDir>
 #include <QKeyEvent>
-#include <QMutableMapIterator>
 #include <QProcess>
 #include <QScrollBar>
-#include <QTimer>
 #include <QDesktopWidget>
 #include <QScreen>
 #include <QFuture>
 
-ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, bool isFromSession) :
+ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent, bool isFromSession) :
 	QWidget(parent), api(api), board(board), thread(thread), isFromSession(isFromSession),
 	ui(new Ui::ThreadTab)
 {
@@ -29,20 +28,35 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	info.setParent(this);
 	info.move(this->width()-info.width()-20,this->height()-info.height()-20);
 	info.show();
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	updateTimer.setInterval(60000);
+	if(settings.value("autoUpdate").toBool()) {
+		connectionAutoUpdate = connect(&updateTimer,&QTimer::timeout,this,&ThreadTab::getPosts);
+	}
 	helper.moveToThread(&workerThread);
-	connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF,Qt::QueuedConnection);
+	connect(this,&ThreadTab::startHelper,&helper,&ThreadTabHelper::startUp,Qt::QueuedConnection);
+	connect(&helper,&ThreadTabHelper::newTF,this,&ThreadTab::onNewTF);
 	connect(&helper,&ThreadTabHelper::windowTitle,this,&ThreadTab::onWindowTitle,Qt::QueuedConnection);
 	connect(&helper,&ThreadTabHelper::tabTitle,this,&ThreadTab::setTabTitle,Qt::QueuedConnection);
-	connect(&helper,&ThreadTabHelper::removeTF,this,&ThreadTab::removeTF,Qt::QueuedConnection);
-	connect(&helper,&ThreadTabHelper::showTF,this,&ThreadTab::showTF,Qt::QueuedConnection);
-	connectionAutoUpdate = connect(mw,&MainWindow::setAutoUpdate,&helper,&ThreadTabHelper::setAutoUpdate,Qt::DirectConnection);
-	connect(mw,&MainWindow::reloadFilters,&helper,&ThreadTabHelper::reloadFilters,Qt::DirectConnection);
+	connect(&helper,&ThreadTabHelper::addReply,this,&ThreadTab::onAddReply,Qt::QueuedConnection);
+	connect(&helper,&ThreadTabHelper::addNotification,this,&ThreadTab::onAddNotification,Qt::QueuedConnection);
+	connect(&helper,&ThreadTabHelper::threadStatus,this,&ThreadTab::onThreadStatus);
+	connect(&helper,&ThreadTabHelper::getPosts,this,&ThreadTab::getPosts);
+	connect(&helper,&ThreadTabHelper::getFlags,this,&ThreadTab::onGetFlags);
+	connect(&helper,&ThreadTabHelper::setRegion,this,&ThreadTab::onSetRegion);
+
+	//probably trash; maybe put allPosts hash in helper
+	connect(mw,&MainWindow::reloadFilters,&helper,&ThreadTabHelper::reloadFilters);
+	connect(&helper,&ThreadTabHelper::startFilterTest,this,&ThreadTab::reloadFilters);
+	connect(this,&ThreadTab::testFilters,&helper,&ThreadTabHelper::filterTest);
+	connect(&helper,&ThreadTabHelper::filterTested,this,&ThreadTab::onFilterTest);
+
 	workerThread.start();
+
 	myPostForm.setParent(this,Qt::Tool
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);
 	myPostForm.load(api,board,thread);
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QFont temp = ui->lineEdit->font();
 	temp.setPointSize(settings.value("fontSize",14).toInt()-2);
 	ui->label->setFont(temp);
@@ -50,9 +64,11 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 	ui->pushButton->setFont(temp);
 	this->setShortcuts();
 	this->installEventFilter(this);
-	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,Qt::QueuedConnection);
-	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize,Qt::QueuedConnection);
-	connect(mw,&MainWindow::setImageSize,this,&ThreadTab::setImageSize,Qt::QueuedConnection);
+
+	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass);
+	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize);
+	connect(mw,&MainWindow::setImageSize,this,&ThreadTab::setImageSize);
+	connect(mw,&MainWindow::setAutoUpdate,this,&ThreadTab::setAutoUpdate);
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
 	connect(&watcher,&QFutureWatcherBase::finished,[=]()
@@ -77,11 +93,43 @@ ThreadTab::ThreadTab(Chan *api, QString board, QString thread, QWidget *parent, 
 		newImage = QtConcurrent::run(&ThreadTab::checkIfVisible, unseenList);
 		watcher.setFuture(newImage);
 	});
-	helper.startUp(api,board,thread,this,isFromSession);
+	emit startHelper(api,board,thread,this,isFromSession);
+	//helper.startUp(api,board,thread,this,isFromSession);
+}
+
+void ThreadTab::setAutoUpdate(bool update) {
+	disconnect(connectionAutoUpdate);
+	if(update) {
+		connectionAutoUpdate = connect(&updateTimer,&QTimer::timeout,this,&ThreadTab::getPosts);
+	}
 }
 
 void ThreadTab::setTabTitle(QString tabTitle){
 	tn->setData(0,tabTitle);
+}
+
+void ThreadTab::onThreadStatus(QString status, QString value){
+	(void)value;
+	if(status == "404" || status == "closed" || status == "archived"){
+		if(updateTimer.isActive()) updateTimer.stop();
+	}
+}
+
+void ThreadTab::getPosts(){
+	qDebug().noquote().nospace() << "getting posts for " << board << '/' << thread;
+	postsReply = nc.jsonManager->get(helper.request);
+	connect(postsReply,&QNetworkReply::finished,&helper,&ThreadTabHelper::getPostsFinished,Qt::UniqueConnection);
+}
+
+void ThreadTab::onGetFlags(QByteArray data){
+	qDebug().noquote().nospace() << "loading extra flags for " << board << '/' << thread;
+	flagsReply = nc.fileManager->post(helper.requestFlags,data);
+	connect(flagsReply,&QNetworkReply::finished,&helper,&ThreadTabHelper::loadExtraFlags,Qt::UniqueConnection);
+}
+
+void ThreadTab::onSetRegion(QString post_nr, QString region){
+	QPointer<ThreadForm> tf = tfMap.value(post_nr);
+	if(tf) tf->setRegion(region);
 }
 
 void ThreadTab::setFontSize(int fontSize){
@@ -143,14 +191,13 @@ void ThreadTab::setShortcuts()
 
 	QAction *expandAll = new QAction(this);
 	expandAll->setShortcut(Qt::Key_E);
-	connect(expandAll, &QAction::triggered,&helper,&ThreadTabHelper::loadAllImages,Qt::DirectConnection);
-	//&helper,&ThreadTabHelper::loadAllImages,Qt::DirectConnection);
+	connect(expandAll, &QAction::triggered,this,&ThreadTab::loadAllImages);
 	this->addAction(expandAll);
 
 	QAction *refresh = new QAction(this);
 	refresh->setShortcut(Qt::Key_R);
 	refresh->setShortcutContext(Qt::ApplicationShortcut);
-	connect(refresh, &QAction::triggered,&helper,&ThreadTabHelper::getPosts,Qt::DirectConnection);
+	connect(refresh, &QAction::triggered,this,&ThreadTab::getPosts);
 	//&helper,&ThreadTabHelper::getPosts,Qt::DirectConnection);
 	this->addAction(refresh);
 
@@ -357,7 +404,7 @@ void ThreadTab::gallery()
 	ui->threads->insertItem(-1,&space);
 }*/
 
-void ThreadTab::onNewTF(ThreadForm *tf)
+/*void ThreadTab::onNewTF(ThreadForm *tf)
 {
 	//TODO put filtering in another thread
 	if(tf->hidden){
@@ -379,10 +426,47 @@ void ThreadTab::onNewTF(ThreadForm *tf)
 	info.unseen++;
 	info.updateFields();
 	if(this == mw->currentTab) QCoreApplication::processEvents();
+}*/
+
+void ThreadTab::onNewTF(Post post, ThreadFormStrings strings, bool loadFile){
+	ThreadForm *tf = new ThreadForm(api,strings,true,loadFile,this);
+	tf->load(post);
+	if(post.filtered){
+		qDebug().noquote().nospace() << post.no << " filtered from " << this->windowTitle() << "!";
+		tf->hide();
+		info.hidden++;
+	}
+	ui->threads->addWidget(tf);
+	tfMap.insert(post.no,tf);
+	connect(tf,&ThreadForm::floatLink,this,&ThreadTab::floatReply);
+	connect(tf,&ThreadForm::removeMe,this,&ThreadTab::removeTF);
+	connect(tf,&ThreadForm::deleteFloat,this,&ThreadTab::deleteFloat);
+	connect(tf,&ThreadForm::updateFloat,this,&ThreadTab::updateFloat);
+	unseenList.append(tf);
+	formsTotal++;
+	formsUnseen++;
+	info.posts++;
+	if(post.tim.isEmpty()) info.files++;
+	info.unseen++;
+	info.updateFields();
+	if(this == mw->currentTab) QCoreApplication::processEvents();
 }
 
-void ThreadTab::removeTF(ThreadForm *tf)
-{
+void ThreadTab::onAddReply(QString orig, QString no, bool isYou){
+	QPointer<ThreadForm> tf = tfMap.value(orig);
+	if(!tf) return;
+	tf->replies.insert(no.toDouble(),no);
+	tf->addReplyLink(no,isYou);
+}
+
+void ThreadTab::onAddNotification(QString no){
+	QPointer<ThreadForm> tf = tfMap.value(no);
+	if(!tf) return;
+	ThreadForm *cloned = tf->clone(0);
+	nv->addNotification(cloned);
+}
+
+void ThreadTab::removeTF(ThreadForm *tf){
 	tf->hide();
 	//tfMap.remove(tf->post.no);
 	if(!tf->seen) {
@@ -411,16 +495,9 @@ void ThreadTab::onWindowTitle(QString title)
 void ThreadTab::loadAllImages()
 {
 	updated = false;
-	QMapIterator<QString,ThreadForm*> mapI(tfMap);
-	while (mapI.hasNext()) {
-		mapI.next();
-		static_cast<ThreadForm *>(mapI.value())->getFile();
+	foreach(ThreadForm *tf,tfMap){
+		tf->getFile();
 	}
-}
-
-ThreadForm *ThreadTab::findPost(QString postNum)
-{
-	return tfMap.value(postNum);
 }
 
 //TODO, just search the whole JSON and find posts
@@ -505,7 +582,7 @@ void ThreadTab::on_lineEdit_returnPressed()
 void ThreadTab::floatReply(const QString &link, int replyLevel)
 {
 	deleteFloat();
-	QPointer<ThreadForm> tf = findPost(link);
+	QPointer<ThreadForm> tf = tfMap.value(link);
 	if(!tf) return;
 	floating = tf->clone(replyLevel);
 	floating->deleteHideLayout();
@@ -567,4 +644,19 @@ void ThreadTab::updateFloat()
 		if(y<0) y = globalCursorPos.y()+10;
 		floating->move(x,y);
 	}
+}
+
+void ThreadTab::reloadFilters(){
+	foreach(ThreadForm *tf,tfMap){
+		emit testFilters(tf->post);
+	}
+}
+
+void ThreadTab::onFilterTest(QString no, bool filtered){
+	QPointer<ThreadForm> tf = tfMap.value(no);
+	if(!tf) return;
+	tf->post.filtered = filtered;
+	bool hidden = tf->isHidden();
+	if(filtered && !hidden) removeTF(tf);
+	else if(!filtered && hidden) showTF(tf);
 }

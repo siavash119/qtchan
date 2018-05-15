@@ -9,8 +9,8 @@
 #include "filter.h"
 #include "chans.h"
 #include <QWidget>
-#include <QMutableMapIterator>
 #include <QPointer>
+#include <QTimer>
 #include <QThread>
 #include <QSpacerItem>
 #include <QFutureWatcher>
@@ -23,23 +23,19 @@ class ThreadTab;
 class ThreadTab : public QWidget
 {
 	Q_OBJECT
-	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
-	//QSpacerItem space = QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Expanding);
 protected:
 	bool eventFilter(QObject *obj, QEvent *event);
 public:
-	explicit ThreadTab(Chan *api, QString board, QString thread, QWidget *parent = 0, bool isFromSession = false);
+	explicit ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent = 0, bool isFromSession = false);
 	~ThreadTab();
 
 	Chan *api;
 	QString board;
 	QString thread;
-	QString threadUrl;
 	QMap<QString,ThreadForm*> tfMap;
 	bool updated = false;
 	void findText(const QString &text);
 	void loadAllImages();
-	ThreadForm *findPost(QString postNum);
 	QPointer<ThreadForm> floating;
 	PostForm myPostForm;
 	QThread workerThread;
@@ -53,6 +49,7 @@ public:
 	int formsUnseen = 0;
 	ThreadForm* tfAtTop();
 	ThreadForm* tfAtBottom();
+	QTimer updateTimer;
 
 public slots:
 	//void addStretch();
@@ -61,10 +58,21 @@ public slots:
 	void floatReply(const QString &link, int replyLevel = 0);
 	void deleteFloat();
 	void updateFloat();
-	void onNewTF(ThreadForm *tf);
+	//void onNewTF(ThreadForm *tf);
+	void onNewTF(Post p, ThreadFormStrings strings, bool loadFile = false);
 	void onWindowTitle(QString title);
 	void setFontSize(int fontSize);
 	void setImageSize(int imageSize);
+	void onAddReply(QString orig, QString no, bool isYou);
+	void onAddNotification(QString no);
+	void setAutoUpdate(bool update);
+	void onThreadStatus(QString status,QString value = QString());
+	void onGetFlags(QByteArray data);
+	void getPosts();
+	void onSetRegion(QString post_nr, QString region);
+	void onFilterTest(QString no, bool filtered);
+
+
 	//void checkScroll();
 
 private:
@@ -76,6 +84,8 @@ private:
 	QFuture< QList<ThreadForm*> > newImage;
 	QFutureWatcher< QList<ThreadForm*> > watcher;
 	QString vimCommand;
+	QNetworkReply *postsReply;
+	QNetworkReply *flagsReply;
 
 private slots:
 	void gallery();
@@ -86,13 +96,15 @@ private slots:
 	void showTF(ThreadForm *tf);
 	void updateVim();
 	void setTabTitle(QString tabTitle);
+	void reloadFilters();
 
 
 signals:
 	void autoUpdate(bool update);
 	void unseen(int totalUnseen);
 	void formSeen();
-	void startHelper(Chan *api, QString &board, QString &thread, QWidget *parent, bool isFromSession = false);
+	void startHelper(Chan *api, QString board, QString thread, QWidget *parent, bool isFromSession = false);
+	void testFilters(Post p);
 
 };
 

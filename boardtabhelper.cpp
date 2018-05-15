@@ -8,7 +8,7 @@ BoardTabHelper::BoardTabHelper() {
 
 }
 
-void BoardTabHelper::startUp(Chan *api, QString &board, BoardType type, QString search, QWidget *parent)
+void BoardTabHelper::startUp(Chan *api, QString board, BoardType type, QString search, QWidget *parent)
 {
 	this->api = api;
 	this->parent = parent;
@@ -27,7 +27,6 @@ void BoardTabHelper::startUp(Chan *api, QString &board, BoardType type, QString 
 		request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
 	}
 	request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
-	getPosts();
 	filterMe.filters2 = filter.filterMatchedPerTab(board,"board");
 	/*updateTimer = new QTimer();
 	updateTimer->setInterval(60000);
@@ -36,16 +35,12 @@ void BoardTabHelper::startUp(Chan *api, QString &board, BoardType type, QString 
 		connectionUpdate = connect(updateTimer, &QTimer::timeout,
 								   this,&BoardTabHelper::getPosts,UniqueDirect);
 	}*/
+	emit getPosts();
 }
 
 BoardTabHelper::~BoardTabHelper() {
 	abort = true;
 	disconnect(connectionPost);
-	if(gettingReply) {
-		reply->abort();
-		disconnect(reply);
-		reply->deleteLater();
-	}
 }
 
 void BoardTabHelper::setAutoUpdate(bool update) {
@@ -56,15 +51,6 @@ void BoardTabHelper::setAutoUpdate(bool update) {
 	}*/
 }
 
-void BoardTabHelper::getPosts() {
-	disconnect(connectionPost);
-	if(reply) reply->abort();
-	qDebug() << "getting posts for" << boardUrl;
-	reply = nc.jsonManager->get(request);
-	gettingReply = true;
-	connectionPost = connect(reply,SIGNAL(finished()),this,SLOT(loadPosts()),Qt::DirectConnection);
-}
-
 void BoardTabHelper::writeJson(QString &board, QByteArray &rep) {
 	QFile jsonFile(board+"/index.json");
 	jsonFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
@@ -72,7 +58,8 @@ void BoardTabHelper::writeJson(QString &board, QByteArray &rep) {
 	jsonFile.close();
 }
 
-void BoardTabHelper::loadPosts() {
+void BoardTabHelper::getPostsFinished() {
+	QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
 	if(!reply) return;
 	gettingReply = false;
 	if(reply->error()) {
@@ -93,8 +80,6 @@ void BoardTabHelper::loadPosts() {
 	QByteArray rep = reply->readAll();
 	reply->deleteLater();
 	if(rep.isEmpty()) return;
-	qDeleteAll(tfMap);
-	tfMap.clear();
 	emit clearMap();
 	QJsonArray threads = filterThreads(rep);
 	int length = threads.size();
@@ -122,22 +107,19 @@ void BoardTabHelper::loadPosts() {
 			i++;
 			continue;
 		}
-		ThreadForm *tf;
-		if(!abort) tf = new ThreadForm(api,board,threadNum,Thread,true,loadFile,parent,0);
-		else break;
-		tf->load(p);
-		tfMap.insert(tf->post.no,tf);
-		//if(filter.filterMatched(tf->matchThis()) || filter.filterMatched2(&(tf->post))){
-		if(filterMe.filterMatched2(&(tf->post))){
-			tf->hidden=true;
+		Post post(p,board);
+		if(filterMe.filterMatched2(&post)){
+			post.filtered = true;
 		}
-		emit newThread(tf);
+		allPosts.append(post.no);
+		ThreadFormStrings tfString(post,threadNum,"index");
+		emit newThread(post,tfString,loadFile);
 		if(type==BoardType::Index && showIndexReplies){
 			for(int j=1;j<t.size();j++){
 				p = t.at(j).toObject();
-				ThreadForm *tfChild = new ThreadForm(api,board,threadNum,Thread,true,loadFile,parent,1);
-				tfChild->load(p);
-				emit newTF(tfChild,tf);
+				Post replyPost(p,board);
+				ThreadFormStrings replyStrings(replyPost,threadNum,"index");
+				emit newReply(replyPost,replyStrings,threadNum);
 			}
 		}
 		i++;
@@ -145,18 +127,14 @@ void BoardTabHelper::loadPosts() {
 }
 
 void BoardTabHelper::reloadFilters(){
-	filterMe.filters2 = filter.filterMatchedPerTab(this->board,"board");
-	foreach(ThreadForm* tf,tfMap){
-		if(filterMe.filterMatched2(&(tf->post))){
-			tf->hidden=true;
-			emit removeTF(tf);
-		}
-		else if(tf->isHidden()){
-			tf->hidden=false;
-			emit showTF(tf);
-		}
-	}
+	filterMe.filters2 = filter.filterMatchedPerTab(this->board,"thread");
+	emit startFilterTest();
 }
+
+void BoardTabHelper::filterTest(Post p){
+	emit filterTested(p.no,filterMe.filterMatched2(&p));
+}
+
 
 QJsonArray BoardTabHelper::filterThreads(QByteArray &rep){
 	QJsonArray threads;
@@ -189,16 +167,4 @@ QJsonArray BoardTabHelper::filterThreads(QByteArray &rep){
 		}
 	}
 	return threads;
-}
-
-void BoardTabHelper::loadAllImages() {
-	expandAll = !expandAll;
-	qDebug() << "settings expandAll for" << boardUrl << "to" << expandAll;
-	if(expandAll) {
-		QMapIterator<QString,ThreadForm*> mapI(tfMap);
-		while (mapI.hasNext()) {
-			mapI.next();
-			mapI.value()->getFile();
-		}
-	}
 }

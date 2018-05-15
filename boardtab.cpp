@@ -11,20 +11,31 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	QWidget(parent), api(api), board(board), type(type), search(search),
 	ui(new Ui::BoardTab)
 {
+	qRegisterMetaType<BoardType>("BoardType");
 	ui->setupUi(this);
 	ui->searchWidget->hide();
 	//TODO check if actual board
 	this->setWindowTitle("/"+board+"/"+search);
 	if(type == BoardType::Index) boardUrl = api->boardURL(board);
 	else boardUrl = api->catalogURL(board);
+
 	helper.moveToThread(&workerThread);
+	connect(this,&BoardTab::startHelper,&helper,&BoardTabHelper::startUp,Qt::QueuedConnection);
+	connect(&helper,&BoardTabHelper::getPosts,this,&BoardTab::getPosts,Qt::QueuedConnection);
 	connect(&helper,&BoardTabHelper::newThread,this,&BoardTab::onNewThread,Qt::QueuedConnection);
-	connect(&helper,&BoardTabHelper::newTF,this,&BoardTab::onNewTF,Qt::QueuedConnection);
+	connect(&helper,&BoardTabHelper::newReply,this,&BoardTab::onNewReply,Qt::QueuedConnection);
 	connect(&helper,&BoardTabHelper::clearMap,this,&BoardTab::clearMap,Qt::QueuedConnection);
 	connect(&helper,&BoardTabHelper::removeTF,this,&BoardTab::removeTF,Qt::QueuedConnection);
 	connect(&helper,&BoardTabHelper::showTF,this,&BoardTab::showTF,Qt::QueuedConnection);
-	connect(mw,&MainWindow::reloadFilters,&helper,&BoardTabHelper::reloadFilters,Qt::DirectConnection);
+
+	//probably trash; maybe put allPosts hash in helper
+	connect(mw,&MainWindow::reloadFilters,&helper,&BoardTabHelper::reloadFilters);
+	connect(&helper,&BoardTabHelper::startFilterTest,this,&BoardTab::reloadFilters);
+	connect(this,&BoardTab::testFilters,&helper,&BoardTabHelper::filterTest);
+	connect(&helper,&BoardTabHelper::filterTested,this,&BoardTab::onFilterTest);
+
 	workerThread.start();
+
 	myPostForm.setParent(this,Qt::Tool
 						 | Qt::WindowMaximizeButtonHint
 						 | Qt::WindowCloseButtonHint);
@@ -43,7 +54,7 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,Qt::QueuedConnection);
 	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,Qt::QueuedConnection);
 	connect(mw,&MainWindow::setImageSize,this,&BoardTab::setImageSize,Qt::QueuedConnection);
-	helper.startUp(api,board,type,search,this);
+	emit startHelper(api,board,type,search,this);
 }
 
 void BoardTab::setFontSize(int fontSize){
@@ -57,6 +68,13 @@ void BoardTab::setFontSize(int fontSize){
 		tf->setFontSize(fontSize);
 	}
 }
+
+void BoardTab::getPosts(){
+	qDebug().noquote().nospace() << "getting posts for " << board;
+	postsReply = nc.jsonManager->get(helper.request);
+	connect(postsReply,&QNetworkReply::finished,&helper,&BoardTabHelper::getPostsFinished,Qt::UniqueConnection);
+}
+
 
 void BoardTab::removeTF(ThreadForm *tf){
 	tf->hide();
@@ -86,7 +104,7 @@ void BoardTab::setShortcuts()
 {
 	QAction *refresh = new QAction(this);
 	refresh->setShortcut(Qt::Key_R);
-	connect(refresh, &QAction::triggered, &helper, &BoardTabHelper::getPosts, Qt::DirectConnection);
+	connect(refresh, &QAction::triggered, this, &BoardTab::getPosts);
 	this->addAction(refresh);
 
 	QAction *postForm = new QAction(this);
@@ -107,6 +125,11 @@ void BoardTab::setShortcuts()
 	});
 	this->addAction(selectPost);
 
+	QAction *expandAll = new QAction(this);
+	expandAll->setShortcut(Qt::Key_E);
+	connect(expandAll, &QAction::triggered,this,&BoardTab::loadAllImages);
+	this->addAction(expandAll);
+
 	QAction *scrollUp = new QAction(this);
 	scrollUp->setShortcut(Qt::Key_K);
 	connect(scrollUp, &QAction::triggered,[=]{
@@ -124,7 +147,7 @@ void BoardTab::setShortcuts()
 				QObject *temp = i.previous();
 				if(temp->objectName() == "ThreadForm"){
 					toTf = qobject_cast<ThreadForm*>(temp);
-					if(toTf->hidden) vimNumber++;
+					if(toTf->isHidden()) vimNumber++;
 				}
 			}
 			if(toTf) bar->setValue(toTf->pos().y());
@@ -149,7 +172,7 @@ void BoardTab::setShortcuts()
 				QObject *temp = i.next();
 				if(temp->objectName() == "ThreadForm"){
 					toTf = qobject_cast<ThreadForm*>(temp);
-					if(toTf->hidden) vimNumber++;
+					if(toTf->isHidden()) vimNumber++;
 				}
 
 			}
@@ -235,25 +258,34 @@ void BoardTab::addStretch()
 	ui->threads->insertItem(-1,&space);
 }*/
 
-void BoardTab::onNewTF(ThreadForm *tf, ThreadForm *thread)
-{
+void BoardTab::onNewReply(Post post, ThreadFormStrings strings, QString opNum, bool loadFile){
+	QPointer<ThreadForm> OP = tfMap.value(opNum);
+	if(!OP) return;
+	ThreadForm *tf = new ThreadForm(api,strings,true,loadFile,OP,1);
+	tf->load(post);
+	tfReplyMap.insert(post.no,tf);
+	if(post.filtered){
+		qDebug().noquote().nospace() << post.no << " filtered from " << this->windowTitle() << "!";
+		tf->hide();
+	}
 	connect(tf,&ThreadForm::removeMe,tf,&ThreadForm::deleteLater,Qt::QueuedConnection);
-	thread->addReply(tf);
+	OP->addReply(tf);
 	if(this == mw->currentTab) QCoreApplication::processEvents();
 }
 
-void BoardTab::onNewThread(ThreadForm *tf)
-{
-	if(tf->hidden){
-		qDebug().noquote().nospace() << tf->post.no << " filtered from /" << board << "/!";
+void BoardTab::onNewThread(Post post, ThreadFormStrings strings, bool loadFile){
+	ThreadForm *tf = new ThreadForm(api,strings,true,loadFile,this);
+	tf->load(post);
+	if(post.filtered){
+		qDebug().noquote().nospace() << post.no << " filtered from " << this->windowTitle() << "!";
 		tf->hide();
 	}
 	connect(tf,&ThreadForm::removeMe,[=]{
-		filter.addFilter2("no",tf->post.no,"boards:"+board);
+		filter.addFilter2("no",post.no,"boards:"+board);
 		tf->hide();
 	});
 	ui->threads->addWidget(tf);
-	tfMap.insert(tf->post.no,tf);
+	tfMap.insert(post.no,tf);
 	if(this == mw->currentTab) QCoreApplication::processEvents();
 }
 
@@ -289,5 +321,32 @@ void BoardTab::focusIt()
 }
 
 void BoardTab::clearMap(){
+	qDeleteAll(tfMap);
 	tfMap.clear();
+	tfReplyMap.clear();
+}
+
+void BoardTab::reloadFilters(){
+	foreach(ThreadForm *tf,tfMap){
+		emit testFilters(tf->post);
+	}
+}
+
+void BoardTab::onFilterTest(QString no, bool filtered){
+	QPointer<ThreadForm> tf = tfMap.value(no);
+	if(!tf) return;
+	tf->post.filtered = filtered;
+	bool hidden = tf->isHidden();
+	if(filtered && !hidden) removeTF(tf);
+	else if(!filtered && hidden) showTF(tf);
+}
+
+void BoardTab::loadAllImages()
+{
+	foreach(ThreadForm *tf,tfMap){
+		tf->getFile();
+	}
+	/*foreach(ThreadForm *tf,tfReplyMap){
+		tf->getFile();
+	}*/
 }

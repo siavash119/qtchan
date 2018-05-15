@@ -6,13 +6,14 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QRegExp>
+#include <QSet>
 #include <time.h>
 
 class Post
 {
 public:
 	Post();
-	Post(QJsonObject &p,QString &board);
+	Post(QJsonObject p,QString &board);
 	~Post();
 	void load(QJsonObject &p,QString &board);
 
@@ -78,7 +79,8 @@ public:
 	bool isYou = false;
 	bool hasYou = false;
 	QString* get(QString key);
-
+	bool filtered = false;
+	QSet<QString> quotelinks;
 };
 
 #endif // POST_H

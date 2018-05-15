@@ -22,30 +22,32 @@ public:
 	QMap<QString,ThreadForm*> tfMap;
 	bool abort = false;
 	bool expandAll;
-	void startUp(Chan *api, QString &board, BoardType type, QString search, QWidget *parent);
 	static void writeJson(QString &board, QByteArray &rep);
 	Chan *api;
+	QStringList allPosts;
+	QNetworkRequest request;
 
 private:
 	QString boardUrl;
-	QPointer<QNetworkReply> reply;
-	QNetworkRequest request;
 	QWidget *parent;
 	QMetaObject::Connection connectionPost;
 	QMetaObject::Connection connectionUpdate;
 	QJsonArray filterThreads(QByteArray &rep);
 
 public slots:
-	void loadPosts();
-	void getPosts();
-	void loadAllImages();
+	void getPostsFinished();
 	void setAutoUpdate(bool update);
 	void reloadFilters();
+	void filterTest(Post p);
+	void startUp(Chan *api, QString board, BoardType type, QString search, QWidget *parent);
 
 signals:
+	void getPosts();
 	void postsLoaded(QJsonArray &posts);
-	void newThread(ThreadForm *tf);
-	void newTF(ThreadForm *tf, ThreadForm *parent);
+	//void newThread(ThreadForm *tf);
+	void newReply(Post p, ThreadFormStrings strings, QString parentNum, bool loadFile = false);
+	void newThread(Post p, ThreadFormStrings strings, bool loadFile = false);
+	//void newTF(ThreadForm *tf, ThreadForm *parent);
 	void windowTitle(QString windowTitle);
 	void setReplies(ThreadForm *tf);
 	void addStretch();
@@ -54,6 +56,9 @@ signals:
 	void clearMap();
 	void removeTF(ThreadForm *tf);
 	void showTF(ThreadForm *tf);
+	void filterTested(QString no, bool filtered);
+	void startFilterTest();
+
 	//void scrollIt();
 };
 
