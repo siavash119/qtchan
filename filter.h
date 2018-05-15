@@ -45,6 +45,7 @@ private:
 	QRegularExpressionMatch quotelinkMatch;
 	QRegularExpressionMatchIterator quotelinkMatches;
 	void loadFilterFile();
+	void insertFilterIntoFile(QString key, QString exp, QString options);
 	void writeFilterFile2();
 	bool useFilter(QString &options, Post *p);
 };

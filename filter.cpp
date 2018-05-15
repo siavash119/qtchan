@@ -2,6 +2,7 @@
 #include "post.h"
 #include "you.h"
 #include <QStandardPaths>
+#include <QTemporaryFile>
 #include <QDebug>
 
 Filter::Filter()
@@ -91,16 +92,51 @@ void Filter::loadFilterFile2(){
 	qDebug() << "########" << endl << "FILTERS" << endl << filters2 << endl << "#########";
 }
 
-//TODO addFilter2 doesn't rewrite the whole file; just adds one line
-//comments and empty lines are currently NOT preserved
 void Filter::addFilter2(QString key, QString newFilter, QString options){
 	QHash<QRegularExpression,QString> hash = filters2.value(key);
 	hash.insert(QRegularExpression(newFilter,QRegularExpression::CaseInsensitiveOption),options);
 	filters2.insert(key,hash);
 	qDebug() << filters2;
-	writeFilterFile2();
+	insertFilterIntoFile(key,newFilter,options);
+	//writeFilterFile2();
 }
 
+void Filter::insertFilterIntoFile(QString key, QString exp, QString options){
+	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + "filters.conf";
+	QFile file(filterFile);
+	QTemporaryFile temp;
+	bool found(false);
+	if (file.open(QIODevice::ReadWrite) && temp.open()){
+		QTextStream ts(&file);
+		QTextStream out(&temp);
+		QString search('!'+key);
+		while (!ts.atEnd())
+		{
+			QString line = ts.readLine();
+			out << line << endl;
+			if(!found && line == search){
+				found = true;
+				out << exp << '$' << options << endl;
+			}
+		}
+		if(found){
+			file.close();
+			file.remove();
+			//QFile::copy(temp.fileName(),filterFile);
+			qDebug() << temp.copy(filterFile);
+			temp.close();
+		}
+		else{
+			ts << endl << '!' << key;
+			ts << endl << exp << '$' << options;
+			ts << endl << '!';
+			file.close();
+			temp.close();
+		}
+	}
+}
+
+//deprecated
 void Filter::writeFilterFile2(){
 	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + "filters.conf";
 	QFile file(filterFile);
