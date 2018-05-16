@@ -49,7 +49,7 @@ public:
 	int formsUnseen = 0;
 	ThreadForm* tfAtTop();
 	ThreadForm* tfAtBottom();
-	QTimer updateTimer;
+	QString status;
 
 public slots:
 	//void addStretch();
@@ -72,7 +72,6 @@ public slots:
 	void onSetRegion(QString post_nr, QString region);
 	void onFilterTest(QString no, bool filtered);
 
-
 	//void checkScroll();
 
 private:
@@ -85,6 +84,7 @@ private:
 	QString vimCommand;
 	QNetworkReply *postsReply;
 	QNetworkReply *flagsReply;
+	QTimer updateTimer;
 
 private slots:
 	void gallery();

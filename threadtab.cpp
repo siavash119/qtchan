@@ -99,6 +99,7 @@ ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent
 }
 
 void ThreadTab::setAutoUpdate(bool update) {
+	if(!status.isEmpty()) return;
 	if(update) {
 		updateTimer.start();
 	}
@@ -113,6 +114,7 @@ void ThreadTab::setTabTitle(QString tabTitle){
 
 void ThreadTab::onThreadStatus(QString status, QString value){
 	(void)value;
+	this->status = status;
 	if(status == "404" || status == "closed" || status == "archived"){
 		if(updateTimer.isActive()) updateTimer.stop();
 	}
@@ -398,36 +400,6 @@ void ThreadTab::gallery()
 	QProcess().startDetached(command,arguments);
 }
 
-/*void ThreadTab::addStretch()
-{
-	ui->threads->removeItem(&space);
-	ui->threads->insertItem(-1,&space);
-}*/
-
-/*void ThreadTab::onNewTF(ThreadForm *tf)
-{
-	//TODO put filtering in another thread
-	if(tf->hidden){
-		qDebug().noquote().nospace() << tf->post.no << " filtered from " << this->windowTitle() << "!";
-		tf->hide();
-		info.hidden++;
-	}
-	ui->threads->addWidget(tf);
-	tfMap.insert(tf->post.no,tf);
-	connect(tf,&ThreadForm::floatLink,this,&ThreadTab::floatReply);
-	connect(tf,&ThreadForm::removeMe,this,&ThreadTab::removeTF, Qt::DirectConnection);
-	connect(tf,&ThreadForm::deleteFloat,this,&ThreadTab::deleteFloat,Qt::DirectConnection);
-	connect(tf,&ThreadForm::updateFloat,this,&ThreadTab::updateFloat,Qt::DirectConnection);
-	unseenList.append(tf);
-	formsTotal++;
-	formsUnseen++;
-	info.posts++;
-	if(!tf->post.tim.isEmpty()) info.files++;
-	info.unseen++;
-	info.updateFields();
-	if(this == mw->currentTab) QCoreApplication::processEvents();
-}*/
-
 void ThreadTab::onNewTF(Post post, ThreadFormStrings strings, bool loadFile){
 	ThreadForm *tf = new ThreadForm(api,strings,true,loadFile,this);
 	tf->load(post);
@@ -468,7 +440,6 @@ void ThreadTab::onAddNotification(QString no){
 
 void ThreadTab::removeTF(ThreadForm *tf){
 	tf->hide();
-	//tfMap.remove(tf->post.no);
 	if(!tf->seen) {
 		formsUnseen--;
 		unseenList.removeOne(tf);
@@ -579,6 +550,7 @@ void ThreadTab::on_lineEdit_returnPressed()
 	findText(ui->lineEdit->text());
 }
 
+//TODO make post smaller if doesn't fit
 void ThreadTab::floatReply(const QString &link, int replyLevel)
 {
 	deleteFloat();
@@ -590,20 +562,10 @@ void ThreadTab::floatReply(const QString &link, int replyLevel)
 	floating->setObjectName("reply");
 	floating->setWindowFlags(Qt::ToolTip);
 	floating->setWindowTitle("reply");
+
 	QRect rec = QApplication::desktop()->availableGeometry(this);
 	QPoint globalCursorPos = QCursor::pos();
 	QSize sizeHint = floating->sizeHint();
-	/*qDebug() << sizeHint;
-	if(floating->hasImage && sizeHint.width() < 850){
-		sizeHint.setWidth(850);
-		sizeHint.setHeight(floating->heightForWidth(850));
-	}
-	else if(!floating->hasImage && sizeHint.width() < 600){
-			sizeHint.setWidth(600);
-			sizeHint.setHeight(floating->heightForWidth(600));
-	}
-	qDebug() << sizeHint;*/
-	//floating->setFixedSize(sizeHint);
 	int x = -1, y = -1;
 	if(globalCursorPos.x()  - rec.topLeft().x() + sizeHint.width() + 10 > rec.width()) {
 		x = globalCursorPos.x() - sizeHint.width() - 10;
