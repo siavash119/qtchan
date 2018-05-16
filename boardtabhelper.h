@@ -33,6 +33,7 @@ private:
 	QMetaObject::Connection connectionPost;
 	QMetaObject::Connection connectionUpdate;
 	QJsonArray filterThreads(QByteArray &rep);
+	PostKeys postKeys;
 
 public slots:
 	void getPostsFinished();

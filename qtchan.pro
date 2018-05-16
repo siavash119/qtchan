@@ -8,59 +8,60 @@ QMAKE_CXXFLAGS_RELEASE += -O3
 
 SOURCES += main.cpp \
 	mainwindow.cpp \
+	threadformcontext.cpp \
+	threadformstrings.cpp \
 	threadform.cpp \
 	clickablelabel.cpp \
-	boardtab.cpp \
+	filter.cpp \
 	netcontroller.cpp \
-	threadtab.cpp \
+	chans.cpp \
+	overlay.cpp \
+	captcha.cpp \
 	post.cpp \
 	postform.cpp \
-	filter.cpp \
-	overlay.cpp \
+	threadtab.cpp \
 	threadtabhelper.cpp \
+	boardtab.cpp \
+	boardtabhelper.cpp \
 	treemodel.cpp \
 	treeitem.cpp \
+	treeview.cpp \
 	settings.cpp \
-	boardtabhelper.cpp \
-	captcha.cpp \
 	threadinfo.cpp \
-	chans.cpp \
 	you.cpp \
 	notificationtray.cpp \
-	treeview.cpp \
 	notificationview.cpp \
-	archivetab.cpp \
-	threadformcontext.cpp \
-	threadformstrings.cpp
+	archivetab.cpp
 
 HEADERS += mainwindow.h \
+	threadformcontext.h \
+	threadformstrings.h \
 	threadform.h \
 	clickablelabel.h \
-	boardtab.h \
-	netcontroller.h \
-	threadtab.h \
-	post.h \
-	postform.h \
 	filter.h \
-	overlay.h \
-	threadtabhelper.h \
-	treeitem.h \
-	treemodel.h \
-	settings.h \
-	boardtabhelper.h \
-	captcha.h \
-	threadinfo.h \
-	chans/chan.h \
+	netcontroller.h \
 	chans.h \
+	chans/chan.h \
 	chans/fourchan.h \
 	chans/eightchan.h \
+	chans/twochhk.h \
+	captcha.h \
+	overlay.h \
+	post.h \
+	postform.h \
+	threadtab.h \
+	threadtabhelper.h \
+	boardtab.h \
+	boardtabhelper.h \
+	treemodel.h \
+	treeitem.h \
+	treeview.h \
+	settings.h \
+	threadinfo.h \
 	you.h \
 	notificationtray.h \
-	treeview.h \
 	notificationview.h \
-	archivetab.h \
-	threadformcontext.h \
-	threadformstrings.h
+	archivetab.h
 
 FORMS   += mainwindow.ui \
 	threadform.ui \

@@ -12,6 +12,7 @@ Filter filter;
 netController nc;
 Chan *fourChanAPI = new FourChan();
 Chan *eightChanAPI = new EightChan();
+Chan *twoChHkAPI = new TwoChHk();
 
 int main(int argc, char *argv[])
 {

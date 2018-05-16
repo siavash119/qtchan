@@ -94,10 +94,6 @@ QString ThreadForm::matchThis(){
 	return post.sub % post.com % tfInfoString % fileInfoString;
 }
 
-void ThreadForm::load(QJsonObject &p){
-	Post aPost(p,strings.board);
-	load(aPost);
-}
 void ThreadForm::load(Post &post)
 {
 	//set post number

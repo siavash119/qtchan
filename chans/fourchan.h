@@ -2,7 +2,6 @@
 #define FOURCHAN_H
 
 #include "chan.h"
-#include <QString>
 
 //TODO check if i use inline/use final/etc.
 
@@ -31,6 +30,10 @@ public:
 		"https://boards.4chan.org/"
 	};
 	inline CaptchaLinks captchaLinks(){return captchaInfo;}
+	inline QJsonArray postsArray(QByteArray &data, QString type){
+		(void)type;
+		return QJsonDocument::fromJson(data).object().value("posts").toArray();
+	}
 };
 
 #endif // FOURCHAN_H

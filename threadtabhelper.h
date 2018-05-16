@@ -36,6 +36,7 @@ private:
 	QWidget *parent;
 	bool isFromSession;
 	QSet<QString> gottenFlags;
+	PostKeys postKeys;
 
 public slots:
 	void startUp(Chan *api, QString board, QString thread, QWidget *parent, bool isFromSession);

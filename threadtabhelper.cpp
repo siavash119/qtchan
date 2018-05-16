@@ -16,6 +16,7 @@ void ThreadTabHelper::startUp(Chan *api, QString board, QString thread, QWidget 
 	this->board = board;
 	this->isFromSession = isFromSession;
 	this->api = api;
+	postKeys = api->postKeys();
 	//TODO check type
 	this->threadUrl = api->threadURL(board,thread);
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
@@ -116,14 +117,15 @@ void ThreadTabHelper::getPostsFinished() {
 }
 
 void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
-	QJsonArray posts = QJsonDocument::fromJson(postData).object().value("posts").toArray();
+	QJsonArray posts = api->postsArray(postData,"thread");
+	//QJsonArray posts = QJsonDocument::fromJson(postData).object().value("posts").toArray();
 	int length = posts.size();
 	qDebug().noquote() << QString("length of ").append(threadUrl).append(" is ").append(QString::number(length));
 	//check OP if archived or closed
 	QJsonObject p;
 	if(length) {
 		p = posts.at(0).toObject();
-		Post OP(p,board);
+		Post OP(p,postKeys,board);
 		if(OP.archived) {
 			qDebug().nospace() << "Stopping timer for " << threadUrl <<". Reason: Archived";
 			emit threadStatus("archived",OP.archived_on);
@@ -141,7 +143,7 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	bool loadFile = settings.value("autoExpand",false).toBool() || this->expandAll;
 	while(i<length) {
-		Post post(posts.at(i).toObject(),board);
+		Post post(posts.at(i).toObject(),postKeys,board);
 		if(filterMe.filterMatched2(&post)){
 			post.filtered = true;
 		}

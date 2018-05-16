@@ -1,6 +1,7 @@
 #ifndef POST_H
 #define POST_H
 
+#include "chans/chan.h"
 #include <QString>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -13,9 +14,9 @@ class Post
 {
 public:
 	Post();
-	Post(QJsonObject p,QString &board);
+	Post(QJsonObject p,PostKeys &keys, QString &board);
 	~Post();
-	void load(QJsonObject &p,QString &board);
+	void load(QJsonObject &p,PostKeys &keys, QString &board);
 
 	QString no;
 	int resto;

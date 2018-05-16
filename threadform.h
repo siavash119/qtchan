@@ -34,7 +34,6 @@ public:
 	void setText(QString text);
 	void setImage(QByteArray img);
 	//void getImage(QNetworkAccessManager *manager, QString *img);
-	void load(QJsonObject &p);
 	void load(Post &post);
 	void loadImage(QString path);
 	void openImage();

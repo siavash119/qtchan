@@ -15,6 +15,7 @@ void BoardTabHelper::startUp(Chan *api, QString board, BoardType type, QString s
 	this->board = board;
 	this->type = type;
 	this->search = search;
+	this->postKeys = api->postKeys();
 	if(type == BoardType::Index) boardUrl = api->boardURL(board);
 	else boardUrl = api->catalogURL(board);
 	qDebug() << "boardURL is" << boardUrl;
@@ -107,7 +108,7 @@ void BoardTabHelper::getPostsFinished() {
 			i++;
 			continue;
 		}
-		Post post(p,board);
+		Post post(p,postKeys,board);
 		if(filterMe.filterMatched2(&post)){
 			post.filtered = true;
 		}
@@ -117,7 +118,7 @@ void BoardTabHelper::getPostsFinished() {
 		if(type==BoardType::Index && showIndexReplies){
 			for(int j=1;j<t.size();j++){
 				p = t.at(j).toObject();
-				Post replyPost(p,board);
+				Post replyPost(p,postKeys,board);
 				ThreadFormStrings replyStrings(replyPost,threadNum,"index");
 				emit newReply(replyPost,replyStrings,threadNum);
 			}
