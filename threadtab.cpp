@@ -30,8 +30,9 @@ ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent
 	info.show();
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	updateTimer.setInterval(60000);
+	connect(&updateTimer,&QTimer::timeout,this,&ThreadTab::getPosts);
 	if(settings.value("autoUpdate").toBool()) {
-		connectionAutoUpdate = connect(&updateTimer,&QTimer::timeout,this,&ThreadTab::getPosts);
+		updateTimer.start();
 	}
 	helper.moveToThread(&workerThread);
 	connect(this,&ThreadTab::startHelper,&helper,&ThreadTabHelper::startUp,Qt::QueuedConnection);
@@ -98,9 +99,11 @@ ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent
 }
 
 void ThreadTab::setAutoUpdate(bool update) {
-	disconnect(connectionAutoUpdate);
 	if(update) {
-		connectionAutoUpdate = connect(&updateTimer,&QTimer::timeout,this,&ThreadTab::getPosts);
+		updateTimer.start();
+	}
+	else{
+		updateTimer.stop();
 	}
 }
 
@@ -369,12 +372,9 @@ ThreadForm* ThreadTab::tfAtBottom(){
 
 ThreadTab::~ThreadTab()
 {
-	//ui->threads->removeItem(&space);
 	helper.abort = true;
 	workerThread.quit();
 	workerThread.wait();
-	workerThread.terminate();
-	disconnect(connectionAutoUpdate);
 	delete ui;
 	qDebug().noquote().nospace() << "deleting tab /" << board+"/"+thread;
 }

@@ -78,7 +78,6 @@ public slots:
 private:
 	bool isFromSession;
 	Ui::ThreadTab *ui;
-	QMetaObject::Connection connectionAutoUpdate;
 	QMetaObject::Connection connectionVisibleChecker;
 	void setShortcuts();
 	QFuture< QList<ThreadForm*> > newImage;

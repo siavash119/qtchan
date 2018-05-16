@@ -95,7 +95,6 @@ BoardTab::~BoardTab()
 	helper.abort = true;
 	workerThread.quit();
 	workerThread.wait();
-	workerThread.terminate();
 	delete ui;
 	qDebug().noquote().nospace() << "deleting board /" << board+"/";
 }
