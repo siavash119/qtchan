@@ -157,19 +157,11 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 
 		//Update windowTitle with OP info
 		if(i==0) {
-			if(post.sub.length()){
-				emit windowTitle("/"+board+"/"+thread + " - " + post.sub);
-				emit tabTitle(post.sub);
-			}
-			else if(post.com.length()) {
-				QString temp = post.com;
-				//TODO clean this
-				temp = Filter::htmlParse(temp)
-						.replace("\n"," ")
-						.remove(QRegExp("<[^>]*>"));
-				emit windowTitle("/"+board+"/"+thread + " - " + temp);
-				if(!isFromSession) emit tabTitle(temp);
-			}
+			QString temp;
+			if(post.sub.length()) temp = Filter::titleParse(post.sub);
+			else temp = Filter::titleParse(post.com);
+			emit windowTitle("/"+board+"/"+thread + " - " + temp);
+			if(!isFromSession) emit tabTitle(temp);
 		}
 		foreach (const QString &orig, post.quotelinks) {
 			emit addReply(orig,post.no,post.isYou);

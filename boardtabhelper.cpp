@@ -5,7 +5,8 @@
 #include <QtConcurrent/QtConcurrent>
 
 BoardTabHelper::BoardTabHelper() {
-
+	qRegisterMetaType<Post>("Post");
+	qRegisterMetaType<ThreadFormStrings>("ThreadFormStrings");
 }
 
 void BoardTabHelper::startUp(Chan *api, QString board, BoardType type, QString search, QWidget *parent)
@@ -102,7 +103,7 @@ void BoardTabHelper::getPostsFinished() {
 		else{
 			p = threads.at(i).toObject();
 		}
-		QString threadNum = QString("%1").arg(p.value("no").toDouble(),0,'f',0);
+		QString threadNum = QString("%1").arg(p.value(api->postKeys().no).toDouble(),0,'f',0);
 		if (idFilters.contains(threadNum)){
 			qDebug("threadNum %s filtered!",threadNum.toLatin1().constData());
 			i++;
@@ -139,14 +140,15 @@ void BoardTabHelper::filterTest(Post p){
 
 QJsonArray BoardTabHelper::filterThreads(QByteArray &rep){
 	QJsonArray threads;
-	if(type==BoardType::Index) threads = QJsonDocument::fromJson(rep).object().value("threads").toArray();
+	if(type==BoardType::Index){
+		threads = api->threadsArray(rep);
+	}
 	else if(search.isEmpty()){
-		QJsonArray allThreads = QJsonDocument::fromJson(rep).array();
+		QJsonArray allThreads = api->catalogArray(rep);
 		int numPages = allThreads.size();
-		QJsonArray pageThreads;
 		//-5 for some reason catalog goes blank on last 5 pages
 		for(int i=0;i<numPages-5;i++){
-			pageThreads = allThreads.at(i).toObject().value("threads").toArray();
+			QJsonArray pageThreads = api->catalogPageArray(allThreads,i);
 			int numThreads = pageThreads.size();
 			for(int j=0;j<numThreads;j++){
 				threads.append(pageThreads.at(j));
@@ -154,15 +156,16 @@ QJsonArray BoardTabHelper::filterThreads(QByteArray &rep){
 		}
 	}
 	else{ //TODO put this is static concurrent function with future or stream?
+		QJsonArray allThreads = api->catalogArray(rep);
+		int numPages = allThreads.size();
 		qDebug("searching %s",search.toLatin1().constData());
 		QRegularExpression re(search,QRegularExpression::CaseInsensitiveOption);
-		QRegularExpressionMatch match;
-		QJsonArray allThreads = QJsonDocument::fromJson(rep).array();
-		QJsonArray pageThreads;
-		for(int i=0;i<allThreads.size();i++) {
-			pageThreads = allThreads.at(i).toObject().value("threads").toArray();
+		for(int i=0;i<numPages;i++) {
+			QJsonArray pageThreads = api->catalogPageArray(allThreads,i);
 			for(int j=0;j<pageThreads.size();j++) {
-				match = re.match(pageThreads.at(j).toObject().value("sub").toString() % pageThreads.at(j).toObject().value("com").toString());
+				QJsonObject post = pageThreads.at(j).toObject();
+				QRegularExpressionMatch match = re.match(post.value(api->postKeys().sub).toString()
+								 % post.value(api->postKeys().com).toString());
 				if(match.hasMatch())threads.append(pageThreads.at(j));
 			}
 		}

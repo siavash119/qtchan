@@ -11,12 +11,12 @@
 //TODO each Chan api has its own Captcha object
 
 struct CaptchaLinks{
-	QString server= "";
-	QString siteKey = "";
-	QString lang = "";
-	QString challengeURL = "";
-	QString imageBaseURL = "";
-	QString refererURL = "";
+	QString server;
+	QString siteKey;
+	QString lang;
+	QString challengeURL;
+	QString imageBaseURL;
+	QString refererURL;
 };
 
 struct PostKeys{
@@ -88,11 +88,16 @@ public:
 	virtual QString regToCatalog() = 0;
 	virtual QString apiBase() = 0;
 	virtual QJsonArray postsArray(QByteArray &data, QString type = QString()) = 0;
+	virtual QJsonArray threadsArray(QByteArray &data) = 0;
+	virtual QJsonArray catalogArray(QByteArray &data) = 0;
+	virtual QJsonArray catalogPageArray(QJsonArray &allThreads, int index) = 0;
+	//if usesCaptcha() is true, implement captchaURL() and captchaLinks()
 	virtual inline bool usesCaptcha(){return false;}
-	virtual inline QString captchaURL(){return QString();}
-	virtual inline CaptchaLinks captchaLinks(){CaptchaLinks defaultCaptchaLinks; return defaultCaptchaLinks;}
+	virtual QString captchaURL(){return QString();}
+	virtual CaptchaLinks captchaLinks(){CaptchaLinks links; return links;}
 	virtual inline bool requiresUserAgent(){return false;}
 	virtual inline QString requiredUserAgent(){return QString("Mozilla/5.0 (X11; Linux x86_64; rv:59.0) Gecko/20100101 Firefox/59.0");}
+	//if requiresCookies() is true, implement setCookies()
 	virtual inline bool requiresCookies(){return false;}
 	virtual inline void setCookies(){return;}
 	virtual inline PostKeys postKeys(){PostKeys defaultPostKeys; return defaultPostKeys;}

@@ -36,6 +36,15 @@ public:
 		(void)type;
 		return QJsonDocument::fromJson(data).object().value("posts").toArray();
 	}
+	inline QJsonArray threadsArray(QByteArray &data){
+		return QJsonDocument::fromJson(data).object().value("threads").toArray();
+	}
+	inline QJsonArray catalogArray(QByteArray &data){
+		return QJsonDocument::fromJson(data).array();
+	}
+	inline QJsonArray catalogPageArray(QJsonArray &allThreads, int index){
+		return allThreads.at(index).toObject().value("threads").toArray();
+	}
 };
 
 #endif // EIGHTCHAN_H
