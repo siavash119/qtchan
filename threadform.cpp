@@ -515,7 +515,7 @@ void ThreadForm::setReplies()
 	if(list.length()) {
 		foreach (const QString &reply, list)
 		{
-			repliesString+=" <a href=\"#p" % reply % "\" style=\"color:#897399\">>>" % reply % (you.hasYou(board,reply) ? " (You)</a>" : "</a>");
+			repliesString+=" <a href=\"#p" % reply % "\" style=\"color:#897399\">>>" % reply % (you.hasYou(api->name(),board,reply) ? " (You)</a>" : "</a>");
 		}
 		repliesString = repliesString.mid(1);
 		ui->info->setText(infoString());

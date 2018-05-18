@@ -20,6 +20,7 @@ struct CaptchaLinks{
 };
 
 struct PostKeys{
+	QString api = "4chan";
 	QString no = "no";
 	QString resto = "resto";
 

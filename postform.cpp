@@ -258,11 +258,11 @@ void PostForm::postFinished()
 			ui->cancel->hide();
 			QTimer::singleShot(1000, this, &PostForm::close);
 			QRegularExpression re("<!-- thread:(?<replyThreadNum>\\d+),no:(?<threadNum>\\d+)");
-			QRegularExpressionMatch match = re.match(replyString);
+			QRegularExpressionMatch match = re.match(replyArray);
 			if(thread == ""){
 				if(match.hasMatch()){
 					QString captured(match.captured("threadNum"));
-					you.addYou(board,captured);
+					you.addYou(api->name(),board,captured);
 					qDebug() << "post successful; loading thread:" << match.captured("threadNum");
 					emit loadThread(captured);
 					postExtraFlags(captured);
@@ -275,7 +275,7 @@ void PostForm::postFinished()
 			else{
 				if(match.hasMatch()){
 					QString captured(match.captured("threadNum"));
-					you.addYou(board,captured);
+					you.addYou(api->name(),board,captured);
 					postExtraFlags(captured);
 				}
 			}

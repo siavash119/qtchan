@@ -34,6 +34,11 @@ public:
 		nc.loadCookiesIntoAllManagers(".8ch.net","cf_clearance","your cf_clearance cookie value");
 	}
 	inline bool requiresUserAgent(){return true;}
+	inline PostKeys postKeys(){
+		PostKeys keys;
+		keys.api = "8ch";
+		return keys;
+	}
 	inline QJsonArray postsArray(QByteArray &data, QString type){
 		(void)type;
 		return QJsonDocument::fromJson(data).object().value("posts").toArray();

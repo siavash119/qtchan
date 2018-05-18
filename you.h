@@ -10,18 +10,17 @@ class You
 {
 public:
 	You();
-	void addYou(const QString &boardName, const QString &threadNum);
-	bool hasYou(const QString &boardName, const QString &text);
-	QRegularExpressionMatchIterator findYou(const QString &boardName, const QString &text);
-	void updateRegExp(const QString &boardName);
-	QHash<QString,QRegularExpression> matchYou;
+	void addYou(const QString &api, const QString &board, const QString &post);
+	bool hasYou(const QString &api, const QString &board, const QString &text);
+	QRegularExpressionMatchIterator findYou(const QString &api, const QString &board, const QString &text);
+	void updateRegExp(const QString &api, const QString &board);
+	QHash< QString, QHash<QString,QRegularExpression> > matchYou;
 
-	QString youFileName = "you";
 	void loadYou(QString fileName = "you");
 	void saveYou(QString fileName = "you");
 
 private:
-	QHash< QString,QSet<QString> > yourPosts;
+	QHash< QString, QHash< QString,QSet<QString> > > yourPosts;
 };
 
 extern You you;

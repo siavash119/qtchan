@@ -219,7 +219,7 @@ bool Filter::useFilter(QString &options, Post *p){
 }
 
 QString Filter::filterEscape(QString &string){
-	QRegularExpression re("[+?():]");
+	QRegularExpression re("[+?():$^]");
 	QRegularExpressionMatchIterator i = re.globalMatch(string);
 	QList<QRegularExpressionMatch> matches;
 	while (i.hasNext()) {

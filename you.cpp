@@ -14,22 +14,29 @@ void You::loadYou(QString fileName){
 	}
 
 	QTextStream in(&file);
-	QString boardName = "UNK";
-	QSet<QString> posts = yourPosts.value(boardName);
+	QString api = "UNK";
+	QString board = "UNK";
 	while(!in.atEnd()) {
 		QString line = in.readLine();
 		if(line.at(0) == ':'){
-			boardName = line.mid(1);
+			api = line.mid(1);
+			continue;
+		}
+		if(line.at(0) == ';'){
+			board = line.mid(1);
 			continue;
 		}
 		if(line.at(0) == ',') line = line.mid(1);
 		QStringList fields = line.split(",");
-		posts = yourPosts.value(boardName);
+		fields.toSet();
+		QSet<QString> posts;
 		foreach(QString temp, fields){
-			if(!temp.isEmpty())posts.insert(temp);
+			if(!temp.isEmpty()) posts.insert(temp);
 		}
-		yourPosts.insert(boardName,posts);
-		updateRegExp(boardName);
+		QHash< QString, QSet< QString> > boards = yourPosts.value(api);
+		boards.insert(board,posts);
+		yourPosts.insert(api,boards);
+		updateRegExp(api,board);
 	}
 	file.close();
 	qDebug() << "######" << endl << "YOU" << endl << yourPosts << endl << "########";
@@ -37,49 +44,57 @@ void You::loadYou(QString fileName){
 
 void You::saveYou(const QString fileName){
 	QFile file(fileName);
-	if (file.open(QIODevice::ReadWrite))
+	if (file.open(QIODevice::WriteOnly))
 	{
 		QTextStream stream(&file);
-		foreach(QString boardName, yourPosts.keys()){
-			stream << ":" << boardName << endl;
-			foreach(QString postNum, yourPosts.value(boardName)){
-				stream << "," << postNum;
-			}
+		foreach(QString api, yourPosts.keys()){
+			stream << ':' << api << endl;
+			foreach(QString board, yourPosts.value(api).keys()){
+				stream << ';' << board << endl;
+				foreach(QString post, yourPosts.value(api).value(board)){
+					stream << "," << post;
+				}
 			stream << endl;
+			}
 		}
+		file.close();
 	}
-	file.close();
 }
 
-void You::addYou(const QString &boardName, const QString &postNum){
-	QSet<QString> posts = yourPosts.value(boardName);
-	posts.insert(postNum);
-	yourPosts.insert(boardName,posts);
+void You::addYou(const QString &api, const QString &board, const QString &post){
+	qDebug().noquote().nospace() << "adding you " << api << '/' << board << '/' << post;
+	QHash< QString, QSet< QString> > boards = yourPosts.value(api);
+	QSet<QString> posts = boards.value(board);
+	posts.insert(post);
+	boards.insert(board,posts);
+	yourPosts.insert(api,boards);
 	//yourPosts.value(boardName).insert(postNum);
-	updateRegExp(boardName);
+	updateRegExp(api,board);
 }
 
-void You::updateRegExp(const QString &boardName){
+void You::updateRegExp(const QString &api, const QString &board){
 	QString pattern = "&gt;&gt;(";
-	foreach (QString postNum, yourPosts.value(boardName)) {
-		pattern += postNum % "|";
+	foreach (QString post, yourPosts.value(api).value(board)) {
+		pattern += post % "|";
 	}
 	pattern.chop(1);
 	pattern += ")";
-	QRegularExpression patt = matchYou.value(boardName);
+	QHash<QString,QRegularExpression> patts = matchYou.value(api);
+	QRegularExpression patt = patts.value(board);
 	patt.setPattern(pattern);
 	patt.optimize();
-	matchYou.insert(boardName,patt);
+	patts.insert(board,patt);
+	matchYou.insert(api,patts);
 }
 
-bool You::hasYou(const QString &boardName, const QString &postNum){
-	QSet<QString> temp = yourPosts.value(boardName);
-	if(!temp.isEmpty() && temp.contains(postNum)) return true;
+bool You::hasYou(const QString &api, const QString &board, const QString &post){
+	QSet<QString> temp = yourPosts.value(api).value(board);
+	if(!temp.isEmpty() && temp.contains(post)) return true;
 	return false;
 }
 
-QRegularExpressionMatchIterator You::findYou(const QString &boardName, const QString &text){
-	QRegularExpression temp = matchYou.value(boardName);
+QRegularExpressionMatchIterator You::findYou(const QString &api, const QString &board, const QString &text){
+	QRegularExpression temp = matchYou.value(api).value(board);
 	if(!temp.pattern().isEmpty()) return temp.globalMatch(text);
 	else return QRegularExpressionMatchIterator();
 }

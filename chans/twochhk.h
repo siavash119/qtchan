@@ -23,6 +23,7 @@ public:
 	inline QString postURL(QString &board){(void)board; return QString();}
 	inline PostKeys postKeys(){
 		PostKeys keys;
+		keys.api = "2ch.hk";
 		keys.com = "comment";
 		keys.no = "num";
 		keys.sub = "subject";

@@ -43,9 +43,9 @@ void Post::load(QJsonObject &p, PostKeys &keys, QString &board)
 	//TODO regexp on all posts or do the whole json at once?
 	//com = p.value("com").toString();
 	com = p.value(keys.com).toString();
-	QRegularExpressionMatchIterator i = you.findYou(board,com);
+	QRegularExpressionMatchIterator i = you.findYou(keys.api,board,com);
 	if(i.hasNext()) hasYou = true;
-	if(you.hasYou(board,no)){
+	if(you.hasYou(keys.api,board,no)){
 		isYou = true;
 	}
 	com = Filter::replaceYouStrings(i,com);
