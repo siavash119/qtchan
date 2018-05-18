@@ -127,7 +127,7 @@ void ThreadTab::getPosts(){
 }
 
 void ThreadTab::onGetFlags(QByteArray data){
-	qDebug().noquote().nospace() << "loading extra flags for " << board << '/' << thread;
+	qDebug().noquote().nospace() << "getting extra flags for " << helper.title;
 	flagsReply = nc.fileManager->post(helper.requestFlags,data);
 	connect(flagsReply,&QNetworkReply::finished,&helper,&ThreadTabHelper::loadExtraFlags,Qt::UniqueConnection);
 }

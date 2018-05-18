@@ -67,7 +67,6 @@ void ThreadTabHelper::getExtraFlags(){
 	}
 	if(!postNums.size()) return;
 	QString data = "board=" % board % "&post_nrs=" % postNums.join("%2C");
-	qDebug() << data;
 	emit getFlags(data.toUtf8());
 	/*replyFlags = nc.fileManager->post(requestFlags,data.toUtf8());
 	flagsConnection = connect(replyFlags,SIGNAL(finished()),this,SLOT(loadExtraFlags()),UniqueDirect);*/
@@ -86,7 +85,7 @@ void ThreadTabHelper::loadExtraFlags(){
 	QJsonArray extraFlags = QJsonDocument::fromJson(answer).array();
 	int length = extraFlags.size();
 	if(!length) return;
-	qDebug() << "loading" << length << "extra flag posts";
+	qDebug() << "loading" << length << "extra flag posts for" << title;
 	QJsonObject ef;
 	for(int i=0;i<length;i++){
 		ef = extraFlags.at(i).toObject();
