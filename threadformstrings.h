@@ -2,6 +2,7 @@
 #define THREADFORMSTRINGS_H
 
 #include "post.h"
+#include "chans/chan.h"
 #include <QString>
 #include <QStringList>
 
@@ -9,7 +10,7 @@ class ThreadFormStrings
 {
 public:
 	ThreadFormStrings();
-	ThreadFormStrings(const Post &post, QString thread, QString path = "index");
+	ThreadFormStrings(Chan *api, const Post &post, QString thread, QString path = "index");
 
 	QString thread;
 	QString path;

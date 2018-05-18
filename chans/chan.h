@@ -73,9 +73,8 @@ struct PostKeys{
 class Chan
 {
 public:
-	inline Chan(){
-		if(requiresCookies()) setCookies();
-	}
+	Chan(){}
+	virtual inline QString name(){return "other";}
 	virtual inline ~Chan(){}
 	virtual QString boardURL(QString &board) = 0;
 	virtual QString catalogURL(QString &board) = 0;

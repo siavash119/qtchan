@@ -11,8 +11,10 @@ class EightChan : public Chan
 {
 public:
 	inline EightChan(){
-		if(requiresCookies()) setCookies();
+		nc.loadCookiesIntoAllManagers(".8ch.net","__cfduid","your __cfduid cookie value");
+		nc.loadCookiesIntoAllManagers(".8ch.net","cf_clearance","your cf_clearance cookie value");
 	}
+	inline QString name(){return "8ch";}
 	inline QString thumbURL(){return "";}
 	inline QString imageURL(){return "";}
 	inline QString regURL(){return QString("^(?:https?:\\/\\/)?8ch.net\\/?.*$");}

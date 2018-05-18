@@ -22,7 +22,8 @@ void BoardTabHelper::startUp(Chan *api, QString board, BoardType type, QString s
 	qDebug() << "boardURL is" << boardUrl;
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	this->expandAll = settings.value("autoExpand",false).toBool();
-	QDir().mkpath(board+"/index/thumbs");
+	filesPath = api->name() + '/' + board + "/index/";
+	QDir().mkpath(filesPath+"thumbs");
 	qDebug() << boardUrl;
 	request = QNetworkRequest(QUrl(boardUrl));
 	if(api->requiresUserAgent()){
@@ -53,8 +54,8 @@ void BoardTabHelper::setAutoUpdate(bool update) {
 	}*/
 }
 
-void BoardTabHelper::writeJson(QString &board, QByteArray &rep) {
-	QFile jsonFile(board+"/index.json");
+void BoardTabHelper::writeJson(QString &path, QByteArray &rep) {
+	QFile jsonFile(path+"index.json");
 	jsonFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
 	jsonFile.write(rep);
 	jsonFile.close();
@@ -86,7 +87,7 @@ void BoardTabHelper::getPostsFinished() {
 	QJsonArray threads = filterThreads(rep);
 	int length = threads.size();
 	qDebug().noquote() << "length of" << boardUrl << "is" << QString::number(length);
-	QtConcurrent::run(&BoardTabHelper::writeJson,board,rep);
+	QtConcurrent::run(&BoardTabHelper::writeJson,filesPath,rep);
 	//load new posts
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	bool loadFile = settings.value("autoExpand",false).toBool() || this->expandAll;
@@ -114,13 +115,13 @@ void BoardTabHelper::getPostsFinished() {
 			post.filtered = true;
 		}
 		allPosts.append(post.no);
-		ThreadFormStrings tfString(post,threadNum,"index");
+		ThreadFormStrings tfString(api,post,threadNum,"index");
 		emit newThread(post,tfString,loadFile);
 		if(type==BoardType::Index && showIndexReplies){
 			for(int j=1;j<t.size();j++){
 				p = t.at(j).toObject();
 				Post replyPost(p,postKeys,board);
-				ThreadFormStrings replyStrings(replyPost,threadNum,"index");
+				ThreadFormStrings replyStrings(api,replyPost,threadNum,"index");
 				emit newReply(replyPost,replyStrings,threadNum);
 			}
 		}

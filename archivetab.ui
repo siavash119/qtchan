@@ -33,8 +33,18 @@
     <number>0</number>
    </property>
    <item>
+    <layout class="QHBoxLayout" name="apis">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+    </layout>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="boards">
      <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
       <number>0</number>
      </property>
     </layout>

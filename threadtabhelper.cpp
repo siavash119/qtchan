@@ -21,13 +21,14 @@ void ThreadTabHelper::startUp(Chan *api, QString board, QString thread, QWidget 
 	this->threadUrl = api->threadURL(board,thread);
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	this->expandAll = settings.value("autoExpand",false).toBool();
-	QDir().mkpath(board+"/"+thread+"/thumbs");
+	filesPath = api->name() % '/' % board % '/' % thread % '/';
+	QDir().mkpath(filesPath + "thumbs");
 	qDebug() << threadUrl;
 
 	filterMe.filters2 = filter.filterMatchedPerTab(board,"thread");
 
 	//self-archive check
-	QFile jsonFile(board+"/"+thread+"/"+thread+".json");
+	QFile jsonFile(filesPath+thread+".json");
 	if(jsonFile.exists() && jsonFile.open(QIODevice::ReadOnly)){
 		QByteArray archive = jsonFile.readAll();
 		loadPosts(archive,false);
@@ -48,8 +49,8 @@ ThreadTabHelper::~ThreadTabHelper() {
 	abort = true;
 }
 
-void ThreadTabHelper::writeJson(QString &board, QString &thread, QByteArray &rep) {
-	QFile jsonFile(board+"/"+thread+"/"+thread+".json");
+void ThreadTabHelper::writeJson(QString &path, QString &thread, QByteArray &rep) {
+	QFile jsonFile(path+thread+".json");
 	jsonFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
 	jsonFile.write(rep);
 	jsonFile.close();
@@ -127,17 +128,17 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 		p = posts.at(0).toObject();
 		Post OP(p,postKeys,board);
 		if(OP.archived) {
-			qDebug().nospace() << "Stopping timer for " << threadUrl <<". Reason: Archived";
+			qDebug().nospace() << "Stopping timer for " << threadUrl << ". Reason: Archived";
 			emit threadStatus("archived",OP.archived_on);
 		}
 		else if(OP.closed) {
-			qDebug().nospace() << "Stopping timer for " << threadUrl <<". Reason: Closed";
+			qDebug().nospace() << "Stopping timer for " << threadUrl << ". Reason: Closed";
 			emit threadStatus("closed");
 		}
 	}
 	else return;
 	//write to file
-	if(writeIt) QtConcurrent::run(&ThreadTabHelper::writeJson, board, thread, postData);
+	if(writeIt) QtConcurrent::run(&ThreadTabHelper::writeJson, filesPath, thread, postData);
 	//load new posts
 	int i = allPosts.size();
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
@@ -147,7 +148,7 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 		if(filterMe.filterMatched2(&post)){
 			post.filtered = true;
 		}
-		ThreadFormStrings tfString(post,thread,thread);
+		ThreadFormStrings tfString(api,post,thread,thread);
 		allPosts.append(post.no);
 
 		emit newTF(post,tfString,loadFile);

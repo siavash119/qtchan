@@ -8,6 +8,7 @@
 class TwoChHk : public Chan
 {
 public:
+	inline QString name(){return "8ch.hk";}
 	inline QString thumbURL(){return "";}
 	inline QString imageURL(){return "";}
 	inline bool usesCaptcha(){return true;}

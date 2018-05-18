@@ -80,7 +80,7 @@ void ThreadForm::setText(QString text)
 }
 
 QString ThreadForm::infoString(){
-	tfInfoString = "<span style=\"color: rgb(152, 125, 62); font-weight: bold;\">" % Filter::htmlParse(post.sub) % "</span> " +
+	tfInfoString = "<span style=\"color: rgb(152, 125, 62); font-weight: bold;\">" % post.sub % "</span> " +
 			"<span style=\"color: rgb(163, 68, 67);\">" % post.name % "</span> " %
 			strings.countryString % regionString %
 			"<span>" % post.realNow % "</span> " %

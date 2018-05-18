@@ -8,6 +8,7 @@
 class FourChan : public Chan
 {
 public:
+	inline QString name(){return "4chan";}
 	inline QString thumbURL(){return "";}
 	inline QString imageURL(){return "";}
 	inline bool usesCaptcha(){return true;}

@@ -22,7 +22,7 @@ public:
 	QMap<QString,ThreadForm*> tfMap;
 	bool abort = false;
 	bool expandAll;
-	static void writeJson(QString &board, QByteArray &rep);
+	static void writeJson(QString &path, QByteArray &rep);
 	Chan *api;
 	QStringList allPosts;
 	QNetworkRequest request;
@@ -34,6 +34,7 @@ private:
 	QMetaObject::Connection connectionUpdate;
 	QJsonArray filterThreads(QByteArray &rep);
 	PostKeys postKeys;
+	QString filesPath;
 
 public slots:
 	void getPostsFinished();

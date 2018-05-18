@@ -72,6 +72,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	this->setShortcuts();
 }
 
+void MainWindow::closeEvent(QCloseEvent *event){
+	(void)event;
+	QApplication::closeAllWindows();
+}
+
 void MainWindow::onRemoveTab(TreeItem* tn){
 	tn->tab->deleteLater();
 	tabs.remove(tn->tab);
@@ -275,6 +280,8 @@ MainWindow::~MainWindow()
 	disconnect(model,&TreeModel::removingTab,this,&MainWindow::onRemoveTab);
 	saveSession();
 	you.saveYou();
+	aTab.close();
+	aTab.deleteLater();
 	delete ui;
 	delete model;
 	Chans::deleteAPIs();

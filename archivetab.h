@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+class QHBoxLayout;
 namespace Ui {
 class ArchiveTab;
 }
@@ -14,15 +15,18 @@ class ArchiveTab : public QWidget
 public:
 	explicit ArchiveTab(QWidget *parent = 0);
 	~ArchiveTab();
+	QString api;
 	QString board;
-	void fillTable(QString board);
+	void fillAPIs();
 	void fillBoards();
-	void clearBoards();
+	void fillTable(QString board);
+	void clearLayout(QHBoxLayout *layout);
 signals:
 	void loadThread(QString threadString);
 public slots:
-	void threadClicked(int row, int column);
+	void tableClicked(int row, int column);
 private slots:
+	void apiClicked();
 	void boardClicked();
 private:
 	Ui::ArchiveTab *ui;

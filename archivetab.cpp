@@ -1,6 +1,7 @@
 #include "archivetab.h"
 #include "ui_archivetab.h"
 #include "filter.h"
+#include "chans.h"
 #include <QDir>
 #include <QFile>
 #include <QPushButton>
@@ -24,24 +25,55 @@ ArchiveTab::ArchiveTab(QWidget *parent) :
 	headerView->setSectionsClickable(true);
 	ui->table->setColumnWidth(0,96);
 	ui->table->setColumnWidth(1,150);
-	connect(ui->table,&QTableWidget::cellClicked,this,&ArchiveTab::threadClicked);
-	fillBoards();
+	connect(ui->table,&QTableWidget::cellClicked,this,&ArchiveTab::tableClicked);
+	fillAPIs();
 	QAction *refresh = new QAction(this);
 	refresh->setShortcut(Qt::Key_F5);
 	refresh->setShortcutContext(Qt::WindowShortcut);
-	connect(refresh,&QAction::triggered,this,&ArchiveTab::fillBoards);
+	connect(refresh,&QAction::triggered,this,&ArchiveTab::fillAPIs);
 	this->addAction(refresh);
 }
 
+void ArchiveTab::fillAPIs(){
+	clearLayout(ui->apis);
+	QStringList apiList = Chans::apiList();
+	foreach(QString api, apiList){
+		if(!QDir(api).exists()) apiList.removeOne(api);
+	}
+	/*
+	if(apiList.size()==1){
+		this->api = apiList.at(0);
+		fillBoards();
+	}
+	else{*/
+		int size = apiList.size();
+		for(int i=0;i<size;i++){
+			QString api = apiList.at(i);
+			QPushButton *button = new QPushButton(this);
+			button->setText(api);
+			connect(button,&QPushButton::clicked,this,&ArchiveTab::apiClicked);
+			ui->apis->insertWidget(i,button);
+		}
+	//}
+}
+
+void ArchiveTab::apiClicked(){
+	QPushButton* buttonSender = qobject_cast<QPushButton*>(sender());
+	if(buttonSender){
+		QString buttonText = buttonSender->text();
+		this->api = buttonText;
+		fillBoards();
+	}
+}
+
 void ArchiveTab::fillBoards(){
-	clearBoards();
-	QStringList entries = QDir().entryList(QStringList(),QDir::AllDirs | QDir::NoDotAndDotDot);
-	entries.removeOne("cache");
+	clearLayout(ui->boards);
+	QStringList entries = QDir(api).entryList(QStringList(),QDir::AllDirs | QDir::NoDotAndDotDot);
 	entries.removeOne("flags");
 	int size = entries.size();
 	for(int i=0;i<size;i++){
 		QString board = entries.at(i);
-		if(!QDir(board).entryList().contains("index.json")){
+		if(!QDir(api+"/"+board).entryList().contains("index")){
 			continue;
 		}
 		QPushButton *button = new QPushButton(this);
@@ -51,22 +83,21 @@ void ArchiveTab::fillBoards(){
 	}
 }
 
-void ArchiveTab::clearBoards(){
-	QLayoutItem* item;
-	while ((item = ui->boards->takeAt(0)) != NULL)
-	{
-		delete item->widget();
-		delete item;
+void ArchiveTab::boardClicked(){
+	QPushButton* buttonSender = qobject_cast<QPushButton*>(sender());
+	if(buttonSender){
+		QString buttonText = buttonSender->text();
+		fillTable(buttonText);
 	}
 }
 
 void ArchiveTab::fillTable(QString board){
 	this->board = board;
 	ui->table->setRowCount(0);
-	QDir tech(board);
+	QDir tech(api+"/"+board);
 	QStringList entries = tech.entryList(QStringList(),QDir::AllDirs | QDir::NoDotAndDotDot);
 	for(int i=0;i<entries.size()-1;i++){
-		QFile json(board+"/"+ entries.at(i)+"/"+entries.at(i)+".json");
+		QFile json(api+"/"+board+"/"+entries.at(i)+"/"+entries.at(i)+".json");
 		if(json.exists()){
 			json.open(QIODevice::ReadOnly);
 			QByteArray postData = json.readAll();
@@ -89,7 +120,7 @@ void ArchiveTab::fillTable(QString board){
 			if(temp != 0.0){
 				tim = QString::number(temp,'d',0);
 				filename = OP.value("filename").toString();
-				QString thumbPath(board+"/"+num+"/thumbs/"+num+"-"+filename+"s.jpg");
+				QString thumbPath(api+"/"+board+"/"+num+"/thumbs/"+num+"-"+filename+"s.jpg");
 				QImage *img = new QImage();
 				bool loaded = img->load(thumbPath);
 				if(loaded){
@@ -111,15 +142,7 @@ void ArchiveTab::fillTable(QString board){
 	}
 }
 
-void ArchiveTab::boardClicked(){
-	QPushButton* buttonSender = qobject_cast<QPushButton*>(sender());
-	if(buttonSender){
-		QString buttonText = buttonSender->text();
-		fillTable(buttonText);
-	}
-}
-
-void ArchiveTab::threadClicked(int row, int column){
+void ArchiveTab::tableClicked(int row, int column){
 	if(column == 0){
 		QString threadNum = ui->table->item(row,1)->data(Qt::DisplayRole).toString();
 		emit loadThread(this->board+"/"+threadNum);
@@ -129,6 +152,15 @@ void ArchiveTab::threadClicked(int row, int column){
 		QDir dir(this->board+"/"+threadNum);
 		if(dir.exists()) dir.removeRecursively();
 		ui->table->removeRow(row);
+	}
+}
+
+void ArchiveTab::clearLayout(QHBoxLayout *layout){
+	QLayoutItem* item;
+	while ((item = layout->takeAt(0)) != NULL)
+	{
+		delete item->widget();
+		delete item;
 	}
 }
 

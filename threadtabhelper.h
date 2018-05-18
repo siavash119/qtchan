@@ -24,7 +24,7 @@ public:
 	QFutureWatcher<QImage> *imageScaler;
 	bool abort = false;
 	bool expandAll;
-	static void writeJson(QString &board, QString &thread, QByteArray &rep);
+	static void writeJson(QString &path, QString &thread, QByteArray &rep);
 	Chan *api;
 	void getExtraFlags();
 	QNetworkRequest request;
@@ -37,6 +37,7 @@ private:
 	bool isFromSession;
 	QSet<QString> gottenFlags;
 	PostKeys postKeys;
+	QString filesPath;
 
 public slots:
 	void startUp(Chan *api, QString board, QString thread, QWidget *parent, bool isFromSession);

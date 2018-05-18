@@ -9,6 +9,11 @@ class Chans
 {
 public:
 	static Chan* stringToType(QString url);
+	static inline QStringList apiList(){
+		QStringList list;
+		list << "4chan" << "8ch" << "2ch.hk";
+		return list;
+	}
 	static void deleteAPIs();
 };
 

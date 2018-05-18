@@ -88,6 +88,9 @@ signals:
 	void setFontSize(int fontSize);
 	void setImageSize(int imageSize);
 	void reloadFilters();
+
+protected:
+	void closeEvent(QCloseEvent *event);
 };
 
 extern MainWindow *mw;
