@@ -129,12 +129,6 @@ void MainWindow::setShortcuts()
 	addShortcut(QKeySequence("Ctrl+u"),this,&MainWindow::toggleAutoUpdate);
 	addShortcut(QKeySequence("Ctrl+e"),this,&MainWindow::toggleAutoExpand);
 
-	//TODO select session saves slots
-	addShortcut(Qt::Key_F10,this,&MainWindow::saveSession);
-
-	//TODO select session saves slots
-	addShortcut(Qt::Key_F12,this,&MainWindow::loadSession);
-
 	addShortcut(QKeySequence("ctrl+o"),this,&MainWindow::openExplorer);
 
 	addShortcut(QKeySequence::ZoomOut,this,[=](){
@@ -183,7 +177,7 @@ void MainWindow::setShortcuts()
 
 	ui->actionSave->setShortcut(QKeySequence("Ctrl+s"));
 	ui->actionSave->setShortcutContext(Qt::ApplicationShortcut);
-	connect(ui->actionSave,&QAction::triggered,this,&MainWindow::saveSession);
+	connect(ui->actionSave,&QAction::triggered,[=]{saveSession();});
 
 	ui->actionReload->setShortcut(QKeySequence("Ctrl+r"));
 	connect(ui->actionReload,&QAction::triggered,[=]{
@@ -218,7 +212,6 @@ void MainWindow::setShortcuts()
 		filter.loadFilterFile2();
 		emit reloadFilters();
 	});
-
 	addShortcut(QKeySequence("ctrl+f"),this,[=]{
 		TreeItem *item = model->getItem(selectionModel->currentIndex());
 		if(!item) return;
@@ -253,9 +246,41 @@ void MainWindow::setShortcuts()
 	addShortcut(Qt::Key_F4,this,[=]{
 		if(QWidget *temp = currentWidget()) temp->setFocus();
 	});
-	addShortcut(Qt::Key_F6,this,&MainWindow::focusBar);
+	//addShortcut(Qt::Key_F6,this,&MainWindow::focusBar);
 	addShortcut(Qt::Key_F8,&aTab,&ArchiveTab::show);
 
+	//session shortcuts
+	for(int i=Qt::Key_F1, j=0; i<=Qt::Key_F4; i++, j++){
+		QAction *saveShortcut = new QAction(this);
+		saveShortcut->setShortcut(QKeySequence(Qt::ControlModifier+i));
+		connect(saveShortcut, &QAction::triggered,[=]{
+			qDebug() << "saving shortcut";
+			saveSession(QString::number(j));
+		});
+		this->addAction(saveShortcut);
+		QAction *loadShortcut = new QAction(this);
+		loadShortcut->setShortcut(QKeySequence(Qt::ShiftModifier+i));
+		connect(loadShortcut, &QAction::triggered,[=]{
+			loadSession(QString::number(j));
+		});
+		this->addAction(loadShortcut);
+	}
+	addShortcut(Qt::Key_F5,this,[=]{saveSession();});
+	addShortcut(Qt::Key_F6,this,[=]{loadSession();});
+	addShortcut(QKeySequence("ctrl+F5"),this,[=]{
+		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+		int slot = settings.value("sessionFileSlot",0).toInt();
+		if(--slot == 0) slot = 9;
+		settings.setValue("sessionFileSlot",slot);
+		qDebug() << "current session slot:" << slot;
+	});
+	addShortcut(QKeySequence("ctrl+F6"),this,[=]{
+		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+		int slot = settings.value("sessionFileSlot",0).toInt();
+		if(++slot == 10) slot = 0;
+		settings.setValue("sessionFileSlot",slot);
+		qDebug() << "current session slot:" << slot;
+	});
 }
 
 void MainWindow::showHelp(){
@@ -542,20 +567,22 @@ void MainWindow::focusBar()
 	ui->navBar->selectAll();
 }
 
-void MainWindow::saveSession()
+void MainWindow::saveSession(QString slot)
 {
-	qDebug().noquote() << "Saving session.";
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	QString sessionFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + settings.value("sessionFile","session.txt").toString();
-	qDebug() <<	settings.value("sessionFile","session.txt").toString();
-	model->saveSessionToFile(sessionFile,ui->treeView->currentIndex());
+	if(slot.isEmpty()) slot = settings.value("sessionSlot","0").toString();
+	QString sessionPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/sessions/";
+	QDir().mkpath(sessionPath);
+	QString sessionFile = sessionPath + settings.value("sessionFile","session").toString();
+	model->saveSessionToFile(sessionFile,slot,ui->treeView->currentIndex());
 }
 
-void MainWindow::loadSession()
+void MainWindow::loadSession(QString slot)
 {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	QString sessionFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + settings.value("sessionFile","session.txt").toString();
-	QModelIndex qmi = model->loadSessionFromFile(sessionFile);
+	if(slot.isEmpty()) slot = settings.value("sessionSlot","0").toString();
+	QString sessionFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/sessions/" + settings.value("sessionFile","session").toString();
+	QModelIndex qmi = model->loadSessionFromFile(sessionFile,slot);
 	selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
 	ui->treeView->setCurrentIndex(qmi);
 }

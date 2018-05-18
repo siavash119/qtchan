@@ -93,7 +93,6 @@ void netController::refreshManagers(){
 	fileManager->setNetworkAccessible(QNetworkAccessManager::Accessible);
 	captchaManager->setNetworkAccessible(QNetworkAccessManager::Accessible);
 }
-
 //std::vector<BoardTab*> bts;
 //std::vector<Tab> tabs;
 //std::vector<QWidget*> tabs;

@@ -206,10 +206,10 @@ void ThreadTab::setShortcuts()
 	//&helper,&ThreadTabHelper::getPosts,Qt::DirectConnection);
 	this->addAction(refresh);
 
-	QAction *focusBar = new QAction(this);
+	/*QAction *focusBar = new QAction(this);
 	focusBar->setShortcut(Qt::Key_F6);
 	connect(focusBar,&QAction::triggered,mw,&MainWindow::focusBar);
-	this->addAction(focusBar);
+	this->addAction(focusBar);*/
 
 	QAction *selectPost = new QAction(this);
 	selectPost->setShortcut(Qt::Key_O);

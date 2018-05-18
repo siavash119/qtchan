@@ -239,14 +239,15 @@ QModelIndex TreeModel::getIndex(TreeItem *item) const
 	return createIndex(item->row(),0,item);
 }
 
-void TreeModel::saveSessionToFile(QString fileName, QModelIndex ind)
+void TreeModel::saveSessionToFile(QString fileName, QString slot, QModelIndex ind)
 {
-	QFile data(fileName);
-	if(!data.open(static_cast<QFile::OpenMode>(QFile::WriteOnly | QFile::Truncate))){
+	qDebug().noquote().nospace() << "saving session " << fileName << slot;
+	QFile session(fileName+slot);
+	if(!session.open(static_cast<QFile::OpenMode>(QFile::WriteOnly | QFile::Truncate))){
 		qDebug().noquote() << "unable to open session file" << fileName;
 		return;
 	}
-	QTextStream out(&data);
+	QTextStream out(&session);
 	QList<TreeItem*> parents;
 	QList<int> lines;
 	parents << root;
@@ -284,9 +285,10 @@ void TreeModel::saveSessionToFile(QString fileName, QModelIndex ind)
 	out << indexString << endl;
 }
 
-QModelIndex TreeModel::loadSessionFromFile(QString sessionFile)
+QModelIndex TreeModel::loadSessionFromFile(QString fileName, QString slot)
 {
-	QFile session(sessionFile);
+	qDebug().noquote().nospace() << "loading session " << fileName << slot;
+	QFile session(fileName+slot);
 	session.open(QFile::ReadOnly);
 	QTextStream in(&session);
 	QString line;

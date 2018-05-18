@@ -56,8 +56,8 @@ public slots:
 	void focusBar();
 	TreeItem *loadFromSearch(QString query, QString display, TreeItem *childOf, bool select = false);
 	TreeItem *onNewThread(QWidget *parent, Chan *api, QString board, QString thread, QString display, TreeItem *childOf);
-	void saveSession();
-	void loadSession();
+	void saveSession(QString slot = QString());
+	void loadSession(QString slot = QString());
 	void prevTab();
 	void nextTab();
 	void prevParent();

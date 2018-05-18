@@ -38,8 +38,8 @@ public:
 	QModelIndex getIndex(TreeItem *item) const;
 	TreeItem *getItem(const QModelIndex &index) const;
 
-	void saveSessionToFile(QString filename, QModelIndex ind = QModelIndex());
-	QModelIndex loadSessionFromFile(QString filename);
+	void saveSessionToFile(QString filename, QString slot, QModelIndex ind = QModelIndex());
+	QModelIndex loadSessionFromFile(QString filename, QString slot);
 	void addTab(TreeItem *child, TreeItem *parent, bool select);
 	void removeChildren(QModelIndex ind);
 	QList<int> fullIndex(QModelIndex ind);

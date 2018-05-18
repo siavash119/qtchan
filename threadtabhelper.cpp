@@ -114,8 +114,7 @@ void ThreadTabHelper::getPostsFinished() {
 	}
 	QVariant fromCache = reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute);
 	if(fromCache.toBool()){
-		qDebug().noquote().nospace() << "got " << title << ": returned cache";
-		return;
+		qDebug().noquote().nospace() << "got " << title << " from cache";
 	}
 	QByteArray rep = reply->readAll();
 	reply->deleteLater();

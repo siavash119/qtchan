@@ -17,12 +17,12 @@ Chan *twoChHkAPI = new TwoChHk();
 
 int main(int argc, char *argv[])
 {
+	QApplication a(argc, argv);
 	QCoreApplication::setOrganizationName("qtchan");
 	QCoreApplication::setApplicationName("qtchan");
 	//QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	//QApplication::setAttribute(QT_SCALE_FACTOR,"1.4");
 	//qputenv("QT_SCALE_FACTOR","0.2");
-	QApplication a(argc, argv);
 	QFont font = QGuiApplication::font();
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	font.setPointSize(settings.value("fontSize",14).toInt());
@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
 	/*NotificationTray t;
 	t.setIcon(QIcon(":/icons/icon_22x22.png"));
 	t.show();*/
-	w.loadSession();
+	QString sessionSlot = settings.value("sessionSlot","0").toString();
+	w.loadSession(sessionSlot);
 	return a.exec();
 }
