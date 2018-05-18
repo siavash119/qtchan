@@ -396,7 +396,7 @@ void ThreadTab::gallery()
 															  << "--borderless"
 															  << "--image-bg" << "black"
 															  << "--preload";*/
-	QString command = "mpv"; QStringList arguments; arguments << QDir("./"+board+"/"+thread).absolutePath();
+	QString command = "mpv"; QStringList arguments; arguments << QDir(api->name()+'/'+board+'/'+thread).absolutePath();
 	QProcess().startDetached(command,arguments);
 }
 
@@ -421,7 +421,7 @@ void ThreadTab::onNewTF(Post post, ThreadFormStrings strings, bool loadFile){
 	if(post.tim.isEmpty()) info.files++;
 	info.unseen++;
 	info.updateFields();
-	if(this == mw->currentTab) QCoreApplication::processEvents();
+	//if(this == mw->currentTab) QCoreApplication::processEvents();
 }
 
 void ThreadTab::onAddReply(QString orig, QString no, bool isYou){

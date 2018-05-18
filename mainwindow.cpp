@@ -356,11 +356,11 @@ void MainWindow::openExplorer(){
 	TreeItem *item = model->getItem(selectionModel->currentIndex());
 	if(item->type == TreeItemType::thread){
 		ThreadTab *tab = static_cast<ThreadTab*>(item->tab);
-		url = QDir("./"+tab->board+"/"+tab->thread).absolutePath();
+		url = QDir(tab->api->name()+'/'+tab->board+'/'+tab->thread).absolutePath();
 	}
 	else{
 		BoardTab *tab = static_cast<BoardTab*>(item->tab);
-		url = QDir("./"+tab->board).absolutePath();
+		url = QDir(tab->api->name()+'/'+tab->board).absolutePath();
 	}
 	qDebug() << "Opening folder" << url;
 	QDesktopServices::openUrl(QUrl::fromLocalFile(url));

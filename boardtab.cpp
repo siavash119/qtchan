@@ -269,7 +269,7 @@ void BoardTab::onNewReply(Post post, ThreadFormStrings strings, QString opNum, b
 	}
 	connect(tf,&ThreadForm::removeMe,tf,&ThreadForm::deleteLater,Qt::QueuedConnection);
 	OP->addReply(tf);
-	if(this == mw->currentTab) QCoreApplication::processEvents();
+	//if(this == mw->currentTab) QCoreApplication::processEvents();
 }
 
 void BoardTab::onNewThread(Post post, ThreadFormStrings strings, bool loadFile){
