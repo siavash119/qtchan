@@ -36,7 +36,6 @@ public:
 	void openPostForm();
 	void getPosts();
 	void focusIt();
-	ThreadForm* tfAtTop();
 
 public slots:
 	void findText(const QString text);
@@ -57,6 +56,7 @@ private:
 	QString vimCommand;
 	void setShortcuts();
 	QPointer<QNetworkReply> postsReply;
+	ThreadForm* tfAtTop();
 
 private slots:
 	void on_pushButton_clicked();

@@ -184,8 +184,8 @@ void MainWindow::setShortcuts()
 		QMapIterator<QWidget*,Tab> i(tabs);
 		while(i.hasNext()) {
 			Tab tab = i.next().value();
-			if(tab.type == Tab::TabType::Board) static_cast<BoardTab*>(tab.TabPointer)->helper.getPosts();
-			else static_cast<ThreadTab*>(tab.TabPointer)->helper.getPosts();
+			if(tab.type == Tab::TabType::Board) static_cast<BoardTab*>(tab.TabPointer)->getPosts();
+			else static_cast<ThreadTab*>(tab.TabPointer)->getPosts();
 		}
 	});
 
