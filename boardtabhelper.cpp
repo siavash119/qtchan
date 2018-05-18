@@ -19,12 +19,11 @@ void BoardTabHelper::startUp(Chan *api, QString board, BoardType type, QString s
 	this->postKeys = api->postKeys();
 	if(type == BoardType::Index) boardUrl = api->boardURL(board);
 	else boardUrl = api->catalogURL(board);
-	qDebug() << "boardURL is" << boardUrl;
+	title = api->name() % '/' % board;
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	this->expandAll = settings.value("autoExpand",false).toBool();
 	filesPath = api->name() + '/' + board + "/index/";
 	QDir().mkpath(filesPath+"thumbs");
-	qDebug() << boardUrl;
 	request = QNetworkRequest(QUrl(boardUrl));
 	if(api->requiresUserAgent()){
 		request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
@@ -66,7 +65,7 @@ void BoardTabHelper::getPostsFinished() {
 	if(!reply) return;
 	gettingReply = false;
 	if(reply->error()) {
-		qDebug().noquote() << "loading post error:" << reply->errorString();
+		qDebug().noquote() << "error" << title << ": " << reply->errorString();
 		if(reply->error() == QNetworkReply::ContentNotFoundError) {
 			//qDebug() << "Stopping timer for" << threadUrl;
 			//updateTimer->stop();
@@ -86,7 +85,7 @@ void BoardTabHelper::getPostsFinished() {
 	emit clearMap();
 	QJsonArray threads = filterThreads(rep);
 	int length = threads.size();
-	qDebug().noquote() << "length of" << boardUrl << "is" << QString::number(length);
+	qDebug().noquote().nospace() << "got " << title << ": length is " << QString::number(length);
 	QtConcurrent::run(&BoardTabHelper::writeJson,filesPath,rep);
 	//load new posts
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");

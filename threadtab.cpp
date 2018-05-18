@@ -121,7 +121,7 @@ void ThreadTab::onThreadStatus(QString status, QString value){
 }
 
 void ThreadTab::getPosts(){
-	qDebug().noquote().nospace() << "getting posts for " << board << '/' << thread;
+	qDebug().noquote().nospace() << "getting " << helper.title;
 	postsReply = nc.jsonManager->get(helper.request);
 	connect(postsReply,&QNetworkReply::finished,&helper,&ThreadTabHelper::getPostsFinished,Qt::UniqueConnection);
 }

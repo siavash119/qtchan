@@ -5,6 +5,7 @@
 #include "mainwindow.h"
 #include <QSettings>
 #include <QApplication>
+#include <QStandardPaths>
 
 MainWindow *mw;
 NotificationView *nv;

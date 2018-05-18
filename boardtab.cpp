@@ -70,7 +70,7 @@ void BoardTab::setFontSize(int fontSize){
 }
 
 void BoardTab::getPosts(){
-	qDebug().noquote().nospace() << "getting posts for " << board;
+	qDebug().noquote().nospace() << "getting " << helper.title;
 	postsReply = nc.jsonManager->get(helper.request);
 	connect(postsReply,&QNetworkReply::finished,&helper,&BoardTabHelper::getPostsFinished,Qt::UniqueConnection);
 }

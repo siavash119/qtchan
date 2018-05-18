@@ -175,7 +175,11 @@ void ThreadForm::downloadFile(const QString &fileUrl,
 			qDebug().noquote().nospace() << "error downloading " << fileUrl << ": " << reply->errorString();
 		}
 		else{
-			file->open(QIODevice::WriteOnly);
+			if(!file->open(QIODevice::WriteOnly)){
+				qDebug().noquote().nospace() << "error writing " << filePath << ": Could not open for writing";
+				file->close();
+				return;
+			};
 			file->write(reply->readAll());
 			file->close();
 			downloadedSlot(filePath,message);

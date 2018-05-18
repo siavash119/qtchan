@@ -18,7 +18,6 @@
 #include <QShortcut>
 #include <QDesktopServices>
 
-
 //TODO decouple item model/view logic to another class
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -57,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(&settingsView,&Settings::update,[=](QString field, QVariant value){
 		if(field == "use4chanPass" && value.toBool() == true){
 			QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-			QString defaultCookies = QDir::homePath() + "/.config/qtchan/cookies";
+			QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/cookies";
 			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
 		}
 	});
@@ -279,7 +278,7 @@ MainWindow::~MainWindow()
 	disconnect(selectionConnection);
 	disconnect(model,&TreeModel::removingTab,this,&MainWindow::onRemoveTab);
 	saveSession();
-	you.saveYou();
+	you.saveYou(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/you");
 	aTab.close();
 	aTab.deleteLater();
 	delete ui;
@@ -317,7 +316,7 @@ void MainWindow::updateSettings(QString field, QVariant value){
 		emit setUse4chanPass(value.toBool());
 		if(value.toBool()){
 			QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-			QString defaultCookies = QDir::homePath() + "/.config/qtchan/cookies";
+			QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/cookies";
 			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
 		}
 		else{
@@ -547,13 +546,15 @@ void MainWindow::saveSession()
 {
 	qDebug().noquote() << "Saving session.";
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	model->saveSessionToFile(settings.value("sessionFile","session.txt").toString(),ui->treeView->currentIndex());
+	QString sessionFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + settings.value("sessionFile","session.txt").toString();
+	qDebug() <<	settings.value("sessionFile","session.txt").toString();
+	model->saveSessionToFile(sessionFile,ui->treeView->currentIndex());
 }
 
 void MainWindow::loadSession()
 {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	QString sessionFile = settings.value("sessionFile","session.txt").toString();
+	QString sessionFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/" + settings.value("sessionFile","session.txt").toString();
 	QModelIndex qmi = model->loadSessionFromFile(sessionFile);
 	selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
 	ui->treeView->setCurrentIndex(qmi);

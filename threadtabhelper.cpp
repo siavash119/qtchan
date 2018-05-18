@@ -17,13 +17,13 @@ void ThreadTabHelper::startUp(Chan *api, QString board, QString thread, QWidget 
 	this->isFromSession = isFromSession;
 	this->api = api;
 	postKeys = api->postKeys();
+	title = api->name() % '/' % board % '/' % thread;
 	//TODO check type
 	this->threadUrl = api->threadURL(board,thread);
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	this->expandAll = settings.value("autoExpand",false).toBool();
 	filesPath = api->name() % '/' % board % '/' % thread % '/';
 	QDir().mkpath(filesPath + "thumbs");
-	qDebug() << threadUrl;
 
 	filterMe.filters2 = filter.filterMatchedPerTab(board,"thread");
 
@@ -112,6 +112,11 @@ void ThreadTabHelper::getPostsFinished() {
 		}
 		return;
 	}
+	QVariant fromCache = reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute);
+	if(fromCache.toBool()){
+		qDebug().noquote().nospace() << "got " << title << ": returned cache";
+		return;
+	}
 	QByteArray rep = reply->readAll();
 	reply->deleteLater();
 	loadPosts(rep);
@@ -119,9 +124,8 @@ void ThreadTabHelper::getPostsFinished() {
 
 void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 	QJsonArray posts = api->postsArray(postData,"thread");
-	//QJsonArray posts = QJsonDocument::fromJson(postData).object().value("posts").toArray();
 	int length = posts.size();
-	qDebug().noquote() << QString("length of ").append(threadUrl).append(" is ").append(QString::number(length));
+	qDebug().noquote().nospace() << "got " << title << ": length is " << QString::number(length);
 	//check OP if archived or closed
 	QJsonObject p;
 	if(length) {

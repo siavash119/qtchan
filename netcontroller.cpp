@@ -3,10 +3,13 @@
 #include <QStandardPaths>
 #include <QNetworkCookie>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QDebug>
 
 netController::netController(QObject *parent) : QObject(parent)
 {
+	//qt bug? AppConfigLocation is same as ConfigLocation
+	//qDebug() << QStandardPaths::standardLocations(QStandardPaths::AppConfigLocation);
 	thumbManager = new QNetworkAccessManager(this);
 	fileManager = new QNetworkAccessManager(this);
 	jsonManager = new QNetworkAccessManager(this);
@@ -15,14 +18,13 @@ netController::netController(QObject *parent) : QObject(parent)
 
 	postManager->setCookieJar(new QNetworkCookieJar());
 
-	diskCache = new QNetworkDiskCache(this);
-	QDir().mkpath("cache");
-	diskCache->setCacheDirectory("cache");
+	diskCache = new QNetworkDiskCache(jsonManager);
+	QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/qtchan");
+	diskCache->setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/qtchan");
 	//diskCache->setMaximumCacheSize(1073741824); //1GB cache
 	jsonManager->setCache(diskCache);
 
-	QDir().mkpath(QDir::homePath()+"/.config/qtchan");
-	QString defaultCookies = QDir::homePath() + "/.config/qtchan/cookies";
+	QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/cookies";
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	QString cookiesFile = settings.value("cookiesFile",defaultCookies).toString();
 	loadCookies(cookiesFile);
@@ -52,7 +54,7 @@ void netController::loadCookies(QString passFile){
 			line = in.readLine();
 			if(line.startsWith("#") || !line.contains(":")) continue;
 			info = line.split(":");
-			qDebug() << "adding cookie: " << info.at(0);
+			qDebug().noquote() << "adding cookie" << info.at(0);
 			QNetworkCookie temp(info.at(0).toStdString().c_str(),
 								info.at(1).toStdString().c_str());
 			temp.setDomain(".4chan.org");

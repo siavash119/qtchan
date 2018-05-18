@@ -1,10 +1,10 @@
 #include "you.h"
 #include <QFile>
 #include <QDebug>
-
+#include <QStandardPaths>
 You::You()
 {
-	loadYou();
+	loadYou(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/you");
 }
 
 void You::loadYou(QString fileName){
@@ -32,7 +32,7 @@ void You::loadYou(QString fileName){
 		updateRegExp(boardName);
 	}
 	file.close();
-	qDebug() << yourPosts;
+	qDebug() << "######" << endl << "YOU" << endl << yourPosts << endl << "########";
 }
 
 void You::saveYou(const QString fileName){

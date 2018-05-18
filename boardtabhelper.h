@@ -26,6 +26,7 @@ public:
 	Chan *api;
 	QStringList allPosts;
 	QNetworkRequest request;
+	QString title;
 
 private:
 	QString boardUrl;

@@ -30,10 +30,11 @@ public:
 	QNetworkRequest request;
 	QNetworkRequest requestFlags;
 	QStringList allPosts;
+	QString title;
 
 private:
-	QString threadUrl;
 	QWidget *parent;
+	QString threadUrl;
 	bool isFromSession;
 	QSet<QString> gottenFlags;
 	PostKeys postKeys;
