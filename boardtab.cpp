@@ -285,7 +285,7 @@ void BoardTab::onNewThread(Post post, ThreadFormStrings strings, bool loadFile){
 	});
 	ui->threads->addWidget(tf);
 	tfMap.insert(post.no,tf);
-	if(this == mw->currentTab) QCoreApplication::processEvents();
+	//if(this == mw->currentTab) QCoreApplication::processEvents();
 }
 
 ThreadForm* BoardTab::tfAtTop(){
