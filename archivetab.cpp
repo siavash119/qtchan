@@ -40,12 +40,11 @@ void ArchiveTab::fillAPIs(){
 	foreach(QString api, apiList){
 		if(!QDir(api).exists()) apiList.removeOne(api);
 	}
-	/*
 	if(apiList.size()==1){
 		this->api = apiList.at(0);
 		fillBoards();
 	}
-	else{*/
+	else{
 		int size = apiList.size();
 		for(int i=0;i<size;i++){
 			QString api = apiList.at(i);
@@ -54,7 +53,7 @@ void ArchiveTab::fillAPIs(){
 			connect(button,&QPushButton::clicked,this,&ArchiveTab::apiClicked);
 			ui->apis->insertWidget(i,button);
 		}
-	//}
+	}
 }
 
 void ArchiveTab::apiClicked(){
