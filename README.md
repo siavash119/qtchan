@@ -37,29 +37,41 @@ packer -S qtchan
 
 
 ## a few keyboard commands and instructions
-* ctrl+l opens up the nav bar; you can type g or g/boardnum or /g/ or https://boards.4chan... etc.\
-g for first page, /g/ for catalog, g/search to get catalog and search
+### navigation
+* F1 shows this help
+* ctrl+l opens up the nav bar
+* you can type g or g/boardnum or /g/ or https://boards.4chan... etc.
+* g for first page, /g/ for catalog, g/search to get catalog and search
 * o opens thread/image at top of view (expand the tree if you don't see the new tab in the treeview)
-* F3 focuses the tree
-* F4 focuses the content
-* #j and #k scroll (e.g. 5j, k)
-* #h and #l scroll by (You) replies
+* F3 focuses the tree, F4 focuses the content
+* ctrl+tab ctrl+shift+tab, ctrl+1-4 to switch tabs
+* ctrl+w or delete to close tab
+* ctrl+q to quit
+### pages
+* #j and #k scroll by post(e.g. 5j, k)
+* #h and #l scroll by replies to (You)
 * #G puts scrollbar at percent (e.g. G for bottom, 0G for top, 50G for 50%)
-* ctrl+w (ctrl+f4 on windows) or delete to close tab
-* ctrl+p opens settings-ctrl+tab ctrl+shift+tab, ctrl+1-4 to switch tabs
 * ctrl+f to search and filter
 * r manually refreshes thread
-* q opens up post form, shift+enter to post from there
-* focus the bottom lineEdit to load captcha; press enter to verify/reload
+* ctrl+o opens current save folder in default file manager
+### posting
+* q opens up post form, shift+enter to post from postform
+* focus the bottom lineEdit to load captcha; answer pictures like the numpad (e.g. 135)
+* press enter in answer field to verify/reload captcha
 * e expands all images and auto expands future posts on current tab
+### settings
+* ctrl+p opens settings
 * ctrl+plus/minus to zoom in/zoom out text
 * ctrl+9/0 to scale down/up images
-* ctrl+q to quit
-* F7 reloads filters.conf file
-* F8 opens self-archive window; F5 reloads it
-* F9 toggles notification view
-* F10 saves tree state (it'll also save on exit)
-* F11 hides menubar (might disable some shortcuts)
+* F11 hides menubar (currently disables some shortcuts)
+### sessions
+* F5 saves tree session(it'll also save on exit)
+* F6 loads tree session
+* ctrl+F1-F4 saves tree session to slots (0-3)
+* shift+F1-F4 loads tree session from slots (0-3)
+* ctrl+F5-F6 selects prev/next session slot (0-9)
+### other
+* F9 toggles notification view (unfinished)
 * if you have mpv, g opens all the images/videos in the thread.
 
 there are more shortcuts; look at the source for now for info.
