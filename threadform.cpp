@@ -17,6 +17,7 @@
 #include <QPainter>
 #include <QMenu>
 
+
 //TODO get rid of #include threadtab.h and mainwindow.h by using signals/slots
 //TODO Possibly decouple the file and thumb getters to another class class
 ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool autoExpand, QWidget *parent, int replyLevel) :
@@ -45,6 +46,7 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 	connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
 	comQuoteConnection = connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	infoQuoteConnection = connect(ui->info,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
+	connect(this,&ThreadForm::setPixmap,this,&ThreadForm::onSetPixmap,Qt::UniqueConnection);
 	if(root) ui->hide->setStyleSheet("padding:0 10px; background-color: #191919;");
 	ui->info->installEventFilter(this);
 	ui->com->installEventFilter(this);
@@ -237,40 +239,55 @@ void ThreadForm::clickImage(){
 	if(QPointer<ClickableLabel>(ui->tim)) ui->tim->clicked();
 }
 
-QImage ThreadForm::scaleImage(QString path, int scale){
+QPixmap ThreadForm::scaleImage(QString path, int scale){
 	QImage pic;
 	pic.load(path);
 	QImage scaled = (pic.height() > pic.width()) ?
 				pic.scaledToHeight(scale, Qt::SmoothTransformation) :
 				pic.scaledToWidth(scale, Qt::SmoothTransformation);
-	return scaled;
+	return QPixmap::fromImage(scaled);
+}
+
+void ThreadForm::onSetPixmap(){
+	ui->tim->setPixmap(scaled);
+	ui->tim->setFixedSize(scaled.size());
+	ui->tim->show();
 }
 
 void ThreadForm::loadImage(QString path) {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	//TODO scale in background threads?
-	/*QFuture<QImage> newImage = QtConcurrent::run(scaleImage,
-												 path, settings.value("imageSize",250).toInt());
+	int maxWidth = settings.value("imageSize",250).toInt();
+	QFuture<QPixmap> newImage = QtConcurrent::run(&ThreadForm::scaleImage,path,maxWidth);
 	connect(&watcher, &QFutureWatcherBase::finished,[=]()
 	{
-		QImage scaled = newImage.result();
-		if(!scaled.isNull()) {
-			ui->tim->show();
-			//this->setMinimumWidth(738);
-			ui->tim->setPixmap(QPixmap::fromImage(scaled));
-			ui->tim->setFixedSize(scaled.size());
-			//if(this->type == PostType::Reply) {
-			//	static_cast<ThreadTab*>(tab)->checkScroll();
-			//}
-		}
+		scaled = newImage.result();
+		emit setPixmap();
 	});
-	watcher.setFuture(newImage);*/
-	QImage scaled = scaleImage(path, settings.value("imageSize",250).toInt());
+	watcher.setFuture(newImage);
+
+	/*QImage scaled = scaleImage(path, settings.value("imageSize",250).toInt());
 	if(!scaled.isNull()) {
 		ui->tim->show();
 		ui->tim->setPixmap(QPixmap::fromImage(scaled));
 		ui->tim->setFixedSize(scaled.size());
+	}*/
+
+	//Possible to wrap text around image; decided not to for now
+	//no smooth scaling doesn't look good
+	//or scaling then storing image as base64 data takes too much memory
+	//save scaled thumbnails? use qml?
+	/*
+	QImage scaled = scaleImage(path, settings.value("imageSize",250).toInt());
+	QString url;
+	if(!scaled.isNull()) {
+		QPixmap pixmap = QPixmap::fromImage(scaled);
+		QByteArray byteArray;
+		QBuffer buffer(&byteArray);
+		pixmap.save(&buffer, "JPG");
+		url = QString("<img style=\"float:left\" src=\"data:image/jpg;base64,") + byteArray.toBase64() + "\"/>";
 	}
+	ui->com->setText("<a href=\"#t" % path % "\">" % url % "</a><p>" + post.com + "</p>");
+	*/
 }
 
 void ThreadForm::imageClicked()
@@ -290,10 +307,13 @@ void ThreadForm::imageClicked()
 void ThreadForm::hideClicked()
 {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	QStringList idFilters = settings.value("filters/" % board % "/id").toStringList();
+	//deprecated
+	QString filterString = "filters/" % api->name() % '/' % board % "/id";
+	QStringList idFilters = settings.value(filterString).toStringList();
 	idFilters.append(strings.thread);
-	settings.setValue("filters/" % board % "/id",idFilters);
-	qDebug().noquote() << "hide Clicked so" << post.no << "filtered!";
+	settings.setValue(filterString,idFilters);
+	//
+	qDebug().noquote().nospace() << "hide Clicked so " << api->name() << '/' << board << '/' << post.no << " filtered!";
 	this->hidden = true;
 	emit removeMe(this);
 	if(strings.thread != "index"){
@@ -303,11 +323,11 @@ void ThreadForm::hideClicked()
 		}
 		QSet<QString> quotes = post.quotelinks;
 		ThreadForm *replyTo;
+		//TODO use QtConcurrent?
 		foreach (const QString &orig, quotes)
 		{
 			replyTo = static_cast<ThreadTab*>(tab)->tfMap.find(orig).value();
 			if(replyTo != nullptr) {
-				//replyTo->replies.insert(tf->post.no);
 				replyTo->replies.remove(post.no.toDouble());
 				replyTo->setReplies();
 			}
@@ -403,16 +423,7 @@ void ThreadForm::quoteClicked(const QString &link)
 }
 
 void ThreadForm::postMenu(){
-
-	/*QMenu *postM = new QMenu;
-	postM->setStyleSheet("background-color: #222222; color:#bbbbbb; border: 1px solid white");
-	QAction* actionPostNum = postM->addAction(postNum);
-	QMenu *filterMenu = postM->addMenu("Filter");
-	connect(actionPostNum,&QAction::triggered,[=](){
-		qDebug() << actionPostNum->text() << "triggered";
-	});
-	postM->setAttribute(Qt::WA_DeleteOnClose);
-	postM->popup(QCursor::pos());*/
+	//tfc will delete on close
 	ThreadFormContext *tfc = new ThreadFormContext(&post);
 	connect(tfc,&ThreadFormContext::filtersChanged,mw,&MainWindow::reloadFilters,Qt::DirectConnection);
 }

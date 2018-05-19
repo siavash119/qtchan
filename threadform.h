@@ -4,7 +4,7 @@
 #include "post.h"
 #include "chans.h"
 #include "threadformstrings.h"
-//#include <QFutureWatcher>
+#include <QFutureWatcher>
 #include <QWidget>
 #include <QPointer>
 #include <QNetworkReply>
@@ -57,7 +57,7 @@ public:
 	//TODO check settings -> filter
 	bool hidden = false;
 	bool seen = false;
-	static QImage scaleImage(QString path, int scale);
+	static QPixmap scaleImage(QString path, int scale);
 	//QFutureWatcher<QImage> watcher;
 	QString repliesString;
 	QString infoString();
@@ -98,6 +98,8 @@ private:
 	QMap<QString,QMetaObject::Connection> insertedConnections;
 	void removeFromInserted();
 	void postMenu();
+	QPixmap scaled;
+	QFutureWatcher<QPixmap> watcher;
 
 signals:
 	void loadThreadTab(ThreadForm*, QJsonArray&);
@@ -107,6 +109,7 @@ signals:
 	void updateFloat();
 	void removeMe(QPointer<ThreadForm> tf);
 	void deleteFloat();
+	void setPixmap();
 	//void searchPost(int position, QString postNum);
 
 public slots:
@@ -117,6 +120,7 @@ public slots:
 	void setFontSize(int fontSize);
 	void setImageSize(int imageSize);
 	void downloadedSlot(const QString &path, const QString &message);
+	void onSetPixmap();
 
 private slots:
 	void quoteClicked(const QString &link);
