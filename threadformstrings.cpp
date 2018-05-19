@@ -9,14 +9,14 @@ ThreadFormStrings::ThreadFormStrings(Chan *api, const Post &post, QString thread
 	board = post.board;
 	pathBase = api->name() % '/' % board % '/' % path % '/';
 	if(!post.tim.isNull() && !post.filedeleted) {
-		fileUrl = board % '/' % post.tim % post.ext;
+		fileUrl = api->imageURL(board,post.tim,post.ext);
 		filePath = pathBase%post.no%"-"%post.filename%post.ext;
 		fileInfoString = post.filename % post.ext
 				% " (" % QString("%1").arg(post.w)
 				% "x" % QString("%1").arg(post.h)
 				% ", " % QString("%1").arg(post.fsize/1024,0,'f',0)
 				% " KB)";
-		thumbUrl = this->board % '/' % post.tim % "s.jpg";
+		thumbUrl = api->thumbURL(board,post.tim,post.ext);
 		thumbPath = pathBase%"thumbs/"%post.no%"-"%post.filename%"s.jpg";
 	}
 	flagStrings(post);

@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QRegularExpression>
 
 //TODO: does everything need to be a virtual function?
 
@@ -81,11 +82,11 @@ public:
 	virtual QString catalogURL(QString &board) = 0;
 	virtual QString threadURL(QString &board, QString &thread) = 0;
 	virtual QString postURL(QString &board) = 0;
-	virtual QString thumbURL() = 0;
-	virtual QString imageURL() = 0;
-	virtual QString regURL() = 0;
-	virtual QString regToThread() = 0;
-	virtual QString regToCatalog() = 0;
+	virtual QString thumbURL(QString &board,QString name, QString ext) = 0;
+	virtual QString imageURL(QString &board,QString name, QString ext) = 0;
+	virtual QRegularExpression regURL() = 0;
+	virtual QRegularExpression regToThread() = 0;
+	virtual QRegularExpression regToCatalog() = 0;
 	virtual QString apiBase() = 0;
 	virtual QJsonArray postsArray(QByteArray &data, QString type = QString()) = 0;
 	virtual QJsonArray threadsArray(QByteArray &data) = 0;

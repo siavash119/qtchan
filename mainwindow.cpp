@@ -436,24 +436,28 @@ void MainWindow::on_pushButton_clicked()
 
 TreeItem *MainWindow::loadFromSearch(QString query, QString display, TreeItem *childOf, bool select)
 {
+	qDebug() << query;
 	Chan *api = Chans::stringToType(query);
-	QRegularExpression re(api->regToThread(),QRegularExpression::CaseInsensitiveOption);
-	QRegularExpressionMatch match = re.match(query);
+	if(api==Q_NULLPTR){
+		qDebug() << query << "is an invalid URL";
+		return Q_NULLPTR;
+	}
+	qDebug() << query;
+	QRegularExpressionMatch match = api->regToThread().match(query);
 	QRegularExpressionMatch match2;
 	BoardTab *bt;
 	if (!match.hasMatch()) {
-		QRegularExpression res(api->regToCatalog(),QRegularExpression::CaseInsensitiveOption);
-		match2 = res.match(query);
+		match2 = api->regToCatalog().match(query);
 	}
 	else{
 		TreeItem *tnParent;
 		if(childOf == Q_NULLPTR)tnParent = model->root;
 		else tnParent = childOf;
-		return onNewThread(this,api,match.captured(1),match.captured(2),display,tnParent);
+		return onNewThread(this,api,match.captured("board"),match.captured("thread"),display,tnParent);
 	}
 	if(match2.hasMatch()) {
 		bt = new BoardTab(api, match2.captured(1),BoardType::Catalog,match2.captured(2),this);
-		if(!display.length()) display = "/"+match2.captured(1)+"/"+match2.captured(2);
+		if(!display.length()) display = "/"+match2.captured("board")+"/"+match2.captured("search");
 	}
 	else{
 		bt = new BoardTab(api, query,BoardType::Index,"",this);

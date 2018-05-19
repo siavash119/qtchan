@@ -144,11 +144,11 @@ void ArchiveTab::fillTable(QString board){
 void ArchiveTab::tableClicked(int row, int column){
 	if(column == 0){
 		QString threadNum = ui->table->item(row,1)->data(Qt::DisplayRole).toString();
-		emit loadThread(this->board+"/"+threadNum);
+		emit loadThread(api+'/'+board+'/'+threadNum);
 	}
 	else if(column == 4){
 		QString threadNum = ui->table->item(row,1)->data(Qt::DisplayRole).toString();
-		QDir dir(this->board+"/"+threadNum);
+		QDir dir(api+'/'+board+'/'+threadNum);
 		if(dir.exists()) dir.removeRecursively();
 		ui->table->removeRow(row);
 	}

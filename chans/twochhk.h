@@ -8,13 +8,21 @@
 class TwoChHk : public Chan
 {
 public:
+	inline TwoChHk(){
+		regurl.setPattern("^(?:(?:https?:\\/\\/)?2ch.hk)\\/?.*$");
+		regurl.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+		regtothread.setPattern("^2ch.hk\\/(\\w+)\\/(\\d+)$");
+		regtothread.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+		regtocatalog.setPattern("^(?:(?:https?:\\/\\/)?2ch.hk)?\\/?(\\w+)\\/(?:catalog#s=)?(.+)?$");
+		regtocatalog.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+	}
 	inline QString name(){return "8ch.hk";}
-	inline QString thumbURL(){return "";}
-	inline QString imageURL(){return "";}
+	inline QString thumbURL(QString &board,QString name, QString ext){(void)ext; return QString(board % '/' % name % "s.jpg");}
+	inline QString imageURL(QString &board,QString name, QString ext){return QString(board % '/' % name % ext);}
 	inline bool usesCaptcha(){return true;}
-	inline QString regURL(){return QString("^(?:(?:https?:\\/\\/)?2ch.hk)\\/?.*$");}
-	inline QString regToThread(){return QString("^2ch.hk\\/(\\w+)\\/(\\d+)$");}
-	inline QString regToCatalog(){return QString("^(?:(?:https?:\\/\\/)?2ch.hk)?\\/?(\\w+)\\/(?:catalog#s=)?(.+)?$");}
+	inline QRegularExpression regURL(){return regurl;}
+	inline QRegularExpression regToThread(){return regtothread;}
+	inline QRegularExpression regToCatalog(){return regtocatalog;}
 	inline QString apiBase(){return QString("https://2ch.hk/");}
 	inline QString boardURL(QString &board){return QString("https://2ch.hk/" % board % "/1.json");}
 	inline QString catalogURL(QString &board){return QString("https://2ch.hk/" % board % "/catalog.json");}
@@ -45,6 +53,10 @@ public:
 	inline QJsonArray catalogPageArray(QJsonArray &allThreads, int index){
 		return allThreads.at(index).toObject().value("threads").toArray();
 	}
+private:
+	QRegularExpression regurl;
+	QRegularExpression regtothread;
+	QRegularExpression regtocatalog;
 };
 
 #endif // TWOCHHK_H
