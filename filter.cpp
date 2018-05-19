@@ -81,6 +81,7 @@ void Filter::loadFilterFile2(){
 					else{
 						exp.setPattern(line);
 					}
+					if(!exp.isValid()) continue;
 					if(key!="md5") exp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
 					hash.insert(exp,options);
 				}
