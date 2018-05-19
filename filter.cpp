@@ -380,11 +380,10 @@ QString Filter::htmlParse(QString &html){
 
 QString Filter::titleParse(QString &title){
 	QRegularExpression htmlTag("<[^>]*>");
-	return title.replace(htmlTag,"").replace("<br>"," ")
+	return title.replace("<br>"," ").replace(htmlTag,"")
 			.replace("\n"," ").replace("&amp;","&")
 			.replace("&gt;",">").replace("&lt;","<")
-			.replace("&quot;","\"").replace("&#039;","'")
-			.replace("<wb>","").replace("<wbr>","");
+			.replace("&quot;","\"").replace("&#039;","'");
 }
 
 QString Filter::toStrippedHtml(QString &text){
