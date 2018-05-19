@@ -2,7 +2,6 @@
 #define FOURCHAN_H
 
 #include "chan.h"
-#include <QDebug>
 //TODO check if i use inline/use final/etc.
 
 class FourChan : public Chan
@@ -12,13 +11,10 @@ public:
 		myName = "4chan";
 		myRegUrl.setPattern("^(4chan/|(?:(?:https?://)?boards\\.4chan\\.org/))?(?<url>.*)$");
 		myRegUrl.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
-		qDebug() << "myRegUrl valid?" << myRegUrl.isValid();
 		myRegToThread.setPattern("^/?(?<board>\\w+)(?:/thread)?/(?<thread>\\d+)(?:#p\\d+)?$");
 		myRegToThread.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
-		qDebug() << "myRegToThread valid?" << myRegToThread.isValid();
 		myRegToCatalog.setPattern("^/?(?<board>\\w+)/(?:catalog#s=)?(?<search>.+)?$");
 		myRegToCatalog.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
-		qDebug() << "myRegToCatalog valid?" << myRegToCatalog.isValid();
 		myApiBase = "https://i.4cdn.org/";
 		myCaptchaUrl = "https://www.google.com/recaptcha/api";
 		captchaInfo = {
