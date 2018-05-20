@@ -134,7 +134,7 @@ void ThreadTab::onGetFlags(QByteArray data){
 
 void ThreadTab::onSetRegion(QString post_nr, QString region){
 	QPointer<ThreadForm> tf = tfMap.value(post_nr);
-	if(tf) tf->setRegion(region);
+	if(tf && tf->post.troll_country.isEmpty()) tf->setRegion(region);
 }
 
 void ThreadTab::setFontSize(int fontSize){
