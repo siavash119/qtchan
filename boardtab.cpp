@@ -138,9 +138,7 @@ void BoardTab::setShortcuts()
 		if(ThreadForm *tf = tfAtTop()){
 			ThreadForm *toTf = Q_NULLPTR;
 			QListIterator<QObject*> i(ui->scrollAreaWidgetContents->children());
-			while(i.hasNext()){
-				if(i.next() == tf) break;
-			}
+			i.findNext(tf);
 			if(i.hasPrevious()) i.previous();
 			while(i.hasPrevious() && vimNumber--){
 				QObject *temp = i.previous();
@@ -149,7 +147,8 @@ void BoardTab::setShortcuts()
 					if(toTf->isHidden()) vimNumber++;
 				}
 			}
-			if(toTf) bar->setValue(toTf->pos().y());
+			if(toTf) bar->setValue(((QWidget*)(toTf))->pos().y());
+			else bar->setValue(0);
 		}
 		vimCommand = "";
 	});
@@ -164,16 +163,13 @@ void BoardTab::setShortcuts()
 		if(ThreadForm *tf = tfAtTop()){
 			ThreadForm *toTf = Q_NULLPTR;
 			QListIterator<QObject*> i(ui->scrollAreaWidgetContents->children());
-			while(i.hasNext()){
-				if(i.next() == tf) break;
-			}
+			i.findNext(tf);
 			while(i.hasNext() && vimNumber--){
 				QObject *temp = i.next();
 				if(temp->objectName() == "ThreadForm"){
 					toTf = qobject_cast<ThreadForm*>(temp);
 					if(toTf->isHidden()) vimNumber++;
 				}
-
 			}
 			if(toTf) bar->setValue(((QWidget*)(toTf))->pos().y());
 		}
