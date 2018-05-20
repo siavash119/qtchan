@@ -57,8 +57,7 @@ public:
 	//TODO check settings -> filter
 	bool hidden = false;
 	bool seen = false;
-	static QPixmap scaleImage(QString path, int scale);
-	//QFutureWatcher<QImage> watcher;
+	static QImage scaleImage(QString path, int scale);
 	QString repliesString;
 	QString infoString();
 	QString getInfoString();
@@ -99,7 +98,7 @@ private:
 	void removeFromInserted();
 	void postMenu();
 	QPixmap scaled;
-	QFutureWatcher<QPixmap> watcher;
+	QFutureWatcher<QImage> watcher;
 
 signals:
 	void loadThreadTab(ThreadForm*, QJsonArray&);

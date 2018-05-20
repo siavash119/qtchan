@@ -239,13 +239,13 @@ void ThreadForm::clickImage(){
 	if(QPointer<ClickableLabel>(ui->tim)) ui->tim->clicked();
 }
 
-QPixmap ThreadForm::scaleImage(QString path, int scale){
+QImage ThreadForm::scaleImage(QString path, int scale){
 	QImage pic;
 	pic.load(path);
 	QImage scaled = (pic.height() > pic.width()) ?
 				pic.scaledToHeight(scale, Qt::SmoothTransformation) :
 				pic.scaledToWidth(scale, Qt::SmoothTransformation);
-	return QPixmap::fromImage(scaled);
+	return scaled;
 }
 
 void ThreadForm::onSetPixmap(){
@@ -257,10 +257,10 @@ void ThreadForm::onSetPixmap(){
 void ThreadForm::loadImage(QString path) {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	int maxWidth = settings.value("imageSize",250).toInt();
-	QFuture<QPixmap> newImage = QtConcurrent::run(&ThreadForm::scaleImage,path,maxWidth);
+	QFuture<QImage> newImage = QtConcurrent::run(&ThreadForm::scaleImage,path,maxWidth);
 	connect(&watcher, &QFutureWatcherBase::finished,[=]()
 	{
-		scaled = newImage.result();
+		scaled = QPixmap::fromImage(newImage.result());
 		emit setPixmap();
 	});
 	watcher.setFuture(newImage);
