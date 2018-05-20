@@ -14,6 +14,7 @@ class ThreadTabHelper : public QObject
 {
 	Q_OBJECT
 	bool gettingReply = false;
+	bool gettingFlags = false;
 	Filter filterMe = filter;
 public:
 	ThreadTabHelper();
@@ -39,6 +40,7 @@ private:
 	QSet<QString> gottenFlags;
 	PostKeys postKeys;
 	QString filesPath;
+	QStringList extraFlagPostNums;
 
 public slots:
 	void startUp(Chan *api, QString board, QString thread, QWidget *parent, bool isFromSession);

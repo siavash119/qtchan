@@ -57,16 +57,15 @@ void ThreadTabHelper::writeJson(QString &path, QString &thread, QByteArray &rep)
 }
 
 void ThreadTabHelper::getExtraFlags(){
-	if(abort || !(board == "int" || board == "pol" || board == "sp" || board == "int")) return;
-	QStringList postNums;
+	if(abort || gettingFlags || !(board == "int" || board == "pol" || board == "sp")) return;
 	foreach(QString no, allPosts){
 		if(abort) return;
 		if(gottenFlags.contains(no)) continue;
-		gottenFlags.insert(no);
-		postNums.append(no);
+		extraFlagPostNums.append(no);
 	}
-	if(!postNums.size()) return;
-	QString data = "board=" % board % "&post_nrs=" % postNums.join("%2C");
+	if(!extraFlagPostNums.size()) return;
+	QString data = "board=" % board % "&post_nrs=" % extraFlagPostNums.join("%2C");
+	gettingFlags = true;
 	emit getFlags(data.toUtf8());
 	/*replyFlags = nc.fileManager->post(requestFlags,data.toUtf8());
 	flagsConnection = connect(replyFlags,SIGNAL(finished()),this,SLOT(loadExtraFlags()),UniqueDirect);*/
@@ -79,6 +78,11 @@ void ThreadTabHelper::loadExtraFlags(){
 		qDebug() << "checking flags errror:" << replyFlags->errorString();
 		return;
 	}
+	foreach(QString no, extraFlagPostNums){
+		gottenFlags.insert(no);
+	}
+	extraFlagPostNums.clear();
+	gettingFlags = false;
 	QByteArray answer = replyFlags->readAll();
 	replyFlags->deleteLater();
 	if(answer.isEmpty()) return;
