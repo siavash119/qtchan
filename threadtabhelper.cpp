@@ -145,7 +145,7 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 	}
 	else return;
 	//write to file
-	if(writeIt && !fromCache) QtConcurrent::run(&ThreadTabHelper::writeJson, filesPath, thread, postData);
+	if(writeIt) QtConcurrent::run(&ThreadTabHelper::writeJson, filesPath, thread, postData);
 	//load new posts
 	int i = allPosts.size();
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
