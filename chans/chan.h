@@ -1,6 +1,7 @@
 #ifndef CHAN_H
 #define CHAN_H
 
+#include "post.h"
 #include <QString>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -82,8 +83,8 @@ public:
 	virtual QString catalogURL(QString &board) = 0;
 	virtual QString threadURL(QString &board, QString &thread) = 0;
 	virtual QString postURL(QString &board) = 0;
-	virtual QString thumbURL(QString &board,QString name, QString ext) = 0;
-	virtual QString imageURL(QString &board,QString name, QString ext) = 0;
+	virtual QString thumbURL(QString &board,QString &thread, QString name, QString ext) = 0;
+	virtual QString imageURL(QString &board,QString &thread, QString name, QString ext) = 0;
 	virtual QRegularExpression regURL() = 0;
 	virtual QRegularExpression regToThread() = 0;
 	virtual QRegularExpression regToCatalog() = 0;
@@ -97,11 +98,13 @@ public:
 	virtual QString captchaURL(){return QString();}
 	virtual CaptchaLinks captchaLinks(){CaptchaLinks links; return links;}
 	virtual inline bool requiresUserAgent(){return false;}
-	virtual inline QString requiredUserAgent(){return QString("Mozilla/5.0 (X11; Linux x86_64; rv:59.0) Gecko/20100101 Firefox/59.0");}
+	virtual inline QString requiredUserAgent(){return QString("Mozilla/5.0 (X11; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0");}
 	//if requiresCookies() is true, implement setCookies()
 	virtual inline bool requiresCookies(){return false;}
 	virtual inline void setCookies(){return;}
 	virtual inline PostKeys postKeys(){PostKeys defaultPostKeys; return defaultPostKeys;}
+	virtual Post post(QJsonObject p, QString &board, QString &thread) = 0;
+	virtual inline void replacements(QByteArray &data){(void)data;}
 };
 
 #endif // CHANS_H

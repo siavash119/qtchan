@@ -418,7 +418,7 @@ void ThreadTab::onNewTF(Post post, ThreadFormStrings strings, bool loadFile){
 	formsTotal++;
 	formsUnseen++;
 	info.posts++;
-	if(post.tim.isEmpty()) info.files++;
+	info.files += post.files.size();
 	info.unseen++;
 	info.updateFields();
 	//if(this == mw->currentTab) QCoreApplication::processEvents();
@@ -467,7 +467,7 @@ void ThreadTab::loadAllImages()
 {
 	updated = false;
 	foreach(ThreadForm *tf,tfMap){
-		tf->getFile();
+		tf->getFiles();
 	}
 }
 
@@ -563,9 +563,9 @@ void ThreadTab::floatReply(const QString &link, int replyLevel)
 	floating->setWindowFlags(Qt::ToolTip);
 	floating->setWindowTitle("reply");
 
-	QRect rec = QApplication::desktop()->availableGeometry(this);
 	QPoint globalCursorPos = QCursor::pos();
 	QSize sizeHint = floating->sizeHint();
+	QRect rec = QApplication::desktop()->availableGeometry(this);
 	int x = -1, y = -1;
 	if(globalCursorPos.x()  - rec.topLeft().x() + sizeHint.width() + 10 > rec.width()) {
 		x = globalCursorPos.x() - sizeHint.width() - 10;

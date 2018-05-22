@@ -115,8 +115,8 @@ void ThreadTabHelper::getPostsFinished() {
 		}
 		return;
 	}
-	QVariant fromCache = reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute);
-	if(fromCache.toBool()){
+	fromCache = reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute).toBool();
+	if(fromCache){
 		qDebug().noquote().nospace() << "got " << title << " from cache";
 	}
 	QByteArray rep = reply->readAll();
@@ -125,6 +125,7 @@ void ThreadTabHelper::getPostsFinished() {
 }
 
 void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
+	api->replacements(postData);
 	QJsonArray posts = api->postsArray(postData,"thread");
 	int length = posts.size();
 	qDebug().noquote().nospace() << "got " << title << ": length is " << QString::number(length);
@@ -132,7 +133,7 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 	QJsonObject p;
 	if(length) {
 		p = posts.at(0).toObject();
-		Post OP(p,postKeys,board);
+		Post OP = api->post(p,board,thread);
 		if(OP.archived) {
 			qDebug().nospace() << "Stopping timer for " << threadUrl << ". Reason: Archived";
 			emit threadStatus("archived",OP.archived_on);
@@ -144,13 +145,13 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 	}
 	else return;
 	//write to file
-	if(writeIt) QtConcurrent::run(&ThreadTabHelper::writeJson, filesPath, thread, postData);
+	if(writeIt && !fromCache) QtConcurrent::run(&ThreadTabHelper::writeJson, filesPath, thread, postData);
 	//load new posts
 	int i = allPosts.size();
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	bool loadFile = settings.value("autoExpand",false).toBool() || this->expandAll;
 	while(i<length) {
-		Post post(posts.at(i).toObject(),postKeys,board);
+		Post post = api->post(posts.at(i).toObject(),board,thread);
 		if(filterMe.filterMatched2(&post)){
 			post.filtered = true;
 		}

@@ -26,6 +26,9 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 {
 	if(root) rootTF = this;
 	ui->setupUi(this);
+	ui->horizontalLayout->setAlignment(ui->hide,static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignLeft));
+	//ui->hide->setAlignment(static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignLeft));
+	ui->postLayout->setAlignment(static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignLeft));
 	this->board = strings.board;
 	if(strings.thread == "index") this->type = PostType::Thread;
 	else this->type = PostType::Reply;
@@ -39,7 +42,7 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 	background.setRgb(darkness,darkness,darkness);
 	this->setStyleSheet("background-color:" + background.name() + "; color:#bbbbbb;");
 	ui->quoteWidget->hide();
-	ui->tim->hide();
+//	ui->tim->hide();
 	ui->fileInfo->hide();
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	setFontSize(settings.value("fontSize",14).toInt());
@@ -105,22 +108,8 @@ void ThreadForm::load(Post &post)
 	ui->com->setText(post.com);
 
 	getFlag();
-
-	//set image
-	//TODO use filedeleted image
-	if(!post.tim.isNull() && !post.filedeleted) {
-		file = new QFile(strings.filePath,this);
-		ui->fileInfo->show();
-		ui->fileInfo->setText(strings.fileInfoString);
-		thumb = new QFile(strings.thumbPath,this);
-		getThumb();
-		if(autoExpand || file->exists()) getFile();
-		connect(ui->tim,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
-	}
-	else{
-		ui->pictureLayout->deleteLater();
-		this->hasImage = false;
-	}
+	getThumb();
+	if(autoExpand) getFiles();
 }
 
 void ThreadForm::getFlag(){
@@ -129,29 +118,71 @@ void ThreadForm::getFlag(){
 	downloadFile(strings.flagUrl,strings.flagPath,nc.thumbManager);
 }
 
-void ThreadForm::getFile(bool andOpen){
-	if(post.tim.isNull() || post.filedeleted || gettingFile) return;
-	QString url = api->apiBase() + strings.fileUrl;
+void ThreadForm::getFile(ClickableLabel* label, int ind, bool andOpen){
+	/*if(!post.files.size() || post.files.at(0).filedeleted || gettingFile) return;
+	foreach(PostFile file,post.files){
+		QString url = api->apiBase() + file.fileUrlPath;
+		QString message = andOpen ? "clicked" : "";
+		downloadFile(url,strings.filePath,nc.fileManager,"file",message,label);
+		gettingFile = true;
+	}*/
+	//foreach(PostFile file,post.files){
+	PostFile postFile = post.files.at(ind);
+	QString url = api->apiBase() + postFile.fileUrlPath;
 	QString message = andOpen ? "clicked" : "";
-	downloadFile(url,strings.filePath,nc.fileManager,message);
-	gettingFile = true;
+	downloadFile(url,strings.pathBase % postFile.filePath,nc.fileManager,"file",message,label);
+}
+
+void ThreadForm::getFiles(){
+	int i = 0;
+	foreach(PostFile postFile,post.files){
+		ClickableLabel *label = labels.at(i);
+		gettingFile.replace(i++,true);
+		QString url = api->apiBase() + postFile.fileUrlPath;
+		downloadFile(url,strings.pathBase % postFile.filePath,nc.fileManager,"file","",label);
+	}
 }
 
 void ThreadForm::getThumb(){
-	if(post.tim.isNull() || post.filedeleted) return;
-	QString url = api->apiBase() + strings.thumbUrl;
-	downloadFile(url,strings.thumbPath,nc.thumbManager);
-	gettingThumb = true;
+	int numFiles = post.files.size();
+	if(!numFiles) return;
+	int i = 0;
+	QLayoutItem *item = ui->contentLayout->takeAt(0);
+	foreach(PostFile postFile, post.files){
+		gettingFile.insert(i,false);
+		finished.insert(i,false);
+		if(postFile.filedeleted) continue;
+		if(numFiles == 1){
+			ui->fileInfo->show();
+			ui->fileInfo->setText(postFile.infoString);
+		}
+		QString url = api->apiBase() + postFile.tnUrlPath;
+		//QVBoxLayout *layout = new QVBoxLayout;
+		ClickableLabel *label = new ClickableLabel(this);
+		labels.append(label);
+		connect(label,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
+		//layout->setContentsMargins(13,6,0,11);
+		//layout->insertWidget(0,label);
+		//layout->setAlignment(label,Qt::AlignTop);
+		//ui->contentLayout->addLayout(layout,0,i++);
+		//label->setStyleSheet("padding:13px 6px 0px 11px");
+		ui->contentLayout->addWidget(label,0,i++,static_cast<Qt::Alignment>(Qt::AlignLeft | Qt::AlignTop));
+		downloadFile(url,strings.pathBase % postFile.tnPath,nc.thumbManager,"thumb",postFile.filename % postFile.ext,label);
+	}
+	if(numFiles > 1) ui->contentLayout->addItem(item,1,0,1,numFiles);
+	else ui->contentLayout->addItem(item,0,i);
 }
 
 //TODO: I want this in netcontroller
 void ThreadForm::downloadFile(const QString &fileUrl,
-								 const QString &filePath,
-								 QNetworkAccessManager *manager,
-								 QString message){
+								const QString &filePath,
+								QNetworkAccessManager *manager,
+								QString type,
+								QString message,
+								ClickableLabel *label){
 	QFile *file = new QFile(filePath);
 	if(file->exists()){
-		downloadedSlot(filePath,message);
+		downloadedSlot(filePath,type,message,label);
 		file->deleteLater();
 		return;
 	}
@@ -184,13 +215,13 @@ void ThreadForm::downloadFile(const QString &fileUrl,
 			};
 			file->write(reply->readAll());
 			file->close();
-			downloadedSlot(filePath,message);
+			downloadedSlot(filePath,type,message,label);
 		}
 	});
 }
 
-void ThreadForm::downloadedSlot(const QString &path, const QString &message){
-	if(path.compare(strings.flagPath) == 0){
+void ThreadForm::downloadedSlot(const QString &path, const QString &type, const QString &message, ClickableLabel* label){
+	if(type == "flag"){
 		ui->info->update();
 		QListIterator< QPointer<ThreadForm> > i(rootTF->clones);
 		QPointer<ThreadForm> cloned;
@@ -201,7 +232,7 @@ void ThreadForm::downloadedSlot(const QString &path, const QString &message){
 			cloned->setInfoString();
 		}
 	}
-	else if(path.startsWith("flags/flegs/")){
+	else if(type == "extraFlags"){
 		if(++regionsGot != regionList.size()) return;
 		ui->info->update();
 		QListIterator< QPointer<ThreadForm> > i(rootTF->clones);
@@ -213,30 +244,41 @@ void ThreadForm::downloadedSlot(const QString &path, const QString &message){
 			cloned->setInfoString();
 		}
 	}
-	else if(path.compare(strings.filePath) == 0){
-		gettingFile = false;
-		finished = true;
-		if(post.ext.compare(".jpg") == 0 || post.ext.compare(".png") == 0) {
-			loadImage(strings.filePath);
+	else if(type == "file"){
+		int ind = labels.indexOf(label);
+		gettingFile.replace(ind,false);
+		finished.replace(ind,true);
+		if(post.files.at(ind).ext == ".jpg" || post.files.at(ind).ext == ".png") {
+			loadImage(label,path);
 			QListIterator< QPointer<ThreadForm> > i(rootTF->clones);
 			QPointer<ThreadForm> cloned;
 			while(i.hasNext()) {
 				cloned = i.next();
 				if(!cloned) continue;
-				cloned->loadImage(strings.filePath);
+				cloned->loadImage(label,path);
 			}
 		}
 		if(message.compare("clicked") == 0 || loadIt){
-			openImage();
+			openImage(path);
 		}
 	}
-	else if(path.compare(strings.thumbPath) == 0){
-		if(!finished) loadImage(strings.thumbPath);
+	else if(type == "thumb"){
+		int ind = labels.indexOf(label);
+		if(!finished.at(ind)){
+			loadImage(label,path);
+			QListIterator< QPointer<ThreadForm> > i(rootTF->clones);
+			QPointer<ThreadForm> cloned;
+			while(i.hasNext()) {
+				cloned = i.next();
+				if(!cloned) continue;
+				cloned->loadImage(label,path);
+			}
+		}
 	}
 }
 
 void ThreadForm::clickImage(){
-	if(QPointer<ClickableLabel>(ui->tim)) ui->tim->clicked();
+	//if(QPointer<ClickableLabel>(ui->tim)) ui->tim->clicked();
 }
 
 QImage ThreadForm::scaleImage(QString path, int scale){
@@ -248,20 +290,20 @@ QImage ThreadForm::scaleImage(QString path, int scale){
 	return scaled;
 }
 
-void ThreadForm::onSetPixmap(){
-	ui->tim->setPixmap(scaled);
-	ui->tim->setFixedSize(scaled.size());
-	ui->tim->show();
+void ThreadForm::onSetPixmap(ClickableLabel *label, QPixmap scaled){
+	label->setPixmap(scaled);
+	//label->setFixedSize(scaled.size());
+	//label->show();
 }
 
-void ThreadForm::loadImage(QString path) {
+void ThreadForm::loadImage(ClickableLabel *label, QString path) {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	int maxWidth = settings.value("imageSize",250).toInt();
 	QFuture<QImage> newImage = QtConcurrent::run(&ThreadForm::scaleImage,path,maxWidth);
 	connect(&watcher, &QFutureWatcherBase::finished,[=]()
 	{
 		scaled = QPixmap::fromImage(newImage.result());
-		emit setPixmap();
+		emit setPixmap(label,scaled);
 	});
 	watcher.setFuture(newImage);
 
@@ -292,15 +334,22 @@ void ThreadForm::loadImage(QString path) {
 
 void ThreadForm::imageClicked()
 {
-	qDebug().noquote().nospace() << "clicked " << post.filename << post.ext;
+	if(!labels.size())return;
+	ClickableLabel *label = qobject_cast<ClickableLabel*>(sender());
+	int ind = labels.indexOf(label);
+	if(ind == -1){
+		ind=0;
+		label = labels.at(0);
+	}
+	//qDebug().noquote().nospace() << "clicked " << post.files.at(ind).filename << post.files.at(ind).ext;
 	if(strings.path == "index") {
 		TreeItem *childOf = mw->model->getItem(mw->selectionModel->currentIndex());
 		mw->onNewThread(mw,api,strings.board,strings.thread,QString(),childOf);
 	}
 	else{
-		if(finished) openImage();
-		else if(gettingFile) loadIt = true;
-		else getFile(true);
+		if(finished.at(ind)) openImage(strings.pathBase % post.files.at(ind).filePath);
+		else if(gettingFile.at(ind)) loadIt = true;
+		else getFile(label,ind,true);
 	}
 }
 
@@ -335,11 +384,11 @@ void ThreadForm::hideClicked()
 	}
 }
 
-void ThreadForm::openImage()
+void ThreadForm::openImage(const QString &path)
 {
 	QDesktopServices::openUrl(
 				QUrl::fromLocalFile(
-					QDir().absoluteFilePath(strings.filePath)));
+					QDir().absoluteFilePath(path)));
 }
 
 void ThreadForm::setFontSize(int fontSize){
@@ -361,7 +410,8 @@ void ThreadForm::setFontSize(int fontSize){
 }
 
 void ThreadForm::setImageSize(int imageSize){
-	if(file && file->exists()) loadImage(strings.filePath);
+	(void)imageSize;
+	/*if(file && file->exists()) loadImage(strings.filePath);
 	else if(thumb && thumb->exists()) loadImage(strings.thumbPath);
 	if(root && clones.size()){
 		QListIterator< QPointer<ThreadForm> > i(clones);
@@ -370,7 +420,7 @@ void ThreadForm::setImageSize(int imageSize){
 			if(!next) continue;
 			next->setImageSize(imageSize);
 		}
-	}
+	}*/
 }
 
 //TODO put most of this in another thread
@@ -457,16 +507,17 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 {
 	ThreadForm *tfs = new ThreadForm(this->api,this->strings,false,false,tab,replyLevel+1);
 	tfs->rootTF = this->rootTF;
-	tfs->tab = tab;
+	//tfs->tab = tab;
 	tfs->post = this->post;
-	tfs->ui->com->setText(post.com);
-	tfs->ui->info->setText(ui->info->text());
+	//tfs->ui->com->setText(post.com);
+	//tfs->ui->info->setText(ui->info->text());
 	tfs->replies = replies;
 	//TODO check and account for if original is still getting file
-	if(!post.tim.isNull() && !post.filedeleted) {
+	/*
+	if(post.files.size() && !post.files.at(0).filedeleted) {
 		tfs->strings = this->strings;
-		tfs->file = file;
-		tfs->thumb = thumb;
+		tfs->files = files;
+		tfs->thumbs = thumbs;
 		tfs->ui->fileInfo->show();
 		tfs->ui->fileInfo->setText(ui->fileInfo->text());
 		const QPixmap *px = this->ui->tim->pixmap();
@@ -482,11 +533,13 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 	} else {
 		tfs->ui->pictureLayout->deleteLater();
 		tfs->hasImage = false;
-	}
+	}*/
 	tfs->regionString = regionString;
 	if(repliesString.length()) {
 		tfs->setRepliesString(repliesString);
 	}
+	//is load okay?
+	tfs->load(post);
 	rootTF->clones.append(tfs);
 	disconnect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::hideClicked);
 	connect(tfs->ui->hide,&ClickableLabel::clicked,tfs,&ThreadForm::deleteLater);
@@ -611,7 +664,7 @@ void ThreadForm::on_com_linkHovered(const QString &link)
 
 void ThreadForm::deleteHideLayout()
 {
-	ui->hideLayout->deleteLater();
+	ui->hide->deleteLater();
 	ui->quoteWidget->deleteLater();
 	hideButtonShown = false;
 }

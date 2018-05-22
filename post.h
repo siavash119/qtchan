@@ -1,7 +1,6 @@
 #ifndef POST_H
 #define POST_H
 
-#include "chans/chan.h"
 #include <QString>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -10,13 +9,34 @@
 #include <QSet>
 #include <time.h>
 
+struct PostFile{
+	QString tim; //Renamed filename (Unix timestamp + milliseconds)
+	QString filename; //Original filename
+	QString ext; //File extension (.jpg|.png|.gif|.pdf|.swf|.webm)
+	double fsize; //File size
+	QString md5; //File MD5
+	int w; //Image width
+	int h; //Image Height
+	int tn_w; //Thumbnail width
+	int tn_h; //Thumbnail height
+	bool filedeleted; //File deleted?
+	bool spoiler; //Spoiler image?
+	int custom_spoiler; //Custom spoilers? only if board has customs
+	QString size_img;
+	QString tnUrlPath;
+	QString tnPath;
+	QString fileUrlPath;
+	QString filePath;
+	QString infoString;
+};
+
 class Post
 {
 public:
 	Post();
-	Post(QJsonObject p,PostKeys &keys, QString &board);
+	Post(QJsonObject &p, QString &board, QString &thread);
 	~Post();
-	void load(QJsonObject &p,PostKeys &keys, QString &board);
+	virtual void load(QJsonObject &p, QString &board, QString &thread);
 
 	QString no;
 	int resto;
@@ -42,6 +62,7 @@ public:
 	QString sub; //Subject
 	QString com; //Comment
 
+	QList<PostFile> files;
 	//Image only (tim != "")
 	QString tim; //Renamed filename (Unix timestamp + milliseconds)
 	QString filename; //Original filename
@@ -71,6 +92,7 @@ public:
 	//custom strings
 
 	QString board;
+	QString thread;
 	QString size_img;
 	/*QString fileURL;
 	QString filePath;

@@ -41,6 +41,7 @@ private:
 	PostKeys postKeys;
 	QString filesPath;
 	QStringList extraFlagPostNums;
+	bool fromCache;
 
 public slots:
 	void startUp(Chan *api, QString board, QString thread, QWidget *parent, bool isFromSession);

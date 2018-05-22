@@ -4,6 +4,7 @@
 #include "post.h"
 #include "chans.h"
 #include "threadformstrings.h"
+#include "clickablelabel.h"
 #include <QFutureWatcher>
 #include <QWidget>
 #include <QPointer>
@@ -24,8 +25,6 @@ enum PostType { Thread, Reply };
 class ThreadForm : public QWidget
 {
 	Q_OBJECT
-	bool gettingFile = false;
-	bool gettingThumb = false;
 	Qt::ConnectionType UniqueDirect = static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::UniqueConnection);
 public:
 	explicit ThreadForm(Chan *api, ThreadFormStrings strings, bool root = true,
@@ -35,8 +34,8 @@ public:
 	void setImage(QByteArray img);
 	//void getImage(QNetworkAccessManager *manager, QString *img);
 	void load(Post &post);
-	void loadImage(QString path);
-	void openImage();
+	void loadImage(ClickableLabel *label, QString path);
+	void openImage(const QString &path);
 	Chan *api;
 	ThreadFormStrings strings;
 	PostType type;
@@ -68,29 +67,31 @@ public:
 	QMetaObject::Connection comQuoteConnection;
 	QMetaObject::Connection infoQuoteConnection;
 	void getFlag();
-	void getFile(bool andOpen = false);
+	void getFile(ClickableLabel *label, int ind, bool andOpen = false);
 	QStringList regionList;
 	void setRegion(const QString &region);
 	QString fileInfoString;
 	QString tfInfoString;
 	QString matchThis();
 	QString regionString;
+	void getFiles();
 
 //TODO take care of file downloading in netcontroller
 private:
 	QWidget *tab;
 	ThreadForm *rootTF;
 	Ui::ThreadForm *ui;
-	QPointer<QFile> file;
-	QPointer<QFile> thumb;
+	QList<ClickableLabel*> labels;
 	void getThumb();
-	bool finished = false;
+	QList<bool> gettingFile;
+	QList<bool> finished;
 	bool hideButtonShown = true;
 	int darkness = 22;
 	QColor background;
 	void clickImage();
 	bool loadIt = false;
-	void downloadFile(const QString &fileUrl,const QString &filePath,QNetworkAccessManager *manager, QString message = QString());
+	void downloadFile(const QString &fileUrl,const QString &filePath,QNetworkAccessManager *manager,
+					  QString type = QString(), QString message = QString(), ClickableLabel *label = Q_NULLPTR);
 	QHash<QString,QNetworkReply*> networkReplies;
 	int regionsGot = 0;
 	QMap<QString,ThreadForm*> inserted;
@@ -108,7 +109,7 @@ signals:
 	void updateFloat();
 	void removeMe(QPointer<ThreadForm> tf);
 	void deleteFloat();
-	void setPixmap();
+	void setPixmap(ClickableLabel *label, QPixmap scaled);
 	//void searchPost(int position, QString postNum);
 
 public slots:
@@ -118,8 +119,8 @@ public slots:
 	void addReply(ThreadForm *tf);
 	void setFontSize(int fontSize);
 	void setImageSize(int imageSize);
-	void downloadedSlot(const QString &path, const QString &message);
-	void onSetPixmap();
+	void downloadedSlot(const QString &path, const QString &type, const QString &message, ClickableLabel *label);
+	void onSetPixmap(ClickableLabel *label, QPixmap scaled);
 
 private slots:
 	void quoteClicked(const QString &link);

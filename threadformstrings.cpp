@@ -8,16 +8,17 @@ ThreadFormStrings::ThreadFormStrings(Chan *api, const Post &post, QString thread
 {
 	board = post.board;
 	pathBase = api->name() % '/' % board % '/' % path % '/';
-	if(!post.tim.isNull() && !post.filedeleted) {
-		fileUrl = api->imageURL(board,post.tim,post.ext);
-		filePath = pathBase%post.no%"-"%post.filename%post.ext;
-		fileInfoString = post.filename % post.ext
-				% " (" % QString("%1").arg(post.w)
-				% "x" % QString("%1").arg(post.h)
-				% ", " % QString("%1").arg(post.fsize/1024,0,'f',0)
+	if(post.files.size() && !post.filedeleted) {
+		PostFile file = post.files.at(0);
+		fileUrl = api->imageURL(board,thread,file.tim,file.ext);
+		filePath = pathBase%post.no%"-"%file.filename%file.ext;
+		fileInfoString = file.filename % file.ext
+				% " (" % QString("%1").arg(file.w)
+				% "x" % QString("%1").arg(file.h)
+				% ", " % QString("%1").arg(file.fsize/1024,0,'f',0)
 				% " KB)";
-		thumbUrl = api->thumbURL(board,post.tim,post.ext);
-		thumbPath = pathBase%"thumbs/"%post.no%"-"%post.filename%"s.jpg";
+		thumbUrl = api->thumbURL(board,thread,file.tim,file.ext);
+		thumbPath = pathBase%"thumbs/"%post.no%"-"%file.filename%"s.jpg";
 	}
 	flagStrings(post);
 }

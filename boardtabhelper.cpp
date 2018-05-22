@@ -83,6 +83,7 @@ void BoardTabHelper::getPostsFinished() {
 	reply->deleteLater();
 	if(rep.isEmpty()) return;
 	emit clearMap();
+	api->replacements(rep);
 	QJsonArray threads = filterThreads(rep);
 	int length = threads.size();
 	qDebug().noquote().nospace() << "got " << title << ": length is " << QString::number(length);
@@ -109,7 +110,8 @@ void BoardTabHelper::getPostsFinished() {
 			i++;
 			continue;
 		}
-		Post post(p,postKeys,board);
+		QString thread = "";
+		Post post = api->post(p,board,thread);
 		if(filterMe.filterMatched2(&post)){
 			post.filtered = true;
 		}
@@ -119,7 +121,7 @@ void BoardTabHelper::getPostsFinished() {
 		if(type==BoardType::Index && showIndexReplies){
 			for(int j=1;j<t.size();j++){
 				p = t.at(j).toObject();
-				Post replyPost(p,postKeys,board);
+				Post replyPost = api->post(p,board,thread);
 				ThreadFormStrings replyStrings(api,replyPost,threadNum,"index");
 				emit newReply(replyPost,replyStrings,threadNum);
 			}

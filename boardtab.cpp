@@ -339,7 +339,7 @@ void BoardTab::onFilterTest(QString no, bool filtered){
 void BoardTab::loadAllImages()
 {
 	foreach(ThreadForm *tf,tfMap){
-		tf->getFile();
+		tf->getFiles();
 	}
 	/*foreach(ThreadForm *tf,tfReplyMap){
 		tf->getFile();

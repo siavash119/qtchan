@@ -2,12 +2,7 @@
 #include <QRegularExpressionMatch>
 
 Chan* Chans::stringToType(QString &url){
-	QString match = fourChanAPI->regURL().match(url).captured("url");
-	if(!match.isEmpty()){
-		url = match;
-		return fourChanAPI;
-	}
-	match = eightChanAPI->regURL().match(url).captured("url");
+	QString match = eightChanAPI->regURL().match(url).captured("url");
 	if(!match.isEmpty()){
 		url = match;
 		return eightChanAPI;
@@ -16,6 +11,11 @@ Chan* Chans::stringToType(QString &url){
 	if(!match.isEmpty()){
 		url = match;
 		return twoChHkAPI;
+	}
+	match = fourChanAPI->regURL().match(url).captured("url");
+	if(!match.isEmpty()){
+		url = match;
+		return fourChanAPI;
 	}
 	return Q_NULLPTR;
 }

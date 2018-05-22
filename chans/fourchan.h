@@ -4,6 +4,13 @@
 #include "chan.h"
 //TODO check if i use inline/use final/etc.
 
+class FourChanPost : public Post
+{
+public:
+	FourChanPost(QJsonObject &p, QString &board, QString &thread)
+		: Post(p, board, thread){}
+};
+
 class FourChan : public Chan
 {
 public:
@@ -15,7 +22,7 @@ public:
 		myRegToThread.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
 		myRegToCatalog.setPattern("^/?(?<board>\\w+)/(?:catalog#s=)?(?<search>.+)?$");
 		myRegToCatalog.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
-		myApiBase = "https://i.4cdn.org/";
+		myApiBase = "https://i.4cdn.org";
 		myCaptchaUrl = "https://www.google.com/recaptcha/api";
 		captchaInfo = {
 			"https://www.google.com/recaptcha/api",
@@ -25,10 +32,18 @@ public:
 			"https://www.google.com/recaptcha/api2/payload?c=",
 			"https://boards.4chan.org/"
 		};
+		quoteExp.setPattern("class=\\\\\"quote\\\\\"");
+		quoteLinkExp.setPattern("class=\\\\\"quotelink\\\\\"");
 	}
 	inline QString name(){return myName;}
-	inline QString thumbURL(QString &board,QString name, QString ext){(void)ext; return QString(board % '/' % name % "s.jpg");}
-	inline QString imageURL(QString &board,QString name, QString ext){return QString(board % '/' % name % ext);}
+	inline QString thumbURL(QString &board,QString &thread, QString name, QString ext){
+		(void)ext; (void)thread;
+		return QString(board % '/' % name % "s.jpg");
+	}
+	inline QString imageURL(QString &board,QString &thread, QString name, QString ext){
+		(void)thread;
+		return QString(board % '/' % name % ext);
+	}
 	inline bool usesCaptcha(){return true;}
 	//4chan doesn't need API name in front
 	inline QRegularExpression regURL(){return myRegUrl;}
@@ -56,6 +71,15 @@ public:
 	inline QJsonArray catalogPageArray(QJsonArray &allThreads, int index){
 		return allThreads.at(index).toObject().value("threads").toArray();
 	}
+	inline Post post(QJsonObject p, QString &board, QString &thread){
+		return FourChanPost(p,board,thread);
+	}
+	inline void replacements(QByteArray &data){
+		QString dataString(data);
+		dataString.replace(quoteExp,"class=\\\"quote\\\" style=\\\"color:#8ba446\\\"");
+		dataString.replace(quoteLinkExp,"class=\\\"quote\\\" style=\\\"color:#897399\\\"");
+		data = dataString.toUtf8();
+	}
 private:
 	QString myName;
 	QRegularExpression myRegUrl;
@@ -64,6 +88,8 @@ private:
 	QString myApiBase;
 	QString myCaptchaUrl;
 	CaptchaLinks captchaInfo;
+	QRegularExpression quoteExp;
+	QRegularExpression quoteLinkExp;
 };
 
 #endif // FOURCHAN_H
