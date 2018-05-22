@@ -63,19 +63,6 @@ public:
 	QString com; //Comment
 
 	QList<PostFile> files;
-	//Image only (tim != "")
-	QString tim; //Renamed filename (Unix timestamp + milliseconds)
-	QString filename; //Original filename
-	QString ext; //File extension (.jpg|.png|.gif|.pdf|.swf|.webm)
-	double fsize; //File size
-	QString md5; //File MD5
-	int w; //Image width
-	int h; //Image Height
-	int tn_w; //Thumbnail width
-	int tn_h; //Thumbnail height
-	bool filedeleted; //File deleted?
-	bool spoiler; //Spoiler image?
-	int custom_spoiler; //Custom spoilers? only if board has customs
 
 	//only OPs (resto != 0)
 	int omitted_posts; //# replies ommited
@@ -101,7 +88,7 @@ public:
 	*/
 	bool isYou = false;
 	bool hasYou = false;
-	QString* get(QString key);
+	QString get(QString key);
 	bool filtered = false;
 	QSet<QString> quotelinks;
 };

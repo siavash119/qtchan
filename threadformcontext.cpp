@@ -12,7 +12,7 @@ ThreadFormContext::ThreadFormContext(Post *p, QWidget *parent) :
 	addFilter(filterMenu,"Name: ","name",p->name);
 	if(!p->sub.isEmpty()) addFilter(filterMenu,"Subject: ","sub",p->sub);
 	if(!p->trip.isEmpty()) addFilter(filterMenu,"Trip: ","trip",p->trip);
-	if(!p->md5.isEmpty()) addFilter(filterMenu,"MD5: ","md5",p->md5);
+	if(p->files.size() && !p->files.at(0).md5.isEmpty()) addFilter(filterMenu,"MD5: ","md5",p->files.at(0).md5);
 	popup(QCursor::pos());
 }
 

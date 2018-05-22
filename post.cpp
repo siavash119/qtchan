@@ -81,17 +81,17 @@ void Post::load(QJsonObject &p, QString &board, QString &thread)
 	}
 }
 
-QString* Post::get(QString key){
-	if(key == "no") return &no;
-	else if(key == "name") return &name;
-	else if(key == "sub") return &sub;
-	else if(key == "com") return &com;
-	else if(key == "trip") return &trip;
-	else if(key == "md5") return &md5;
-	else if(key == "size") return &size_img;
-	else if(key == "filename") return &filename;
-	else if(key == "country_name") return &country_name;
-	else return Q_NULLPTR;
+QString Post::get(QString key){
+	if(key == "no") return no;
+	else if(key == "name") return name;
+	else if(key == "sub") return sub;
+	else if(key == "com") return com;
+	else if(key == "trip") return trip;
+	else if(key == "md5" && files.size()) return files.at(0).md5;
+	else if(key == "size") return size_img;
+	else if(key == "filename" && files.size()) return files.at(0).filename;
+	else if(key == "country_name") return country_name;
+	else return QString();
 }
 
 Post::~Post() {

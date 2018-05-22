@@ -162,14 +162,14 @@ bool Filter::filterMatched2(Post *p){
 	while (i.hasNext()) {
 		i.next();
 		QString key = i.key();
-		QString *temp = p->get(key);
+		QString temp = p->get(key);
 		QHashIterator<QRegularExpression,QString> j(i.value());
 		while(j.hasNext()){
 			j.next();
 			QRegularExpression exp = j.key();
 			//QString options = j.value();
 			//&& useFilter(options,p)
-			if(temp != Q_NULLPTR && temp->contains(exp))
+			if(!temp.isEmpty() && temp.contains(exp))
 				return true;
 		}
 	}

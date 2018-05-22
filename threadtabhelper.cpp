@@ -38,7 +38,7 @@ void ThreadTabHelper::startUp(Chan *api, QString board, QString thread, QWidget 
 	request = QNetworkRequest(QUrl(threadUrl));
 	if(api->requiresUserAgent()) request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
 	request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
-	if(settings.value("extraFlags/enable",false).toBool()){
+	if(api->name() == "4chan" && settings.value("extraFlags/enable",false).toBool()){
 		requestFlags.setUrl(QUrl("https://flagtism.drunkensailor.org/int/get_flags_api2.php"));
 		requestFlags.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 	}

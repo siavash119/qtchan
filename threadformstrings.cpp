@@ -8,7 +8,7 @@ ThreadFormStrings::ThreadFormStrings(Chan *api, const Post &post, QString thread
 {
 	board = post.board;
 	pathBase = api->name() % '/' % board % '/' % path % '/';
-	if(post.files.size() && !post.filedeleted) {
+	if(post.files.size() && !post.files.at(0).filedeleted) {
 		PostFile file = post.files.at(0);
 		fileUrl = api->imageURL(board,thread,file.tim,file.ext);
 		filePath = pathBase%post.no%"-"%file.filename%file.ext;
