@@ -562,6 +562,7 @@ void ThreadTab::floatReply(const QString &link, int replyLevel)
 	floating->setObjectName("reply");
 	floating->setWindowFlags(Qt::ToolTip);
 	floating->setWindowTitle("reply");
+	floating->setAttribute(Qt::WA_DeleteOnClose);
 
 	QPoint globalCursorPos = QCursor::pos();
 	QSize sizeHint = floating->sizeHint();
@@ -585,7 +586,8 @@ void ThreadTab::floatReply(const QString &link, int replyLevel)
 void ThreadTab::deleteFloat()
 {
 	if(floating) {
-		floating->deleteLater();
+		floating->close();
+		floating = Q_NULLPTR;
 	}
 }
 
