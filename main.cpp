@@ -1,5 +1,6 @@
 #include "filter.h"
 #include "netcontroller.h"
+#include "you.h"
 #include "chans.h"
 #include "notificationview.h"
 #include "mainwindow.h"
@@ -11,6 +12,7 @@ MainWindow *mw;
 NotificationView *nv;
 Filter filter;
 netController nc;
+You you;
 Chan *fourChanAPI = new FourChan();
 Chan *eightChanAPI = new EightChan();
 Chan *twoChHkAPI = new TwoChHk();

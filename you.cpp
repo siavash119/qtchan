@@ -98,5 +98,3 @@ QRegularExpressionMatchIterator You::findYou(const QString &api, const QString &
 	if(!temp.pattern().isEmpty()) return temp.globalMatch(text);
 	else return QRegularExpressionMatchIterator();
 }
-
-You you;
