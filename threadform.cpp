@@ -127,6 +127,7 @@ void ThreadForm::getFile(ClickableLabel* label, int ind, bool andOpen){
 		gettingFile = true;
 	}*/
 	//foreach(PostFile file,post.files){
+	gettingFile.replace(ind,true);
 	PostFile postFile = post.files.at(ind);
 	QString url = api->apiBase() + postFile.fileUrlPath;
 	QString message = andOpen ? "clicked" : "";
@@ -136,10 +137,12 @@ void ThreadForm::getFile(ClickableLabel* label, int ind, bool andOpen){
 void ThreadForm::getFiles(){
 	int i = 0;
 	foreach(PostFile postFile,post.files){
+		if(QFile(strings.pathBase % postFile.filePath).exists()){i++; continue;}
 		ClickableLabel *label = labels.at(i);
-		gettingFile.replace(i++,true);
+		gettingFile.replace(i,true);
 		QString url = api->apiBase() + postFile.fileUrlPath;
 		downloadFile(url,strings.pathBase % postFile.filePath,nc.fileManager,"file","",label);
+		i++;
 	}
 }
 

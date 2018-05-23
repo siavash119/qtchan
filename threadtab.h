@@ -33,7 +33,6 @@ public:
 	QString board;
 	QString thread;
 	QMap<QString,ThreadForm*> tfMap;
-	bool updated = false;
 	void findText(const QString &text);
 	void loadAllImages();
 	QPointer<ThreadForm> floating;

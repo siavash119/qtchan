@@ -465,7 +465,8 @@ void ThreadTab::onWindowTitle(QString title)
 
 void ThreadTab::loadAllImages()
 {
-	updated = false;
+	helper.expandAll = !helper.expandAll;
+	if(!helper.expandAll) return;
 	foreach(ThreadForm *tf,tfMap){
 		tf->getFiles();
 	}
