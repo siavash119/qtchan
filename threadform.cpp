@@ -538,6 +538,11 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 	}*/
 	int numFiles = post.files.size();
 	if(numFiles){
+		QString fileInfoText = ui->fileInfo->text();
+		if(!fileInfoText.isEmpty()){
+			tfs->ui->fileInfo->show();
+			tfs->ui->fileInfo->setText(fileInfoText);
+		}
 		QLayoutItem *item = tfs->ui->contentLayout->takeAt(0);
 		int i=0;
 		foreach(ClickableLabel *label, labels){
