@@ -137,7 +137,7 @@ void ThreadForm::getFile(ClickableLabel* label, int ind, bool andOpen){
 void ThreadForm::getFiles(){
 	int i = 0;
 	foreach(PostFile postFile,post.files){
-		if(QFile(strings.pathBase % postFile.filePath).exists()){i++; continue;}
+		if(gettingFile.at(i) || QFile(strings.pathBase % postFile.filePath).exists()){i++; continue;}
 		ClickableLabel *label = labels.at(i);
 		gettingFile.replace(i,true);
 		QString url = api->apiBase() + postFile.fileUrlPath;
