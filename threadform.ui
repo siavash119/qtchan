@@ -109,7 +109,7 @@
    <item>
     <layout class="QVBoxLayout" name="postLayout">
      <property name="spacing">
-      <number>6</number>
+      <number>5</number>
      </property>
      <property name="leftMargin">
       <number>11</number>
@@ -212,7 +212,7 @@
           <bool>true</bool>
          </property>
          <property name="margin">
-          <number>0</number>
+          <number>1</number>
          </property>
          <property name="textInteractionFlags">
           <set>Qt::TextBrowserInteraction</set>

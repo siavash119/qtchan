@@ -606,6 +606,7 @@ void ThreadTab::updateFloat()
 			y = globalCursorPos.y() - sizeHint.height() - 10;
 		}
 		if(y<0) y = globalCursorPos.y()+10;
+		//floating->setGeometry(x,y,sizeHint.width(),sizeHint.height());
 		floating->move(x,y);
 	}
 }

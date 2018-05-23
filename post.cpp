@@ -88,7 +88,7 @@ QString Post::get(QString key){
 	else if(key == "com") return com;
 	else if(key == "trip") return trip;
 	else if(key == "md5" && files.size()) return files.at(0).md5;
-	else if(key == "size") return size_img;
+	else if(key == "size" && files.size()) return files.at(0).size_img;
 	else if(key == "filename" && files.size()) return files.at(0).filename;
 	else if(key == "country_name") return country_name;
 	else return QString();

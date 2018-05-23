@@ -34,7 +34,7 @@ public:
 	void setImage(QByteArray img);
 	//void getImage(QNetworkAccessManager *manager, QString *img);
 	void load(Post &post);
-	void loadImage(ClickableLabel *label, QString path);
+	void loadImage(int ind, ClickableLabel *label, QString path);
 	void openImage(const QString &path);
 	Chan *api;
 	ThreadFormStrings strings;
@@ -75,6 +75,9 @@ public:
 	QString matchThis();
 	QString regionString;
 	void getFiles();
+	QList<bool> gettingFile;
+	QList<bool> finished;
+	void setPixmap(int ind, QPixmap scaled);
 
 //TODO take care of file downloading in netcontroller
 private:
@@ -83,8 +86,6 @@ private:
 	Ui::ThreadForm *ui;
 	QList<ClickableLabel*> labels;
 	void getThumb();
-	QList<bool> gettingFile;
-	QList<bool> finished;
 	bool hideButtonShown = true;
 	int darkness = 22;
 	QColor background;
@@ -98,7 +99,6 @@ private:
 	QMap<QString,QMetaObject::Connection> insertedConnections;
 	void removeFromInserted();
 	void postMenu();
-	QPixmap scaled;
 	QFutureWatcher<QImage> watcher;
 
 signals:
@@ -109,7 +109,6 @@ signals:
 	void updateFloat();
 	void removeMe(QPointer<ThreadForm> tf);
 	void deleteFloat();
-	void setPixmap(ClickableLabel *label, QPixmap scaled);
 	//void searchPost(int position, QString postNum);
 
 public slots:
@@ -120,7 +119,6 @@ public slots:
 	void setFontSize(int fontSize);
 	void setImageSize(int imageSize);
 	void downloadedSlot(const QString &path, const QString &type, const QString &message, ClickableLabel *label);
-	void onSetPixmap(ClickableLabel *label, QPixmap scaled);
 
 private slots:
 	void quoteClicked(const QString &link);

@@ -95,7 +95,8 @@ void ArchiveTab::fillTable(QString board){
 	ui->table->setRowCount(0);
 	QDir tech(api+"/"+board);
 	QStringList entries = tech.entryList(QStringList(),QDir::AllDirs | QDir::NoDotAndDotDot);
-	for(int i=0;i<entries.size()-1;i++){
+	entries.removeOne("index");
+	for(int i=0;i<entries.size();i++){
 		QFile json(api+"/"+board+"/"+entries.at(i)+"/"+entries.at(i)+".json");
 		if(json.exists()){
 			json.open(QIODevice::ReadOnly);

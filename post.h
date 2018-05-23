@@ -80,12 +80,7 @@ public:
 
 	QString board;
 	QString thread;
-	QString size_img;
-	/*QString fileURL;
-	QString filePath;
-	QString thumbURL;
-	QString thumbPath;
-	*/
+
 	bool isYou = false;
 	bool hasYou = false;
 	QString get(QString key);
