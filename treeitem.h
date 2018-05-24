@@ -33,6 +33,7 @@ public:
 	TreeItemType type;
 	QString query;
 	QString display;
+	QString api;
 	int unseen;
 	void removeChildren();
 

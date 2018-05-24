@@ -457,13 +457,16 @@ TreeItem *MainWindow::loadFromSearch(QString query, QString display, TreeItem *c
 		else tnParent = childOf;
 		return onNewThread(this,api,match.captured("board"),match.captured("thread"),display,tnParent);
 	}
+	QString sessionQuery;
 	if(match2.hasMatch()) {
-		bt = new BoardTab(api, match2.captured(1),BoardType::Catalog,match2.captured(2),this);
-		if(!display.length()) display = "/"+match2.captured("board")+"/"+match2.captured("search");
+		bt = new BoardTab(api,match2.captured(1),BoardType::Catalog,match2.captured(2),this);
+		if(!display.length()) display = '/' % match2.captured("board") % '/' % match2.captured("search");
+		sessionQuery = display;
 	}
 	else{
-		bt = new BoardTab(api, query,BoardType::Index,"",this);
+		bt = new BoardTab(api,query,BoardType::Index,"",this);
 		if(!display.length()) display = "/"+query+"/";
+		sessionQuery = '/' % query;
 	}
 	qDebug().noquote() << "loading" << display;
 	ui->content->addWidget(bt);
@@ -474,7 +477,8 @@ TreeItem *MainWindow::loadFromSearch(QString query, QString display, TreeItem *c
 	if(childOf == Q_NULLPTR) tnParent = model->root;
 	else tnParent = childOf;
 	TreeItem *tnNew = new TreeItem(list,tnParent,bt, TreeItemType::board);
-	tnNew->query = query;
+	tnNew->api = api->name();
+	tnNew->query = sessionQuery;
 	tnNew->display = display;
 	Tab tab = {Tab::TabType::Board,bt,tnNew,query,display};
 	tabs.insert(bt,tab);
@@ -497,6 +501,7 @@ TreeItem *MainWindow::onNewThread(QWidget *parent, Chan *api, QString board, QSt
 	list.append(display);
 
 	TreeItem *tnNew = new TreeItem(list,model->root,tt, TreeItemType::thread);
+	tnNew->api = api->name();
 	tnNew->query = query;
 	tnNew->display = display;
 	tt->tn = tnNew;

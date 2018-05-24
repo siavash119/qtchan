@@ -262,7 +262,7 @@ void TreeModel::saveSessionToFile(QString fileName, QString slot, QModelIndex in
 		while(i<parent->childCount()) {
 			child = parent->child(i);
 			out << indent.repeated(lines.size()-1);
-			out << child->query << "\t" << child->display << endl;
+			out << child->api % child->query << "\t" << child->display << endl;
 			i++;
 			lines.last()++;
 			if(child->childCount()) {
