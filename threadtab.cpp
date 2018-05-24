@@ -69,7 +69,14 @@ ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass);
 	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize);
 	connect(mw,&MainWindow::setImageSize,this,&ThreadTab::setImageSize);
-	connect(mw,&MainWindow::setAutoUpdate,this,&ThreadTab::setAutoUpdate,Qt::DirectConnection);
+	connect(mw,&MainWindow::setAutoUpdate,this,&ThreadTab::setAutoUpdate);
+	connect(mw,&MainWindow::setAutoExpand,[=](bool expand){
+		if(expand){
+			foreach(ThreadForm *tf,tfMap){
+				if(tf) tf->getFiles();
+			}
+		}
+	});
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
 	connect(&watcher,&QFutureWatcherBase::finished,[=]()
