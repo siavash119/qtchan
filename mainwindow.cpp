@@ -59,6 +59,8 @@ MainWindow::MainWindow(QWidget *parent) :
 			QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/cookies";
 			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
 		}
+		else if(field == "autoUpdate") emit setAutoUpdate(value.toBool());
+		else if(field == "autoExpand") emit setAutoExpand(value.toBool());
 	});
 	connect(ui->treeView,&TreeView::treeMiddleClicked,model,&TreeModel::removeTab,Qt::DirectConnection);
 	connect(ui->treeView,&TreeView::hideNavBar,ui->navBar,&QWidget::hide,Qt::DirectConnection);

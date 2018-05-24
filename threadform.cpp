@@ -137,7 +137,7 @@ void ThreadForm::getFile(ClickableLabel* label, int ind, bool andOpen){
 void ThreadForm::getFiles(){
 	int i = 0;
 	foreach(PostFile postFile,post.files){
-		if(gettingFile.at(i) || QFile(strings.pathBase % postFile.filePath).exists()){i++; continue;}
+		if(gettingFile.at(i) || QFileInfo::exists(strings.pathBase % postFile.filePath)){i++; continue;}
 		ClickableLabel *label = labels.at(i);
 		gettingFile.replace(i,true);
 		QString url = api->apiBase() + postFile.fileUrlPath;
@@ -171,8 +171,15 @@ void ThreadForm::getThumb(){
 		label->setStyleSheet("padding:13px 6px 0px 11px");*/
 		ui->contentLayout->addWidget(label,0,i,static_cast<Qt::Alignment>(Qt::AlignLeft | Qt::AlignTop));
 		downloadFile(url,strings.pathBase % postFile.tnPath,nc.thumbManager,"thumb",postFile.filename % postFile.ext,label);
-		QFile orig(strings.pathBase % postFile.filePath);
-		if(orig.exists() || autoExpand) getFile(label,i,false);
+		//if(QFileInfo::exists(strings.pathBase % postFile.filePath) || autoExpand) getFile(label,i,false);
+		//Optimize getFile?
+		if(QFileInfo::exists(strings.pathBase % postFile.filePath)){
+			finished.replace(i,true);
+			if(post.files.at(i).ext == ".jpg" || post.files.at(i).ext == ".png") {
+				loadImage(i,label,strings.pathBase % postFile.filePath);
+			}
+		}
+		else if(autoExpand) getFile(label,i,false);
 		i++;
 	}
 	if(numFiles > 1) ui->contentLayout->addItem(item,1,0,1,numFiles);

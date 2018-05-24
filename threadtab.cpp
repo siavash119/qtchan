@@ -69,7 +69,7 @@ ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass);
 	connect(mw,&MainWindow::setFontSize,this,&ThreadTab::setFontSize);
 	connect(mw,&MainWindow::setImageSize,this,&ThreadTab::setImageSize);
-	connect(mw,&MainWindow::setAutoUpdate,this,&ThreadTab::setAutoUpdate);
+	connect(mw,&MainWindow::setAutoUpdate,this,&ThreadTab::setAutoUpdate,Qt::DirectConnection);
 	//check visible thread forms
 	QScrollBar *vBar = ui->scrollArea->verticalScrollBar();
 	connect(&watcher,&QFutureWatcherBase::finished,[=]()
@@ -99,11 +99,13 @@ ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent
 }
 
 void ThreadTab::setAutoUpdate(bool update) {
-	if(!status.isEmpty()) return;
+	if(status == "404" || status == "closed" || status == "archived") return;
 	if(update) {
+		qDebug() << "starting update timer for" << helper.title;
 		updateTimer.start();
 	}
 	else{
+		qDebug() << "stopping update timer for" << helper.title;
 		updateTimer.stop();
 	}
 }
@@ -116,6 +118,7 @@ void ThreadTab::onThreadStatus(QString status, QString value){
 	(void)value;
 	this->status = status;
 	if(status == "404" || status == "closed" || status == "archived"){
+		qDebug() << "stopping update timer for" << helper.title;
 		if(updateTimer.isActive()) updateTimer.stop();
 	}
 }
