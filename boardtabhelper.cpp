@@ -104,25 +104,29 @@ void BoardTabHelper::getPostsFinished() {
 		else{
 			p = threads.at(i).toObject();
 		}
+		//deprecated
 		QString threadNum = QString("%1").arg(p.value(api->postKeys().no).toDouble(),0,'f',0);
 		if (idFilters.contains(threadNum)){
 			qDebug("threadNum %s filtered!",threadNum.toLatin1().constData());
 			i++;
 			continue;
 		}
-		QString thread = "";
-		Post post = api->post(p,board,thread);
+		//
+		//TODO post doesn't need threadnum?
+		QString empty;
+		Post post = api->post(p,board,empty);
 		if(filterMe.filterMatched2(&post)){
 			post.filtered = true;
 		}
-		allPosts.append(post.no);
-		ThreadFormStrings tfString(api,post,threadNum,"index");
+		QString thread = post.no;
+		allPosts.append(thread);
+		ThreadFormStrings tfString(api,post,thread,"index");
 		emit newThread(post,tfString,loadFile);
 		if(type==BoardType::Index && showIndexReplies){
 			for(int j=1;j<t.size();j++){
 				p = t.at(j).toObject();
 				Post replyPost = api->post(p,board,thread);
-				ThreadFormStrings replyStrings(api,replyPost,threadNum,"index");
+				ThreadFormStrings replyStrings(api,replyPost,thread,"index");
 				emit newReply(replyPost,replyStrings,threadNum);
 			}
 		}

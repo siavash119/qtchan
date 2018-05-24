@@ -2,6 +2,7 @@
 #define TWOCHHK_H
 
 #include "chan.h"
+#include "filter.h"
 #include "you.h"
 
 //TODO check if i use inline/use final/etc.
@@ -10,9 +11,11 @@ class TwoChHkPost : public Post
 {
 public:
 	inline TwoChHkPost(QJsonObject &p, QString &board, QString &thread){
+		(void)thread;
 		this->board = board;
-		this->thread = thread;
 		no = QString::number(p.value("num").toInt());
+		if(no == "0") no = p.value("num").toString();
+		this->thread = no;
 		resto = p.value("resto").toInt();
 		if(resto == 0) {
 			sticky = (p.value("sticky").toInt() == 1) ? true : false;
@@ -39,31 +42,40 @@ public:
 		//TODO regexp on all posts or do the whole json at once?
 		//com = p.value("com").toString();
 		com = p.value("comment").toString();
-		QRegularExpressionMatchIterator i = you.findYou("4chan",board,com);
+		QRegularExpressionMatchIterator i = you.findYou("2ch.hk",board,com);
 		if(i.hasNext()) hasYou = true;
-		if(you.hasYou("4chan",board,no)){
+		if(you.hasYou("2ch.hk",board,no)){
 			isYou = true;
 		}
-		com = Filter::replaceYouStrings(i,com);
-		com = Filter::replaceQuoteStrings(com);
+		//com = Filter::replaceYouStrings(i,com);
+		//com = Filter::replaceQuoteStrings(com);
 		quotelinks = Filter::findQuotes(com);
 		QJsonArray allFiles = p.value("files").toArray();
 		for(int i=0; i<allFiles.size(); i++){
 			QJsonObject f = allFiles.at(i).toObject();
 			PostFile file;
 			file.tim = f.value("name").toString();
-			file.filename = f.value("name").toString();
+			file.filename = f.value("fullname").toString();
 			file.ext = f.value("ext").toString();
-			file.fsize = f.value("fsize").toDouble();
+			file.fsize = f.value("size").toDouble();
 			file.md5 = f.value("md5").toString();
-			file.w = f.value("w").toInt();
-			file.h = f.value("h").toInt();
+			file.w = f.value("width").toInt();
+			file.h = f.value("height").toInt();
 			file.size_img = QString(file.w + "x" + file.h);
 			file.tn_w = f.value("tn_w").toInt();
 			file.tn_h = f.value("tn_h").toInt();
 			file.filedeleted = (f.value("filedeleted").toInt() == 1) ? true : false;
 			file.spoiler = (f.value("spoiler").toInt() == 1) ? true : false;
 			file.custom_spoiler = (f.value("custom_spoiler").toInt() == 1) ? true : false;
+			file.tnUrlPath = f.value("thumbnail").toString();
+			file.fileUrlPath = f.value("path").toString();
+			file.tnPath = "thumbs/" % no % "-" % file.filename % "s.jpg";
+			file.filePath = no % "-" % file.filename % file.ext;
+			file.infoString = file.filename % file.ext
+					% " (" % QString("%1").arg(file.w)
+					% "x" % QString("%1").arg(file.h)
+					% ", " % QString("%1").arg(file.fsize/1024,0,'f',0)
+					% " KB)";
 			files.append(file);
 		}
 	}
@@ -80,6 +92,8 @@ public:
 		myRegToThread.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
 		myRegToCatalog.setPattern("^/?(?<board>\\w+)/(?:catalog#s=)?(?<search>.+)?$");
 		myRegToCatalog.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+		//quoteExp.setPattern("class=\\\\\"body-line ltr quote\\\\\"");
+		quoteLinkExp.setPattern("href=[^\\s]+ [^\\s]+ [^\\s]+ [^\\d]+(\\d+)");
 	}
 	inline QString name(){return myName;}
 	inline QString thumbURL(QString &board,QString &thread, QString name, QString ext){
@@ -93,7 +107,7 @@ public:
 	inline QRegularExpression regURL(){return myRegUrl;}
 	inline QRegularExpression regToThread(){return myRegToThread;}
 	inline QRegularExpression regToCatalog(){return myRegToCatalog;}
-	inline QString apiBase(){return QString("https://2ch.hk/");}
+	inline QString apiBase(){return QString("https://2ch.hk");}
 	inline QString boardURL(QString &board){return QString("https://2ch.hk/" % board % "/1.json");}
 	inline QString catalogURL(QString &board){return QString("https://2ch.hk/" % board % "/catalog.json");}
 	inline QString threadURL(QString &board, QString &thread){return QString("https://2ch.hk/" % board % "/res/" % thread % ".json");}
@@ -126,11 +140,19 @@ public:
 	inline Post post(QJsonObject p, QString &board, QString &thread){
 		return TwoChHkPost(p,board,thread);
 	}
+	inline void replacements(QByteArray &data){
+		QString dataString(data);
+		//dataString.replace(quoteExp,"class=\\\"quote\\\" style=\\\"color:#8ba446\\\"");
+		dataString.replace(quoteLinkExp,"class=\\\"quote\\\" style=\\\"color:#897399\\\" href=\\\"#p\\1");
+		data = dataString.toUtf8();
+	}
 private:
 	QString myName;
 	QRegularExpression myRegUrl;
 	QRegularExpression myRegToThread;
 	QRegularExpression myRegToCatalog;
+	//QRegularExpression quoteExp;
+	QRegularExpression quoteLinkExp;
 	QString myApiBase;
 	QString myCaptchaUrl;
 	CaptchaLinks captchaInfo;

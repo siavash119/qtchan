@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+   <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -125,6 +125,12 @@
      </property>
      <item>
       <widget class="QLabel" name="info">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>600</width>
@@ -155,6 +161,12 @@
      </item>
      <item>
       <widget class="QLabel" name="fileInfo">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -197,7 +209,7 @@
           <enum>QFrame::NoFrame</enum>
          </property>
          <property name="lineWidth">
-          <number>1</number>
+          <number>0</number>
          </property>
          <property name="text">
           <string/>
@@ -223,6 +235,12 @@
      </item>
      <item>
       <widget class="QWidget" name="quoteWidget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <layout class="QVBoxLayout" name="quotes">
         <property name="spacing">
          <number>12</number>
