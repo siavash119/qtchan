@@ -20,7 +20,7 @@ void ThreadFormContext::addFilter(QMenu *menu, QString name, QString key, QStrin
 	QAction *newFilter = menu->addAction(name % value);
 	connect(newFilter,&QAction::triggered,[=]{
 		QString exp = value;
-		filter.addFilter2(key,Filter::filterEscape(exp),"boards:"+p->board);
+		filter.addFilter2(key,Filter::filterEscape(exp),"boards:" % p->board);
 		emit filtersChanged();
 	});
 }

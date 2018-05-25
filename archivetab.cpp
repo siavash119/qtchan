@@ -106,21 +106,20 @@ void ArchiveTab::fillTable(QString board){
 			ui->table->setRowHeight(0,96);
 			QString num = entries.at(i);
 			ui->table->setItem(0,1,new QTableWidgetItem(num));
-			QJsonArray posts = QJsonDocument::fromJson(postData).object().value("posts").toArray();
-			QJsonObject OP = posts.at(0).toObject();
-			QString sub;
-			sub = OP.value("sub").toString();
+			Chan *chanAPI = Chans::get(api);
+			QJsonArray posts = chanAPI->postsArray(postData);
+			QString temp;
+			Post p = chanAPI->post(posts.at(0).toObject(),board,temp);
+			QString sub = p.sub;
 			if(sub.isEmpty()){
-				sub = OP.value("com").toString();
+				sub = p.com;
 				sub = Filter::replaceQuoteStrings(sub);
 			}
 			sub = Filter::titleParse(sub);
-			double temp = OP.value("tim").toDouble();
-			QString tim, filename;
-			if(temp != 0.0){
-				tim = QString::number(temp,'d',0);
-				filename = OP.value("filename").toString();
-				QString thumbPath(api+"/"+board+"/"+num+"/thumbs/"+num+"-"+filename+"s.jpg");
+			if(p.files.size()){
+				QString filename = p.files.at(0).tnPath;
+				qDebug() << filename;
+				QString thumbPath(api % '/' % board % '/' % num % '/' % filename);
 				QImage *img = new QImage();
 				bool loaded = img->load(thumbPath);
 				if(loaded){

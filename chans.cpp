@@ -20,6 +20,13 @@ Chan* Chans::stringToType(QString &url){
 	return Q_NULLPTR;
 }
 
+Chan* Chans::get(QString &name){
+	if(name == "4chan") return fourChanAPI;
+	else if(name == "2ch.hk") return twoChHkAPI;
+	else if(name == "8ch") return eightChanAPI;
+	return Q_NULLPTR;
+}
+
 void Chans::deleteAPIs(){
 	delete fourChanAPI;
 	delete eightChanAPI;

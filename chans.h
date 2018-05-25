@@ -14,6 +14,7 @@ public:
 		list << "4chan" << "8ch" << "2ch.hk";
 		return list;
 	}
+	static Chan* get(QString &name);
 	static void deleteAPIs();
 };
 
