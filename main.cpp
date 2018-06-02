@@ -1,7 +1,7 @@
 #include "filter.h"
-#include "netcontroller.h"
 #include "you.h"
 #include "chans.h"
+#include "netcontroller.h"
 #include "notificationview.h"
 #include "mainwindow.h"
 #include <QSettings>
@@ -10,12 +10,12 @@
 
 MainWindow *mw;
 NotificationView *nv;
-Filter filter;
 netController nc;
-You you;
 Chan *fourChanAPI = new FourChan();
 Chan *eightChanAPI = new EightChan();
 Chan *twoChHkAPI = new TwoChHk();
+You you;
+Filter filter;
 
 int main(int argc, char *argv[])
 {

@@ -1,7 +1,6 @@
 #ifndef NETCONTROLLER_H
 #define NETCONTROLLER_H
 
-#include "filter.h"
 #include <QNetworkAccessManager>
 #include <QNetworkCookieJar>
 #include <QNetworkDiskCache>

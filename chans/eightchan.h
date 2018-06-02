@@ -2,6 +2,7 @@
 #define EIGHTCHAN_H
 
 #include "chan.h"
+#include "filter.h"
 #include "you.h"
 #include "netcontroller.h"
 #include <QDebug>
