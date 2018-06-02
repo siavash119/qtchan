@@ -4,6 +4,7 @@
 #include "filter.h"
 #include "threadtab.h"
 #include "mainwindow.h"
+#include <QScrollArea>
 #include <QPixmap>
 #include <QImageReader>
 #include <QFile>
@@ -100,9 +101,7 @@ QString ThreadForm::matchThis(){
 
 void ThreadForm::load(Post &post)
 {
-	//set post number
 	this->post = post;
-	//post = new Post(p,board);
 	ui->info->setText(infoString());
 	ui->com->setText(post.com);
 
@@ -669,7 +668,7 @@ bool ThreadForm::eventFilter(QObject *obj, QEvent *event)
 			emit deleteFloat();
 		}
 	}
-	if((event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonRelease)
+	if((event->type() == QEvent::MouseButtonRelease)
 			&& (obj->objectName() == "com" || obj->objectName() == "info" || obj->objectName() == "fileInfo")){
 		QLabel *temp = static_cast<QLabel*>(obj);
 		if(temp->hasSelectedText()){
@@ -686,6 +685,37 @@ bool ThreadForm::eventFilter(QObject *obj, QEvent *event)
 				Qt::LinksAccessibleByMouse);
 			ui->hide->setFocus();
 			temp->setFocus();
+		}
+	}
+	//can I just use replaceWidget instead of getItemPosition, takeAt, addWidget?
+	if(event->type() == QEvent::Resize && obj->objectName() == "com"){
+		QLabel *temp = qobject_cast<QLabel*>(obj); //ui->com
+		if(temp->sizeHint().width() >= temp->size().width()){
+			if(temp->parent()->objectName() != "qt_scrollarea_viewport"){
+				int index = ui->contentLayout->indexOf(temp);
+				if(index != -1){
+					int row,col,rs,cs;
+					ui->contentLayout->getItemPosition(index,&row,&col,&rs,&cs);
+					ui->contentLayout->takeAt(index);
+					QScrollArea *scroller = new QScrollArea(this);
+					scroller->setFrameShape(QScrollArea::Shape::NoFrame);
+					scroller->setWidgetResizable(true);
+					scroller->setObjectName("scroller");
+					scroller->setWidget(temp);
+					ui->contentLayout->addWidget(scroller,row,col,rs,cs);
+				}
+			}
+		}
+		else if(temp->parent()->objectName() == "qt_scrollarea_viewport"){
+			QScrollArea *scroller = qobject_cast<QScrollArea*>(temp->parent()->parent());
+			int index = ui->contentLayout->indexOf(scroller);
+			if(index != -1){
+				int row,col,rs,cs;
+				ui->contentLayout->getItemPosition(index,&row,&col,&rs,&cs);
+				ui->contentLayout->takeAt(index);
+				scroller->deleteLater();
+				ui->contentLayout->addWidget(ui->com,row,col,rs,cs);
+			}
 		}
 	}
 	return QObject::eventFilter(obj, event);
