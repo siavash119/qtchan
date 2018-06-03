@@ -560,7 +560,7 @@ ThreadForm *ThreadForm::clone(int replyLevel)
 			connect(tfsLabel,&ClickableLabel::clicked,this,&ThreadForm::imageClicked);
 			tfs->ui->contentLayout->addWidget(tfsLabel,0,i,static_cast<Qt::Alignment>(Qt::AlignLeft | Qt::AlignTop));
 			const QPixmap *pixToSet = label->pixmap();
-			tfsLabel->setPixmap(*pixToSet);
+			if(pixToSet) tfsLabel->setPixmap(*pixToSet);
 			i++;
 		}
 		if(numFiles > 1) tfs->ui->contentLayout->addItem(item,1,0,1,numFiles);
