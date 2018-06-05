@@ -537,6 +537,7 @@ void MainWindow::deleteSelected()
 {
 	if(!tabs.size()) return;
 	QModelIndexList list = ui->treeView->selected();
+	disconnect(selectionConnection);
 	if(!list.size()){
 		Tab tab = tabs.value(ui->content->currentWidget());
 		if(tab.tn) tab.tn->deleteLater();
@@ -544,6 +545,8 @@ void MainWindow::deleteSelected()
 	else foreach(QModelIndex index, list) {
 		model->removeTab(index);
 	}
+	selectionConnection = connect(selectionModel,&QItemSelectionModel::selectionChanged,this,
+								  &MainWindow::onSelectionChanged, Qt::UniqueConnection);
 }
 
 void MainWindow::removeChildTabs(){
