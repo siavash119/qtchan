@@ -42,7 +42,6 @@ PostForm::PostForm(QWidget *parent) :
 	setFontSize(settings.value("fontSize",14).toInt());
 	ui->name->installEventFilter(this);
 	ui->email->installEventFilter(this);
-	ui->subject->installEventFilter(this);
 	ui->com->installEventFilter(this);
 	ui->browse->installEventFilter(this);
 	ui->response->installEventFilter(this);
@@ -76,6 +75,10 @@ void PostForm::load(Chan *api, QString &board, QString thread)
 	if(api->usesCaptcha()) captcha.startUp(api);
 	this->board = board;
 	this->thread = thread;
+	if(thread.isEmpty())
+		ui->subject->installEventFilter(this);
+	else
+		ui->subject->hide();
 	this->setWindowTitle("post to /" + board + "/" + thread);
 	ui->com->setFocus();
 }
@@ -179,28 +182,37 @@ void PostForm::postIt()
 	mode.setBody("regist");
 	multiPart->append(mode);
 
-	if(thread != ""){
+	if(!thread.isEmpty()){
 		QHttpPart resto;
 		resto.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"resto\""));
 		resto.setBody(thread.toStdString().c_str());
 		multiPart->append(resto);
 	}
-
-	QHttpPart name;
-	name.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"name\""));
-	name.setBody(ui->name->text().toStdString().c_str());
-	multiPart->append(name);
-
-	QHttpPart email;
-	email.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"email\""));
-	email.setBody(ui->email->text().toStdString().c_str());
-	multiPart->append(email);
-
-	QHttpPart com;
-	com.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"com\""));
-	qDebug().noquote() << ui->com->toPlainText().toStdString().c_str();
-	com.setBody(ui->com->toPlainText().toStdString().c_str());
-	multiPart->append(com);
+	else if(!ui->subject->text().isEmpty()){
+		QHttpPart sub;
+		sub.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"sub\""));
+		sub.setBody(thread.toStdString().c_str());
+		multiPart->append(sub);
+	}
+	if(!ui->name->text().isEmpty()){
+		QHttpPart name;
+		name.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"name\""));
+		name.setBody(ui->name->text().toStdString().c_str());
+		multiPart->append(name);
+	}
+	if(!ui->email->text().isEmpty()){
+		QHttpPart email;
+		email.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"email\""));
+		email.setBody(ui->email->text().toStdString().c_str());
+		multiPart->append(email);
+	}
+	if(!ui->com->toPlainText().isEmpty()){
+		QHttpPart com;
+		com.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"com\""));
+		qDebug().noquote() << ui->com->toPlainText().toStdString().c_str();
+		com.setBody(ui->com->toPlainText().toStdString().c_str());
+		multiPart->append(com);
+	}
 
 	if(api->usesCaptcha() && settings.value("use4chanPass", false).toBool() == false){
 		QHttpPart captchaResponse;
@@ -213,7 +225,7 @@ void PostForm::postIt()
 		multiPart->append(captchaResponse);
 	}
 
-	if(filename != "") {
+	if(!filename.isEmpty()) {
 		QHttpPart uploadFile;
 		uploadFile.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
 		uploadFile.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"upfile\"; filename=\""+filename+"\""));
@@ -449,7 +461,7 @@ void PostForm::fileSelected(const QString &file)
 	filename = file;
 	//qDebug() << dialog->;
 	//qDebug() << dialog->getOpenFileName();
-	if(filename == "") {
+	if(filename.isEmpty()) {
 		setFilenameText(empty);
 		ui->cancel->hide();
 	}
@@ -480,7 +492,7 @@ void PostForm::setFilenameText(QString &text){
 }
 
 void PostForm::resizeEvent(QResizeEvent *event){
-	if(filename != "") setFilenameText(filename);
+	if(!filename.isEmpty()) setFilenameText(filename);
 	else setFilenameText(empty);
 	return QWidget::resizeEvent(event);
 }
