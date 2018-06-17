@@ -1,5 +1,6 @@
 #include "notificationview.h"
 #include "ui_notificationview.h"
+#include "mainwindow.h"
 #include <QDesktopWidget>
 
 NotificationView::NotificationView(QWidget *parent) :
@@ -57,4 +58,5 @@ void NotificationView::on_clear_clicked(){
 
 void NotificationView::on_close_clicked(){
 	hide();
+	mw->activateWindow();
 }

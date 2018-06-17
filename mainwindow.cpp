@@ -545,6 +545,7 @@ void MainWindow::deleteSelected()
 	else foreach(QModelIndex index, list) {
 		model->removeTab(index);
 	}
+	onSelectionChanged();
 	selectionConnection = connect(selectionModel,&QItemSelectionModel::selectionChanged,this,
 								  &MainWindow::onSelectionChanged, Qt::UniqueConnection);
 }
