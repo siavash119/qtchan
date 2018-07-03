@@ -144,16 +144,22 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 			qDebug().nospace() << "Stopping timer for " << threadUrl << ". Reason: Closed";
 			emit threadStatus("closed");
 		}
+		if(OP.sticky){
+			isSticky = true;
+		}
 	}
 	else return;
 	//write to file
 	if(writeIt) QtConcurrent::run(&ThreadTabHelper::writeJson, filesPath, thread, postData);
 	//load new posts
-	int i = allPosts.size();
+	int i;
+	if(!isSticky) i = allPosts.size();
+	else i = 0;
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	bool loadFile = settings.value("autoExpand",false).toBool() || this->expandAll;
 	while(i<length) {
 		Post post = api->post(posts.at(i).toObject(),board,thread);
+		if(isSticky && allPosts.contains(post.no)){i++; continue;}
 		if(filterMe.filterMatched2(&post)){
 			post.filtered = true;
 		}

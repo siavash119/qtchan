@@ -21,8 +21,6 @@ public:
 	~ThreadTabHelper();
 	QString board;
 	QString thread;
-	QMap<QString,ThreadForm*> tfMap;
-	QFutureWatcher<QImage> *imageScaler;
 	bool abort = false;
 	bool expandAll;
 	static void writeJson(QString &path, QString &thread, QByteArray &rep);
@@ -42,6 +40,7 @@ private:
 	QString filesPath;
 	QStringList extraFlagPostNums;
 	bool fromCache;
+	bool isSticky = false;
 
 public slots:
 	void startUp(Chan *api, QString board, QString thread, QWidget *parent, bool isFromSession);
