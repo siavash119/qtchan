@@ -10,6 +10,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDebug>
+#include <QAction>
 
 ArchiveTab::ArchiveTab(QWidget *parent) :
 	QWidget(parent),

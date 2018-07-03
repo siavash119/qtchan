@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QScrollBar>
 #include <QRegularExpressionMatch>
+#include <QAction>
 
 BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWidget *parent) :
 	QWidget(parent), api(api), board(board), type(type), search(search),

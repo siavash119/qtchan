@@ -15,6 +15,7 @@
 #include <QDesktopWidget>
 #include <QScreen>
 #include <QFuture>
+#include <QAction>
 
 ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent, bool isFromSession) :
 	QWidget(parent), api(api), board(board), thread(thread), isFromSession(isFromSession),
