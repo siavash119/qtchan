@@ -105,11 +105,11 @@
    </item>
    <item>
     <widget class="QFrame" name="postFrame">
-     <property name="frameShape">
-      <enum>QFrame::Box</enum>
+     <property name="styleSheet">
+      <string notr="true">#postFrame {border: 1px solid #646464}</string>
      </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
+     <property name="lineWidth">
+      <number>0</number>
      </property>
      <layout class="QVBoxLayout" name="postLayout">
       <property name="spacing">
