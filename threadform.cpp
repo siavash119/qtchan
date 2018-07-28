@@ -36,7 +36,7 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 	for(int i=0;i<replyLevel;i++){
 		if(i == replyLevel-1){
 			background.setRgb(darkness,darkness,darkness);
-			ui->hide->setStyleSheet("padding: 0 10px; background-color:"+ background.name());
+			ui->hide->setStyleSheet("padding: 0 12px; background-color:"+ background.name());
 		}
 		darkness = darkness*0.8;
 	}
