@@ -100,6 +100,7 @@ private:
 	void removeFromInserted();
 	void postMenu();
 	QFutureWatcher<QImage> watcher;
+	void reloadFiles();
 
 signals:
 	void loadThreadTab(ThreadForm*, QJsonArray&);
@@ -130,7 +131,6 @@ private slots:
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *event);
-	void paintEvent(QPaintEvent *e);
 	//void mouseMoveEvent(QMouseEvent *event);
 };
 

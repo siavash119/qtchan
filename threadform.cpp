@@ -50,7 +50,6 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 	connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
 	comQuoteConnection = connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	infoQuoteConnection = connect(ui->info,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
-	if(root) ui->hide->setStyleSheet("padding:0 10px; background-color: #191919;");
 	ui->info->installEventFilter(this);
 	ui->com->installEventFilter(this);
 	ui->fileInfo->installEventFilter(this);
@@ -118,16 +117,8 @@ void ThreadForm::getFlag(){
 }
 
 void ThreadForm::getFile(ClickableLabel* label, int ind, bool andOpen){
-	/*if(!post.files.size() || post.files.at(0).filedeleted || gettingFile) return;
-	foreach(PostFile file,post.files){
-		QString url = api->apiBase() + file.fileUrlPath;
-		QString message = andOpen ? "clicked" : "";
-		downloadFile(url,strings.filePath,nc.fileManager,"file",message,label);
-		gettingFile = true;
-	}*/
-	//foreach(PostFile file,post.files){
-	gettingFile.replace(ind,true);
 	PostFile postFile = post.files.at(ind);
+	gettingFile.replace(ind,true);
 	QString url = api->apiBase() + postFile.fileUrlPath;
 	QString message = andOpen ? "clicked" : "";
 	downloadFile(url,strings.pathBase % postFile.filePath,nc.fileManager,"file",message,label);
@@ -422,16 +413,20 @@ void ThreadForm::setFontSize(int fontSize){
 
 void ThreadForm::setImageSize(int imageSize){
 	(void)imageSize;
-	/*if(file && file->exists()) loadImage(strings.filePath);
-	else if(thumb && thumb->exists()) loadImage(strings.thumbPath);
-	if(root && clones.size()){
-		QListIterator< QPointer<ThreadForm> > i(clones);
-		while(i.hasNext()) {
-			QPointer<ThreadForm> next = i.next();
-			if(!next) continue;
-			next->setImageSize(imageSize);
-		}
-	}*/
+	reloadFiles();
+}
+
+void ThreadForm::reloadFiles(){
+	int i = 0;
+	//TODO map label to current loaded image?
+	foreach(PostFile postFile, post.files){
+		ClickableLabel *label = labels.at(i);
+		if(QFileInfo::exists(strings.pathBase % postFile.filePath))
+			loadImage(i,label,strings.pathBase % postFile.filePath);
+		else if(QFileInfo::exists(strings.pathBase % postFile.tnPath))
+			loadImage(i,label,strings.pathBase % postFile.tnPath);
+		i++;
+	}
 }
 
 //TODO put most of this in another thread
@@ -731,17 +726,4 @@ void ThreadForm::deleteHideLayout()
 	ui->hide->deleteLater();
 	ui->quoteWidget->deleteLater();
 	hideButtonShown = false;
-}
-
-void ThreadForm::paintEvent(QPaintEvent *){
-	QPainter painter(this);
-	int x = 0;
-	if(hideButtonShown){
-		painter.setPen(QColor(100,100,100));
-		x = ui->hide->width();
-	}
-	else
-		painter.setPen(QColor(75,75,75));
-	painter.drawRect(x,0,width()-x-1,height()-1);
-	painter.fillRect(x+1,1,width()-x-2,height()-2,background);
 }
