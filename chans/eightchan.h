@@ -54,7 +54,8 @@ public:
 		if(!p.value("extra_files").isNull()){
 			filesArray = p.value("extra_files").toArray();
 		}
-		for(int i = -1; i<filesArray.size(); i++){
+		int numFiles = filesArray.size();
+		for(int i = -1; i<numFiles; i++){
 			QJsonObject fileObject;
 			if(i == -1) fileObject = p;
 			else fileObject = filesArray.at(i).toObject();
@@ -75,8 +76,9 @@ public:
 			file.custom_spoiler = (fileObject.value("custom_spoiler").toInt() == 1) ? true : false;
 			file.tnUrlPath = "/thumb/" % file.tim % file.ext;
 			file.fileUrlPath = '/' % file.tim % file.ext;
-			file.tnPath = "thumbs/" % no % "-" % file.filename % ".jpg";
-			file.filePath = no % "-" % file.filename % file.ext;
+			QString indString = numFiles > 1 ? QString::number(i).append("-") : "";
+			file.tnPath = "thumbs/" % no % "-" % indString % file.filename % ".jpg";
+			file.filePath = no % "-" % indString % file.filename % file.ext;
 			file.infoString = file.filename % file.ext
 					% " (" % QString("%1").arg(file.w)
 					% "x" % QString("%1").arg(file.h)

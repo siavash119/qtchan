@@ -51,7 +51,8 @@ public:
 		//com = Filter::replaceQuoteStrings(com);
 		quotelinks = Filter::findQuotes(com);
 		QJsonArray allFiles = p.value("files").toArray();
-		for(int i=0; i<allFiles.size(); i++){
+		int numFiles = allFiles.size();
+		for(int i=0; i<numFiles; i++){
 			QJsonObject f = allFiles.at(i).toObject();
 			PostFile file;
 			file.tim = f.value("name").toString();
@@ -69,8 +70,9 @@ public:
 			file.custom_spoiler = (f.value("custom_spoiler").toInt() == 1) ? true : false;
 			file.tnUrlPath = f.value("thumbnail").toString();
 			file.fileUrlPath = f.value("path").toString();
-			file.tnPath = "thumbs/" % no % "-" % file.filename % "s.jpg";
-			file.filePath = no % "-" % file.filename % file.ext;
+			QString indString = numFiles > 1 ? QString::number(i).append("-") : "";
+			file.tnPath = "thumbs/" % no % "-" % indString % file.filename % ".jpg";
+			file.filePath = no % "-" % indString % file.filename % file.ext;
 			file.infoString = file.filename % file.ext
 					% " (" % QString("%1").arg(file.w)
 					% "x" % QString("%1").arg(file.h)
