@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->treeView->setModel(model);
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	int fontSize = settings.value("fontSize",14).toInt();
+	if(settings.value("hideMenuBar",false).toBool()) ui->menuBar->hide();
 	QFont temp = ui->treeView->font();
 	temp.setPointSize(fontSize);
 	ui->treeView->setFont(temp);
