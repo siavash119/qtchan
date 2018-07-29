@@ -1,18 +1,18 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <QWidget>
+#include <QTabWidget>
 #include <QVariant>
 
 namespace Ui {
 class Settings;
 }
 
-class Settings : public QWidget
+class Settings : public QTabWidget
 {
 	Q_OBJECT
 public:
-	explicit Settings(QWidget *parent = 0);
+	explicit Settings(QTabWidget *parent = 0);
 	void refreshValues();
 	~Settings();
 signals:

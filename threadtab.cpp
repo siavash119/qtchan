@@ -195,23 +195,26 @@ QList<ThreadForm*> ThreadTab::checkIfVisible(QList<ThreadForm*> &unseenList)
 
 void ThreadTab::setShortcuts()
 {
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	settings.beginGroup("keybinds");
+
 	QAction *gallery = new QAction(this);
-	gallery->setShortcut(Qt::Key_G);
+	gallery->setShortcut(QKeySequence(settings.value("gallery","g").toString()));
 	connect(gallery, &QAction::triggered,this,&ThreadTab::gallery);
 	this->addAction(gallery);
 
 	QAction *postForm = new QAction(this);
-	postForm->setShortcut(Qt::Key_Q);
+	postForm->setShortcut(QKeySequence(settings.value("reply","q").toString()));
 	connect(postForm, &QAction::triggered,this,&ThreadTab::openPostForm);
 	this->addAction(postForm);
 
 	QAction *expandAll = new QAction(this);
-	expandAll->setShortcut(Qt::Key_E);
+	expandAll->setShortcut(QKeySequence(settings.value("toggleExpandTab","e").toString()));
 	connect(expandAll, &QAction::triggered,this,&ThreadTab::loadAllImages);
 	this->addAction(expandAll);
 
 	QAction *refresh = new QAction(this);
-	refresh->setShortcut(Qt::Key_R);
+	refresh->setShortcut(QKeySequence(settings.value("refreshTab","r").toString()));
 	refresh->setShortcutContext(Qt::ApplicationShortcut);
 	connect(refresh, &QAction::triggered,this,&ThreadTab::getPosts);
 	//&helper,&ThreadTabHelper::getPosts,Qt::DirectConnection);
@@ -223,7 +226,7 @@ void ThreadTab::setShortcuts()
 	this->addAction(focusBar);*/
 
 	QAction *selectPost = new QAction(this);
-	selectPost->setShortcut(Qt::Key_O);
+	selectPost->setShortcut(QKeySequence(settings.value("openSelected","o").toString()));
 	connect(selectPost, &QAction::triggered,[=]{
 		if(ThreadForm *tf = tfAtTop()) tf->imageClicked();
 	});
@@ -232,7 +235,7 @@ void ThreadTab::setShortcuts()
 	//NOTE: for scrollUp and scrollDown, prevYou, nextYou
 	//you can swap tfAtTop/tfAtBottom to your scroll preference
 	QAction *scrollUp = new QAction(this);
-	scrollUp->setShortcut(Qt::Key_K);
+	scrollUp->setShortcut(QKeySequence(settings.value("scrollUp","k").toString()));
 	connect(scrollUp, &QAction::triggered,[=]{
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
@@ -252,7 +255,7 @@ void ThreadTab::setShortcuts()
 	this->addAction(scrollUp);
 
 	QAction *scrollDown = new QAction(this);
-	scrollDown->setShortcut(Qt::Key_J);
+	scrollDown->setShortcut(QKeySequence(settings.value("scrollDown","j").toString()));
 	connect(scrollDown, &QAction::triggered,[=]{
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
@@ -272,7 +275,7 @@ void ThreadTab::setShortcuts()
 	this->addAction(scrollDown);
 
 	QAction *prevYou = new QAction(this);
-	prevYou->setShortcut(Qt::Key_H);
+	prevYou->setShortcut(QKeySequence(settings.value("prevReply","h").toString()));
 	connect(prevYou,&QAction::triggered,[=]{
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
@@ -297,7 +300,7 @@ void ThreadTab::setShortcuts()
 
 
 	QAction *nextYou = new QAction(this);
-	nextYou->setShortcut(Qt::Key_L);
+	nextYou->setShortcut(QKeySequence(settings.value("nextReply","l").toString()));
 	connect(nextYou,&QAction::triggered,[=]{
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
@@ -322,7 +325,7 @@ void ThreadTab::setShortcuts()
 
 
 	QAction *scrollPercent = new QAction(this);
-	scrollPercent->setShortcut(QKeySequence("Shift+G"));
+	scrollPercent->setShortcut(QKeySequence(settings.value("scrollTo","shift+g").toString()));
 	connect(scrollPercent, &QAction::triggered,[=]{
 		int vimNumber = 100;
 		if(!vimCommand.isEmpty())vimNumber = vimCommand.toInt();
@@ -332,7 +335,7 @@ void ThreadTab::setShortcuts()
 	this->addAction(scrollPercent);
 
 	QAction *clearVim = new QAction(this);
-	clearVim->setShortcut(Qt::Key_Minus);
+	clearVim->setShortcut(QKeySequence(settings.value("clearVim","-").toString()));
 	connect(clearVim, &QAction::triggered,[=]{
 		vimCommand = "";
 	});

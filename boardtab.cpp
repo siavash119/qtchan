@@ -102,18 +102,21 @@ BoardTab::~BoardTab()
 
 void BoardTab::setShortcuts()
 {
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	settings.beginGroup("keybinds");
+
 	QAction *refresh = new QAction(this);
-	refresh->setShortcut(Qt::Key_R);
+	refresh->setShortcut(QKeySequence(settings.value("refreshTab","r").toString()));
 	connect(refresh, &QAction::triggered, this, &BoardTab::getPosts);
 	this->addAction(refresh);
 
 	QAction *postForm = new QAction(this);
-	postForm->setShortcut(Qt::Key_Q);
+	postForm->setShortcut(QKeySequence(settings.value("reply","q").toString()));
 	connect(postForm, &QAction::triggered, this, &BoardTab::openPostForm);
 	this->addAction(postForm);
 
 	QAction *selectPost = new QAction(this);
-	selectPost->setShortcut(Qt::Key_O);
+	selectPost->setShortcut(QKeySequence(settings.value("openSelected","o").toString()));
 	connect(selectPost, &QAction::triggered,[=]{
 		QWidget *selected = ui->scrollAreaWidgetContents->childAt(50,ui->scrollArea->verticalScrollBar()->value());
 		while(selected && selected->parent()->objectName() != "scrollAreaWidgetContents") {
@@ -126,12 +129,12 @@ void BoardTab::setShortcuts()
 	this->addAction(selectPost);
 
 	QAction *expandAll = new QAction(this);
-	expandAll->setShortcut(Qt::Key_E);
+	expandAll->setShortcut(QKeySequence(settings.value("toggleExpandTab","e").toString()));
 	connect(expandAll, &QAction::triggered,this,&BoardTab::loadAllImages);
 	this->addAction(expandAll);
 
 	QAction *scrollUp = new QAction(this);
-	scrollUp->setShortcut(Qt::Key_K);
+	scrollUp->setShortcut(QKeySequence(settings.value("scrollUp","k").toString()));
 	connect(scrollUp, &QAction::triggered,[=]{
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
@@ -156,7 +159,7 @@ void BoardTab::setShortcuts()
 	this->addAction(scrollUp);
 
 	QAction *scrollDown = new QAction(this);
-	scrollDown->setShortcut(Qt::Key_J);
+	scrollDown->setShortcut(QKeySequence(settings.value("scrollDown","j").toString()));
 	connect(scrollDown, &QAction::triggered,[=]{
 		int vimNumber = 1;
 		if(!vimCommand.isEmpty()) vimNumber = vimCommand.toInt();
@@ -179,7 +182,7 @@ void BoardTab::setShortcuts()
 	this->addAction(scrollDown);
 
 	QAction *scrollPercent = new QAction(this);
-	scrollPercent->setShortcut(QKeySequence("Shift+G"));
+	scrollPercent->setShortcut(QKeySequence(settings.value("scrollTo","shift+g").toString()));
 	connect(scrollPercent, &QAction::triggered,[=]{
 		int vimNumber = 100;
 		if(!vimCommand.isEmpty())vimNumber = vimCommand.toInt();
@@ -189,7 +192,7 @@ void BoardTab::setShortcuts()
 	this->addAction(scrollPercent);
 
 	QAction *clearVim = new QAction(this);
-	clearVim->setShortcut(Qt::Key_Minus);
+	clearVim->setShortcut(QKeySequence(settings.value("clearVim","-").toString()));
 	connect(clearVim, &QAction::triggered,[=]{
 		vimCommand = "";
 	});

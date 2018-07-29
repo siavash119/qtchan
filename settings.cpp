@@ -4,8 +4,8 @@
 #include <QFile>
 #include <QDebug>
 
-Settings::Settings(QWidget *parent) :
-	QWidget(parent),
+Settings::Settings(QTabWidget *parent) :
+	QTabWidget(parent),
 	ui(new Ui::Settings)
 {
 	ui->setupUi(this);

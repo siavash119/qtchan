@@ -50,6 +50,8 @@ private slots:
 	void on_pushButton_clicked();
 	void onSelectionChanged();
 	void on_navBar_returnPressed();
+	void toggleSettingsView();
+	void reloadTabs();
 
 public slots:
 	void focusTree();

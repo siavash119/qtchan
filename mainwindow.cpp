@@ -94,46 +94,44 @@ void MainWindow::onRemoveTab(TreeItem* tn){
 
 void MainWindow::setShortcuts()
 {
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	settings.beginGroup("keybinds");
 	//hiding the menu bar disables other qmenu actions shortcuts
-	addShortcut(Qt::Key_F11,this,[=]{
+	addShortcut(QKeySequence(settings.value("hideMenu","F11").toString()),this,[=]{
 		ui->menuBar->isHidden() ? ui->menuBar->show() : ui->menuBar->hide();
 	});
 
-	addShortcut(QKeySequence("ctrl+shift+tab"),this,&MainWindow::prevTab);
-	addShortcut(QKeySequence("ctrl+tab"),this,&MainWindow::nextTab);
+	addShortcut(QKeySequence(settings.value("prevTab","ctrl+shift+tab").toString()),this,&MainWindow::prevTab);
+	addShortcut(QKeySequence(settings.value("nextTab","ctrl+tab").toString()),this,&MainWindow::nextTab);
 
-	addShortcut(QKeySequence("ctrl+1"),this, [=]{
+	addShortcut(QKeySequence(settings.value("firstTab","ctrl+1").toString()),this, [=]{
 		if(!model->rowCount()) return;
-		selectionModel->setCurrentIndex(model->index(0,0),
-										QItemSelectionModel::ClearAndSelect);
+		selectionModel->setCurrentIndex(model->index(0,0),QItemSelectionModel::ClearAndSelect);
 		ui->treeView->setCurrentIndex(model->index(0,0));
 	});
 
-	addShortcut(QKeySequence("ctrl+2"),this,&MainWindow::prevParent);
-	addShortcut(QKeySequence("ctrl+3"),this,&MainWindow::nextParent);
+	addShortcut(QKeySequence(settings.value("prevParent","ctrl+2").toString()),this,&MainWindow::prevParent);
+	addShortcut(QKeySequence(settings.value("nextParent","ctrl+3").toString()),this,&MainWindow::nextParent);
 
-	addShortcut(QKeySequence("ctrl+4"),this,[=]{
+	addShortcut(QKeySequence(settings.value("lastTab","ctrl+4").toString()),this,[=]{
 		if(!model->rowCount()) return;
 		TreeItem *tm = model->getItem(model->index(model->rowCount(),0));
 		while(tm->childCount()){
 			tm = tm->child(tm->childCount()-1);
 		}
 		QModelIndex qmi = model->getIndex(tm);
-		selectionModel->setCurrentIndex(qmi,
-										QItemSelectionModel::ClearAndSelect);
+		selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
 		ui->treeView->setCurrentIndex(qmi);
 	});
-
-	addShortcut(QKeySequence::Delete, this, &MainWindow::deleteSelected,
+	addShortcut(QKeySequence(settings.value("closeTab2","delete").toString()), this, &MainWindow::deleteSelected,
 				Qt::AutoConnection,Qt::WindowShortcut);
-	addShortcut(QKeySequence("ctrl+w"),this,&MainWindow::deleteSelected);
-	addShortcut(QKeySequence("Ctrl+l"),this,&MainWindow::focusBar);
-	addShortcut(QKeySequence("Ctrl+u"),this,&MainWindow::toggleAutoUpdate);
-	addShortcut(QKeySequence("Ctrl+e"),this,&MainWindow::toggleAutoExpand);
+	addShortcut(QKeySequence(settings.value("closeTab","ctrl+w").toString()),this,&MainWindow::deleteSelected);
+	addShortcut(QKeySequence(settings.value("navBar","ctrl+l").toString()),this,&MainWindow::focusBar);
+	addShortcut(QKeySequence(settings.value("autoUpdate","ctrl+u").toString()),this,&MainWindow::toggleAutoUpdate);
+	addShortcut(QKeySequence(settings.value("autoExpand","ctrl+e").toString()),this,&MainWindow::toggleAutoExpand);
 
-	addShortcut(QKeySequence("ctrl+o"),this,&MainWindow::openExplorer);
-
-	addShortcut(QKeySequence::ZoomOut,this,[=](){
+	addShortcut(QKeySequence(settings.value("fileManager","ctrl+o").toString()),this,&MainWindow::openExplorer);
+	addShortcut(QKeySequence(settings.value("textSmaller",QKeySequence(QKeySequence::ZoomOut).toString()).toString()),this,[=](){
 		qDebug() << "decreasing text size";
 		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int fontSize = settings.value("fontSize",14).toInt()-2;
@@ -147,7 +145,7 @@ void MainWindow::setShortcuts()
 		emit setFontSize(fontSize);
 	});
 
-	addShortcut(QKeySequence::ZoomIn,this,[=](){
+	addShortcut(QKeySequence(settings.value("textBigger",QKeySequence(QKeySequence::ZoomIn).toString()).toString()),this,[=](){
 		qDebug() << "increasing text size";
 		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int fontSize = settings.value("fontSize",14).toInt()+2;
@@ -160,7 +158,7 @@ void MainWindow::setShortcuts()
 		emit setFontSize(fontSize);
 	});
 
-	addShortcut(QKeySequence("ctrl+9"),this,[=](){
+	addShortcut(QKeySequence(settings.value("imagesSmaller","ctrl+9").toString()),this,[=](){
 		qDebug() << "decreasing image size";
 		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int imageSize = settings.value("imageSize",250).toInt()-25;
@@ -169,7 +167,7 @@ void MainWindow::setShortcuts()
 		emit setImageSize(imageSize);
 	});
 
-	addShortcut(QKeySequence("ctrl+0"),this,[=](){
+	addShortcut(QKeySequence(settings.value("imagesBigger","ctrl+0").toString()),this,[=](){
 		qDebug() << "increasing image size";
 		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int imageSize = settings.value("imageSize",250).toInt()+25;
@@ -177,44 +175,38 @@ void MainWindow::setShortcuts()
 		emit setImageSize(imageSize);
 	});
 
-	ui->actionSave->setShortcut(QKeySequence("Ctrl+s"));
-	ui->actionSave->setShortcutContext(Qt::ApplicationShortcut);
+	ui->actionSave->setShortcut(QKeySequence(settings.value("saveSession","ctrl+s").toString()));
+	ui->actionSave->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 	connect(ui->actionSave,&QAction::triggered,[=]{saveSession();});
+	addShortcut(QKeySequence(settings.value("saveSession","ctrl+s").toString()),this,[=]{saveSession();});
 
-	ui->actionReload->setShortcut(QKeySequence("Ctrl+r"));
-	connect(ui->actionReload,&QAction::triggered,[=]{
-		QMapIterator<QWidget*,Tab> i(tabs);
-		while(i.hasNext()) {
-			Tab tab = i.next().value();
-			if(tab.type == Tab::TabType::Board) static_cast<BoardTab*>(tab.TabPointer)->getPosts();
-			else static_cast<ThreadTab*>(tab.TabPointer)->getPosts();
-		}
-	});
+	ui->actionReload->setShortcut(QKeySequence(settings.value("refreshTabs","ctrl+r").toString()));
+	ui->actionReload->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+	connect(ui->actionReload,&QAction::triggered,this,&MainWindow::reloadTabs);
+	addShortcut(QKeySequence(settings.value("refreshTabs","ctrl+r").toString()),this,&MainWindow::reloadTabs);
 
-	ui->actionSettings->setShortcut(QKeySequence("Ctrl+p"));
-	ui->actionSettings->setShortcutContext(Qt::ApplicationShortcut);
-	connect(ui->actionSettings,&QAction::triggered,[=]{
-		if(settingsView.isVisible()){
-			qDebug() << "hiding settings window";
-			settingsView.hide();
-		}
-		else{
-			qDebug() << "showing settings window";
-			settingsView.show();
-		}
-	});
+	ui->actionSettings->setShortcut(QKeySequence(settings.value("toggleSettings","ctrl+p").toString()));
+	ui->actionSettings->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+	connect(ui->actionSettings,&QAction::triggered,this,&MainWindow::toggleSettingsView);
+	addShortcut(QKeySequence(settings.value("toggleSettings","ctrl+p").toString()),this,&MainWindow::toggleSettingsView);
 
-	ui->actionExit->setShortcut(QKeySequence("Ctrl+q"));
-	ui->actionExit->setShortcutContext(Qt::ApplicationShortcut);
+
+	ui->actionExit->setShortcut(QKeySequence(settings.value("quit","ctrl+q").toString()));
+	ui->actionExit->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 	connect(ui->actionExit,&QAction::triggered,this,&QApplication::quit);
+	addShortcut(QKeySequence(settings.value("quit","ctrl+q").toString()),this,&QApplication::quit);
 
-	ui->actionReloadFilters->setShortcut(Qt::Key_F7);
-	ui->actionReloadFilters->setShortcutContext(Qt::ApplicationShortcut);
+	ui->actionReloadFilters->setShortcut(QKeySequence(settings.value("reloadFilters","F7").toString()));
+	ui->actionReloadFilters->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 	connect(ui->actionReloadFilters,&QAction::triggered,[=](){
 		filter.loadFilterFile2();
 		emit reloadFilters();
 	});
-	addShortcut(QKeySequence("ctrl+f"),this,[=]{
+	addShortcut(QKeySequence(settings.value("reloadFilters","F7").toString()),this,[=]{
+		filter.loadFilterFile2();
+		emit reloadFilters();
+	});
+	addShortcut(QKeySequence(settings.value("find","ctrl+f").toString()),this,[=]{
 		TreeItem *item = model->getItem(selectionModel->currentIndex());
 		if(!item) return;
 		if(item->type == TreeItemType::thread){
@@ -227,10 +219,10 @@ void MainWindow::setShortcuts()
 		}
 	});
 
-	addShortcut(QKeySequence("ctrl+k"),this,&MainWindow::removeChildTabs);
+	addShortcut(QKeySequence(settings.value("closeChildTabs","ctrl+k").toString()),this,&MainWindow::removeChildTabs);
 
 	//TODO clean-up and fix focus back to mainwindow
-	addShortcut(Qt::Key_F9,this,[=]{
+	addShortcut(QKeySequence(settings.value("toggleNotifications","F9").toString()),this,[=]{
 		if(nv->isVisible()){
 			nv->hide();
 			activateWindow();
@@ -240,16 +232,16 @@ void MainWindow::setShortcuts()
 			nv->show();
 		}
 	});
-
-	addShortcut(Qt::Key_Escape,ui->navBar,&QLineEdit::hide,
+	qDebug() << "escape string" << QKeySequence(Qt::Key_Escape).toString();
+	addShortcut(QKeySequence(settings.value("hideNavBar","escape").toString()),ui->navBar,&QLineEdit::hide,
 				Qt::DirectConnection,Qt::WidgetWithChildrenShortcut);
-	addShortcut(Qt::Key_F1,this,&MainWindow::showHelp);
-	addShortcut(Qt::Key_F3,this,&MainWindow::focusTree);
-	addShortcut(Qt::Key_F4,this,[=]{
+	addShortcut(QKeySequence(settings.value("showHelp","F1").toString()),this,&MainWindow::showHelp);
+	addShortcut(QKeySequence(settings.value("focusTree","F3").toString()),this,&MainWindow::focusTree);
+	addShortcut(QKeySequence(settings.value("focusTab","F4").toString()),this,[=]{
 		if(QWidget *temp = currentWidget()) temp->setFocus();
 	});
 	//addShortcut(Qt::Key_F6,this,&MainWindow::focusBar);
-	addShortcut(Qt::Key_F8,&aTab,&ArchiveTab::show);
+	addShortcut(QKeySequence(settings.value("showArchive","F8").toString()),&aTab,&ArchiveTab::show);
 
 	//session shortcuts
 	for(int i=Qt::Key_F1, j=0; i<=Qt::Key_F4; i++, j++){
@@ -267,22 +259,41 @@ void MainWindow::setShortcuts()
 		});
 		this->addAction(loadShortcut);
 	}
-	addShortcut(Qt::Key_F5,this,[=]{saveSession();});
-	addShortcut(Qt::Key_F6,this,[=]{loadSession();});
-	addShortcut(QKeySequence("ctrl+F5"),this,[=]{
+	addShortcut(QKeySequence(settings.value("saveSession2","F5").toString()),this,[=]{saveSession();});
+	addShortcut(QKeySequence(settings.value("loadSession","F6").toString()),this,[=]{loadSession();});
+	addShortcut(QKeySequence(settings.value("prevSession","ctrl+F5").toString()),this,[=]{
 		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int slot = settings.value("sessionFileSlot",0).toInt();
 		if(--slot == 0) slot = 9;
 		settings.setValue("sessionFileSlot",slot);
 		qDebug() << "current session slot:" << slot;
 	});
-	addShortcut(QKeySequence("ctrl+F6"),this,[=]{
+	addShortcut(QKeySequence(settings.value("nextSession","ctrl+F6").toString()),this,[=]{
 		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 		int slot = settings.value("sessionFileSlot",0).toInt();
 		if(++slot == 10) slot = 0;
 		settings.setValue("sessionFileSlot",slot);
 		qDebug() << "current session slot:" << slot;
 	});
+}
+
+void MainWindow::reloadTabs(){
+	QMapIterator<QWidget*,Tab> i(tabs);
+	while(i.hasNext()) {
+		Tab tab = i.next().value();
+		if(tab.type == Tab::TabType::Board) static_cast<BoardTab*>(tab.TabPointer)->getPosts();
+		else static_cast<ThreadTab*>(tab.TabPointer)->getPosts();
+	}
+}
+void MainWindow::toggleSettingsView(){
+	if(settingsView.isVisible()){
+		qDebug() << "hiding settings window";
+		settingsView.hide();
+	}
+	else{
+		qDebug() << "showing settings window";
+		settingsView.show();
+	}
 }
 
 void MainWindow::showHelp(){

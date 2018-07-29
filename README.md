@@ -76,9 +76,57 @@ packer -S qtchan
 
 there are more shortcuts; look at the source for now for info.
 
-need to restart qtchan if changing to use 4chan pass or not. signals/slots still not finished for that.
+keybinds are configurable. Set them in your qtchan.ini file like this
+```
+[keybinds]
+hideMenu=F11
+prevTab=ctrl+shift+tab
+nextTab=ctrl+tab
+firstTab=ctrl+1
+prevParent=ctrl+2
+nextParent=ctrl+3
+lastTab=ctrl+4
+closeTab=ctrl+w
+closeTab2=delete
+navBar=ctrl+l
+autoUpdate=ctrl+u
+autoExpand=ctrl+e
+fileManager=ctrl+o
+textSmaller=ctrl+-
+textBigger=ctrl++
+imagesSmaller=ctrl+9
+imagesBigger=ctrl+0
+saveSession=ctrl+s
+saveSession2=F5
+loadSession=F6
+prevSession=ctrl+F5
+nextSession=ctrl+F6
+refreshTabs=ctrl+r
+toggleSettings=ctrl+p
+quit=ctrl+q
+reloadFilters=F7
+find=ctrl+f
+closeChildTabs=ctrl+k
+toggleNotifications=F9
+hideNavBar=escape
+showHelp=F1
+focusTree=F3
+focusTab=F4
+showArchive=F8
+refreshTab=r
+reply=q
+openSelected=o
+toggleExpandTab=e
+scrollUp=k
+scrollDown=j
+scrollTo=shift+g
+clearVim=-
+gallery=g
+prevReply=h
+nextReply=l
+```
 
-you can make a filter file and it'll regexp remove posts for you. I'll post an example
+need to restart qtchan if changing to use 4chan pass or not. signals/slots still not finished for that.
 
 ## Captcha
 1. in the post form, focus the bottom lineEdit. It will load the challenge image
