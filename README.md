@@ -76,7 +76,7 @@ packer -S qtchan
 
 there are more shortcuts; look at the source for now for info.
 
-keybinds are configurable. Set them in your qtchan.ini file like this
+keybinds other than 1-9 (vim #), ctrl+F1-F4 (save session slot), and shift+F1-F4 (load session slot) are configurable. Set them in your qtchan.ini file like this and restart qtchan
 ```
 [keybinds]
 hideMenu=F11
