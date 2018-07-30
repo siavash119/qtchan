@@ -87,7 +87,7 @@ private:
 	QList<ClickableLabel*> labels;
 	void getThumb();
 	bool hideButtonShown = true;
-	int darkness = 22;
+	int darkness = 25;
 	QColor background;
 	void clickImage();
 	bool loadIt = false;

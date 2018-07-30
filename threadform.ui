@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>652</width>
-    <height>146</height>
+    <height>119</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -55,7 +55,7 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item>
+   <item alignment="Qt::AlignLeft|Qt::AlignTop">
     <widget class="ClickableLabel" name="hide">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">

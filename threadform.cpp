@@ -27,21 +27,20 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 {
 	if(root) rootTF = this;
 	ui->setupUi(this);
-	ui->horizontalLayout->setAlignment(ui->hide,static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignLeft));
-	//ui->hide->setAlignment(static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignLeft));
 	ui->postLayout->setAlignment(static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignLeft));
 	this->board = strings.board;
 	if(strings.thread == "index") this->type = PostType::Thread;
 	else this->type = PostType::Reply;
-	for(int i=0;i<replyLevel;i++){
-		if(i == replyLevel-1){
-			background.setRgb(darkness,darkness,darkness);
-			ui->hide->setStyleSheet("padding: 0 12px; background-color:"+ background.name());
-		}
+
+	if(replyLevel){
+		darkness = darkness*qPow(0.8,replyLevel-1);
+		background.setRgb(darkness,darkness,darkness);
+		ui->hide->setStyleSheet("padding: 0 12px; background-color:"+ background.name());
 		darkness = darkness*0.8;
+		background.setRgb(darkness,darkness,darkness);
+		this->setStyleSheet("background-color:" + background.name() + "; color:#bbbbbb;");
 	}
-	background.setRgb(darkness,darkness,darkness);
-	this->setStyleSheet("background-color:" + background.name() + "; color:#bbbbbb;");
+
 	ui->quoteWidget->hide();
 //	ui->tim->hide();
 	ui->fileInfo->hide();
