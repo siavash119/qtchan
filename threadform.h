@@ -56,7 +56,7 @@ public:
 	//TODO check settings -> filter
 	bool hidden = false;
 	bool seen = false;
-	static QImage scaleImage(QString path, int scale);
+	static QPair<ClickableLabel*,QImage> scaleImage(ClickableLabel *label, QString path, int scale);
 	QString repliesString;
 	QString infoString();
 	QString getInfoString();
@@ -99,7 +99,7 @@ private:
 	QMap<QString,QMetaObject::Connection> insertedConnections;
 	void removeFromInserted();
 	void postMenu();
-	QFutureWatcher<QImage> watcher;
+	QFutureWatcher< QPair<ClickableLabel*,QImage> > watcher;
 	void reloadFiles();
 
 signals:
@@ -128,6 +128,7 @@ private slots:
 
 	void on_com_linkHovered(const QString &link);
 	void on_info_linkHovered(const QString &link);
+	void scaleFinished(int ind);
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *event);

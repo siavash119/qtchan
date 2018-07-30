@@ -50,6 +50,7 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 	connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
 	comQuoteConnection = connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	infoQuoteConnection = connect(ui->info,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
+	connect(&watcher,&QFutureWatcher<QImage>::resultReadyAt,this,&ThreadForm::scaleFinished);
 	ui->info->installEventFilter(this);
 	ui->com->installEventFilter(this);
 	ui->fileInfo->installEventFilter(this);
@@ -272,13 +273,12 @@ void ThreadForm::clickImage(){
 	//if(QPointer<ClickableLabel>(ui->tim)) ui->tim->clicked();
 }
 
-QImage ThreadForm::scaleImage(QString path, int scale){
-	QImage pic;
-	pic.load(path);
+QPair<ClickableLabel*,QImage> ThreadForm::scaleImage(ClickableLabel *label, QString path, int scale){
+	QImage pic(path);
 	QImage scaled = (pic.height() > pic.width()) ?
 				pic.scaledToHeight(scale, Qt::SmoothTransformation) :
 				pic.scaledToWidth(scale, Qt::SmoothTransformation);
-	return scaled;
+	return QPair<ClickableLabel*,QImage>(label,scaled);
 }
 
 void ThreadForm::setPixmap(int ind, QPixmap scaled){
@@ -288,33 +288,24 @@ void ThreadForm::setPixmap(int ind, QPixmap scaled){
 	//label->show();
 }
 
+void ThreadForm::scaleFinished(int ind){
+	ClickableLabel *label = watcher.resultAt(ind).first;
+	QPixmap scaled = QPixmap::fromImage(watcher.resultAt(ind).second);
+	label->setPixmap(scaled);
+	if(!root)return;
+	QListIterator< QPointer<ThreadForm> > i(clones);
+	QPointer<ThreadForm> cloned;
+	while(i.hasNext()) {
+		cloned = i.next();
+		if(!cloned) continue;
+		cloned->setPixmap(ind,scaled);
+	}
+}
+
 void ThreadForm::loadImage(int ind, ClickableLabel *label, QString path) {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	int maxWidth = settings.value("imageSize",250).toInt();
-	QFuture<QImage> newImage = QtConcurrent::run(&ThreadForm::scaleImage,path,maxWidth);
-	connect(&watcher, &QFutureWatcherBase::finished,[=]()
-	{
-		QPixmap scaled = QPixmap::fromImage(newImage.result());
-		label->setPixmap(scaled);
-		//shouldn't be root anyway
-		if(!root)return;
-		QListIterator< QPointer<ThreadForm> > i(clones);
-		QPointer<ThreadForm> cloned;
-		while(i.hasNext()) {
-			cloned = i.next();
-			if(!cloned) continue;
-			cloned->setPixmap(ind,scaled);
-		}
-		//emit setPixmap(label,scaled);
-	});
-	watcher.setFuture(newImage);
-
-	/*QImage scaled = scaleImage(path, settings.value("imageSize",250).toInt());
-	if(!scaled.isNull()) {
-		ui->tim->show();
-		ui->tim->setPixmap(QPixmap::fromImage(scaled));
-		ui->tim->setFixedSize(scaled.size());
-	}*/
+	watcher.setFuture(QtConcurrent::run(&ThreadForm::scaleImage,label,path,maxWidth));
 
 	//Possible to wrap text around image; decided not to for now
 	//no smooth scaling doesn't look good
@@ -417,6 +408,7 @@ void ThreadForm::setImageSize(int imageSize){
 }
 
 void ThreadForm::reloadFiles(){
+	watcher.cancel();
 	int i = 0;
 	//TODO map label to current loaded image?
 	foreach(PostFile postFile, post.files){
