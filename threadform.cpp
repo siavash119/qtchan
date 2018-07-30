@@ -167,7 +167,7 @@ void ThreadForm::getThumb(){
 		if(QFileInfo::exists(strings.pathBase % postFile.filePath)){
 			finished.replace(i,true);
 			if(post.files.at(i).ext == ".jpg" || post.files.at(i).ext == ".png") {
-				loadImage(i,label,strings.pathBase % postFile.filePath);
+				loadImage(i,strings.pathBase % postFile.filePath);
 			}
 		}
 		else if(autoExpand) getFile(label,i,false);
@@ -255,7 +255,7 @@ void ThreadForm::downloadedSlot(const QString &path, const QString &type, const 
 		gettingFile.replace(ind,false);
 		finished.replace(ind,true);
 		if(post.files.at(ind).ext == ".jpg" || post.files.at(ind).ext == ".png") {
-			loadImage(ind,label,path);
+			loadImage(ind,path);
 		}
 		if(message.compare("clicked") == 0 || loadIt){
 			openImage(path);
@@ -264,7 +264,7 @@ void ThreadForm::downloadedSlot(const QString &path, const QString &type, const 
 	else if(type == "thumb"){
 		int ind = labels.indexOf(label);
 		if(!finished.at(ind)){
-			loadImage(ind,label,path);
+			loadImage(ind,path);
 		}
 	}
 }
@@ -273,12 +273,12 @@ void ThreadForm::clickImage(){
 	//if(QPointer<ClickableLabel>(ui->tim)) ui->tim->clicked();
 }
 
-QPair<ClickableLabel*,QImage> ThreadForm::scaleImage(ClickableLabel *label, QString path, int scale){
+QPair<int,QImage> ThreadForm::scaleImage(int labelInd, QString path, int scale){
 	QImage pic(path);
 	QImage scaled = (pic.height() > pic.width()) ?
 				pic.scaledToHeight(scale, Qt::SmoothTransformation) :
 				pic.scaledToWidth(scale, Qt::SmoothTransformation);
-	return QPair<ClickableLabel*,QImage>(label,scaled);
+	return QPair<int,QImage>(labelInd,scaled);
 }
 
 void ThreadForm::setPixmap(int ind, QPixmap scaled){
@@ -289,7 +289,7 @@ void ThreadForm::setPixmap(int ind, QPixmap scaled){
 }
 
 void ThreadForm::scaleFinished(int ind){
-	ClickableLabel *label = watcher.resultAt(ind).first;
+	ClickableLabel *label = labels.at(watcher.resultAt(ind).first);
 	QPixmap scaled = QPixmap::fromImage(watcher.resultAt(ind).second);
 	label->setPixmap(scaled);
 	if(!root)return;
@@ -302,10 +302,10 @@ void ThreadForm::scaleFinished(int ind){
 	}
 }
 
-void ThreadForm::loadImage(int ind, ClickableLabel *label, QString path) {
+void ThreadForm::loadImage(int labelInd, QString path) {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	int maxWidth = settings.value("imageSize",250).toInt();
-	watcher.setFuture(QtConcurrent::run(&ThreadForm::scaleImage,label,path,maxWidth));
+	watcher.setFuture(QtConcurrent::run(&ThreadForm::scaleImage,labelInd,path,maxWidth));
 
 	//Possible to wrap text around image; decided not to for now
 	//no smooth scaling doesn't look good
@@ -412,11 +412,10 @@ void ThreadForm::reloadFiles(){
 	int i = 0;
 	//TODO map label to current loaded image?
 	foreach(PostFile postFile, post.files){
-		ClickableLabel *label = labels.at(i);
 		if(QFileInfo::exists(strings.pathBase % postFile.filePath))
-			loadImage(i,label,strings.pathBase % postFile.filePath);
+			loadImage(i,strings.pathBase % postFile.filePath);
 		else if(QFileInfo::exists(strings.pathBase % postFile.tnPath))
-			loadImage(i,label,strings.pathBase % postFile.tnPath);
+			loadImage(i,strings.pathBase % postFile.tnPath);
 		i++;
 	}
 }

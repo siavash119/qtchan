@@ -34,7 +34,7 @@ public:
 	void setImage(QByteArray img);
 	//void getImage(QNetworkAccessManager *manager, QString *img);
 	void load(Post &post);
-	void loadImage(int ind, ClickableLabel *label, QString path);
+	void loadImage(int labelInd, QString path);
 	void openImage(const QString &path);
 	Chan *api;
 	ThreadFormStrings strings;
@@ -56,7 +56,7 @@ public:
 	//TODO check settings -> filter
 	bool hidden = false;
 	bool seen = false;
-	static QPair<ClickableLabel*,QImage> scaleImage(ClickableLabel *label, QString path, int scale);
+	static QPair<int,QImage> scaleImage(int labelInd, QString path, int scale);
 	QString repliesString;
 	QString infoString();
 	QString getInfoString();
@@ -99,7 +99,7 @@ private:
 	QMap<QString,QMetaObject::Connection> insertedConnections;
 	void removeFromInserted();
 	void postMenu();
-	QFutureWatcher< QPair<ClickableLabel*,QImage> > watcher;
+	QFutureWatcher< QPair<int,QImage> > watcher;
 	void reloadFiles();
 
 signals:
