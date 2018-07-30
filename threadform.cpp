@@ -182,45 +182,37 @@ void ThreadForm::downloadFile(const QString &fileUrl,
 								QString type,
 								QString message,
 								ClickableLabel *label){
-	QFile *file = new QFile(filePath);
-	if(file->exists()){
+	if(QFileInfo::exists(filePath)){
 		downloadedSlot(filePath,type,message,label);
-		file->deleteLater();
+		return;
+	}
+	if(networkReplies.contains(fileUrl)){
+		qDebug().noquote() << "already downloading" << fileUrl << "to" << filePath;
 		return;
 	}
 	QNetworkRequest request;
 	request.setUrl(fileUrl);
 	if(api->requiresUserAgent()) request.setHeader(QNetworkRequest::UserAgentHeader,api->requiredUserAgent());
-	QNetworkReply *reply;
-	if(networkReplies.contains(fileUrl)){
-		reply = networkReplies.value(fileUrl);
-		qDebug().noquote() << "already downloading" << fileUrl << "to" << filePath;
-		file->deleteLater();
-		return;
-	}
-	else{
-		reply = manager->get(request);
-		networkReplies.insert(fileUrl,reply);
-		qDebug().noquote() << "downloading" << fileUrl << "to" << filePath;
-	}
+	QNetworkReply *reply = manager->get(request);
+	networkReplies.insert(fileUrl,reply);
+	qDebug().noquote() << "downloading" << fileUrl << "to" << filePath;
 	connect(reply,&QNetworkReply::finished,[=]{
-		networkReplies.remove(fileUrl);
 		reply->deleteLater();
-		file->deleteLater();
+		QFile file(filePath);
+		networkReplies.remove(fileUrl);
 		if(!reply) return;
 		if(reply->error()){
 			qDebug().noquote().nospace() << "error downloading " << fileUrl << ": " << reply->errorString();
+			return;
 		}
-		else{
-			if(!file->open(QIODevice::WriteOnly)){
-				qDebug().noquote().nospace() << "error writing " << filePath << ": Could not open for writing";
-				file->close();
-				return;
-			};
-			file->write(reply->readAll());
-			file->close();
-			downloadedSlot(filePath,type,message,label);
-		}
+		if(!file.open(QIODevice::WriteOnly)){
+			qDebug().noquote().nospace() << "error writing " << filePath << ": Could not open for writing";
+			file.close();
+			return;
+		};
+		file.write(reply->readAll());
+		file.close();
+		downloadedSlot(filePath,type,message,label);
 	});
 }
 
