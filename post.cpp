@@ -62,7 +62,7 @@ void Post::load(QJsonObject &p, QString &board, QString &thread)
 		file.md5 = p.value("md5").toString();
 		file.w = p.value("w").toInt();
 		file.h = p.value("h").toInt();
-		file.size_img = QString(file.w + "x" + file.h);
+		file.size_img =QString::number(file.w) % "x" % QString::number(file.h);
 		file.tn_w = p.value("tn_w").toInt();
 		file.tn_h = p.value("tn_h").toInt();
 		file.filedeleted = (p.value("filedeleted").toInt() == 1) ? true : false;

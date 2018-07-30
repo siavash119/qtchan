@@ -68,7 +68,7 @@ public:
 			file.md5 = fileObject.value("md5").toString();
 			file.w = fileObject.value("w").toInt();
 			file.h = fileObject.value("h").toInt();
-			file.size_img = QString(file.w + "x" + file.h);
+			file.size_img =QString::number(file.w) % "x" % QString::number(file.h);
 			file.tn_w = fileObject.value("tn_w").toInt();
 			file.tn_h = fileObject.value("tn_h").toInt();
 			file.filedeleted = (fileObject.value("filedeleted").toInt() == 1) ? true : false;

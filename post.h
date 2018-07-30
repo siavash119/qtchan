@@ -35,7 +35,7 @@ class Post
 public:
 	Post();
 	Post(QJsonObject &p, QString &board, QString &thread);
-	~Post();
+	virtual ~Post();
 	virtual void load(QJsonObject &p, QString &board, QString &thread);
 
 	QString no;
