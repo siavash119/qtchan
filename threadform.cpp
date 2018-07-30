@@ -50,7 +50,6 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 	connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
 	comQuoteConnection = connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	infoQuoteConnection = connect(ui->info,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
-	connect(&watcher,&QFutureWatcher<QImage>::resultReadyAt,this,&ThreadForm::scaleFinished);
 	ui->info->installEventFilter(this);
 	ui->com->installEventFilter(this);
 	ui->fileInfo->installEventFilter(this);
@@ -288,25 +287,29 @@ void ThreadForm::setPixmap(int ind, QPixmap scaled){
 	//label->show();
 }
 
-void ThreadForm::scaleFinished(int ind){
-	ClickableLabel *label = labels.at(watcher.resultAt(ind).first);
-	QPixmap scaled = QPixmap::fromImage(watcher.resultAt(ind).second);
+void ThreadForm::scaleFinished(){
+	QFutureWatcher< QPair<int,QImage> > *fw = static_cast<QFutureWatcher< QPair<int,QImage> > *>(sender());
+	int labelInd = fw->result().first;
+	ClickableLabel *label = labels.at(labelInd);
+	QPixmap scaled = QPixmap::fromImage(fw->result().second);
 	label->setPixmap(scaled);
+	fw->deleteLater();
 	if(!root)return;
 	QListIterator< QPointer<ThreadForm> > i(clones);
 	QPointer<ThreadForm> cloned;
 	while(i.hasNext()) {
 		cloned = i.next();
 		if(!cloned) continue;
-		cloned->setPixmap(ind,scaled);
+		cloned->setPixmap(labelInd,scaled);
 	}
 }
 
 void ThreadForm::loadImage(int labelInd, QString path) {
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
 	int maxWidth = settings.value("imageSize",250).toInt();
-	watcher.setFuture(QtConcurrent::run(&ThreadForm::scaleImage,labelInd,path,maxWidth));
-
+	QFutureWatcher< QPair<int,QImage> > *fw = new QFutureWatcher< QPair<int,QImage> >(this);
+	fw->setFuture(QtConcurrent::run(&ThreadForm::scaleImage,labelInd,path,maxWidth));
+	connect(fw,&QFutureWatcher< QPair<int,QImage> >::finished,this,&ThreadForm::scaleFinished);
 	//Possible to wrap text around image; decided not to for now
 	//no smooth scaling doesn't look good
 	//or scaling then storing image as base64 data takes too much memory
@@ -408,7 +411,6 @@ void ThreadForm::setImageSize(int imageSize){
 }
 
 void ThreadForm::reloadFiles(){
-	watcher.cancel();
 	int i = 0;
 	//TODO map label to current loaded image?
 	foreach(PostFile postFile, post.files){

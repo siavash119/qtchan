@@ -99,7 +99,6 @@ private:
 	QMap<QString,QMetaObject::Connection> insertedConnections;
 	void removeFromInserted();
 	void postMenu();
-	QFutureWatcher< QPair<int,QImage> > watcher;
 	void reloadFiles();
 
 signals:
@@ -128,7 +127,7 @@ private slots:
 
 	void on_com_linkHovered(const QString &link);
 	void on_info_linkHovered(const QString &link);
-	void scaleFinished(int ind);
+	void scaleFinished();
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *event);
