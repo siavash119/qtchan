@@ -233,8 +233,7 @@ void MainWindow::setShortcuts()
 			nv->show();
 		}
 	});
-	qDebug() << "escape string" << QKeySequence(Qt::Key_Escape).toString();
-	addShortcut(QKeySequence(settings.value("hideNavBar","escape").toString()),ui->navBar,&QLineEdit::hide,
+	addShortcut(QKeySequence(settings.value("hideNavBar","Esc").toString()),ui->navBar,&QLineEdit::hide,
 				Qt::DirectConnection,Qt::WidgetWithChildrenShortcut);
 	addShortcut(QKeySequence(settings.value("showHelp","F1").toString()),this,&MainWindow::showHelp);
 	addShortcut(QKeySequence(settings.value("focusTree","F3").toString()),this,&MainWindow::focusTree);
