@@ -378,7 +378,7 @@ QString Filter::htmlParse(QString &html){
 		.replace("<wb>","\n").replace("<wbr>","\n");
 }
 
-QString Filter::titleParse(QString &title){
+QString Filter::titleParse(QString title){
 	QRegularExpression htmlTag("<[^>]*>");
 	return title.replace("<br>"," ").replace(htmlTag,"")
 			.replace("\n"," ").replace("&amp;","&")

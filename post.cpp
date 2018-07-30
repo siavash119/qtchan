@@ -56,7 +56,7 @@ void Post::load(QJsonObject &p, QString &board, QString &thread)
 	if(temp != 0.0) {
 		PostFile file;
 		file.tim = QString::number(temp,'d',0);
-		file.filename = p.value("filename").toString();
+		file.filename = Filter::titleParse(p.value("filename").toString());
 		file.ext = p.value("ext").toString();
 		file.fsize = p.value("fsize").toDouble();
 		file.md5 = p.value("md5").toString();
