@@ -135,7 +135,7 @@ void BoardTabHelper::getPostsFinished() {
 }
 
 void BoardTabHelper::reloadFilters(){
-	filterMe.filters2 = filter.filterMatchedPerTab(this->board,"thread");
+	filterMe.filters2 = filter.filterMatchedPerTab(this->board,"board");
 	emit startFilterTest();
 }
 
