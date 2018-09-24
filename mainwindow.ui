@@ -440,9 +440,6 @@
             <property name="wordWrap">
              <bool>true</bool>
             </property>
-            <property name="openExternalLinks">
-             <bool>true</bool>
-            </property>
             <property name="textInteractionFlags">
              <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
             </property>

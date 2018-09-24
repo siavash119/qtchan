@@ -90,6 +90,7 @@ signals:
 	void setFontSize(int fontSize);
 	void setImageSize(int imageSize);
 	void reloadFilters();
+	void updateStyles(QString key, QString value);
 
 protected:
 	void closeEvent(QCloseEvent *event);

@@ -19,13 +19,14 @@ signals:
 	void update(QString setting, QVariant value);
 public slots:
 	void clicked();
-	void checked(bool checked = false);
 private:
 	Ui::Settings *ui;
 protected:
 	void showEvent(QShowEvent *event);
 private slots:
 	void on_sessionFile_editingFinished();
+	void on_styleMainWindowEdit_editingFinished();
+	void on_styleThreadFormEdit_editingFinished();
 };
 
 #endif // SETTINGS_H

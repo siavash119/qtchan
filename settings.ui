@@ -14,7 +14,7 @@
    <string>Settings</string>
   </property>
   <property name="currentIndex">
-   <number>1</number>
+   <number>2</number>
   </property>
   <widget class="QWidget" name="general">
    <attribute name="title">
@@ -142,11 +142,64 @@
    <attribute name="title">
     <string>Keybinds</string>
    </attribute>
+   <layout class="QGridLayout" name="gridLayout_2"/>
   </widget>
   <widget class="QWidget" name="style">
    <attribute name="title">
     <string>Style</string>
    </attribute>
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
+     <widget class="ClickableLabel" name="styleMainWindowLabel">
+      <property name="text">
+       <string>MainWindow</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="styleMainWindowEdit"/>
+    </item>
+    <item row="1" column="0">
+     <widget class="ClickableLabel" name="styleThreadFormLabel">
+      <property name="text">
+       <string>ThreadForm</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="styleThreadFormEdit"/>
+    </item>
+    <item row="2" column="0">
+     <widget class="ClickableLabel" name="stylePostFormLabel">
+      <property name="text">
+       <string>PostForm</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLineEdit" name="stylePostFormEdit"/>
+    </item>
+    <item row="3" column="0">
+     <widget class="ClickableLabel" name="styleNotificationLabel">
+      <property name="text">
+       <string>Notification</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QLineEdit" name="styleNotificationEdit"/>
+    </item>
+    <item row="4" column="0">
+     <widget class="ClickableLabel" name="styleArchiveLabel">
+      <property name="text">
+       <string>Archive</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QLineEdit" name="styleArchiveEdit"/>
+    </item>
+   </layout>
   </widget>
  </widget>
  <customwidgets>

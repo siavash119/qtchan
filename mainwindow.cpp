@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->navBar->hide();
 	ui->treeView->setModel(model);
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	setStyleSheet(settings.value("style/MainWindow","background-color: #191919; color:white").toString());
 	int fontSize = settings.value("fontSize",14).toInt();
 	if(settings.value("hideMenuBar",false).toBool()) ui->menuBar->hide();
 	QFont temp = ui->treeView->font();
@@ -62,6 +63,12 @@ MainWindow::MainWindow(QWidget *parent) :
 		}
 		else if(field == "autoUpdate") emit setAutoUpdate(value.toBool());
 		else if(field == "autoExpand") emit setAutoExpand(value.toBool());
+		else if(field == "style/MainWindow"){
+			this->setStyleSheet(value.toString());
+		}
+		else if(field == "style/ThreadForm"){
+			emit updateStyles("ThreadForm",value.toString());
+		}
 	});
 	connect(ui->treeView,&TreeView::treeMiddleClicked,model,&TreeModel::removeTab,Qt::DirectConnection);
 	connect(ui->treeView,&TreeView::hideNavBar,ui->navBar,&QWidget::hide,Qt::DirectConnection);

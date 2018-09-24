@@ -52,6 +52,16 @@ ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent
 	connect(&helper,&ThreadTabHelper::startFilterTest,this,&ThreadTab::reloadFilters);
 	connect(this,&ThreadTab::testFilters,&helper,&ThreadTabHelper::filterTest);
 	connect(&helper,&ThreadTabHelper::filterTested,this,&ThreadTab::onFilterTest);
+	connect(mw,&MainWindow::updateStyles,[=](QString key, QString value){
+		if(key == "ThreadForm"){
+			foreach(ThreadForm *tf, tfMap){
+				tf->setStyleSheet(value);
+				foreach(QPointer<ThreadForm> clone, tf->clones){
+					if(clone) clone->setStyleSheet(value);
+				}
+			}
+		}
+	});
 
 	workerThread.start();
 
