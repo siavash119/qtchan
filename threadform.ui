@@ -34,7 +34,7 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">color:#bbbbbb;</string>
+   <string notr="true"/>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
    <property name="spacing">

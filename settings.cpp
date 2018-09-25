@@ -9,6 +9,7 @@ Settings::Settings(QTabWidget *parent) :
 	ui(new Ui::Settings)
 {
 	ui->setupUi(this);
+	bColorRegExp.setPattern("background-color[^:]*:\\s*(?<bColor>[^\\s;$]*)?");
 	refreshValues();
 	connect(ui->autoExpandLabel,&ClickableLabel::clicked,this,&Settings::clicked);
 	connect(ui->autoUpdateLabel,&ClickableLabel::clicked,this,&Settings::clicked);
@@ -108,6 +109,11 @@ void Settings::on_styleMainWindowEdit_editingFinished()
 	if(!text.isEmpty()){
 		qDebug().noquote() << "setting style/MainWindow to" << text;
 		settings.setValue("style/MainWindow",text);
+		QRegularExpressionMatch match = bColorRegExp.match(text);
+		if(match.hasMatch()){
+			settings.setValue("style/MainWindow/background-color",match.captured("bColor"));
+		}
+		else settings.setValue("style/MainWindow/background-color",QString());
 		emit update("style/MainWindow",text);
 	}
 }
@@ -119,6 +125,11 @@ void Settings::on_styleThreadFormEdit_editingFinished()
 	if(!text.isEmpty()){
 		qDebug().noquote() << "setting style/ThreadForm to" << text;
 		settings.setValue("style/ThreadForm",text);
+		QRegularExpressionMatch match = bColorRegExp.match(text);
+		if(match.hasMatch()){
+			settings.setValue("style/ThreadForm/background-color",match.captured("bColor"));
+		}
+		else settings.setValue("style/ThreadForm/background-color",QString());
 		emit update("style/ThreadForm",text);
 	}
 

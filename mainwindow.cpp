@@ -29,6 +29,39 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->navBar->hide();
 	ui->treeView->setModel(model);
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+
+
+	selectionModel = ui->treeView->selectionModel();
+	selectionConnection = connect(selectionModel,&QItemSelectionModel::selectionChanged,this,
+								  &MainWindow::onSelectionChanged, Qt::UniqueConnection);
+	settingsView.setParent(this,Qt::Tool
+						   | Qt::WindowMaximizeButtonHint
+						   | Qt::WindowCloseButtonHint);
+	connect(&settingsView,&Settings::update,[=](QString field, QVariant value){
+		if(field == "use4chanPass" && value.toBool() == true){
+			QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+			QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/cookies";
+			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
+		}
+		else if(field == "autoUpdate") emit setAutoUpdate(value.toBool());
+		else if(field == "autoExpand") emit setAutoExpand(value.toBool());
+		else if(field == "style/MainWindow"){
+			this->setStyleSheet(value.toString());
+			emit updateStyles("MainWindow",value.toString());
+		}
+		else if(field == "style/ThreadForm"){
+			emit updateStyles("ThreadForm",value.toString());
+		}
+	});
+	connect(ui->treeView,&TreeView::treeMiddleClicked,model,&TreeModel::removeTab,Qt::DirectConnection);
+	connect(ui->treeView,&TreeView::hideNavBar,ui->navBar,&QWidget::hide,Qt::DirectConnection);
+	connect(model,&TreeModel::selectTab,ui->treeView,&TreeView::selectTab,Qt::DirectConnection);
+	connect(model,&TreeModel::loadFromSearch,this,&MainWindow::loadFromSearch);
+	connect(model,&TreeModel::removingTab,this,&MainWindow::onRemoveTab);
+	connect(&aTab,&ArchiveTab::loadThread,[=](QString threadString){
+		loadFromSearch(threadString,QString(),Q_NULLPTR,true);
+	});
+
 	setStyleSheet(settings.value("style/MainWindow","background-color: #191919; color:white").toString());
 	int fontSize = settings.value("fontSize",14).toInt();
 	if(settings.value("hideMenuBar",false).toBool()) ui->menuBar->hide();
@@ -48,36 +81,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	QList<int> sizes;
 	sizes << 150 << this->width()-150;
 	ui->splitter->setSizes(sizes);
-
-	selectionModel = ui->treeView->selectionModel();
-	selectionConnection = connect(selectionModel,&QItemSelectionModel::selectionChanged,this,
-								  &MainWindow::onSelectionChanged, Qt::UniqueConnection);
-	settingsView.setParent(this,Qt::Tool
-						   | Qt::WindowMaximizeButtonHint
-						   | Qt::WindowCloseButtonHint);
-	connect(&settingsView,&Settings::update,[=](QString field, QVariant value){
-		if(field == "use4chanPass" && value.toBool() == true){
-			QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-			QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/cookies";
-			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
-		}
-		else if(field == "autoUpdate") emit setAutoUpdate(value.toBool());
-		else if(field == "autoExpand") emit setAutoExpand(value.toBool());
-		else if(field == "style/MainWindow"){
-			this->setStyleSheet(value.toString());
-		}
-		else if(field == "style/ThreadForm"){
-			emit updateStyles("ThreadForm",value.toString());
-		}
-	});
-	connect(ui->treeView,&TreeView::treeMiddleClicked,model,&TreeModel::removeTab,Qt::DirectConnection);
-	connect(ui->treeView,&TreeView::hideNavBar,ui->navBar,&QWidget::hide,Qt::DirectConnection);
-	connect(model,&TreeModel::selectTab,ui->treeView,&TreeView::selectTab,Qt::DirectConnection);
-	connect(model,&TreeModel::loadFromSearch,this,&MainWindow::loadFromSearch);
-	connect(model,&TreeModel::removingTab,this,&MainWindow::onRemoveTab);
-	connect(&aTab,&ArchiveTab::loadThread,[=](QString threadString){
-		loadFromSearch(threadString,QString(),Q_NULLPTR,true);
-	});
 	this->setShortcuts();
 }
 

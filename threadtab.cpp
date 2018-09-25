@@ -54,10 +54,19 @@ ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent
 	connect(&helper,&ThreadTabHelper::filterTested,this,&ThreadTab::onFilterTest);
 	connect(mw,&MainWindow::updateStyles,[=](QString key, QString value){
 		if(key == "ThreadForm"){
+			setStyleSheet(value);
 			foreach(ThreadForm *tf, tfMap){
-				tf->setStyleSheet(value);
+				tf->setBackground();
 				foreach(QPointer<ThreadForm> clone, tf->clones){
-					if(clone) clone->setStyleSheet(value);
+					if(clone) clone->setBackground();
+				}
+			}
+		}
+		else if(key == "MainWindow"){
+			foreach(ThreadForm *tf, tfMap){
+				tf->setBackground();
+				foreach(QPointer<ThreadForm> clone, tf->clones){
+					if(clone) clone->setBackground();
 				}
 			}
 		}
@@ -74,6 +83,8 @@ ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent
 	ui->label->setFont(temp);
 	ui->lineEdit->setFont(temp);
 	ui->pushButton->setFont(temp);
+	setStyleSheet(settings.value("style/ThreadForm","color:#bbbbbb;").toString());
+
 	this->setShortcuts();
 	this->installEventFilter(this);
 

@@ -27,26 +27,17 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 {
 	if(root) rootTF = this;
 	ui->setupUi(this);
+	qDebug() << property("objectName").toString();
 	ui->postLayout->setAlignment(static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignLeft));
 	this->board = strings.board;
 	if(strings.thread == "index") this->type = PostType::Thread;
 	else this->type = PostType::Reply;
-
-	if(replyLevel){
-		darkness = darkness*qPow(0.8,replyLevel-1);
-		background.setRgb(darkness,darkness,darkness);
-		ui->hide->setStyleSheet("padding: 0 12px; background-color:"+ background.name());
-		darkness = darkness*0.8;
-		background.setRgb(darkness,darkness,darkness);
-		this->setStyleSheet("background-color:" + background.name() + "; color:#bbbbbb;");
-	}
-
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	setFontSize(settings.value("fontSize",14).toInt());
+	setBackground();
 	ui->quoteWidget->hide();
 //	ui->tim->hide();
 	ui->fileInfo->hide();
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-	setFontSize(settings.value("fontSize",14).toInt());
-	this->setStyleSheet(settings.value("style/ThreadForm","color:#bbbbbb;").toString());
 	connect(ui->hide,&ClickableLabel::clicked,this,&ThreadForm::hideClicked);
 	comQuoteConnection = connect(ui->com,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
 	infoQuoteConnection = connect(ui->info,&QLabel::linkActivated,this,&ThreadForm::quoteClicked);
@@ -54,6 +45,27 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 	ui->com->installEventFilter(this);
 	ui->fileInfo->installEventFilter(this);
 	this->installEventFilter(this);
+}
+
+void ThreadForm::setBackground(){
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	if(replyLevel){
+		QString bColor;
+		if(!settings.value("style/ThreadForm/background-color","").toString().isEmpty())
+			bColor = settings.value("style/ThreadForm/background-color","").toString();
+		else if(!settings.value("style/MainWindow/background-color","").toString().isEmpty())
+			bColor = settings.value("style/MainWindow/background-color","").toString();
+		if(!bColor.isEmpty())background.setNamedColor(bColor);
+		//darkness = darkness*qPow(0.8,replyLevel-1);
+		background.setRgb(background.red()*qPow(0.8,replyLevel-1),
+						  background.green()*qPow(0.8,replyLevel-1),
+						  background.blue()*qPow(0.8,replyLevel-1));
+		QString hidebColor = "#hide{background-color:" % background.name() % "}";
+		background.setRgb(background.red()*0.8,
+						  background.green()*0.8,
+						  background.blue()*0.8);
+		this->setStyleSheet(hidebColor + "*{background-color:" + background.name() +";}");
+	}
 }
 
 void ThreadForm::appendQuote()

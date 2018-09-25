@@ -118,6 +118,7 @@ public slots:
 	void addReply(ThreadForm *tf);
 	void setFontSize(int fontSize);
 	void setImageSize(int imageSize);
+	void setBackground();
 	void downloadedSlot(const QString &path, const QString &type, const QString &message, ClickableLabel *label);
 
 private slots:

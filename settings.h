@@ -2,6 +2,7 @@
 #define SETTINGS_H
 
 #include <QTabWidget>
+#include <QRegularExpression>
 #include <QVariant>
 
 namespace Ui {
@@ -21,6 +22,7 @@ public slots:
 	void clicked();
 private:
 	Ui::Settings *ui;
+	QRegularExpression bColorRegExp;
 protected:
 	void showEvent(QShowEvent *event);
 private slots:
