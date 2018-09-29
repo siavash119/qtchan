@@ -27,7 +27,6 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 {
 	if(root) rootTF = this;
 	ui->setupUi(this);
-	qDebug() << property("objectName").toString();
 	ui->postLayout->setAlignment(static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignLeft));
 	this->board = strings.board;
 	if(strings.thread == "index") this->type = PostType::Thread;
