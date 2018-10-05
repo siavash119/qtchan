@@ -20,7 +20,7 @@ void ThreadTabHelper::startUp(Chan *api, QString board, QString thread, QWidget 
 	title = api->name() % '/' % board % '/' % thread;
 	//TODO check type
 	this->threadUrl = api->threadURL(board,thread);
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	this->expandAll = settings.value("autoExpand",false).toBool();
 	filesPath = api->name() % '/' % board % '/' % thread % '/';
 	QDir().mkpath(filesPath + "thumbs");
@@ -155,7 +155,7 @@ void ThreadTabHelper::loadPosts(QByteArray &postData, bool writeIt){
 	int i;
 	if(!isSticky) i = allPosts.size();
 	else i = 0;
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	bool loadFile = settings.value("autoExpand",false).toBool() || this->expandAll;
 	while(i<length) {
 		Post post = api->post(posts.at(i).toObject(),board,thread);

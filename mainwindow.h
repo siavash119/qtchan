@@ -46,13 +46,6 @@ public:
 	QWidget *currentWidget();
 	Settings settingsView;
 
-private slots:
-	void on_pushButton_clicked();
-	void onSelectionChanged();
-	void on_navBar_returnPressed();
-	void toggleSettingsView();
-	void reloadTabs();
-
 public slots:
 	void focusTree();
 	void focusBar();
@@ -81,6 +74,15 @@ private:
 					 Qt::ConnectionType type = Qt::DirectConnection,
 					 Qt::ShortcutContext context = Qt::ApplicationShortcut);
 	void showHelp();
+	void viewAllTabs();
+
+private slots:
+	void on_pushButton_clicked();
+	void onSelectionChanged();
+	void on_navBar_returnPressed();
+	void toggleSettingsView();
+	void reloadTabs();
+	void onUpdateSettings(QString field, QVariant value);
 
 signals:
 	void requestCatalog(QString);

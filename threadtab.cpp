@@ -29,7 +29,7 @@ ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent
 	info.setParent(this);
 	info.move(this->width()-info.width()-20,this->height()-info.height()-20);
 	info.show();
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	updateTimer.setInterval(60000);
 	connect(&updateTimer,&QTimer::timeout,this,&ThreadTab::getPosts);
 	if(settings.value("autoUpdate").toBool()) {
@@ -216,7 +216,7 @@ QList<ThreadForm*> ThreadTab::checkIfVisible(QList<ThreadForm*> &unseenList)
 
 void ThreadTab::setShortcuts()
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	settings.beginGroup("keybinds");
 
 	QAction *gallery = new QAction(this);

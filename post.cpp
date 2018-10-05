@@ -99,7 +99,7 @@ Post::~Post() {
 /*
 QString Post::quoteColor(QString string)
 {
-	//QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	//QSettings settings;
 	//QColor color = settings.value("quote_color",);
 	string.replace(quotesRegExp,colorString);
 	string.replace(quotelinksRegExp,quoteString);

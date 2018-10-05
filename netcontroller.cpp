@@ -19,13 +19,13 @@ netController::netController(QObject *parent) : QObject(parent)
 	postManager->setCookieJar(new QNetworkCookieJar());
 
 	diskCache = new QNetworkDiskCache(jsonManager);
-	QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/qtchan");
-	diskCache->setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/qtchan");
+	QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/qtchan");
+	diskCache->setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/qtchan");
 	//diskCache->setMaximumCacheSize(1073741824); //1GB cache
 	jsonManager->setCache(diskCache);
 
-	QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/cookies";
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/cookies.conf";
+	QSettings settings;
 	QString cookiesFile = settings.value("cookiesFile",defaultCookies).toString();
 	loadCookies(cookiesFile);
 

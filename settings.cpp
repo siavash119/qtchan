@@ -29,7 +29,7 @@ Settings::~Settings()
 
 void Settings::clicked()
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	QObject *obj = sender();
 	QString sender = obj->objectName();
 	qDebug() << sender;
@@ -72,11 +72,11 @@ void Settings::clicked()
 
 void Settings::refreshValues()
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	ui->autoExpand->setChecked(settings.value("autoExpand",false).toBool());
 	ui->autoUpdate->setChecked(settings.value("autoUpdate",false).toBool());
 	ui->showIndexReplies->setChecked(settings.value("showIndexReplies",false).toBool());
-	ui->sessionFile->setText(settings.value("sessionFile","session.txt").toString());
+	ui->sessionFile->setText(settings.value("sessionFile","session").toString());
 	ui->use4chanPass->setChecked(settings.value("use4chanPass",false).toBool());
 	ui->styleMainWindowEdit->setText(settings.value("style/MainWindow","background-color: #191919; color:white").toString());
 	ui->styleThreadFormEdit->setText(settings.value("style/ThreadForm","color:#bbbbbb;").toString());
@@ -93,7 +93,7 @@ void Settings::showEvent(QShowEvent *event)
 
 void Settings::on_sessionFile_editingFinished()
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	QString text = ui->sessionFile->text();
 	if(!text.isEmpty()){
 		qDebug().noquote() << "setting sessionFile to" << text;
@@ -104,7 +104,7 @@ void Settings::on_sessionFile_editingFinished()
 
 void Settings::on_styleMainWindowEdit_editingFinished()
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	QString text = ui->styleMainWindowEdit->text();
 	if(!text.isEmpty()){
 		qDebug().noquote() << "setting style/MainWindow to" << text;
@@ -120,7 +120,7 @@ void Settings::on_styleMainWindowEdit_editingFinished()
 
 void Settings::on_styleThreadFormEdit_editingFinished()
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	QString text = ui->styleThreadFormEdit->text();
 	if(!text.isEmpty()){
 		qDebug().noquote() << "setting style/ThreadForm to" << text;

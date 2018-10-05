@@ -20,7 +20,7 @@ void BoardTabHelper::startUp(Chan *api, QString board, BoardType type, QString s
 	if(type == BoardType::Index) boardUrl = api->boardURL(board);
 	else boardUrl = api->catalogURL(board);
 	title = api->name() % '/' % board;
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	this->expandAll = settings.value("autoExpand",false).toBool();
 	filesPath = api->name() + '/' + board + "/index/";
 	QDir().mkpath(filesPath+"thumbs");
@@ -89,7 +89,7 @@ void BoardTabHelper::getPostsFinished() {
 	qDebug().noquote().nospace() << "got " << title << ": length is " << QString::number(length);
 	QtConcurrent::run(&BoardTabHelper::writeJson,filesPath,rep);
 	//load new posts
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	bool loadFile = settings.value("autoExpand",false).toBool() || this->expandAll;
 	bool showIndexReplies = settings.value("showIndexReplies",false).toBool();
 	QStringList idFilters = settings.value("filters/"+board+"/id").toStringList();

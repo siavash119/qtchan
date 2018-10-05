@@ -21,7 +21,7 @@ PostForm::PostForm(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->cancel->hide();
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	if(settings.value("use4chanPass", false).toBool() == true){
 		ui->captcha->hide();
 		captchaTimer = Q_NULLPTR;
@@ -165,7 +165,7 @@ void PostForm::verifyCaptcha(){
 
 void PostForm::postIt()
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	if(api->usesCaptcha() && settings.value("use4chanPass", false).toBool() == false && captchaCode.isEmpty()){
 		captcha.getCaptcha();
 		ui->response->setFocus();
@@ -306,7 +306,7 @@ void PostForm::postFinished()
 		}
 	}
 	postReply->deleteLater();
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	if(api->usesCaptcha() && settings.value("use4chanPass", false).toBool() == false){
 		ui->response->show();
 		ui->question->clear();
@@ -318,7 +318,7 @@ void PostForm::postFinished()
 }
 
 void PostForm::postExtraFlags(const QString &postNum){
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	if(!settings.value("extraFlags/enable",false).toBool()
 		|| !(board == "int" || board == "pol" || board == "sp" || board == "int")) return;
 	QString region = settings.value("extraFlags/region",QString()).toString();

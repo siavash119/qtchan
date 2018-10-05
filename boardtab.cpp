@@ -54,12 +54,14 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 		TreeItem *childOf = mw->model->getItem(mw->selectionModel->currentIndex());
 		mw->onNewThread(mw,api,board,threadNum,QString(),childOf);
 	});
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	QFont temp = ui->lineEdit->font();
 	temp.setPointSize(settings.value("fontSize",14).toInt()-2);
 	ui->label->setFont(temp);
 	ui->lineEdit->setFont(temp);
 	ui->pushButton->setFont(temp);
+	setStyleSheet(settings.value("style/ThreadForm","color:#bbbbbb;").toString());
+
 	this->setShortcuts();
 	connect(mw,&MainWindow::setUse4chanPass,&myPostForm,&PostForm::usePass,Qt::QueuedConnection);
 	connect(mw,&MainWindow::setFontSize,this,&BoardTab::setFontSize,Qt::QueuedConnection);
@@ -111,7 +113,7 @@ BoardTab::~BoardTab()
 
 void BoardTab::setShortcuts()
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	settings.beginGroup("keybinds");
 
 	QAction *refresh = new QAction(this);

@@ -23,12 +23,15 @@ MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
+	QCoreApplication::setOrganizationName("qtchan");
+	QCoreApplication::setApplicationName("qtchan");
+	QSettings::setDefaultFormat(QSettings::IniFormat);
 	ui->setupUi(this);
 
 	ui->pushButton->hide();
 	ui->navBar->hide();
 	ui->treeView->setModel(model);
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 
 
 	selectionModel = ui->treeView->selectionModel();
@@ -37,22 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	settingsView.setParent(this,Qt::Tool
 						   | Qt::WindowMaximizeButtonHint
 						   | Qt::WindowCloseButtonHint);
-	connect(&settingsView,&Settings::update,[=](QString field, QVariant value){
-		if(field == "use4chanPass" && value.toBool() == true){
-			QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-			QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/cookies";
-			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
-		}
-		else if(field == "autoUpdate") emit setAutoUpdate(value.toBool());
-		else if(field == "autoExpand") emit setAutoExpand(value.toBool());
-		else if(field == "style/MainWindow"){
-			this->setStyleSheet(value.toString());
-			emit updateStyles("MainWindow",value.toString());
-		}
-		else if(field == "style/ThreadForm"){
-			emit updateStyles("ThreadForm",value.toString());
-		}
-	});
+	connect(&settingsView,&Settings::update,this,&MainWindow::onUpdateSettings);
 	connect(ui->treeView,&TreeView::treeMiddleClicked,model,&TreeModel::removeTab,Qt::DirectConnection);
 	connect(ui->treeView,&TreeView::hideNavBar,ui->navBar,&QWidget::hide,Qt::DirectConnection);
 	connect(model,&TreeModel::selectTab,ui->treeView,&TreeView::selectTab,Qt::DirectConnection);
@@ -61,7 +49,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(&aTab,&ArchiveTab::loadThread,[=](QString threadString){
 		loadFromSearch(threadString,QString(),Q_NULLPTR,true);
 	});
-
 	setStyleSheet(settings.value("style/MainWindow","background-color: #191919; color:white").toString());
 	int fontSize = settings.value("fontSize",14).toInt();
 	if(settings.value("hideMenuBar",false).toBool()) ui->menuBar->hide();
@@ -82,6 +69,35 @@ MainWindow::MainWindow(QWidget *parent) :
 	sizes << 150 << this->width()-150;
 	ui->splitter->setSizes(sizes);
 	this->setShortcuts();
+}
+
+//work around because if you haven't viewed a tab setStyleSheet will segfault
+void MainWindow::viewAllTabs(){
+	int curr = ui->content->currentIndex();
+	int count = ui->content->count();
+	for(int i=0;i<count;i++){
+		ui->content->setCurrentIndex(i);
+	}
+	ui->content->setCurrentIndex(curr);
+}
+
+void MainWindow::onUpdateSettings(QString field, QVariant value){
+	if(field == "use4chanPass" && value.toBool() == true){
+		QSettings settings;
+		QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/cookies.conf";
+		nc.loadCookies(settings.value("passFile",defaultCookies).toString());
+	}
+	else if(field == "autoUpdate") emit setAutoUpdate(value.toBool());
+	else if(field == "autoExpand") emit setAutoExpand(value.toBool());
+	else if(field == "style/MainWindow"){
+		viewAllTabs();
+		setStyleSheet(value.toString());
+		emit updateStyles("MainWindow",value.toString());
+	}
+	else if(field == "style/ThreadForm"){
+		viewAllTabs();
+		emit updateStyles("ThreadForm",value.toString());
+	}
 }
 
 void MainWindow::closeEvent(QCloseEvent *event){
@@ -105,7 +121,7 @@ void MainWindow::onRemoveTab(TreeItem* tn){
 
 void MainWindow::setShortcuts()
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	settings.beginGroup("keybinds");
 	//hiding the menu bar disables other qmenu actions shortcuts
 	addShortcut(QKeySequence(settings.value("hideMenu","F11").toString()),this,[=]{
@@ -144,7 +160,7 @@ void MainWindow::setShortcuts()
 	addShortcut(QKeySequence(settings.value("fileManager","ctrl+o").toString()),this,&MainWindow::openExplorer);
 	addShortcut(QKeySequence(settings.value("textSmaller",QKeySequence(QKeySequence::ZoomOut).toString()).toString()),this,[=](){
 		qDebug() << "decreasing text size";
-		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+		QSettings settings;
 		int fontSize = settings.value("fontSize",14).toInt()-2;
 		if(fontSize < 4) fontSize = 4;
 		settings.setValue("fontSize",fontSize);
@@ -158,7 +174,7 @@ void MainWindow::setShortcuts()
 
 	addShortcut(QKeySequence(settings.value("textBigger",QKeySequence(QKeySequence::ZoomIn).toString()).toString()),this,[=](){
 		qDebug() << "increasing text size";
-		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+		QSettings settings;
 		int fontSize = settings.value("fontSize",14).toInt()+2;
 		settings.setValue("fontSize",fontSize);
 		QFont temp = ui->treeView->font();
@@ -171,7 +187,7 @@ void MainWindow::setShortcuts()
 
 	addShortcut(QKeySequence(settings.value("imagesSmaller","ctrl+9").toString()),this,[=](){
 		qDebug() << "decreasing image size";
-		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+		QSettings settings;
 		int imageSize = settings.value("imageSize",250).toInt()-25;
 		if(imageSize < 25) imageSize = 25;
 		settings.setValue("imageSize",imageSize);
@@ -180,7 +196,7 @@ void MainWindow::setShortcuts()
 
 	addShortcut(QKeySequence(settings.value("imagesBigger","ctrl+0").toString()),this,[=](){
 		qDebug() << "increasing image size";
-		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+		QSettings settings;
 		int imageSize = settings.value("imageSize",250).toInt()+25;
 		settings.setValue("imageSize",imageSize);
 		emit setImageSize(imageSize);
@@ -272,14 +288,14 @@ void MainWindow::setShortcuts()
 	addShortcut(QKeySequence(settings.value("saveSession2","F5").toString()),this,[=]{saveSession();});
 	addShortcut(QKeySequence(settings.value("loadSession","F6").toString()),this,[=]{loadSession();});
 	addShortcut(QKeySequence(settings.value("prevSession","ctrl+F5").toString()),this,[=]{
-		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+		QSettings settings;
 		int slot = settings.value("sessionFileSlot",0).toInt();
 		if(--slot == 0) slot = 9;
 		settings.setValue("sessionFileSlot",slot);
 		qDebug() << "current session slot:" << slot;
 	});
 	addShortcut(QKeySequence(settings.value("nextSession","ctrl+F6").toString()),this,[=]{
-		QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+		QSettings settings;
 		int slot = settings.value("sessionFileSlot",0).toInt();
 		if(++slot == 10) slot = 0;
 		settings.setValue("sessionFileSlot",slot);
@@ -326,7 +342,7 @@ MainWindow::~MainWindow()
 	disconnect(selectionConnection);
 	disconnect(model,&TreeModel::removingTab,this,&MainWindow::onRemoveTab);
 	saveSession();
-	you.saveYou(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/you");
+	you.saveYou(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/you.conf");
 	aTab.close();
 	aTab.deleteLater();
 	delete ui;
@@ -337,7 +353,7 @@ MainWindow::~MainWindow()
 //TODO put toggle functions in 1 function with argument
 void MainWindow::toggleAutoUpdate()
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	bool autoUpdate = !settings.value("autoUpdate").toBool();
 	qDebug () << "setting autoUpdate to" << autoUpdate;
 	settings.setValue("autoUpdate",autoUpdate);
@@ -347,7 +363,7 @@ void MainWindow::toggleAutoUpdate()
 
 void MainWindow::toggleAutoExpand()
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	bool autoExpand = !settings.value("autoExpand").toBool();
 	qDebug () << "setting autoExpand to" << autoExpand;
 	settings.setValue("autoExpand",autoExpand);
@@ -363,8 +379,8 @@ void MainWindow::updateSettings(QString field, QVariant value){
 	else if(field == "use4chanPass"){
 		emit setUse4chanPass(value.toBool());
 		if(value.toBool()){
-			QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
-			QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/cookies";
+			QSettings settings;
+			QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/cookies.conf";
 			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
 		}
 		else{
@@ -605,9 +621,9 @@ void MainWindow::focusBar()
 
 void MainWindow::saveSession(QString slot)
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	if(slot.isEmpty()) slot = settings.value("sessionSlot","0").toString();
-	QString sessionPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/sessions/";
+	QString sessionPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/sessions/";
 	QDir().mkpath(sessionPath);
 	QString sessionFile = sessionPath + settings.value("sessionFile","session").toString();
 	model->saveSessionToFile(sessionFile,slot,ui->treeView->currentIndex());
@@ -615,9 +631,9 @@ void MainWindow::saveSession(QString slot)
 
 void MainWindow::loadSession(QString slot)
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	if(slot.isEmpty()) slot = settings.value("sessionSlot","0").toString();
-	QString sessionFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/sessions/" + settings.value("sessionFile","session").toString();
+	QString sessionFile = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/sessions/" + settings.value("sessionFile","session").toString();
 	QModelIndex qmi = model->loadSessionFromFile(sessionFile,slot);
 	selectionModel->setCurrentIndex(qmi,QItemSelectionModel::ClearAndSelect);
 	ui->treeView->setCurrentIndex(qmi);

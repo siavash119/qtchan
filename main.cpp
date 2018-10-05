@@ -22,11 +22,13 @@ int main(int argc, char *argv[])
 	QApplication a(argc, argv);
 	QCoreApplication::setOrganizationName("qtchan");
 	QCoreApplication::setApplicationName("qtchan");
+	QSettings::setDefaultFormat(QSettings::IniFormat);
+	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation));
 	//QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	//QApplication::setAttribute(QT_SCALE_FACTOR,"1.4");
 	//qputenv("QT_SCALE_FACTOR","0.2");
 	QFont font = QGuiApplication::font();
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	font.setPointSize(settings.value("fontSize",14).toInt());
 	a.setFont(font);
 	//flag path

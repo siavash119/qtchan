@@ -33,7 +33,8 @@ QSet<QString> Filter::findQuotes(QString post)
 //TODO allow change filter file location setting
 //TODO listen for file changes and reload filter
 void Filter::loadFilterFile(){
-	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/filters.conf";
+
+	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/filters.conf";
 	QFile inputFile(filterFile);
 	if (inputFile.open(QIODevice::ReadOnly))
 	{
@@ -52,7 +53,7 @@ void Filter::loadFilterFile(){
 
 void Filter::loadFilterFile2(){
 	filters2.clear();
-	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/filters.conf";
+	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/filters.conf";
 	QFile inputFile(filterFile);
 	if (inputFile.open(QIODevice::ReadOnly))
 	{
@@ -102,7 +103,7 @@ void Filter::addFilter2(QString key, QString newFilter, QString options){
 }
 
 void Filter::insertFilterIntoFile(QString key, QString exp, QString options){
-	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/filters.conf";
+	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/filters.conf";
 	QFile file(filterFile);
 	QTemporaryFile temp;
 	bool found(false);
@@ -137,7 +138,7 @@ void Filter::insertFilterIntoFile(QString key, QString exp, QString options){
 
 //deprecated
 void Filter::writeFilterFile2(){
-	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/filters.conf";
+	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/filters.conf";
 	QFile file(filterFile);
 	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
 		QTextStream out(&file);
@@ -314,7 +315,7 @@ bool Filter::filterMatched(QString post){
 
 void Filter::addFilter(QString &newFilter){
 	filters.insert(QRegularExpression(newFilter));
-	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/filters.conf";
+	QString filterFile = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/filters.conf";
 	QFile file(filterFile);
 	if(file.open(QIODevice::WriteOnly | QIODevice::Append)){
 		newFilter.prepend("\n");
@@ -350,7 +351,7 @@ QString Filter::quoteString("class=\"quote\" style=\"color:#897399\"");
 
 
 QString Filter::replaceQuoteStrings(QString &string){
-	//QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	//QSettings settings;
 	//QColor color = settings.value("quote_color",);
 	string.replace(quoteRegExp,colorString);
 	string.replace(quotelinkRegExp,quoteString);

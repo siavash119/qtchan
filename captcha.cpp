@@ -37,7 +37,7 @@ void Captcha::startUp(Chan *api){
 	lang = QString(links.lang);
 	urlChallenge = links.challengeURL;
 	urlImageBase = links.imageBaseURL;
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	if(settings.value("antiCaptcha/enable",false).toBool() == false){
 		requestChallenge = QNetworkRequest(QUrl(urlChallenge));
 		requestChallenge.setRawHeader(QByteArray("Referer"), QByteArray(links.refererURL.toUtf8()));
@@ -73,7 +73,7 @@ void Captcha::getCaptcha(){
 	loading = true;
 	emit questionInfo(loadingString);
 	replyChallenge = NULL;
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	if(settings.value("antiCaptcha/enable",false).toBool() == true){
 		antiMake();
 	}

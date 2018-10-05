@@ -2,9 +2,10 @@
 #include <QFile>
 #include <QDebug>
 #include <QStandardPaths>
+
 You::You()
 {
-	loadYou(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/qtchan/you");
+	loadYou(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/you.conf");
 }
 
 void You::loadYou(QString fileName){

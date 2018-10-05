@@ -31,7 +31,7 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 	this->board = strings.board;
 	if(strings.thread == "index") this->type = PostType::Thread;
 	else this->type = PostType::Reply;
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	setFontSize(settings.value("fontSize",14).toInt());
 	setBackground();
 	ui->quoteWidget->hide();
@@ -47,7 +47,7 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 }
 
 void ThreadForm::setBackground(){
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	if(replyLevel){
 		QString bColor;
 		if(!settings.value("style/ThreadForm/background-color","").toString().isEmpty())
@@ -63,7 +63,7 @@ void ThreadForm::setBackground(){
 		background.setRgb(background.red()*0.8,
 						  background.green()*0.8,
 						  background.blue()*0.8);
-		this->setStyleSheet(hidebColor + "*{background-color:" + background.name() +";}");
+		this->setStyleSheet(hidebColor + "*{background-color:" + background.name() +"}");
 	}
 }
 
@@ -308,11 +308,11 @@ void ThreadForm::scaleFinished(){
 }
 
 void ThreadForm::loadImage(int labelInd, QString path) {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	int maxWidth = settings.value("imageSize",250).toInt();
 	QFutureWatcher< QPair<int,QImage> > *fw = new QFutureWatcher< QPair<int,QImage> >(this);
-	fw->setFuture(QtConcurrent::run(&ThreadForm::scaleImage,labelInd,path,maxWidth));
-	connect(fw,&QFutureWatcher< QPair<int,QImage> >::finished,this,&ThreadForm::scaleFinished);
+    connect(fw,&QFutureWatcher< QPair<int,QImage> >::finished,this,&ThreadForm::scaleFinished);
+    fw->setFuture(QtConcurrent::run(&ThreadForm::scaleImage,labelInd,path,maxWidth));
 	//Possible to wrap text around image; decided not to for now
 	//no smooth scaling doesn't look good
 	//or scaling then storing image as base64 data takes too much memory
@@ -354,7 +354,7 @@ void ThreadForm::imageClicked()
 
 void ThreadForm::hideClicked()
 {
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope,"qtchan","qtchan");
+	QSettings settings;
 	//deprecated
 	QString filterString = "filters/" % api->name() % '/' % board % "/id";
 	QStringList idFilters = settings.value(filterString).toStringList();
