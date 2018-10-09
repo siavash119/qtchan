@@ -36,11 +36,12 @@ BoardTab::BoardTab(Chan *api, QString board, BoardType type, QString search, QWi
 	connect(&helper,&BoardTabHelper::filterTested,this,&BoardTab::onFilterTest);
 	connect(mw,&MainWindow::updateStyles,[=](QString key, QString value){
 		if(key == "ThreadForm"){
+			setStyleSheet(value);
 			foreach(ThreadForm *tf, tfMap){
-				tf->setStyleSheet(value);
+				tf->setBackground();
 			}
 			foreach(ThreadForm *tf, tfReplyMap){
-				tf->setStyleSheet(value);
+				tf->setBackground();
 			}
 		}
 	});
