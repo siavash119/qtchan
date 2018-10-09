@@ -107,8 +107,9 @@ void MainWindow::closeEvent(QCloseEvent *event){
 
 void MainWindow::onRemoveTab(TreeItem* tn){
 	tn->tab->deleteLater();
+	TreeItem *parent = tn->parent;
 	tabs.remove(tn->tab);
-	QWidget *cw = currentWidget();
+	QWidget *cw = (parent->childCount() > 0) ? currentWidget() : parent->tab;
 	if(!cw) return;
 	Tab current = tabs.value(cw);
 	if(!current.tn) return;
