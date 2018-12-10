@@ -30,6 +30,19 @@ ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent
 	info.move(this->width()-info.width()-20,this->height()-info.height()-20);
 	info.show();
 	QSettings settings;
+	vsb = ui->scrollArea->verticalScrollBar();
+	connect(vsb,&QScrollBar::sliderMoved,[=](int value){
+		if(value == vsb->maximum()) atBottom = true;
+		else atBottom = false;
+	});
+	connect(vsb,&QScrollBar::rangeChanged,[=](int min, int max){
+		QSettings settings;
+		(void)min;
+		if(atBottom &&
+				((this == mw->currentTab && settings.value("autoScrollActive",false).toBool())
+				 || (settings.value("autoScrollBackground",false).toBool() && this != mw->currentTab)))
+			vsb->setValue(max);
+	});
 	updateTimer.setInterval(60000);
 	connect(&updateTimer,&QTimer::timeout,this,&ThreadTab::getPosts);
 	if(settings.value("autoUpdate").toBool()) {
@@ -435,6 +448,11 @@ void ThreadTab::gallery()
 	QProcess().startDetached(command,arguments);
 }
 
+bool ThreadTab::vsbAtMax(){
+	if(vsb->value() == vsb->maximum()) return true;
+	else return false;
+}
+
 void ThreadTab::onNewTF(Post post, ThreadFormStrings strings, bool loadFile){
 	ThreadForm *tf = new ThreadForm(api,strings,true,loadFile,this);
 	tf->load(post);
@@ -443,6 +461,7 @@ void ThreadTab::onNewTF(Post post, ThreadFormStrings strings, bool loadFile){
 		tf->hide();
 		info.hidden++;
 	}
+	atBottom = vsbAtMax();
 	ui->threads->addWidget(tf);
 	tfMap.insert(post.no,tf);
 	connect(tf,&ThreadForm::floatLink,this,&ThreadTab::floatReply);
@@ -456,7 +475,6 @@ void ThreadTab::onNewTF(Post post, ThreadFormStrings strings, bool loadFile){
 	info.files += post.files.size();
 	info.unseen++;
 	info.updateFields();
-	//if(this == mw->currentTab) QCoreApplication::processEvents();
 }
 
 void ThreadTab::onAddReply(QString orig, QString no, bool isYou){
@@ -474,6 +492,7 @@ void ThreadTab::onAddNotification(QString no){
 }
 
 void ThreadTab::removeTF(ThreadForm *tf){
+	atBottom = vsbAtMax();
 	tf->hide();
 	if(!tf->seen) {
 		formsUnseen--;

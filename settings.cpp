@@ -12,12 +12,16 @@ Settings::Settings(QTabWidget *parent) :
 	bColorRegExp.setPattern("background-color[^:]*:\\s*(?<bColor>[^\\s;$]*)?");
 	refreshValues();
 	connect(ui->autoExpandLabel,&ClickableLabel::clicked,this,&Settings::clicked);
-	connect(ui->autoUpdateLabel,&ClickableLabel::clicked,this,&Settings::clicked);
 	connect(ui->sessionFileLabel,&ClickableLabel::clicked,this,&Settings::clicked);
+	connect(ui->autoUpdateLabel,&ClickableLabel::clicked,this,&Settings::clicked);
+	connect(ui->autoScrollActiveLabel,&ClickableLabel::clicked,this,&Settings::clicked);
+	connect(ui->autoScrollBackgroundLabel,&ClickableLabel::clicked,this,&Settings::clicked);
 	connect(ui->showIndexRepliesLabel,&ClickableLabel::clicked,this,&Settings::clicked);
 	connect(ui->use4chanPassLabel,&ClickableLabel::clicked,this,&Settings::clicked);
 	connect(ui->autoExpand,&QCheckBox::clicked,this,&Settings::clicked);
 	connect(ui->autoUpdate,&QCheckBox::clicked,this,&Settings::clicked);
+	connect(ui->autoScrollActive,&QCheckBox::clicked,this,&Settings::clicked);
+	connect(ui->autoScrollBackground,&QCheckBox::clicked,this,&Settings::clicked);
 	connect(ui->showIndexReplies,&QCheckBox::clicked,this,&Settings::clicked);
 	connect(ui->use4chanPass,&QCheckBox::clicked,this,&Settings::clicked);
 }
@@ -32,7 +36,6 @@ void Settings::clicked()
 	QSettings settings;
 	QObject *obj = sender();
 	QString sender = obj->objectName();
-	qDebug() << sender;
 	if(sender == "sessionFileLabel") {
 		QString sessionFile = ui->sessionFile->text();
 		qDebug () << "setting sessionFile to" << sessionFile;
@@ -53,6 +56,20 @@ void Settings::clicked()
 		settings.setValue("autoUpdate",autoUpdate);
 		emit update("autoUpdate", autoUpdate);
 		ui->autoUpdate->setChecked(autoUpdate);
+	}
+	else if(sender == "autoScrollActiveLabel" || sender == "autoScrollActive") {
+		bool autoScrollActive = !settings.value("autoScrollActive", !ui->autoScrollActive->isChecked()).toBool();
+		qDebug () << "setting autoScrollActive to" << autoScrollActive;
+		settings.setValue("autoScrollActive",autoScrollActive);
+		emit update("autoScrollActive", autoScrollActive);
+		ui->autoScrollActive->setChecked(autoScrollActive);
+	}
+	else if(sender == "autoScrollBackgroundLabel" || sender == "autoScrollBackground") {
+		bool autoScrollBackground = !settings.value("autoScrollBackground", !ui->autoScrollBackground->isChecked()).toBool();
+		qDebug () << "setting autoScrollBackground to" << autoScrollBackground;
+		settings.setValue("autoScrollBackground",autoScrollBackground);
+		emit update("autoScrollBackground", autoScrollBackground);
+		ui->autoScrollBackground->setChecked(autoScrollBackground);
 	}
 	else if(sender == "showIndexRepliesLabel" || sender == "showIndexReplies") {
 		bool showIndexReplies = !settings.value("showIndexReplies", !ui->showIndexReplies->isChecked()).toBool();
@@ -75,6 +92,8 @@ void Settings::refreshValues()
 	QSettings settings;
 	ui->autoExpand->setChecked(settings.value("autoExpand",false).toBool());
 	ui->autoUpdate->setChecked(settings.value("autoUpdate",false).toBool());
+	ui->autoScrollActive->setChecked(settings.value("autoScrollActive",false).toBool());
+	ui->autoScrollBackground->setChecked(settings.value("autoScrollBackground",false).toBool());
 	ui->showIndexReplies->setChecked(settings.value("showIndexReplies",false).toBool());
 	ui->sessionFile->setText(settings.value("sessionFile","session").toString());
 	ui->use4chanPass->setChecked(settings.value("use4chanPass",false).toBool());

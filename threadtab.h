@@ -49,6 +49,8 @@ public:
 	ThreadForm* tfAtTop();
 	ThreadForm* tfAtBottom();
 	QString status;
+	QScrollBar *vsb;
+	bool atBottom = false;
 
 public slots:
 	//void addStretch();
@@ -70,6 +72,7 @@ public slots:
 	void getPosts();
 	void onSetRegion(QString post_nr, QString region);
 	void onFilterTest(QString no, bool filtered);
+	bool vsbAtMax();
 
 	//void checkScroll();
 

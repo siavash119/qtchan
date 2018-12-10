@@ -285,6 +285,10 @@ QPair<int,QImage> ThreadForm::scaleImage(int labelInd, QString path, int scale){
 
 void ThreadForm::setPixmap(int ind, QPixmap scaled){
 	ClickableLabel *label = labels.at(ind);
+	if(strings.thread != "index"){
+		ThreadTab *tt = static_cast<ThreadTab*>(tab);
+		tt->atBottom = tt->vsbAtMax();
+	}
 	label->setPixmap(scaled);
 	//label->setFixedSize(scaled.size());
 	//label->show();
@@ -482,6 +486,11 @@ void ThreadForm::postMenu(){
 
 void ThreadForm::insert(ThreadForm *tf)
 {
+	if(strings.thread != "index"){
+		ThreadTab *tt = static_cast<ThreadTab*>(tab);
+		//tt->atBottom = tt->vsbAtMax();
+		tt->atBottom = false;
+	}
 	ThreadForm *newtf = tf->clone(replyLevel);
 	inserted.insert(tf->post.no,newtf);
 	QMetaObject::Connection removeOnDestroy = connect(newtf,&ThreadForm::destroyed,this,&ThreadForm::removeFromInserted);

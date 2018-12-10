@@ -21,6 +21,32 @@
     <string>General</string>
    </attribute>
    <layout class="QGridLayout" name="gridLayout">
+    <item row="2" column="2">
+     <widget class="QCheckBox" name="autoUpdate">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="0">
+     <widget class="ClickableLabel" name="showIndexRepliesLabel">
+      <property name="font">
+       <font>
+        <pointsize>16</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Show replies on board index</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="2">
+     <widget class="QCheckBox" name="showIndexReplies">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="0">
      <widget class="ClickableLabel" name="autoExpandLabel">
       <property name="font">
@@ -39,7 +65,7 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="1">
+    <item row="0" column="2">
      <widget class="QCheckBox" name="autoExpand">
       <property name="text">
        <string/>
@@ -64,15 +90,6 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="sessionFile">
-      <property name="font">
-       <font>
-        <pointsize>16</pointsize>
-       </font>
-      </property>
-     </widget>
-    </item>
     <item row="2" column="0">
      <widget class="ClickableLabel" name="autoUpdateLabel">
       <property name="font">
@@ -88,33 +105,16 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
-     <widget class="QCheckBox" name="autoUpdate">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="ClickableLabel" name="showIndexRepliesLabel">
+    <item row="1" column="2">
+     <widget class="QLineEdit" name="sessionFile">
       <property name="font">
        <font>
         <pointsize>16</pointsize>
        </font>
       </property>
-      <property name="text">
-       <string>Show replies on board index</string>
-      </property>
      </widget>
     </item>
-    <item row="3" column="1">
-     <widget class="QCheckBox" name="showIndexReplies">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
+    <item row="9" column="0">
      <widget class="ClickableLabel" name="use4chanPassLabel">
       <property name="font">
        <font>
@@ -129,10 +129,54 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="1">
+    <item row="9" column="2">
      <widget class="QCheckBox" name="use4chanPass">
       <property name="text">
        <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="2">
+     <widget class="QCheckBox" name="autoScrollBackground">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="2">
+     <widget class="QCheckBox" name="autoScrollActive">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="ClickableLabel" name="autoScrollActiveLabel">
+      <property name="font">
+       <font>
+        <pointsize>16</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Auto Scroll Active</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="ClickableLabel" name="autoScrollBackgroundLabel">
+      <property name="font">
+       <font>
+        <pointsize>16</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Auto Scroll Background</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>
@@ -266,6 +310,25 @@
    <header>clickablelabel.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>autoExpand</tabstop>
+  <tabstop>sessionFile</tabstop>
+  <tabstop>autoUpdate</tabstop>
+  <tabstop>autoScrollActive</tabstop>
+  <tabstop>autoScrollBackground</tabstop>
+  <tabstop>showIndexReplies</tabstop>
+  <tabstop>use4chanPass</tabstop>
+  <tabstop>styleMainWindowEdit</tabstop>
+  <tabstop>styleThreadFormEdit</tabstop>
+  <tabstop>stylePostFormEdit</tabstop>
+  <tabstop>styleNotificationEdit</tabstop>
+  <tabstop>styleArchiveEdit</tabstop>
+  <tabstop>styleMainWindowEdit_2</tabstop>
+  <tabstop>styleThreadFormEdit_2</tabstop>
+  <tabstop>stylePostFormEdit_2</tabstop>
+  <tabstop>styleNotificationEdit_2</tabstop>
+  <tabstop>styleArchiveEdit_2</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
