@@ -36,11 +36,8 @@ ThreadTab::ThreadTab(Chan *api, QString &board, QString &thread, QWidget *parent
 		else atBottom = false;
 	});
 	connect(vsb,&QScrollBar::rangeChanged,[=](int min, int max){
-		QSettings settings;
 		(void)min; (void)max;
-		bool scrollSettings = ((this == mw->currentTab && settings.value("autoScrollActive",false).toBool())
-					 || (settings.value("autoScrollBackground",false).toBool() && this != mw->currentTab));
-		if(atBottom && scrollSettings)
+		if(atBottom)
 			vsb->triggerAction(QAbstractSlider::SliderToMaximum);
 	});
 	updateTimer.setInterval(60000);
@@ -449,7 +446,10 @@ void ThreadTab::gallery()
 }
 
 bool ThreadTab::vsbAtMax(){
-	if(vsb->value() != 0 && vsb->value() == vsb->maximum()) return true;
+	QSettings settings;
+	bool scrollSettings = ((this == mw->currentTab && settings.value("autoScrollActive",false).toBool())
+	|| (settings.value("autoScrollBackground",false).toBool() && this != mw->currentTab));
+	if(scrollSettings && vsb->value() != 0 && vsb->value() == vsb->maximum()) return true;
 	else return false;
 }
 
