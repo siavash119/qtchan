@@ -447,10 +447,9 @@ void ThreadTab::gallery()
 
 bool ThreadTab::vsbAtMax(){
 	QSettings settings;
-	bool scrollSettings = ((this == mw->currentTab && settings.value("autoScrollActive",false).toBool())
-	|| (settings.value("autoScrollBackground",false).toBool() && this != mw->currentTab));
-	if(scrollSettings && vsb->value() != 0 && vsb->value() == vsb->maximum()) return true;
-	else return false;
+	return ((this == mw->currentTab && settings.value("autoScrollActive",false).toBool())
+	|| (settings.value("autoScrollBackground",false).toBool() && this != mw->currentTab))
+	&& vsb->value() != 0 && vsb->value() == vsb->maximum();
 }
 
 void ThreadTab::onNewTF(Post post, ThreadFormStrings strings, bool loadFile){
