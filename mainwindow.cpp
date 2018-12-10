@@ -107,6 +107,9 @@ void MainWindow::closeEvent(QCloseEvent *event){
 
 void MainWindow::onRemoveTab(TreeItem* tn){
 	tn->tab->deleteLater();
+	Tab deletingTab = tabs.value(tn->tab);
+	if(closedList.size() == 100) closedList.pop_front();
+	closedList.append(qMakePair(deletingTab.query,deletingTab.display));
 	TreeItem *parent = tn->parent;
 	tabs.remove(tn->tab);
 	QWidget *cw = (parent->childCount() > 0) ? currentWidget() : parent->tab;
@@ -301,6 +304,13 @@ void MainWindow::setShortcuts()
 		if(++slot == 10) slot = 0;
 		settings.setValue("sessionFileSlot",slot);
 		qDebug() << "current session slot:" << slot;
+	});
+
+	addShortcut(QKeySequence(settings.value("undoCloseTab","ctrl+shift+t").toString()),this,[=]{
+		if(!closedList.length()) return;
+		QPair<QString, QString> tabInfo = closedList.last();
+		loadFromSearch(tabInfo.first, tabInfo.second, Q_NULLPTR, false);
+		closedList.pop_back();
 	});
 }
 

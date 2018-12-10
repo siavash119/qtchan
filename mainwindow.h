@@ -45,6 +45,7 @@ public:
 	void deleteSelected();
 	QWidget *currentWidget();
 	Settings settingsView;
+	QList< QPair < QString,QString> > closedList;
 
 public slots:
 	void focusTree();

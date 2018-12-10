@@ -46,6 +46,7 @@ packer -S qtchan
 * F3 focuses the tree, F4 focuses the content
 * ctrl+tab ctrl+shift+tab, ctrl+1-4 to switch tabs
 * ctrl+w or delete to close tab
+* ctrl+shift+t to undo close tab (does not keep structure)
 * ctrl+q to quit
 ### pages
 * #j and #k scroll by post(e.g. 5j, k)
@@ -87,6 +88,7 @@ prevParent=ctrl+2
 nextParent=ctrl+3
 lastTab=ctrl+4
 closeTab=ctrl+w
+undoCloseTab=ctrl+shift+t
 closeTab2=delete
 navBar=ctrl+l
 autoUpdate=ctrl+u
