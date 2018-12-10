@@ -449,7 +449,7 @@ void ThreadTab::gallery()
 }
 
 bool ThreadTab::vsbAtMax(){
-	if(vsb->value() == vsb->maximum()) return true;
+	if(vsb->isEnabled() && vsb->value() == vsb->maximum()) return true;
 	else return false;
 }
 
