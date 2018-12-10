@@ -95,7 +95,7 @@ void ThreadForm::setText(QString text)
 }
 
 QString ThreadForm::infoString(){
-	tfInfoString = "<span style=\"color: rgb(152, 125, 62); font-weight: bold;\">" % post.sub % "</span> " +
+	tfInfoString = "<span style=\"color: rgb(152, 125, 62); font-weight: bold;\">" % post.sub % "</span> " %
 			"<span style=\"color: rgb(163, 68, 67);\">" % post.name % "</span> " %
 			strings.countryString % regionString %
 			"<span>" % post.realNow % "</span> " %
@@ -311,8 +311,8 @@ void ThreadForm::loadImage(int labelInd, QString path) {
 	QSettings settings;
 	int maxWidth = settings.value("imageSize",250).toInt();
 	QFutureWatcher< QPair<int,QImage> > *fw = new QFutureWatcher< QPair<int,QImage> >(this);
-    connect(fw,&QFutureWatcher< QPair<int,QImage> >::finished,this,&ThreadForm::scaleFinished);
-    fw->setFuture(QtConcurrent::run(&ThreadForm::scaleImage,labelInd,path,maxWidth));
+	connect(fw,&QFutureWatcher< QPair<int,QImage> >::finished,this,&ThreadForm::scaleFinished);
+	fw->setFuture(QtConcurrent::run(&ThreadForm::scaleImage,labelInd,path,maxWidth));
 	//Possible to wrap text around image; decided not to for now
 	//no smooth scaling doesn't look good
 	//or scaling then storing image as base64 data takes too much memory
