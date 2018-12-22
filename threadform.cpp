@@ -53,16 +53,16 @@ void ThreadForm::setBackground(){
 		if(!settings.value("style/ThreadForm/background-color","").toString().isEmpty())
 			bColor = settings.value("style/ThreadForm/background-color","").toString();
 		else if(!settings.value("style/MainWindow/background-color","").toString().isEmpty())
-			bColor = settings.value("style/MainWindow/background-color","").toString();
-		if(!bColor.isEmpty())background.setNamedColor(bColor);
+			bColor = settings.value("style/MainWindow/background-color","#191919").toString();
+		background.setNamedColor(bColor);
 		//darkness = darkness*qPow(0.8,replyLevel-1);
-		background.setRgb(background.red()*qPow(0.8,replyLevel-1),
-						  background.green()*qPow(0.8,replyLevel-1),
-						  background.blue()*qPow(0.8,replyLevel-1));
+		background.setRgb(static_cast<int>(background.red()*qPow(0.8,replyLevel-1)),
+			static_cast<int>(background.green()*qPow(0.8,replyLevel-1)),
+			static_cast<int>(background.blue()*qPow(0.8,replyLevel-1)));
 		QString hidebColor = "#hide{background-color:" % background.name() % "}";
-		background.setRgb(background.red()*0.8,
-						  background.green()*0.8,
-						  background.blue()*0.8);
+		background.setRgb(static_cast<int>(background.red()*0.8),
+			static_cast<int>(background.green()*0.8),
+			static_cast<int>(background.blue()*0.8));
 		this->setStyleSheet(hidebColor + "*{background-color:" + background.name() +"}");
 	}
 }
@@ -649,7 +649,7 @@ void ThreadForm::on_info_linkHovered(const QString &link)
 			emit deleteFloat();
 		}
 		else if(link.startsWith("#p")) {
-			qDebug().noquote() << "hovering" << link;
+			//qDebug().noquote() << "hovering" << link;
 			emit floatLink(link.mid(2),replyLevel);
 		} else {
 			//TODO check mouse cursor?

@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationName("qtchan");
 	QSettings::setDefaultFormat(QSettings::IniFormat);
 	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation));
+	QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/");
 	//QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	//QApplication::setAttribute(QT_SCALE_FACTOR,"1.4");
 	//qputenv("QT_SCALE_FACTOR","0.2");

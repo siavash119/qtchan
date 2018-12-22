@@ -10,6 +10,7 @@ Settings::Settings(QTabWidget *parent) :
 {
 	ui->setupUi(this);
 	bColorRegExp.setPattern("background-color[^:]*:\\s*(?<bColor>[^\\s;$]*)?");
+	setTabColor();
 	refreshValues();
 	connect(ui->autoExpandLabel,&ClickableLabel::clicked,this,&Settings::clicked);
 	connect(ui->sessionFileLabel,&ClickableLabel::clicked,this,&Settings::clicked);
@@ -29,6 +30,22 @@ Settings::Settings(QTabWidget *parent) :
 Settings::~Settings()
 {
 	delete ui;
+}
+
+void Settings::setTabColor(){
+	QColor bColor;
+	QSettings settings;
+	bColor.setNamedColor(settings.value("style/MainWindow/background-color","#191919").toString());
+	//darkness = darkness*qPow(0.8,replyLevel-1);
+	bColor.setRgb(static_cast<int>(bColor.red()*0.8),
+					static_cast<int>(bColor.green()*0.8),
+					static_cast<int>(bColor.blue()*0.8));
+	QString tabStyle = "QTabBar::tab{background-color:" % bColor.name() % ";padding:5px 10px; border:1px solid white}";
+	bColor.setRgb(static_cast<int>(bColor.red()*0.8),
+					static_cast<int>(bColor.green()*0.8),
+					static_cast<int>(bColor.blue()*0.8));
+	tabStyle = tabStyle % "QTabBar::tab:selected{background-color:" % bColor.name() % "}";
+	this->setStyleSheet(tabStyle);
 }
 
 void Settings::clicked()
@@ -133,6 +150,7 @@ void Settings::on_styleMainWindowEdit_editingFinished()
 			settings.setValue("style/MainWindow/background-color",match.captured("bColor"));
 		}
 		else settings.setValue("style/MainWindow/background-color",QString());
+		setTabColor();
 		emit update("style/MainWindow",text);
 	}
 }

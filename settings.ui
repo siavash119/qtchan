@@ -13,9 +13,6 @@
   <property name="windowTitle">
    <string>Settings</string>
   </property>
-  <property name="currentIndex">
-   <number>0</number>
-  </property>
   <widget class="QWidget" name="general">
    <attribute name="title">
     <string>General</string>

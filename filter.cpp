@@ -91,7 +91,7 @@ void Filter::loadFilterFile2(){
 		}
 		inputFile.close();
 	}
-	qDebug() << "########" << endl << "FILTERS" << endl << filters2 << endl << "#########";
+	qDebug() << "#########" << endl << "FILTERS" << endl << filters2 << endl << "#########";
 }
 
 void Filter::addFilter2(QString key, QString newFilter, QString options){

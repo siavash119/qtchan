@@ -13,7 +13,7 @@ class Settings : public QTabWidget
 {
 	Q_OBJECT
 public:
-	explicit Settings(QTabWidget *parent = 0);
+	explicit Settings(QTabWidget *parent = Q_NULLPTR);
 	void refreshValues();
 	~Settings();
 signals:
@@ -23,6 +23,7 @@ public slots:
 private:
 	Ui::Settings *ui;
 	QRegularExpression bColorRegExp;
+	void setTabColor();
 protected:
 	void showEvent(QShowEvent *event);
 private slots:

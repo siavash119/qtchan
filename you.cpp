@@ -40,7 +40,7 @@ void You::loadYou(QString fileName){
 		updateRegExp(api,board);
 	}
 	file.close();
-	qDebug() << "######" << endl << "YOU" << endl << yourPosts << endl << "########";
+	qDebug() << "#########" << endl << "YOU" << endl << yourPosts << endl << "#########";
 }
 
 void You::saveYou(const QString fileName){

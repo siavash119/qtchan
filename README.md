@@ -174,7 +174,7 @@ general$op:only
 F7 reloads and applies the filters.conf file
 
 ## Using 4chan pass to post
-Create a file ~/.config/qtchan/cookies like below. Look at your browser cookies for values.
+Create a file ~/.config/qtchan/cookies.conf like below. Look at your browser cookies for values.
 Open settings with Ctrl+P and check Use 4chan pass.
 ```
 4chan_pass:your_4chanpass
