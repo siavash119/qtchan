@@ -34,8 +34,11 @@ PostForm::PostForm(QWidget *parent) :
 		connect(captchaTimer,&QTimer::timeout,[=]{
 			ui->question->setText("Captcha code expired");
 			ui->question->show();
+			ui->response->show();
 			captchaCode = "";
-			captcha.getCaptcha();
+			captcha.loaded = false;
+			captcha.loading = false;
+			//captcha.getCaptcha();
 		});
 	}
 	this->setObjectName("PostForm");
@@ -154,6 +157,7 @@ void PostForm::verifyCaptcha(){
 				ui->challenge->hide();
 				ui->response->hide();
 				if(captchaTimer && captchaTimer->isActive()) captchaTimer->stop();
+				ui->submit->setFocus();
 				captchaTimer->start(120000);
 			}
 			else{
