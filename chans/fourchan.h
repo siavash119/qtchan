@@ -16,7 +16,7 @@ class FourChan : public Chan
 public:
 	inline FourChan(){
 		myName = "4chan";
-		myRegUrl.setPattern("^(4chan/|(?:(?:https?://)?boards\\.4chan\\.org/))?(?<url>.*)$");
+		myRegUrl.setPattern("^(4chan/|(?:(?:https?://)?boards\\.4chan(?:nel)?\\.org/))?(?<url>.*)$");
 		myRegUrl.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
 		myRegToThread.setPattern("^/?(?<board>\\w+)(?:/thread)?/(?<thread>\\d+)(?:#p\\d+)?$");
 		myRegToThread.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
