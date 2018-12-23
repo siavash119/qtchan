@@ -130,7 +130,7 @@ void PostForm::verifyCaptcha(){
 	QNetworkRequest request(QUrl(api->captchaLinks().challengeURL));
 	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 	request.setRawHeader(QByteArray("Referer"),api->captchaLinks().challengeURL.toUtf8());
-	captchaReply = nc.captchaManager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+	captchaReply = nc->captchaManager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
 	//possible segfault if threadtab/boardtab closes while waiting
 	captchaConnection = connect(captchaReply,&QNetworkReply::finished,[=]{
 		captchaReply->deleteLater();
@@ -238,7 +238,7 @@ void PostForm::postIt()
 
 	QUrl url = QUrl(api->postURL(board));
 	QNetworkRequest request(url);
-	postReply = nc.postManager->post(request, multiPart);
+	postReply = nc->postManager->post(request, multiPart);
 	postConnection = connect(postReply, &QNetworkReply::finished, this, &PostForm::postFinished);
 	multiPart->setParent(postReply); // delete the multiPart with the reply
 	isPosting=true;
@@ -329,7 +329,7 @@ void PostForm::postExtraFlags(const QString &postNum){
 	postData.addQueryItem("regions",region);
 	QNetworkRequest request(QUrl("https://flagtism.drunkensailor.org/int/post_flag_api2.php"));
 	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-	QNetworkReply *reply = nc.postManager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+	QNetworkReply *reply = nc->postManager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
 	flagsConnection = connect(reply,&QNetworkReply::finished,[=]{
 		reply->deleteLater();
 		if(!reply) return;

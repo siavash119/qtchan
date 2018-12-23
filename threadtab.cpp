@@ -164,13 +164,13 @@ void ThreadTab::onThreadStatus(QString status, QString value){
 
 void ThreadTab::getPosts(){
 	qDebug().noquote().nospace() << "getting " << helper.title;
-	postsReply = nc.jsonManager->get(helper.request);
+	postsReply = nc->jsonManager->get(helper.request);
 	connect(postsReply,&QNetworkReply::finished,&helper,&ThreadTabHelper::getPostsFinished,Qt::UniqueConnection);
 }
 
 void ThreadTab::onGetFlags(QByteArray data){
 	qDebug().noquote().nospace() << "getting extra flags for " << helper.title;
-	flagsReply = nc.fileManager->post(helper.requestFlags,data);
+	flagsReply = nc->fileManager->post(helper.requestFlags,data);
 	connect(flagsReply,&QNetworkReply::finished,&helper,&ThreadTabHelper::loadExtraFlags,Qt::UniqueConnection);
 }
 

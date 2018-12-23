@@ -48,60 +48,33 @@ void Settings::setTabColor(){
 	this->setStyleSheet(tabStyle);
 }
 
+void Settings::setSetting(QString setting, QVariant value, QCheckBox *box){
+	QSettings settings;
+	qDebug().noquote() << "setting" << setting << "to" << value.toString();
+	settings.setValue(setting,value);
+	emit update(setting, value);
+	if(box) box->setChecked(value.toBool());
+}
+
 void Settings::clicked()
 {
 	QSettings settings;
 	QObject *obj = sender();
 	QString sender = obj->objectName();
-	if(sender == "sessionFileLabel") {
-		QString sessionFile = ui->sessionFile->text();
-		qDebug () << "setting sessionFile to" << sessionFile;
-		settings.setValue("sessionFile",sessionFile);
-		emit update("sessionFile", sessionFile);
-		//refreshValues();
-	}
-	else if(sender == "autoExpandLabel" || sender == "autoExpand") {
-		bool autoExpand = !settings.value("autoExpand", !ui->autoExpand->isChecked()).toBool();
-		qDebug () << "setting autoExpand to" << autoExpand;
-		settings.setValue("autoExpand",autoExpand);
-		emit update("autoExpand", autoExpand);
-		ui->autoExpand->setChecked(autoExpand);
-	}
-	else if(sender == "autoUpdateLabel" || sender == "autoUpdate") {
-		bool autoUpdate = !settings.value("autoUpdate", !ui->autoUpdate->isChecked()).toBool();
-		qDebug () << "setting autoUpdate to" << autoUpdate;
-		settings.setValue("autoUpdate",autoUpdate);
-		emit update("autoUpdate", autoUpdate);
-		ui->autoUpdate->setChecked(autoUpdate);
-	}
-	else if(sender == "autoScrollActiveLabel" || sender == "autoScrollActive") {
-		bool autoScrollActive = !settings.value("autoScrollActive", !ui->autoScrollActive->isChecked()).toBool();
-		qDebug () << "setting autoScrollActive to" << autoScrollActive;
-		settings.setValue("autoScrollActive",autoScrollActive);
-		emit update("autoScrollActive", autoScrollActive);
-		ui->autoScrollActive->setChecked(autoScrollActive);
-	}
-	else if(sender == "autoScrollBackgroundLabel" || sender == "autoScrollBackground") {
-		bool autoScrollBackground = !settings.value("autoScrollBackground", !ui->autoScrollBackground->isChecked()).toBool();
-		qDebug () << "setting autoScrollBackground to" << autoScrollBackground;
-		settings.setValue("autoScrollBackground",autoScrollBackground);
-		emit update("autoScrollBackground", autoScrollBackground);
-		ui->autoScrollBackground->setChecked(autoScrollBackground);
-	}
-	else if(sender == "showIndexRepliesLabel" || sender == "showIndexReplies") {
-		bool showIndexReplies = !settings.value("showIndexReplies", !ui->showIndexReplies->isChecked()).toBool();
-		qDebug () << "setting showIndexReplies to" << showIndexReplies;
-		settings.setValue("showIndexReplies",showIndexReplies);
-		emit update("showIndexReplies", showIndexReplies);
-		ui->showIndexReplies->setChecked(showIndexReplies);
-	}
-	else if(sender == "use4chanPassLabel" || sender == "use4chanPass") {
-		bool use4chanPass = !settings.value("use4chanPass", !ui->use4chanPass->isChecked()).toBool();
-		qDebug () << "setting use4chanPass to" << use4chanPass;
-		settings.setValue("use4chanPass",use4chanPass);
-		emit update("use4chanPass", use4chanPass);
-		ui->use4chanPass->setChecked(use4chanPass);
-	}
+	if(sender == "sessionFileLabel")
+		setSetting("sessionFile",ui->sessionFile->text());
+	else if(sender == "autoExpandLabel" || sender == "autoExpand")
+		setSetting("autoExpand",!settings.value("autoExpand").toBool(),ui->autoExpand);
+	else if(sender == "autoUpdateLabel" || sender == "autoUpdate")
+		setSetting("autoUpdate",!settings.value("autoUpdate").toBool(),ui->autoUpdate);
+	else if(sender == "autoScrollActiveLabel" || sender == "autoScrollActive")
+		setSetting("autoScrollActive",!settings.value("autoScrollActive").toBool(),ui->autoScrollActive);
+	else if(sender == "autoScrollBackgroundLabel" || sender == "autoScrollBackground")
+		setSetting("autoScrollBackground",!settings.value("autoScrollBackground").toBool(),ui->autoScrollBackground);
+	else if(sender == "showIndexRepliesLabel" || sender == "showIndexReplies")
+		setSetting("showIndexReplies",!settings.value("showIndexReplies").toBool(),ui->showIndexReplies);
+	else if(sender == "use4chanPassLabel" || sender == "use4chanPass")
+		setSetting("use4chanPass",!settings.value("use4chanPass").toBool(),ui->showIndexReplies);
 }
 
 void Settings::refreshValues()

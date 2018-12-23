@@ -23,9 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
-	QCoreApplication::setOrganizationName("qtchan");
-	QCoreApplication::setApplicationName("qtchan");
-	QSettings::setDefaultFormat(QSettings::IniFormat);
 	ui->setupUi(this);
 
 	ui->pushButton->hide();
@@ -85,7 +82,7 @@ void MainWindow::onUpdateSettings(QString field, QVariant value){
 	if(field == "use4chanPass" && value.toBool() == true){
 		QSettings settings;
 		QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/cookies.conf";
-		nc.loadCookies(settings.value("passFile",defaultCookies).toString());
+		nc->loadCookies(settings.value("passFile",defaultCookies).toString());
 	}
 	else if(field == "autoUpdate") emit setAutoUpdate(value.toBool());
 	else if(field == "autoExpand") emit setAutoExpand(value.toBool());
@@ -233,6 +230,11 @@ void MainWindow::setShortcuts()
 		filter.loadFilterFile2();
 		emit reloadFilters();
 	});
+
+	ui->actionAbout->setShortcut(QKeySequence(settings.value("showHelp","F1").toString()));
+	ui->actionAbout->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+	connect(ui->actionAbout,&QAction::triggered,this,&MainWindow::showHelp);
+
 	addShortcut(QKeySequence(settings.value("reloadFilters","F7").toString()),this,[=]{
 		filter.loadFilterFile2();
 		emit reloadFilters();
@@ -392,10 +394,10 @@ void MainWindow::updateSettings(QString field, QVariant value){
 		if(value.toBool()){
 			QSettings settings;
 			QString defaultCookies = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/cookies.conf";
-			nc.loadCookies(settings.value("passFile",defaultCookies).toString());
+			nc->loadCookies(settings.value("passFile",defaultCookies).toString());
 		}
 		else{
-			nc.removeCookies();
+			nc->removeCookies();
 		}
 	}
 }
@@ -419,7 +421,7 @@ void MainWindow::openExplorer(){
 void MainWindow::nextTab()
 {
 	QModelIndex qmi = ui->treeView->currentIndex();
-	QKeyEvent event(QEvent::KeyPress,Qt::Key_Down,0);
+	QKeyEvent event(QEvent::KeyPress,Qt::Key_Down,Q_NULLPTR);
 	QApplication::sendEvent(ui->treeView, &event);
 	if(qmi == ui->treeView->currentIndex()){
 		qmi = model->index(0,0);
@@ -431,7 +433,7 @@ void MainWindow::nextTab()
 void MainWindow::prevTab()
 {
 	QModelIndex qmi = ui->treeView->currentIndex();
-	QKeyEvent event(QEvent::KeyPress,Qt::Key_Up,0);
+	QKeyEvent event(QEvent::KeyPress,Qt::Key_Up,Q_NULLPTR);
 	QApplication::sendEvent(ui->treeView, &event);
 	if(qmi == ui->treeView->currentIndex()){
 		qmi = model->index(model->rowCount()-1,0);

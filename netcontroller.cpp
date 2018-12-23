@@ -19,7 +19,7 @@ netController::netController(QObject *parent) : QObject(parent)
 	postManager->setCookieJar(new QNetworkCookieJar());
 
 	diskCache = new QNetworkDiskCache(jsonManager);
-	QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/qtchan");
+	QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation)+"/qtchan");
 	diskCache->setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/qtchan");
 	//diskCache->setMaximumCacheSize(1073741824); //1GB cache
 	jsonManager->setCache(diskCache);
@@ -33,11 +33,11 @@ netController::netController(QObject *parent) : QObject(parent)
 		qDebug() << "PROXY HOST" << settings.value("proxy/host","127.0.0.1").toString();
 		proxy.setType(QNetworkProxy::ProxyType(settings.value("proxy/type",1).toInt())); //QNetworkProxy::Socks5Proxy
 		proxy.setHostName(settings.value("proxy/host","127.0.0.1").toString());
-		proxy.setPort(settings.value("proxy/port",8080).toInt());
+		proxy.setPort(static_cast<quint16>(settings.value("proxy/port",8080).toInt()));
 		if(!settings.value("proxy/user","").toString().isEmpty())
 			proxy.setUser(settings.value("proxy/user","").toString());
 		if(!settings.value("proxy/pass","").toString().isEmpty())
-			proxy.setUser(settings.value("proxy/pass","").toString());
+			proxy.setPassword(settings.value("proxy/pass","").toString());
 		captchaManager->setProxy(proxy);
 	}
 }

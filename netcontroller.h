@@ -23,6 +23,6 @@ public:
 	void refreshManagers();
 };
 
-extern netController nc;
+extern netController *nc;
 
 #endif // NETCONTROLLER_H

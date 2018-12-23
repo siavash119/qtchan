@@ -78,12 +78,12 @@ void Captcha::getCaptcha(){
 		antiMake();
 	}
 	qDebug() << "getting captcha from " + urlChallenge;
-	replyChallenge = nc.captchaManager->get(requestChallenge);
+	replyChallenge = nc->captchaManager->get(requestChallenge);
 	getConnection = QObject::connect(replyChallenge,&QNetworkReply::finished,this,&Captcha::loadCaptcha,Qt::UniqueConnection);
 }
 
 void Captcha::antiMake(){
-	replyChallenge = nc.captchaManager->post(requestAntiCaptcha,antiCaptchaInfo.toUtf8());
+	replyChallenge = nc->captchaManager->post(requestAntiCaptcha,antiCaptchaInfo.toUtf8());
 	antiConnection = QObject::connect(replyChallenge,&QNetworkReply::finished,this,&Captcha::antiMade,Qt::UniqueConnection);
 }
 
@@ -119,7 +119,7 @@ void Captcha::antiMade(){
 void Captcha::antiFinish(){
 	QTimer::singleShot(10000,[=]{
 		if(!antiGetInfo.isEmpty()){
-			replyImage = nc.captchaManager->post(requestAntiSolution,antiGetInfo.toUtf8());
+			replyImage = nc->captchaManager->post(requestAntiSolution,antiGetInfo.toUtf8());
 			anti2Connection = connect(replyImage,&QNetworkReply::finished,this,&Captcha::antiFinished,Qt::UniqueConnection);
 		}
 	});
@@ -191,7 +191,7 @@ void Captcha::getImage(QString challenge){
 	qDebug() << "getting image";
 	if(challenge.isEmpty()) return;
 	QNetworkRequest imageChallenge(QUrl(urlImageBase+challenge+"&k="+siteKey));
-	replyImage = nc.captchaManager->get(imageChallenge);
+	replyImage = nc->captchaManager->get(imageChallenge);
 	imageConnection = connect(replyImage,&QNetworkReply::finished,this,&Captcha::loadImage,Qt::UniqueConnection);
 }
 

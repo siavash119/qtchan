@@ -124,7 +124,7 @@ void ThreadForm::load(Post &post)
 void ThreadForm::getFlag(){
 	if(post.country_name.isEmpty()) return;
 	setInfoString();
-	downloadFile(strings.flagUrl,strings.flagPath,nc.thumbManager);
+	downloadFile(strings.flagUrl,strings.flagPath,nc->thumbManager);
 }
 
 void ThreadForm::getFile(ClickableLabel* label, int ind, bool andOpen){
@@ -132,7 +132,7 @@ void ThreadForm::getFile(ClickableLabel* label, int ind, bool andOpen){
 	gettingFile.replace(ind,true);
 	QString url = api->apiBase() + postFile.fileUrlPath;
 	QString message = andOpen ? "clicked" : "";
-	downloadFile(url,strings.pathBase % postFile.filePath,nc.fileManager,"file",message,label);
+	downloadFile(url,strings.pathBase % postFile.filePath,nc->fileManager,"file",message,label);
 }
 
 void ThreadForm::getFiles(){
@@ -142,7 +142,7 @@ void ThreadForm::getFiles(){
 		ClickableLabel *label = labels.at(i);
 		gettingFile.replace(i,true);
 		QString url = api->apiBase() + postFile.fileUrlPath;
-		downloadFile(url,strings.pathBase % postFile.filePath,nc.fileManager,"file","",label);
+		downloadFile(url,strings.pathBase % postFile.filePath,nc->fileManager,"file","",label);
 		i++;
 	}
 }
@@ -171,7 +171,7 @@ void ThreadForm::getThumb(){
 		ui->contentLayout->addLayout(layout,0,i++);
 		label->setStyleSheet("padding:13px 6px 0px 11px");*/
 		ui->contentLayout->addWidget(label,0,i,static_cast<Qt::Alignment>(Qt::AlignLeft | Qt::AlignTop));
-		downloadFile(url,strings.pathBase % postFile.tnPath,nc.thumbManager,"thumb",postFile.filename % postFile.ext,label);
+		downloadFile(url,strings.pathBase % postFile.tnPath,nc->thumbManager,"thumb",postFile.filename % postFile.ext,label);
 		//if(QFileInfo::exists(strings.pathBase % postFile.filePath) || autoExpand) getFile(label,i,false);
 		//Optimize getFile?
 		if(QFileInfo::exists(strings.pathBase % postFile.filePath)){
@@ -445,7 +445,7 @@ void ThreadForm::setRegion(const QString &region){
 	foreach(QString reg, regionList){
 		flegPath += '/' % reg;
 		flegUrl += '/' % reg;
-		downloadFile(QUrl(flegUrl % ".png").toString(QUrl::FullyEncoded),flegPath % ".png",nc.fileManager);
+		downloadFile(QUrl(flegUrl % ".png").toString(QUrl::FullyEncoded),flegPath % ".png",nc->fileManager);
 		//regionString += flagString(flegPath % ".png",reg);
 		regionString += "<a href=\"" % reg % "\" style=\"color:lightblue;text-decoration:none\" text><img src=\"" % flegPath % ".png\" width=\"32\" height=\"20\"> " % reg % "</a> ";
 		i++;

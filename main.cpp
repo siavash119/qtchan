@@ -1,7 +1,6 @@
 #include "filter.h"
 #include "you.h"
 #include "chans.h"
-#include "netcontroller.h"
 #include "notificationview.h"
 #include "mainwindow.h"
 #include <QSettings>
@@ -10,10 +9,11 @@
 
 MainWindow *mw;
 NotificationView *nv;
-netController nc;
-Chan *fourChanAPI = new FourChan();
-Chan *eightChanAPI = new EightChan();
-Chan *twoChHkAPI = new TwoChHk();
+netController *nc;
+Chan *fourChanAPI;
+Chan *eightChanAPI;
+Chan *twoChHkAPI;
+//TODO make you and filter pointers
 You you;
 Filter filter;
 
@@ -24,7 +24,8 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationName("qtchan");
 	QSettings::setDefaultFormat(QSettings::IniFormat);
 	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation));
-	QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/qtchan/");
+	QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/qtchan");
+	QDir().mkpath("flags/troll");
 	//QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	//QApplication::setAttribute(QT_SCALE_FACTOR,"1.4");
 	//qputenv("QT_SCALE_FACTOR","0.2");
@@ -32,8 +33,11 @@ int main(int argc, char *argv[])
 	QSettings settings;
 	font.setPointSize(settings.value("fontSize",14).toInt());
 	a.setFont(font);
-	//flag path
-	QDir().mkpath("flags/troll");
+	netController n;
+	nc = &n;
+	fourChanAPI = new FourChan();
+	eightChanAPI = new EightChan();
+	twoChHkAPI = new TwoChHk();
 	MainWindow w;
 	mw = &w;
 	w.show();

@@ -9,6 +9,8 @@ namespace Ui {
 class Settings;
 }
 
+class QCheckBox;
+
 class Settings : public QTabWidget
 {
 	Q_OBJECT
@@ -20,6 +22,7 @@ signals:
 	void update(QString setting, QVariant value);
 public slots:
 	void clicked();
+	void setSetting(QString setting, QVariant value, QCheckBox *box = Q_NULLPTR);
 private:
 	Ui::Settings *ui;
 	QRegularExpression bColorRegExp;

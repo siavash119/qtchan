@@ -73,7 +73,7 @@ void BoardTabHelper::getPostsFinished() {
 		}
 		//QT bug (network does not refresh after resume from suspend) workaround
 		else if(reply->error() == QNetworkReply::UnknownNetworkError){
-			nc.refreshManagers();
+			nc->refreshManagers();
 		}
 		reply->deleteLater();
 		return;

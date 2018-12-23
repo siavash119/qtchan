@@ -29,7 +29,7 @@ public:
 		now = p.value("now").toString();
 		time = p.value("time").toInt();
 		QDateTime timestamp;
-		timestamp.setTime_t(time);
+		timestamp.setTime_t(static_cast<uint>(time));
 		realNow = timestamp.toString(Qt::SystemLocaleShortDate);
 		name = p.value("name").toString();
 		trip = p.value("trip").toString();
@@ -94,9 +94,10 @@ class EightChan : public Chan
 {
 public:
 	inline EightChan(){
-		qDebug() << "loading eightchan api";
-		nc.loadCookiesIntoAllManagers(".8ch.net","__cfduid","your __cfduid value");
-		nc.loadCookiesIntoAllManagers(".8ch.net","cf_clearance","your cf_clearance value");
+		//If your IP requires cookies to visit 8chan, uncomment this, fill your values, and rebuild until settings are made for this
+		/*qDebug() << "loading eightchan api";
+		nc->loadCookiesIntoAllManagers(".8ch.net","__cfduid","your __cfduid value");
+		nc->loadCookiesIntoAllManagers(".8ch.net","cf_clearance","your cf_clearance value");*/
 		myRegUrl.setPattern("^(8ch.net/|(?:(?:https?://)?8ch.net/))(?<url>[^.]*)(\\.html)?$");
 		myRegUrl.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
 		myRegToThread.setPattern("^/?(?<board>\\w+)(?:/res)?/(?<thread>\\d+)(?:#p\\d+)?$");

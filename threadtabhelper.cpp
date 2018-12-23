@@ -67,7 +67,7 @@ void ThreadTabHelper::getExtraFlags(){
 	QString data = "board=" % board % "&post_nrs=" % extraFlagPostNums.join("%2C");
 	gettingFlags = true;
 	emit getFlags(data.toUtf8());
-	/*replyFlags = nc.fileManager->post(requestFlags,data.toUtf8());
+	/*replyFlags = nc->fileManager->post(requestFlags,data.toUtf8());
 	flagsConnection = connect(replyFlags,SIGNAL(finished()),this,SLOT(loadExtraFlags()),UniqueDirect);*/
 }
 
@@ -111,7 +111,7 @@ void ThreadTabHelper::getPostsFinished() {
 		}
 		//QT bug (network does not refresh after resume from suspend) workaround
 		else if(reply->error() == QNetworkReply::UnknownNetworkError){
-			nc.refreshManagers();
+			nc->refreshManagers();
 		}
 		return;
 	}
