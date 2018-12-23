@@ -74,6 +74,8 @@ private slots:
 	void setShortcuts();
 	void on_response_returnPressed();
 
+	void on_refreshCaptcha_clicked();
+
 protected:
 	bool eventFilter(QObject *obj, QEvent *event);
 	void resizeEvent(QResizeEvent *event);

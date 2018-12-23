@@ -68,6 +68,16 @@ Captcha::~Captcha(){
 	disconnect(imageConnection);
 }
 
+void Captcha::cancel(){
+	disconnect(getConnection);
+	if(loading && replyChallenge){
+		replyChallenge->abort();
+		replyChallenge->deleteLater();
+	}
+	loading = false;
+	loaded = false;
+}
+
 void Captcha::getCaptcha(){
 	if(loading || loaded) return;
 	loading = true;

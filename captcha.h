@@ -22,9 +22,9 @@ public:
 	QTimer timer;
 	bool loaded = false;
 	bool loading = false;
-	void getCaptcha();
 	void getImage(QString challenge);
 	QString easyCaptcha(QString answer);
+
 private:
 	QString loadingString = "Loading Captcha...";
 	QMap<QChar,QChar> ec;
@@ -64,6 +64,8 @@ signals:
 	void fail();
 	void captchaCode(QString &code);
 public slots:
+	void cancel();
+	void getCaptcha();
 	void loadCaptcha();
 	void loadImage();
 };

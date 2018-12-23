@@ -29,11 +29,13 @@ PostForm::PostForm(QWidget *parent) :
 	else {
 		ui->question->hide();
 		ui->challenge->hide();
+		ui->refreshCaptcha->hide();
 		captchaTimer = new QTimer(this);
 		captchaTimer->setSingleShot(true);
 		connect(captchaTimer,&QTimer::timeout,[=]{
 			ui->question->setText("Captcha code expired");
 			ui->question->show();
+			ui->refreshCaptcha->show();
 			ui->response->show();
 			captchaCode = "";
 			captcha.loaded = false;
@@ -52,13 +54,20 @@ PostForm::PostForm(QWidget *parent) :
 	setShortcuts();
 	connect(&captcha,&Captcha::questionInfo,this,&PostForm::loadCaptchaQuestion);
 	connect(&captcha,&Captcha::challengeInfo,this,&PostForm::loadCaptchaImage);
-	connect(ui->challenge,&ClickableLabel::clicked,&captcha,&Captcha::getCaptcha);
+	connect(ui->challenge,&ClickableLabel::clicked,[=]{
+		if(captchaTimer && captchaTimer->isActive()) captchaTimer->stop();
+		captcha.loading = false;
+		captcha.loaded = false;
+		captcha.getCaptcha();
+		ui->response->setFocus();
+	});
 }
 
 void PostForm::loadCaptchaQuestion(QString &challenge){
 	ui->question->show();
 	qDebug() << "setting captcha info/question:" << challenge;
 	ui->question->setText(challenge);
+	ui->refreshCaptcha->show();
 	ui->response->show();
 }
 
@@ -93,6 +102,7 @@ void PostForm::usePass(bool use4chanPass){
 	else if(api->usesCaptcha()){
 		ui->captcha->show();
 		ui->challenge->hide();
+		ui->refreshCaptcha->hide();
 	}
 }
 
@@ -137,6 +147,7 @@ void PostForm::verifyCaptcha(){
 	//possible segfault if threadtab/boardtab closes while waiting
 	captchaConnection = connect(captchaReply,&QNetworkReply::finished,[=]{
 		captchaReply->deleteLater();
+		if(captchaTimer && captchaTimer->isActive()) captchaTimer->stop();
 		if(captchaReply->error()){
 			ui->question->setText("Error: try again");
 			qDebug() << "Error:" << captchaReply->errorString();
@@ -155,8 +166,8 @@ void PostForm::verifyCaptcha(){
 				qDebug() << captchaCode;
 				ui->question->setText("Verified");
 				ui->challenge->hide();
+				ui->refreshCaptcha->hide();
 				ui->response->hide();
-				if(captchaTimer && captchaTimer->isActive()) captchaTimer->stop();
 				ui->submit->setFocus();
 				captchaTimer->start(120000);
 			}
@@ -319,6 +330,7 @@ void PostForm::postFinished()
 		ui->response->show();
 		ui->question->clear();
 		ui->question->hide();
+		ui->refreshCaptcha->hide();
 	}
 	QTimer::singleShot(1000, this,&PostForm::removeOverlay);
 	this->installEventFilter(this);
@@ -391,6 +403,11 @@ bool PostForm::eventFilter(QObject *obj, QEvent *event)
 		if(key == Qt::Key_Escape) {
 			if(isPosting) {
 				cancelPost();
+			}
+			else if(captcha.loading){
+				captcha.cancel();
+				ui->question->setText("Captcha load canceled");
+				ui->response->show();
 			}
 			else {
 				hide();
@@ -522,4 +539,11 @@ void PostForm::setFontSize(int fontSize){
 void PostForm::on_response_returnPressed()
 {
 	verifyCaptcha();
+}
+
+void PostForm::on_refreshCaptcha_clicked()
+{
+	if(captchaTimer && captchaTimer->isActive()) captchaTimer->stop();
+	captcha.cancel();
+	captcha.getCaptcha();
 }

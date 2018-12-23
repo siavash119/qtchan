@@ -95,7 +95,7 @@
         <x>0</x>
         <y>0</y>
         <width>638</width>
-        <height>361</height>
+        <height>332</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -232,17 +232,50 @@
        <number>1</number>
       </property>
       <item>
-       <widget class="QLabel" name="question">
-        <property name="text">
-         <string/>
+       <layout class="QHBoxLayout" name="questionLayout" stretch="0,0,0">
+        <property name="spacing">
+         <number>20</number>
         </property>
-        <property name="textFormat">
-         <enum>Qt::RichText</enum>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-        </property>
-       </widget>
+        <item>
+         <widget class="QLabel" name="question">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::RichText</enum>
+          </property>
+          <property name="textInteractionFlags">
+           <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="refreshCaptcha">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>New Captcha</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="ClickableLabel" name="challenge">
@@ -280,6 +313,7 @@
  </customwidgets>
  <tabstops>
   <tabstop>com</tabstop>
+  <tabstop>refreshCaptcha</tabstop>
   <tabstop>response</tabstop>
   <tabstop>submit</tabstop>
   <tabstop>browse</tabstop>
