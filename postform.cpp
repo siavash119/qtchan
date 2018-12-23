@@ -137,6 +137,8 @@ void PostForm::verifyCaptcha(){
 		if(captchaReply->error()){
 			ui->question->setText("Error: try again");
 			qDebug() << "Error:" << captchaReply->errorString();
+			captcha.loading = false;
+			captcha.loaded = false;
 			captcha.getCaptcha();
 		}
 		else{
@@ -156,6 +158,8 @@ void PostForm::verifyCaptcha(){
 			}
 			else{
 				ui->question->setText("Success but need more: try again");
+				captcha.loading = false;
+				captcha.loaded = false;
 				captcha.getCaptcha();
 			}
 
