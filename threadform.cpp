@@ -52,7 +52,7 @@ void ThreadForm::setBackground(){
 		QString bColor;
 		if(!settings.value("style/ThreadForm/background-color","").toString().isEmpty())
 			bColor = settings.value("style/ThreadForm/background-color","").toString();
-		else if(!settings.value("style/MainWindow/background-color","").toString().isEmpty())
+		else
 			bColor = settings.value("style/MainWindow/background-color","#191919").toString();
 		background.setNamedColor(bColor);
 		//darkness = darkness*qPow(0.8,replyLevel-1);
