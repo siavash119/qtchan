@@ -74,7 +74,7 @@ void Settings::clicked()
 	else if(sender == "showIndexRepliesLabel" || sender == "showIndexReplies")
 		setSetting("showIndexReplies",!settings.value("showIndexReplies").toBool(),ui->showIndexReplies);
 	else if(sender == "use4chanPassLabel" || sender == "use4chanPass")
-		setSetting("use4chanPass",!settings.value("use4chanPass").toBool(),ui->showIndexReplies);
+		setSetting("use4chanPass",!settings.value("use4chanPass").toBool(),ui->use4chanPass);
 }
 
 void Settings::refreshValues()
