@@ -15,7 +15,9 @@ There's still a lot to do.
 * (You)
 
 ### Build Instructions (Linux/BSD based)
-needs qt5
+needs qt5 with headers, qmake, and a compiler (like g++ or clang++)\
+e.g. on Debian/Ubuntu: `sudo apt install qt5 qt5-devel qt5-qmake make gcc`\
+For a clang build, change `qmake ../` to `qmake ../ -spec linux-clang`
 ```
 git clone https://github.com/siavash119/qtchan 
 cd qtchan
@@ -177,7 +179,6 @@ F7 reloads and applies the filters.conf file
 Create a file ~/.config/qtchan/cookies.conf like below. Look at your browser cookies for values.
 Open settings with Ctrl+P and check Use 4chan pass.
 ```
-4chan_pass:your_4chanpass
 pass_id:your_pass_id
 pass_enabled:1
 ```
