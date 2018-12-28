@@ -15,7 +15,7 @@ There's still a lot to do.
 * (You)
 
 ### Build Instructions (Linux/BSD based)
-How your dependencies are packaged will vary from distro to distro and which BSD you're using. The only packages you need to compile qtchan are qt5, qt5-devel, qt5-qmake for the proper version of qmake, make (The full build-essentials which also packages make is not truly required), and a compiler of your choice such as gcc or clang. Gcc is not a hard dependency. After that just do the following:.
+How your dependencies are packaged will vary from distro to distro and which BSD you're using. The only packages you need to compile qtchan are qt5, qt5-devel, qt5-qmake for the proper version of qmake, make, and a compiler of your choice such as gcc or clang. Gcc is not a hard dependency. After that just do the following:.
 ```
 git clone https://github.com/siavash119/qtchan 
 cd qtchan
