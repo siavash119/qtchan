@@ -296,14 +296,14 @@ void MainWindow::setShortcuts()
 	addShortcut(QKeySequence(settings.value("prevSession","ctrl+F5").toString()),this,[=]{
 		QSettings settings;
 		int slot = settings.value("sessionSlot",0).toInt();
-		if(--slot == 0) slot = 9;
+		if(--slot < 0) slot = 9;
 		settings.setValue("sessionSlot",slot);
 		qDebug() << "current session slot:" << slot;
 	});
 	addShortcut(QKeySequence(settings.value("nextSession","ctrl+F6").toString()),this,[=]{
 		QSettings settings;
 		int slot = settings.value("sessionSlot",0).toInt();
-		if(++slot == 10) slot = 0;
+		if(++slot > 9) slot = 0;
 		settings.setValue("sessionSlot",slot);
 		qDebug() << "current session slot:" << slot;
 	});
