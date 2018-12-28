@@ -599,6 +599,11 @@ void ThreadTab::focusIt()
 	ui->lineEdit->setFocus();
 }
 
+void ThreadTab::focusMain(){
+	ui->scrollAreaWidgetContents->setFocus();
+}
+
+
 void ThreadTab::on_lineEdit_returnPressed()
 {
 	findText(ui->lineEdit->text());

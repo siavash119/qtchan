@@ -55,6 +55,7 @@ public:
 public slots:
 	//void addStretch();
 	void focusIt();
+	void focusMain();
 	void quoteIt(QString text);
 	void floatReply(const QString &link, int replyLevel = 0);
 	void deleteFloat();

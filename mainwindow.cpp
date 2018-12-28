@@ -270,7 +270,10 @@ void MainWindow::setShortcuts()
 	addShortcut(QKeySequence(settings.value("showHelp","F1").toString()),this,&MainWindow::showHelp);
 	addShortcut(QKeySequence(settings.value("focusTree","F3").toString()),this,&MainWindow::focusTree);
 	addShortcut(QKeySequence(settings.value("focusTab","F4").toString()),this,[=]{
-		if(QWidget *temp = currentWidget()) temp->setFocus();
+		if(QWidget *temp = currentWidget()){
+			if (tabs.find(temp).value().type == Tab::TabType::Board) qobject_cast<BoardTab*>(temp)->focusMain();
+			else qobject_cast<ThreadTab*>(temp)->focusMain();
+		}
 	});
 	//addShortcut(Qt::Key_F6,this,&MainWindow::focusBar);
 	addShortcut(QKeySequence(settings.value("showArchive","F8").toString()),&aTab,&ArchiveTab::show);

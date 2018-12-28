@@ -36,6 +36,7 @@ public:
 	void openPostForm();
 	void getPosts();
 	void focusIt();
+	void focusMain();
 
 public slots:
 	void findText(const QString text);
@@ -50,6 +51,7 @@ public slots:
 	void showTF(ThreadForm *tf);
 	void onFilterTest(QString no, bool filtered);
 	void loadAllImages();
+
 
 private:
 	Ui::BoardTab *ui;

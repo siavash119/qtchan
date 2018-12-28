@@ -331,6 +331,10 @@ void BoardTab::focusIt()
 	ui->lineEdit->setFocus();
 }
 
+void BoardTab::focusMain(){
+	ui->scrollAreaWidgetContents->setFocus();
+}
+
 void BoardTab::clearMap(){
 	qDeleteAll(tfMap);
 	tfMap.clear();
