@@ -29,7 +29,7 @@ ThreadForm::ThreadForm(Chan *api, ThreadFormStrings strings, bool root, bool aut
 	ui->setupUi(this);
 	ui->postLayout->setAlignment(static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignLeft));
 	this->board = strings.board;
-	if(strings.thread == "index") this->type = PostType::Thread;
+	if(strings.path == "index") this->type = PostType::Thread;
 	else this->type = PostType::Reply;
 	QSettings settings;
 	setFontSize(settings.value("fontSize",14).toInt());
