@@ -335,6 +335,11 @@ void ThreadForm::loadImage(int labelInd, QString path) {
 	*/
 }
 
+void ThreadForm::openThread(){
+	TreeItem *childOf = mw->model->getItem(mw->selectionModel->currentIndex());
+	mw->onNewThread(mw,api,strings.board,strings.thread,QString(),childOf);
+}
+
 void ThreadForm::imageClicked()
 {
 	if(!labels.size())return;
@@ -346,8 +351,7 @@ void ThreadForm::imageClicked()
 	}
 	//qDebug().noquote().nospace() << "clicked " << post.files.at(ind).filename << post.files.at(ind).ext;
 	if(strings.path == "index") {
-		TreeItem *childOf = mw->model->getItem(mw->selectionModel->currentIndex());
-		mw->onNewThread(mw,api,strings.board,strings.thread,QString(),childOf);
+		openThread();
 	}
 	else{
 		if(finished.at(ind)) openImage(strings.pathBase % post.files.at(ind).filePath);
@@ -467,8 +471,12 @@ void ThreadForm::quoteClicked(const QString &link)
 		}
 	}
 	else if(link.startsWith("#op")){
-		if(this->type == PostType::Reply) static_cast<ThreadTab*>(tab)->quoteIt(">>"+post.no);
-		else imageClicked();
+		if(this->type == PostType::Reply){
+			static_cast<ThreadTab*>(tab)->quoteIt(">>"+post.no);
+		}
+		else{
+			openThread();
+		}
 	}
 	else if(link.startsWith("#f")){
 		postMenu();

@@ -135,7 +135,7 @@ void BoardTab::setShortcuts()
 			selected = qobject_cast<QWidget*>(selected->parent());
 		}
 		if(selected && selected->objectName() == "ThreadForm"){
-			static_cast<ThreadForm*>(selected)->imageClicked();
+			static_cast<ThreadForm*>(selected)->openThread();
 		}
 	});
 	this->addAction(selectPost);

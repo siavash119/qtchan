@@ -78,6 +78,7 @@ public:
 	QList<bool> gettingFile;
 	QList<bool> finished;
 	void setPixmap(int ind, QPixmap scaled);
+	void openThread();
 
 //TODO take care of file downloading in netcontroller
 private:
