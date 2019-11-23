@@ -347,7 +347,7 @@ void PostForm::postExtraFlags(const QString &postNum){
 	postData.addQueryItem("board",board);
 	postData.addQueryItem("post_nr",postNum);
 	postData.addQueryItem("regions",region);
-	QNetworkRequest request(QUrl("https://flagtism.drunkensailor.org/int/post_flag_api2.php"));
+	QNetworkRequest request(QUrl("https://countryball.ca/int/post_flag_api2.php"));
 	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 	QNetworkReply *reply = nc->postManager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
 	flagsConnection = connect(reply,&QNetworkReply::finished,[=]{
