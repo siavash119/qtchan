@@ -153,7 +153,7 @@ QJsonArray BoardTabHelper::filterThreads(QByteArray &rep){
 		QJsonArray allThreads = api->catalogArray(rep);
 		int numPages = allThreads.size();
 		//-5 for some reason catalog goes blank on last 5 pages
-		for(int i=0;i<numPages-5;i++){
+		for(int i=0;i<numPages;i++){
 			QJsonArray pageThreads = api->catalogPageArray(allThreads,i);
 			int numThreads = pageThreads.size();
 			for(int j=0;j<numThreads;j++){
